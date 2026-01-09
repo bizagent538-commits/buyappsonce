@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainUp Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 16px; color: #fff; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 14px; color: #fff; }
+    .user-name { font-size: 12px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 14px; margin-bottom: 2px; text-decoration: none; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(59,130,246,0.2); color: #fff; font-weight: 500; }
+    .nav-cta { background: #f59e0b !important; color: #fff !important; text-align: center; font-weight: 600; margin-top: auto; margin-bottom: 8px; }
+    .main { flex: 1; margin-left: 220px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; text-decoration: none; display: inline-block; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-cta { background: #f59e0b; color: #fff; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; cursor: pointer; }
+    .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+    .badge-cat { background: #e0e7ff; color: #4338ca; }
+    .badge-req { background: #fee2e2; color: #dc2626; }
+    .progress-bar { height: 6px; background: #e2e8f0; border-radius: 3px; margin-top: 12px; }
+    .progress-fill { height: 100%; border-radius: 3px; transition: width 0.3s; }
+    .lesson-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e2e8f0; cursor: pointer; }
+    .lesson-item:hover { background: #f8fafc; margin: 0 -20px; padding: 12px 20px; }
+    .lesson-check { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; color: #fff; }
+    .lesson-check.done { background: #22c55e; }
+    .lesson-check.pending { background: #e2e8f0; }
+    .quiz-option { display: block; padding: 12px; margin: 6px 0; border: 1px solid #e2e8f0; border-radius: 8px; cursor: pointer; }
+    .quiz-option:hover { background: #f8fafc; }
+    .quiz-option.selected { background: #dbeafe; border-color: #3b82f6; }
+    .cert-card { text-align: center; border: 2px solid #22c55e; }
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+    .hidden { display: none !important; }
+    .cta-banner { background: #fffbeb; border: 1px solid #fbbf24; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .content-view { max-width: 800px; margin: 0 auto; }
+    .lesson-content { white-space: pre-wrap; line-height: 1.8; }
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">🎓 TrainUp Pro Demo - Includes 4 Starter Courses | <a href="https://buyappsonce.com/landing-trainup-pro.html">Get TrainUp Pro - Starting at $249 →</a></div>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">🎓</span><span class="logo-text">TrainUp Pro</span></div>
+      <div class="org-info"><div class="org-name">Demo Company</div><div class="user-name">Demo User</div></div>
+      <div class="nav-item active" onclick="showTab('mycourses')">📚 My Courses</div>
+      <div class="nav-item" onclick="showTab('certs')">🏆 My Certificates</div>
+      <div class="nav-item" onclick="showTab('reports')">📊 Reports</div>
+      <a href="mailto:training@buyappsonce.com?subject=Custom%20Training%20Request" class="nav-item nav-cta">📝 Request Custom Training</a>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const COURSES = [
+  { id: 1, title: 'Workplace Safety Basics', category: 'Safety', duration: 30, description: 'Essential workplace safety training covering hazard identification, emergency procedures, and injury prevention.', required: true,
+    modules: [
+      { id: 1, title: 'Introduction to Workplace Safety', lessons: [
+        { id: 1, title: 'Why Safety Matters', content: 'Workplace safety protects you, your coworkers, and the organization. Every year, millions of workplace injuries occur, many of which are preventable with proper training and awareness.\n\nKey Statistics:\n• Over 2.8 million workplace injuries annually in the US\n• Proper training reduces incidents by up to 60%\n• Safety culture starts with individual responsibility' },
+        { id: 2, title: 'Know Your Rights', content: 'Under OSHA regulations, you have the right to:\n\n1. A safe workplace free from recognized hazards\n2. Information about hazards, methods to prevent harm, and OSHA standards\n3. Request an OSHA inspection if you believe there are violations\n4. Report injuries and illnesses without retaliation\n5. Access your medical records and workplace injury logs' }
+      ]},
+      { id: 2, title: 'Hazard Identification', lessons: [
+        { id: 3, title: 'Types of Workplace Hazards', content: 'Common hazard categories:\n\n• Physical Hazards: Slips, trips, falls, machinery, noise, temperature\n• Chemical Hazards: Cleaning supplies, solvents, fumes\n• Biological Hazards: Mold, bacteria, viruses\n• Ergonomic Hazards: Poor workstation setup, repetitive motions\n• Psychological Hazards: Stress, harassment, workplace violence' },
+        { id: 4, title: 'Reporting Hazards', content: 'When you identify a hazard:\n\n1. Do not ignore it - report immediately\n2. Use the proper reporting channel (supervisor, safety committee, or anonymous hotline)\n3. Document what you observed: location, time, conditions\n4. Suggest solutions if you have them\n5. Follow up to ensure action was taken' }
+      ]},
+      { id: 3, title: 'Emergency Procedures', lessons: [
+        { id: 5, title: 'Emergency Action Plans', content: 'Know your workplace emergency plan:\n\n• Location of emergency exits (at least 2 routes)\n• Assembly points outside the building\n• Location of fire extinguishers and first aid kits\n• Emergency contact numbers\n• Your role during an evacuation\n\nPractice drills regularly and take them seriously.' },
+        { id: 6, title: 'First Response Actions', content: 'In an emergency:\n\n1. Stay calm - panic causes poor decisions\n2. Alert others - activate alarms if needed\n3. Call for help - 911 or internal emergency line\n4. Evacuate safely - help others if safe to do so\n5. Account for everyone at assembly point\n6. Do not re-enter until cleared by authorities' }
+      ]}
+    ],
+    quiz: { title: 'Workplace Safety Quiz', questions: [
+      { id: 1, q: 'What is the first thing you should do when you identify a workplace hazard?', opts: ['Ignore it', 'Fix it yourself', 'Report it immediately', 'Wait to see if it causes problems'], a: 2 },
+      { id: 2, q: 'Which is NOT a type of workplace hazard?', opts: ['Physical', 'Chemical', 'Financial', 'Ergonomic'], a: 2 },
+      { id: 3, q: 'During an evacuation, you should:', opts: ['Use the elevator', 'Go to your designated assembly point', 'Return to get personal belongings', 'Wait at your desk'], a: 1 },
+      { id: 4, q: 'OSHA gives workers the right to:', opts: ['A safe workplace', 'Report injuries without retaliation', 'Access safety records', 'All of the above'], a: 3 },
+      { id: 5, q: 'True or False: You should take fire drills seriously even if they seem routine.', opts: ['True', 'False'], a: 0 }
+    ]}
+  },
+  { id: 2, title: 'Harassment Prevention', category: 'Compliance', duration: 45, description: 'Comprehensive training on recognizing, preventing, and reporting workplace harassment.', required: true,
+    modules: [
+      { id: 4, title: 'Understanding Harassment', lessons: [
+        { id: 7, title: 'What is Workplace Harassment?', content: 'Workplace harassment is unwelcome conduct based on protected characteristics that:\n\n• Creates a hostile work environment, OR\n• Results in adverse employment decisions (quid pro quo)\n\nProtected characteristics include: race, color, religion, sex, national origin, age, disability, genetic information, and in many states: sexual orientation and gender identity.' },
+        { id: 8, title: 'Types of Harassment', content: 'Harassment can take many forms:\n\n• Verbal: Offensive jokes, slurs, name-calling, threats\n• Physical: Unwanted touching, blocking movement, assault\n• Visual: Offensive posters, drawings, emails, gestures\n• Written: Offensive emails, texts, social media posts\n• Sexual: Unwelcome advances, requests for favors, inappropriate comments' }
+      ]},
+      { id: 5, title: 'Recognizing & Reporting', lessons: [
+        { id: 9, title: 'The Reasonable Person Standard', content: 'Courts use the "reasonable person" standard:\n\nWould a reasonable person in similar circumstances find the conduct hostile or abusive?\n\nConsider:\n• Frequency of the conduct\n• Severity of the conduct\n• Whether it is physically threatening or humiliating\n• Whether it unreasonably interferes with work performance\n\nIntent does not matter - impact does.' },
+        { id: 10, title: 'How to Report', content: 'Reporting options:\n\n1. Direct supervisor (unless they are the harasser)\n2. Human Resources department\n3. Company hotline or ethics line\n4. Higher management\n5. EEOC or state agency (external)\n\nDocument incidents: dates, times, witnesses, what was said/done. Retaliation for reporting is illegal.' }
+      ]}
+    ],
+    quiz: { title: 'Harassment Prevention Quiz', questions: [
+      { id: 6, q: 'Workplace harassment must be intentional to be illegal.', opts: ['True', 'False'], a: 1 },
+      { id: 7, q: 'Which is NOT a form of harassment?', opts: ['Offensive jokes', 'Constructive performance feedback', 'Unwanted touching', 'Threatening emails'], a: 1 },
+      { id: 8, q: 'Who can be a harasser?', opts: ['Only supervisors', 'Only coworkers', 'Only men', 'Anyone in the workplace'], a: 3 },
+      { id: 9, q: 'Retaliation against someone who reports harassment is:', opts: ['Acceptable if the report was false', 'Illegal', 'The manager\'s choice', 'Only wrong if severe'], a: 1 }
+    ]}
+  },
+  { id: 3, title: 'Data Security & Privacy', category: 'IT Security', duration: 25, description: 'Learn to protect sensitive information and recognize cyber threats.', required: true,
+    modules: [
+      { id: 6, title: 'Security Fundamentals', lessons: [
+        { id: 11, title: 'Why Data Security Matters', content: 'Data breaches cost companies millions and damage trust:\n\n• Average breach cost: $4.35 million\n• 83% of organizations have had more than one breach\n• Human error causes 95% of security incidents\n\nYou are the first line of defense.' },
+        { id: 12, title: 'Phishing & Social Engineering', content: 'Phishing red flags:\n\n• Urgent or threatening language\n• Requests for sensitive information\n• Suspicious sender addresses\n• Generic greetings ("Dear Customer")\n• Links that don\'t match displayed text\n• Unexpected attachments\n\nWhen in doubt, verify through a separate channel.' }
+      ]},
+      { id: 7, title: 'Best Practices', lessons: [
+        { id: 13, title: 'Password Security', content: 'Strong password practices:\n\n• Use 12+ characters with mixed types\n• Never reuse passwords across accounts\n• Use a password manager\n• Enable multi-factor authentication (MFA)\n• Never share passwords, even with IT\n• Change passwords if breach suspected' },
+        { id: 14, title: 'Safe Computing Habits', content: 'Daily security habits:\n\n• Lock your computer when stepping away (Win+L)\n• Don\'t leave sensitive documents visible\n• Verify requests for sensitive data\n• Use secure Wi-Fi only\n• Report lost/stolen devices immediately\n• Shred confidential paper documents' }
+      ]}
+    ],
+    quiz: { title: 'Data Security Quiz', questions: [
+      { id: 10, q: 'What percentage of security incidents are caused by human error?', opts: ['25%', '50%', '75%', '95%'], a: 3 },
+      { id: 11, q: 'A strong password should be:', opts: ['Easy to remember', 'Your pet\'s name', '12+ characters with mixed types', 'The same across all accounts'], a: 2 },
+      { id: 12, q: 'When stepping away from your computer, you should:', opts: ['Leave it as is', 'Lock the screen', 'Shut it down', 'Hide the keyboard'], a: 1 }
+    ]}
+  },
+  { id: 4, title: 'Customer Service Essentials', category: 'Skills', duration: 35, description: 'Build essential customer service skills including communication and problem-solving.', required: false,
+    modules: [
+      { id: 8, title: 'Service Foundations', lessons: [
+        { id: 15, title: 'The Value of Great Service', content: 'Why customer service matters:\n\n• 86% of customers will pay more for better service\n• It costs 5x more to acquire new customers than retain existing ones\n• One bad experience drives away 51% of customers forever\n• Happy customers tell 9 people; unhappy ones tell 16' },
+        { id: 16, title: 'Active Listening', content: 'Active listening techniques:\n\n• Give full attention - put away distractions\n• Don\'t interrupt - let them finish\n• Acknowledge: "I understand" or "I see"\n• Clarify: "So what you\'re saying is..."\n• Take notes on key points\n• Ask follow-up questions' }
+      ]},
+      { id: 9, title: 'Handling Challenges', lessons: [
+        { id: 17, title: 'Dealing with Difficult Situations', content: 'When customers are upset:\n\n1. Stay calm - don\'t take it personally\n2. Listen fully before responding\n3. Empathize: "I understand why that\'s frustrating"\n4. Apologize for the situation\n5. Focus on solutions\n6. Follow through on promises' },
+        { id: 18, title: 'Problem Solving', content: 'Effective problem resolution:\n\n• Identify the real issue (ask questions)\n• Explain what you CAN do, not what you can\'t\n• Offer options when possible\n• Set realistic expectations\n• Take action promptly\n• Follow up to ensure satisfaction' }
+      ]}
+    ],
+    quiz: { title: 'Customer Service Quiz', questions: [
+      { id: 13, q: 'What does it cost to acquire a new customer vs. retaining one?', opts: ['Same cost', '2x more', '5x more', '10x more'], a: 2 },
+      { id: 14, q: 'What should you do first when a customer is upset?', opts: ['Explain the policy', 'Transfer them', 'Listen fully', 'Apologize'], a: 2 },
+      { id: 15, q: 'A well-handled complaint often results in:', opts: ['A lost customer', 'Increased loyalty', 'No change', 'Legal action'], a: 1 }
+    ]}
+  }
+];
+
+let state = { tab: 'mycourses', viewingCourse: null, viewingLesson: null, takingQuiz: false, quizAnswers: {}, completedLessons: [], completedCourses: [], quizScores: {} };
+
+function init() {
+  const saved = localStorage.getItem('trainup_state');
+  if (saved) {
+    const s = JSON.parse(saved);
+    state.completedLessons = s.completedLessons || [];
+    state.completedCourses = s.completedCourses || [];
+    state.quizScores = s.quizScores || {};
+  }
+  render();
+}
+
+function saveState() {
+  localStorage.setItem('trainup_state', JSON.stringify({ completedLessons: state.completedLessons, completedCourses: state.completedCourses, quizScores: state.quizScores }));
+}
+
+function showTab(tab) { state.tab = tab; state.viewingCourse = null; state.viewingLesson = null; state.takingQuiz = false; updateNav(); render(); }
+function updateNav() { document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['mycourses', 'certs', 'reports'].indexOf(state.tab))); }
+
+function getAllLessons(course) { return course.modules.flatMap(m => m.lessons.map(l => ({...l, moduleName: m.title}))); }
+function isLessonComplete(lessonId) { return state.completedLessons.includes(lessonId); }
+function isCourseComplete(courseId) { return state.completedCourses.includes(courseId); }
+function getCourseProgress(course) {
+  const lessons = getAllLessons(course);
+  if (lessons.length === 0) return 0;
+  const done = lessons.filter(l => isLessonComplete(l.id)).length;
+  return Math.round((done / lessons.length) * 100);
+}
+
+function viewCourse(id) { state.viewingCourse = COURSES.find(c => c.id === id); state.viewingLesson = null; state.takingQuiz = false; render(); }
+function viewLesson(lesson) { state.viewingLesson = lesson; render(); }
+function completeLesson(id) { if (!state.completedLessons.includes(id)) { state.completedLessons.push(id); saveState(); } render(); }
+function startQuiz() { state.takingQuiz = true; state.quizAnswers = {}; render(); }
+function selectAnswer(qId, aIdx) { state.quizAnswers[qId] = aIdx; render(); }
+function submitQuiz() {
+  const quiz = state.viewingCourse.quiz;
+  let correct = 0;
+  quiz.questions.forEach(q => { if (state.quizAnswers[q.id] === q.a) correct++; });
+  const score = Math.round((correct / quiz.questions.length) * 100);
+  const passed = score >= 70;
+  state.quizScores[state.viewingCourse.id] = score;
+  if (passed && !state.completedCourses.includes(state.viewingCourse.id)) {
+    state.completedCourses.push(state.viewingCourse.id);
+  }
+  saveState();
+  state.takingQuiz = false;
+  toast(passed ? `Passed! Score: ${score}%` : `Score: ${score}% - 70% required to pass`);
+  render();
+}
+function backToCourse() { state.viewingLesson = null; state.takingQuiz = false; render(); }
+function backToCourses() { state.viewingCourse = null; state.viewingLesson = null; state.takingQuiz = false; render(); }
+
+function render() {
+  const main = document.getElementById('mainContent');
+  
+  // Quiz view
+  if (state.viewingCourse && state.takingQuiz) {
+    const quiz = state.viewingCourse.quiz;
+    main.innerHTML = `
+      <div class="content-view">
+        <div class="header"><button class="btn btn-secondary" onclick="backToCourse()">← Back</button><h1 class="title">${quiz.title}</h1></div>
+        <div class="card">
+          ${quiz.questions.map((q, i) => `
+            <div style="margin-bottom:24px;padding-bottom:24px;border-bottom:${i < quiz.questions.length-1 ? '1px solid #e2e8f0' : 'none'}">
+              <div style="font-weight:600;margin-bottom:12px">${i+1}. ${q.q}</div>
+              ${q.opts.map((opt, oi) => `<label class="quiz-option ${state.quizAnswers[q.id] === oi ? 'selected' : ''}" onclick="selectAnswer(${q.id}, ${oi})"><input type="radio" name="q${q.id}" ${state.quizAnswers[q.id] === oi ? 'checked' : ''} style="margin-right:8px">${opt}</label>`).join('')}
+            </div>
+          `).join('')}
+          <button class="btn btn-primary" style="width:100%" onclick="submitQuiz()" ${Object.keys(state.quizAnswers).length < quiz.questions.length ? 'disabled' : ''}>Submit Quiz</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Lesson view
+  if (state.viewingCourse && state.viewingLesson) {
+    const lessons = getAllLessons(state.viewingCourse);
+    const idx = lessons.findIndex(l => l.id === state.viewingLesson.id);
+    const prev = idx > 0 ? lessons[idx-1] : null;
+    const next = idx < lessons.length-1 ? lessons[idx+1] : null;
+    const done = isLessonComplete(state.viewingLesson.id);
+    main.innerHTML = `
+      <div class="content-view">
+        <div class="header"><button class="btn btn-secondary" onclick="backToCourse()">← Back to Course</button></div>
+        <div class="card" style="cursor:default">
+          <div style="font-size:12px;color:#64748b;margin-bottom:8px">${state.viewingLesson.moduleName}</div>
+          <h2 style="margin-bottom:20px">${state.viewingLesson.title}</h2>
+          <div class="lesson-content">${state.viewingLesson.content}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:24px;padding-top:24px;border-top:1px solid #e2e8f0;flex-wrap:wrap;gap:12px">
+            ${prev ? `<button class="btn btn-secondary" onclick="viewLesson(getAllLessons(state.viewingCourse)[${idx-1}])">← ${prev.title}</button>` : '<div></div>'}
+            ${!done ? `<button class="btn btn-primary" onclick="completeLesson(${state.viewingLesson.id})">✓ Mark Complete</button>` : '<span style="color:#22c55e;font-weight:600">✓ Completed</span>'}
+            ${next ? `<button class="btn btn-primary" onclick="completeLesson(${state.viewingLesson.id});viewLesson(getAllLessons(state.viewingCourse)[${idx+1}])">Next →</button>` : '<div></div>'}
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+  
+  // Course view
+  if (state.viewingCourse) {
+    const course = state.viewingCourse;
+    const progress = getCourseProgress(course);
+    const completed = isCourseComplete(course.id);
+    const score = state.quizScores[course.id];
+    main.innerHTML = `
+      <div class="content-view">
+        <div class="header"><button class="btn btn-secondary" onclick="backToCourses()">← Back to Courses</button></div>
+        <div class="card" style="cursor:default;margin-bottom:20px">
+          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px">
+            <div>
+              <span class="badge badge-cat">${course.category}</span>
+              <h1 style="margin-top:8px">${course.title}</h1>
+              <p style="color:#64748b;margin-top:8px">${course.description}</p>
+            </div>
+            ${completed ? `<div style="text-align:center;padding:16px;background:#f0fdf4;border-radius:12px"><div style="font-size:32px">🏆</div><div style="color:#166534;font-weight:600">Completed!</div><div style="font-size:12px;color:#64748b">Score: ${score}%</div></div>` : ''}
+          </div>
+          <div style="margin-top:16px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Progress</span><span>${progress}%</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width:${progress}%;background:${progress === 100 ? '#22c55e' : '#3b82f6'}"></div></div>
+          </div>
+        </div>
+        ${course.modules.map(mod => `
+          <div class="card" style="cursor:default;margin-bottom:16px">
+            <h3 style="margin-bottom:12px">${mod.title}</h3>
+            ${mod.lessons.map(lesson => `
+              <div class="lesson-item" onclick="viewLesson({id:${lesson.id},title:'${lesson.title.replace(/'/g,"\\'")}',content:\`${lesson.content.replace(/`/g,'\\`')}\`,moduleName:'${mod.title.replace(/'/g,"\\'")}'})" >
+                <div class="lesson-check ${isLessonComplete(lesson.id) ? 'done' : 'pending'}">${isLessonComplete(lesson.id) ? '✓' : ''}</div>
+                <div style="flex:1"><div style="font-weight:500">${lesson.title}</div><div style="font-size:12px;color:#64748b">5 min</div></div>
+                <div style="color:#3b82f6">→</div>
+              </div>
+            `).join('')}
+          </div>
+        `).join('')}
+        ${course.quiz && progress === 100 && !completed ? `
+          <div class="card" style="background:linear-gradient(135deg,#3b82f6,#1d4ed8);color:#fff;cursor:default">
+            <h3>Ready for the Quiz?</h3>
+            <p style="opacity:0.9;margin-top:8px">You've completed all lessons. Pass the quiz to earn your certificate.</p>
+            <button class="btn btn-secondary" style="margin-top:16px;background:#fff;color:#1d4ed8" onclick="startQuiz()">Take Quiz →</button>
+          </div>
+        ` : ''}
+      </div>
+    `;
+    return;
+  }
+  
+  // Tab views
+  switch (state.tab) {
+    case 'mycourses':
+      const assigned = COURSES.length;
+      const completed = state.completedCourses.length;
+      const inProgress = COURSES.filter(c => !isCourseComplete(c.id) && getCourseProgress(c) > 0).length;
+      main.innerHTML = `
+        <div class="header"><h1 class="title">My Courses</h1></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Assigned</div><div class="stat-value">${assigned}</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:#22c55e">${completed}</div></div>
+          <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:#3b82f6">${inProgress}</div></div>
+        </div>
+        <div class="grid">
+          ${COURSES.map(c => {
+            const prog = getCourseProgress(c);
+            const done = isCourseComplete(c.id);
+            return `
+              <div class="card" onclick="viewCourse(${c.id})">
+                <span class="badge badge-cat">${c.category}</span>
+                ${c.required ? '<span class="badge badge-req" style="margin-left:6px">Required</span>' : ''}
+                <h3 style="margin-top:8px">${c.title}</h3>
+                <p style="font-size:13px;color:#64748b;margin-top:4px">${c.duration} min</p>
+                <div class="progress-bar"><div class="progress-fill" style="width:${prog}%;background:${done ? '#22c55e' : '#3b82f6'}"></div></div>
+                <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:12px">
+                  <span style="color:${done ? '#22c55e' : '#64748b'}">${done ? '✓ Completed' : prog+'%'}</span>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+      break;
+    case 'certs':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">My Certificates</h1></div>
+        ${state.completedCourses.length === 0 ? '<div class="card"><p style="text-align:center;color:#64748b">Complete courses to earn certificates</p></div>' : `
+        <div class="grid">
+          ${state.completedCourses.map(cId => {
+            const c = COURSES.find(x => x.id === cId);
+            return `
+              <div class="card cert-card" style="cursor:default">
+                <div style="font-size:48px">🏆</div>
+                <h3 style="margin-top:8px">${c.title}</h3>
+                <p style="font-size:13px;color:#64748b">Score: ${state.quizScores[cId]}%</p>
+                <p style="font-size:10px;color:#94a3b8;margin-top:8px">Certificate ID: CERT-${cId}-${Date.now().toString(36).toUpperCase()}</p>
+              </div>
+            `;
+          }).join('')}
+        </div>`}
+      `;
+      break;
+    case 'reports':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Training Reports</h1></div>
+        <div class="card cta-banner">
+          <div><strong>Need custom training content?</strong><p style="font-size:13px;color:#92400e">We create tailored training for your industry, policies, and procedures.</p></div>
+          <a href="mailto:training@buyappsonce.com?subject=Custom%20Training%20Request" class="btn btn-cta">📝 Request Custom Training</a>
+        </div>
+        <div class="card" style="cursor:default">
+          <h3 style="margin-bottom:16px">Course Completion</h3>
+          <table><thead><tr><th>Course</th><th>Category</th><th>Status</th><th>Score</th></tr></thead>
+          <tbody>${COURSES.map(c => `
+            <tr><td><strong>${c.title}</strong></td><td>${c.category}</td><td><span class="badge" style="background:${isCourseComplete(c.id) ? '#dcfce7;color:#166534' : getCourseProgress(c) > 0 ? '#dbeafe;color:#1e40af' : '#f1f5f9;color:#64748b'}">${isCourseComplete(c.id) ? 'Completed' : getCourseProgress(c) > 0 ? 'In Progress' : 'Not Started'}</span></td><td>${state.quizScores[c.id] ? state.quizScores[c.id]+'%' : '-'}</td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+  }
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
