@@ -1,0 +1,1296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AmenityBook - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    /* Header */
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-900);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    /* Navigation Tabs */
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      transition: all 0.2s;
+    }
+    
+    .nav-tab:hover {
+      color: var(--gray-700);
+    }
+    
+    .nav-tab.active {
+      color: var(--primary);
+      border-bottom-color: var(--primary);
+    }
+    
+    /* Main Content */
+    .main-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .tab-content {
+      display: none;
+    }
+    
+    .tab-content.active {
+      display: block;
+    }
+    
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .card-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+    
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+    
+    .btn-secondary {
+      background: var(--gray-200);
+      color: var(--gray-700);
+    }
+    
+    .btn-secondary:hover {
+      background: var(--gray-300);
+    }
+    
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+    }
+    
+    /* Amenities Grid */
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .amenity-card {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    
+    .amenity-icon {
+      font-size: 2rem;
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--gray-100);
+      border-radius: 0.5rem;
+    }
+    
+    .amenity-info {
+      flex: 1;
+    }
+    
+    .amenity-name {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .amenity-details {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+    
+    .amenity-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+    
+    /* Calendar */
+    .calendar-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .calendar-nav button {
+      background: var(--gray-200);
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+    }
+    
+    .calendar-nav button:hover {
+      background: var(--gray-300);
+    }
+    
+    .calendar-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: var(--gray-200);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .calendar-day-header {
+      background: var(--gray-100);
+      padding: 0.75rem;
+      text-align: center;
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--gray-600);
+      text-transform: uppercase;
+    }
+    
+    .calendar-day {
+      background: white;
+      min-height: 100px;
+      padding: 0.5rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    
+    .calendar-day:hover {
+      background: var(--gray-50);
+    }
+    
+    .calendar-day.other-month {
+      background: var(--gray-50);
+      color: var(--gray-400);
+    }
+    
+    .calendar-day.today {
+      background: #eff6ff;
+    }
+    
+    .day-number {
+      font-weight: 500;
+      font-size: 0.875rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .day-bookings {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    
+    .booking-chip {
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: pointer;
+    }
+    
+    .booking-chip.pool { background: #dbeafe; color: #1e40af; }
+    .booking-chip.tennis { background: #dcfce7; color: #166534; }
+    .booking-chip.clubhouse { background: #fef3c7; color: #92400e; }
+    .booking-chip.gym { background: #fce7f3; color: #9d174d; }
+    .booking-chip.bbq { background: #fed7d7; color: #c53030; }
+    .booking-chip.meeting { background: #e9d5ff; color: #6b21a8; }
+    
+    /* Bookings List */
+    .bookings-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+    
+    .booking-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .booking-item.cancelled {
+      opacity: 0.5;
+      border-left-color: var(--gray-400);
+    }
+    
+    .booking-date {
+      text-align: center;
+      min-width: 60px;
+    }
+    
+    .booking-date .day {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .booking-date .month {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+    }
+    
+    .booking-info {
+      flex: 1;
+    }
+    
+    .booking-title {
+      font-weight: 600;
+    }
+    
+    .booking-meta {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+    }
+    
+    .booking-status {
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+    
+    .booking-status.confirmed {
+      background: #dcfce7;
+      color: #166534;
+    }
+    
+    .booking-status.pending {
+      background: #fef3c7;
+      color: #92400e;
+    }
+    
+    .booking-status.cancelled {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    /* Forms */
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+    }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray-400);
+    }
+    
+    .modal-close:hover {
+      color: var(--gray-600);
+    }
+    
+    .modal-body {
+      padding: 1.5rem;
+    }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    /* Icons grid for selection */
+    .icon-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 0.5rem;
+    }
+    
+    .icon-option {
+      padding: 0.75rem;
+      text-align: center;
+      font-size: 1.5rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .icon-option:hover {
+      border-color: var(--gray-400);
+    }
+    
+    .icon-option.selected {
+      border-color: var(--primary);
+      background: #eff6ff;
+    }
+    
+    /* Empty State */
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray-500);
+    }
+    
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+    }
+    
+    /* Stats */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+    
+    .stat-label {
+      font-size: 0.75rem;
+      color: var(--gray-500);
+      text-transform: uppercase;
+    }
+    
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-bar select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success {
+      background: var(--success);
+    }
+    
+    .toast.error {
+      background: var(--danger);
+    }
+    
+    @keyframes slideIn {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+      .calendar-day {
+        min-height: 60px;
+        padding: 0.25rem;
+      }
+      
+      .day-number {
+        font-size: 0.75rem;
+      }
+      
+      .booking-chip {
+        font-size: 0.6rem;
+      }
+      
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📅 AmenityBook</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="calendar">Calendar</div>
+    <div class="nav-tab" data-tab="amenities">Amenities</div>
+    <div class="nav-tab" data-tab="bookings">Bookings</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-amenities">0</div>
+        <div class="stat-label">Amenities</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-bookings">0</div>
+        <div class="stat-label">Total Bookings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-upcoming">0</div>
+        <div class="stat-label">Upcoming</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-today">0</div>
+        <div class="stat-label">Today</div>
+      </div>
+    </div>
+    
+    <!-- Calendar Tab -->
+    <div class="tab-content active" id="tab-calendar">
+      <div class="card">
+        <div class="calendar-header">
+          <div class="calendar-nav">
+            <button onclick="changeMonth(-1)">◀</button>
+            <h2 class="calendar-title" id="calendar-title">January 2026</h2>
+            <button onclick="changeMonth(1)">▶</button>
+          </div>
+          <button class="btn btn-primary" onclick="openBookingModal()">+ New Booking</button>
+        </div>
+        <div class="calendar-grid" id="calendar-grid"></div>
+      </div>
+    </div>
+    
+    <!-- Amenities Tab -->
+    <div class="tab-content" id="tab-amenities">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Manage Amenities</h2>
+          <button class="btn btn-primary" onclick="openAmenityModal()">+ Add Amenity</button>
+        </div>
+        <div class="amenities-grid" id="amenities-grid"></div>
+      </div>
+    </div>
+    
+    <!-- Bookings Tab -->
+    <div class="tab-content" id="tab-bookings">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">All Bookings</h2>
+          <button class="btn btn-primary" onclick="openBookingModal()">+ New Booking</button>
+        </div>
+        <div class="filter-bar">
+          <select id="filter-amenity" onchange="renderBookings()">
+            <option value="">All Amenities</option>
+          </select>
+          <select id="filter-status" onchange="renderBookings()">
+            <option value="">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div class="bookings-list" id="bookings-list"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Amenity Modal -->
+  <div class="modal-overlay" id="amenity-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="amenity-modal-title">Add Amenity</h3>
+        <button class="modal-close" onclick="closeModal('amenity-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="amenity-id">
+        <div class="form-group">
+          <label class="form-label">Icon</label>
+          <div class="icon-grid" id="icon-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Name</label>
+          <input type="text" class="form-input" id="amenity-name" placeholder="e.g., Swimming Pool">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Max Capacity</label>
+            <input type="number" class="form-input" id="amenity-capacity" placeholder="e.g., 20">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Booking Duration (hours)</label>
+            <input type="number" class="form-input" id="amenity-duration" placeholder="e.g., 2" value="2">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="amenity-description" placeholder="Brief description...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('amenity-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAmenity()">Save Amenity</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Booking Modal -->
+  <div class="modal-overlay" id="booking-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="booking-modal-title">New Booking</h3>
+        <button class="modal-close" onclick="closeModal('booking-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="booking-id">
+        <div class="form-group">
+          <label class="form-label">Amenity</label>
+          <select class="form-input" id="booking-amenity"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Resident Name</label>
+          <input type="text" class="form-input" id="booking-resident" placeholder="e.g., John Smith">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="booking-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" id="booking-time">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Number of Guests</label>
+          <input type="number" class="form-input" id="booking-guests" placeholder="e.g., 4" value="1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="booking-notes" placeholder="Any special requests...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('booking-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBooking()">Save Booking</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- View Booking Modal -->
+  <div class="modal-overlay" id="view-booking-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Booking Details</h3>
+        <button class="modal-close" onclick="closeModal('view-booking-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="view-booking-content"></div>
+      <div class="modal-footer" id="view-booking-footer"></div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Data
+    let amenities = [];
+    let bookings = [];
+    let currentMonth = new Date().getMonth();
+    let currentYear = new Date().getFullYear();
+    let selectedIcon = '🏊';
+    
+    const ICONS = ['🏊', '🎾', '🏠', '🏋️', '🍖', '🏀', '📋', '⛺', '🎱', '🎯', '🏓', '⚽'];
+    
+    const AMENITY_COLORS = {
+      '🏊': 'pool',
+      '🎾': 'tennis',
+      '🏠': 'clubhouse',
+      '🏋️': 'gym',
+      '🍖': 'bbq',
+      '📋': 'meeting',
+    };
+    
+    // Initialize
+    function init() {
+      loadData();
+      setupTabs();
+      renderIconGrid();
+      renderAll();
+      
+      // Set default date to today
+      document.getElementById('booking-date').valueAsDate = new Date();
+    }
+    
+    // LocalStorage
+    function loadData() {
+      const savedAmenities = localStorage.getItem('amenitybook_amenities');
+      const savedBookings = localStorage.getItem('amenitybook_bookings');
+      
+      if (savedAmenities) {
+        amenities = JSON.parse(savedAmenities);
+      } else {
+        // Default amenities
+        amenities = [
+          { id: 1, icon: '🏊', name: 'Swimming Pool', capacity: 30, duration: 2, description: 'Olympic-sized pool with lanes' },
+          { id: 2, icon: '🎾', name: 'Tennis Court', capacity: 4, duration: 1, description: 'Professional hard court' },
+          { id: 3, icon: '🏠', name: 'Clubhouse', capacity: 50, duration: 4, description: 'Main event space with kitchen' },
+          { id: 4, icon: '🏋️', name: 'Fitness Center', capacity: 15, duration: 2, description: '24/7 access gym' },
+        ];
+      }
+      
+      if (savedBookings) {
+        bookings = JSON.parse(savedBookings);
+      } else {
+        // Sample bookings
+        const today = new Date();
+        bookings = [
+          { id: 1, amenityId: 1, resident: 'John Smith', date: formatDate(today), time: '10:00', guests: 4, notes: 'Birthday swim party', status: 'confirmed' },
+          { id: 2, amenityId: 3, resident: 'Jane Doe', date: formatDate(addDays(today, 2)), time: '14:00', guests: 25, notes: 'Book club meeting', status: 'confirmed' },
+          { id: 3, amenityId: 2, resident: 'Mike Johnson', date: formatDate(addDays(today, 1)), time: '09:00', guests: 2, notes: '', status: 'pending' },
+        ];
+      }
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('amenitybook_amenities', JSON.stringify(amenities));
+      localStorage.setItem('amenitybook_bookings', JSON.stringify(bookings));
+    }
+    
+    function formatDate(date) {
+      return date.toISOString().split('T')[0];
+    }
+    
+    function addDays(date, days) {
+      const result = new Date(date);
+      result.setDate(result.getDate() + days);
+      return result;
+    }
+    
+    // Tabs
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    // Render all
+    function renderAll() {
+      renderStats();
+      renderCalendar();
+      renderAmenities();
+      renderBookings();
+      updateAmenitySelects();
+    }
+    
+    // Stats
+    function renderStats() {
+      const today = formatDate(new Date());
+      const upcomingBookings = bookings.filter(b => b.date >= today && b.status !== 'cancelled');
+      const todayBookings = bookings.filter(b => b.date === today && b.status !== 'cancelled');
+      
+      document.getElementById('stat-amenities').textContent = amenities.length;
+      document.getElementById('stat-bookings').textContent = bookings.length;
+      document.getElementById('stat-upcoming').textContent = upcomingBookings.length;
+      document.getElementById('stat-today').textContent = todayBookings.length;
+    }
+    
+    // Calendar
+    function renderCalendar() {
+      const grid = document.getElementById('calendar-grid');
+      const title = document.getElementById('calendar-title');
+      
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                      'July', 'August', 'September', 'October', 'November', 'December'];
+      title.textContent = `${months[currentMonth]} ${currentYear}`;
+      
+      const firstDay = new Date(currentYear, currentMonth, 1);
+      const lastDay = new Date(currentYear, currentMonth + 1, 0);
+      const startDay = firstDay.getDay();
+      const daysInMonth = lastDay.getDate();
+      
+      const today = formatDate(new Date());
+      
+      let html = '';
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      days.forEach(d => {
+        html += `<div class="calendar-day-header">${d}</div>`;
+      });
+      
+      // Previous month days
+      const prevMonth = new Date(currentYear, currentMonth, 0);
+      const prevDays = prevMonth.getDate();
+      for (let i = startDay - 1; i >= 0; i--) {
+        const day = prevDays - i;
+        html += `<div class="calendar-day other-month"><div class="day-number">${day}</div></div>`;
+      }
+      
+      // Current month days
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const isToday = dateStr === today;
+        const dayBookings = bookings.filter(b => b.date === dateStr && b.status !== 'cancelled');
+        
+        html += `<div class="calendar-day${isToday ? ' today' : ''}" onclick="openBookingModal('${dateStr}')">
+          <div class="day-number">${day}</div>
+          <div class="day-bookings">
+            ${dayBookings.slice(0, 3).map(b => {
+              const amenity = amenities.find(a => a.id === b.amenityId);
+              const colorClass = amenity ? (AMENITY_COLORS[amenity.icon] || 'pool') : 'pool';
+              return `<div class="booking-chip ${colorClass}" onclick="event.stopPropagation(); viewBooking(${b.id})">${amenity ? amenity.name : 'Unknown'}</div>`;
+            }).join('')}
+            ${dayBookings.length > 3 ? `<div class="booking-chip" style="background:#e5e7eb;color:#374151;">+${dayBookings.length - 3} more</div>` : ''}
+          </div>
+        </div>`;
+      }
+      
+      // Next month days
+      const totalCells = startDay + daysInMonth;
+      const remainingCells = (7 - (totalCells % 7)) % 7;
+      for (let i = 1; i <= remainingCells; i++) {
+        html += `<div class="calendar-day other-month"><div class="day-number">${i}</div></div>`;
+      }
+      
+      grid.innerHTML = html;
+    }
+    
+    function changeMonth(delta) {
+      currentMonth += delta;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      } else if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar();
+    }
+    
+    // Amenities
+    function renderAmenities() {
+      const grid = document.getElementById('amenities-grid');
+      
+      if (amenities.length === 0) {
+        grid.innerHTML = `<div class="empty-state">
+          <div class="empty-state-icon">🏢</div>
+          <p>No amenities yet. Add your first amenity to get started.</p>
+        </div>`;
+        return;
+      }
+      
+      grid.innerHTML = amenities.map(a => `
+        <div class="amenity-card">
+          <div class="amenity-icon">${a.icon}</div>
+          <div class="amenity-info">
+            <div class="amenity-name">${a.name}</div>
+            <div class="amenity-details">
+              Capacity: ${a.capacity} • ${a.duration}hr slots<br>
+              ${a.description || 'No description'}
+            </div>
+            <div class="amenity-actions">
+              <button class="btn btn-secondary btn-sm" onclick="editAmenity(${a.id})">Edit</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteAmenity(${a.id})">Delete</button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function renderIconGrid() {
+      const grid = document.getElementById('icon-grid');
+      grid.innerHTML = ICONS.map(icon => 
+        `<div class="icon-option${icon === selectedIcon ? ' selected' : ''}" onclick="selectIcon('${icon}')">${icon}</div>`
+      ).join('');
+    }
+    
+    function selectIcon(icon) {
+      selectedIcon = icon;
+      renderIconGrid();
+    }
+    
+    function openAmenityModal(id = null) {
+      const modal = document.getElementById('amenity-modal');
+      const title = document.getElementById('amenity-modal-title');
+      
+      if (id) {
+        const amenity = amenities.find(a => a.id === id);
+        title.textContent = 'Edit Amenity';
+        document.getElementById('amenity-id').value = id;
+        document.getElementById('amenity-name').value = amenity.name;
+        document.getElementById('amenity-capacity').value = amenity.capacity;
+        document.getElementById('amenity-duration').value = amenity.duration;
+        document.getElementById('amenity-description').value = amenity.description || '';
+        selectedIcon = amenity.icon;
+      } else {
+        title.textContent = 'Add Amenity';
+        document.getElementById('amenity-id').value = '';
+        document.getElementById('amenity-name').value = '';
+        document.getElementById('amenity-capacity').value = '';
+        document.getElementById('amenity-duration').value = '2';
+        document.getElementById('amenity-description').value = '';
+        selectedIcon = '🏊';
+      }
+      
+      renderIconGrid();
+      modal.classList.add('active');
+    }
+    
+    function editAmenity(id) {
+      openAmenityModal(id);
+    }
+    
+    function saveAmenity() {
+      const id = document.getElementById('amenity-id').value;
+      const name = document.getElementById('amenity-name').value.trim();
+      const capacity = parseInt(document.getElementById('amenity-capacity').value) || 10;
+      const duration = parseInt(document.getElementById('amenity-duration').value) || 2;
+      const description = document.getElementById('amenity-description').value.trim();
+      
+      if (!name) {
+        showToast('Please enter a name', 'error');
+        return;
+      }
+      
+      if (id) {
+        const index = amenities.findIndex(a => a.id === parseInt(id));
+        amenities[index] = { ...amenities[index], icon: selectedIcon, name, capacity, duration, description };
+        showToast('Amenity updated');
+      } else {
+        const newId = Math.max(0, ...amenities.map(a => a.id)) + 1;
+        amenities.push({ id: newId, icon: selectedIcon, name, capacity, duration, description });
+        showToast('Amenity added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('amenity-modal');
+    }
+    
+    function deleteAmenity(id) {
+      if (!confirm('Delete this amenity? All associated bookings will be removed.')) return;
+      
+      amenities = amenities.filter(a => a.id !== id);
+      bookings = bookings.filter(b => b.amenityId !== id);
+      
+      saveData();
+      renderAll();
+      showToast('Amenity deleted');
+    }
+    
+    // Bookings
+    function renderBookings() {
+      const list = document.getElementById('bookings-list');
+      const filterAmenity = document.getElementById('filter-amenity').value;
+      const filterStatus = document.getElementById('filter-status').value;
+      
+      let filtered = [...bookings];
+      
+      if (filterAmenity) {
+        filtered = filtered.filter(b => b.amenityId === parseInt(filterAmenity));
+      }
+      if (filterStatus) {
+        filtered = filtered.filter(b => b.status === filterStatus);
+      }
+      
+      // Sort by date descending
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">
+          <div class="empty-state-icon">📅</div>
+          <p>No bookings found.</p>
+        </div>`;
+        return;
+      }
+      
+      list.innerHTML = filtered.map(b => {
+        const amenity = amenities.find(a => a.id === b.amenityId);
+        const date = new Date(b.date + 'T00:00:00');
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        
+        return `<div class="booking-item${b.status === 'cancelled' ? ' cancelled' : ''}">
+          <div class="booking-date">
+            <div class="day">${date.getDate()}</div>
+            <div class="month">${months[date.getMonth()]}</div>
+          </div>
+          <div class="booking-info">
+            <div class="booking-title">${amenity ? amenity.icon + ' ' + amenity.name : 'Unknown Amenity'}</div>
+            <div class="booking-meta">${b.resident} • ${b.time} • ${b.guests} guest${b.guests > 1 ? 's' : ''}</div>
+          </div>
+          <span class="booking-status ${b.status}">${b.status}</span>
+          <button class="btn btn-secondary btn-sm" onclick="viewBooking(${b.id})">View</button>
+        </div>`;
+      }).join('');
+    }
+    
+    function updateAmenitySelects() {
+      const options = '<option value="">Select Amenity</option>' + 
+        amenities.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+      
+      document.getElementById('booking-amenity').innerHTML = options;
+      document.getElementById('filter-amenity').innerHTML = '<option value="">All Amenities</option>' + 
+        amenities.map(a => `<option value="${a.id}">${a.icon} ${a.name}</option>`).join('');
+    }
+    
+    function openBookingModal(date = null, id = null) {
+      const modal = document.getElementById('booking-modal');
+      const title = document.getElementById('booking-modal-title');
+      
+      if (id) {
+        const booking = bookings.find(b => b.id === id);
+        title.textContent = 'Edit Booking';
+        document.getElementById('booking-id').value = id;
+        document.getElementById('booking-amenity').value = booking.amenityId;
+        document.getElementById('booking-resident').value = booking.resident;
+        document.getElementById('booking-date').value = booking.date;
+        document.getElementById('booking-time').value = booking.time;
+        document.getElementById('booking-guests').value = booking.guests;
+        document.getElementById('booking-notes').value = booking.notes || '';
+      } else {
+        title.textContent = 'New Booking';
+        document.getElementById('booking-id').value = '';
+        document.getElementById('booking-amenity').value = '';
+        document.getElementById('booking-resident').value = '';
+        document.getElementById('booking-date').value = date || formatDate(new Date());
+        document.getElementById('booking-time').value = '10:00';
+        document.getElementById('booking-guests').value = '1';
+        document.getElementById('booking-notes').value = '';
+      }
+      
+      modal.classList.add('active');
+    }
+    
+    function saveBooking() {
+      const id = document.getElementById('booking-id').value;
+      const amenityId = parseInt(document.getElementById('booking-amenity').value);
+      const resident = document.getElementById('booking-resident').value.trim();
+      const date = document.getElementById('booking-date').value;
+      const time = document.getElementById('booking-time').value;
+      const guests = parseInt(document.getElementById('booking-guests').value) || 1;
+      const notes = document.getElementById('booking-notes').value.trim();
+      
+      if (!amenityId) {
+        showToast('Please select an amenity', 'error');
+        return;
+      }
+      if (!resident) {
+        showToast('Please enter resident name', 'error');
+        return;
+      }
+      if (!date) {
+        showToast('Please select a date', 'error');
+        return;
+      }
+      
+      if (id) {
+        const index = bookings.findIndex(b => b.id === parseInt(id));
+        bookings[index] = { ...bookings[index], amenityId, resident, date, time, guests, notes };
+        showToast('Booking updated');
+      } else {
+        const newId = Math.max(0, ...bookings.map(b => b.id)) + 1;
+        bookings.push({ id: newId, amenityId, resident, date, time, guests, notes, status: 'confirmed' });
+        showToast('Booking created');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('booking-modal');
+    }
+    
+    function viewBooking(id) {
+      const booking = bookings.find(b => b.id === id);
+      const amenity = amenities.find(a => a.id === booking.amenityId);
+      const modal = document.getElementById('view-booking-modal');
+      const content = document.getElementById('view-booking-content');
+      const footer = document.getElementById('view-booking-footer');
+      
+      const date = new Date(booking.date + 'T00:00:00');
+      
+      content.innerHTML = `
+        <div style="margin-bottom: 1rem;">
+          <span style="font-size: 2rem;">${amenity ? amenity.icon : '📅'}</span>
+          <span style="font-size: 1.25rem; font-weight: 600; margin-left: 0.5rem;">${amenity ? amenity.name : 'Unknown'}</span>
+          <span class="booking-status ${booking.status}" style="margin-left: 0.5rem;">${booking.status}</span>
+        </div>
+        <p><strong>Resident:</strong> ${booking.resident}</p>
+        <p><strong>Date:</strong> ${date.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <p><strong>Time:</strong> ${booking.time}</p>
+        <p><strong>Guests:</strong> ${booking.guests}</p>
+        ${booking.notes ? `<p><strong>Notes:</strong> ${booking.notes}</p>` : ''}
+      `;
+      
+      if (booking.status === 'cancelled') {
+        footer.innerHTML = `<button class="btn btn-secondary" onclick="closeModal('view-booking-modal')">Close</button>`;
+      } else {
+        footer.innerHTML = `
+          <button class="btn btn-danger" onclick="cancelBooking(${id})">Cancel Booking</button>
+          <button class="btn btn-secondary" onclick="closeModal('view-booking-modal'); openBookingModal(null, ${id})">Edit</button>
+          <button class="btn btn-primary" onclick="closeModal('view-booking-modal')">Close</button>
+        `;
+      }
+      
+      modal.classList.add('active');
+    }
+    
+    function cancelBooking(id) {
+      if (!confirm('Cancel this booking?')) return;
+      
+      const index = bookings.findIndex(b => b.id === id);
+      bookings[index].status = 'cancelled';
+      
+      saveData();
+      renderAll();
+      closeModal('view-booking-modal');
+      showToast('Booking cancelled');
+    }
+    
+    // Modal helpers
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.remove('active');
+    }
+    
+    // Toast
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
+    
+    // Close modals on overlay click
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.classList.remove('active');
+        }
+      });
+    });
+    
+    // Init
+    init();
+  </script>
+</body>
+</html>
