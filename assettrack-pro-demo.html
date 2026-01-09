@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AssetTrack Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 18px; color: #fff; }
+    .badge { background: #f59e0b; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 14px; color: #fff; }
+    .user-name { font-size: 12px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 14px; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(245,158,11,0.2); color: #fff; font-weight: 500; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #f59e0b; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-detail { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background: #f8fafc; }
+    .status-badge, .cond-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; display: inline-block; }
+    .filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-size: 13px; text-transform: capitalize; }
+    .filter-btn.active { background: #f59e0b; color: #fff; border-color: #f59e0b; }
+    .search { padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; width: 200px; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #f59e0b, #fbbf24); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">📦 Demo Mode - Data stored in browser | <a href="https://buyappsonce.com/landing-assettrack-pro.html">Get AssetTrack Pro →</a></div>
+  
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">📦</span><span class="logo-text">AssetTrack</span><span class="badge">PRO</span></div>
+      <div class="org-info"><div class="org-name">Demo Company</div><div class="user-name">Admin User</div></div>
+      <div class="nav-item active" onclick="showTab('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showTab('assets')">📦 Assets</div>
+      <div class="nav-item" onclick="showTab('maintenance')">🔧 Maintenance</div>
+      <div class="nav-item" onclick="showTab('checkouts')">🔄 Checkouts</div>
+      <div class="nav-item" onclick="showTab('locations')">📍 Locations</div>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 class="modal-title" id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const STATUSES = ['active', 'in_repair', 'retired', 'disposed', 'lost'];
+const CONDITIONS = ['excellent', 'good', 'fair', 'poor'];
+const STATUS_COLORS = { active: '#22c55e', in_repair: '#f59e0b', retired: '#64748b', disposed: '#ef4444', lost: '#ef4444' };
+const COND_COLORS = { excellent: '#22c55e', good: '#3b82f6', fair: '#f59e0b', poor: '#ef4444' };
+
+let state = { tab: 'dashboard', assets: [], categories: [], locations: [], maintenance: [], checkouts: [], filter: 'all', search: '', selectedAsset: null };
+
+function init() {
+  loadData();
+  if (state.assets.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.assets = JSON.parse(localStorage.getItem('at_assets') || '[]');
+  state.categories = JSON.parse(localStorage.getItem('at_categories') || '[]');
+  state.locations = JSON.parse(localStorage.getItem('at_locations') || '[]');
+  state.maintenance = JSON.parse(localStorage.getItem('at_maintenance') || '[]');
+  state.checkouts = JSON.parse(localStorage.getItem('at_checkouts') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('at_assets', JSON.stringify(state.assets));
+  localStorage.setItem('at_categories', JSON.stringify(state.categories));
+  localStorage.setItem('at_locations', JSON.stringify(state.locations));
+  localStorage.setItem('at_maintenance', JSON.stringify(state.maintenance));
+  localStorage.setItem('at_checkouts', JSON.stringify(state.checkouts));
+}
+
+function loadSampleData() {
+  state.categories = [
+    { id: 1, name: 'Computers', useful_life: 4 },
+    { id: 2, name: 'Furniture', useful_life: 7 },
+    { id: 3, name: 'Vehicles', useful_life: 5 },
+    { id: 4, name: 'Equipment', useful_life: 5 }
+  ];
+  state.locations = [
+    { id: 1, name: 'Main Office', building: 'HQ', floor: '1' },
+    { id: 2, name: 'Warehouse', building: 'Storage', floor: '1' },
+    { id: 3, name: 'Remote Office', building: 'Branch', floor: '2' }
+  ];
+  state.assets = [
+    { id: 1, asset_tag: 'AST-000001', name: 'MacBook Pro 16"', category_id: 1, location_id: 1, status: 'active', condition: 'excellent', serial_number: 'C02X1234', model: 'MacBook Pro', manufacturer: 'Apple', purchase_date: '2023-06-15', purchase_price: 2499, useful_life: 4, depreciation_method: 'straight_line', salvage_value: 500, warranty_expiry: '2026-06-15' },
+    { id: 2, asset_tag: 'AST-000002', name: 'Standing Desk', category_id: 2, location_id: 1, status: 'active', condition: 'good', serial_number: 'SD-9876', model: 'Uplift V2', manufacturer: 'Uplift', purchase_date: '2022-01-10', purchase_price: 799, useful_life: 7, depreciation_method: 'straight_line', salvage_value: 100 },
+    { id: 3, asset_tag: 'AST-000003', name: 'Ford Transit Van', category_id: 3, location_id: 2, status: 'active', condition: 'good', serial_number: 'VIN123456789', model: 'Transit 250', manufacturer: 'Ford', purchase_date: '2021-03-20', purchase_price: 35000, useful_life: 5, depreciation_method: 'straight_line', salvage_value: 8000, warranty_expiry: '2024-03-20' },
+    { id: 4, asset_tag: 'AST-000004', name: 'Dell Monitor 27"', category_id: 1, location_id: 1, status: 'active', condition: 'excellent', serial_number: 'DL-4567', model: 'U2722D', manufacturer: 'Dell', purchase_date: '2023-08-01', purchase_price: 549, useful_life: 4, depreciation_method: 'straight_line', salvage_value: 50 },
+    { id: 5, asset_tag: 'AST-000005', name: 'Conference Table', category_id: 2, location_id: 3, status: 'active', condition: 'fair', serial_number: 'CT-111', model: 'Executive', manufacturer: 'HON', purchase_date: '2019-05-15', purchase_price: 1200, useful_life: 7, depreciation_method: 'straight_line', salvage_value: 200 },
+    { id: 6, asset_tag: 'AST-000006', name: 'Old Laptop', category_id: 1, location_id: 2, status: 'retired', condition: 'poor', serial_number: 'OLD-999', model: 'ThinkPad', manufacturer: 'Lenovo', purchase_date: '2018-01-01', purchase_price: 1500, useful_life: 4, depreciation_method: 'straight_line', salvage_value: 100 }
+  ];
+  state.maintenance = [
+    { id: 1, asset_id: 3, type: 'preventive', description: 'Oil change and tire rotation', performed_by: 'Quick Lube', performed_date: '2024-01-15', cost: 150, next_due: '2024-07-15' },
+    { id: 2, asset_id: 1, type: 'repair', description: 'Battery replacement', performed_by: 'Apple Store', performed_date: '2024-02-20', cost: 199 }
+  ];
+  state.checkouts = [
+    { id: 1, asset_id: 1, checked_out_to: 'John Smith', checkout_date: '2024-01-01', expected_return: '2024-12-31', condition_out: 'excellent', returned: false },
+    { id: 2, asset_id: 4, checked_out_to: 'Jane Doe', checkout_date: '2024-02-15', condition_out: 'excellent', returned: true, return_date: '2024-03-01' }
+  ];
+  saveData();
+}
+
+function showTab(tab) { state.tab = tab; state.selectedAsset = null; state.filter = 'all'; updateNav(); render(); }
+function updateNav() { document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['dashboard', 'assets', 'maintenance', 'checkouts', 'locations'].indexOf(state.tab))); }
+
+function getCat(id) { return state.categories.find(c => c.id === id); }
+function getLoc(id) { return state.locations.find(l => l.id === id); }
+function getAsset(id) { return state.assets.find(a => a.id === id); }
+
+function calcDep(a) {
+  if (!a.purchase_date || !a.purchase_price || a.depreciation_method === 'none') return { current: a.purchase_price || 0, acc: 0, annual: 0 };
+  const months = Math.max(0, Math.floor((Date.now() - new Date(a.purchase_date)) / (1000 * 60 * 60 * 24 * 30)));
+  const dep = a.purchase_price - (a.salvage_value || 0);
+  const annual = dep / (a.useful_life || 5);
+  const acc = Math.min(dep, (annual / 12) * months);
+  return { current: Math.max(a.salvage_value || 0, a.purchase_price - acc), acc, annual };
+}
+
+function render() {
+  const main = document.getElementById('mainContent');
+  if (state.selectedAsset) { main.innerHTML = renderAssetDetail(); return; }
+  switch (state.tab) {
+    case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'assets': main.innerHTML = renderAssets(); break;
+    case 'maintenance': main.innerHTML = renderMaintenance(); break;
+    case 'checkouts': main.innerHTML = renderCheckouts(); break;
+    case 'locations': main.innerHTML = renderLocations(); break;
+  }
+}
+
+function renderDashboard() {
+  const total = state.assets.length;
+  const active = state.assets.filter(a => a.status === 'active').length;
+  const totalVal = state.assets.reduce((s, a) => s + (a.purchase_price || 0), 0);
+  const currentVal = state.assets.reduce((s, a) => s + calcDep(a).current, 0);
+  const warrantyExp = state.assets.filter(a => a.warranty_expiry && new Date(a.warranty_expiry) < new Date(Date.now() + 30 * 24 * 60 * 60 * 1000) && new Date(a.warranty_expiry) > new Date()).length;
+  
+  return `
+    <div class="header"><h1 class="title">Dashboard</h1></div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Total Assets</div><div class="stat-value">${total}</div><div class="stat-meta">${active} active</div></div>
+      <div class="stat-card"><div class="stat-label">Purchase Value</div><div class="stat-value" style="color:#3b82f6">$${totalVal.toLocaleString()}</div></div>
+      <div class="stat-card"><div class="stat-label">Current Value</div><div class="stat-value" style="color:#22c55e">$${Math.round(currentVal).toLocaleString()}</div><div class="stat-meta">After depreciation</div></div>
+      <div class="stat-card"><div class="stat-label">Warranty Alerts</div><div class="stat-value" style="color:#f59e0b">${warrantyExp}</div><div class="stat-meta">Expiring soon</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Assets by Status</h3>
+        ${STATUSES.map(s => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0"><span class="status-badge" style="background:${STATUS_COLORS[s]}22;color:${STATUS_COLORS[s]}">${s.replace('_', ' ')}</span><strong>${state.assets.filter(a => a.status === s).length}</strong></div>`).join('')}
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px">Assets by Category</h3>
+        ${state.categories.map(c => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0"><span>${c.name}</span><strong>${state.assets.filter(a => a.category_id === c.id).length}</strong></div>`).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderAssets() {
+  const filtered = state.assets.filter(a => {
+    if (state.filter !== 'all' && a.status !== state.filter) return false;
+    if (!state.search) return true;
+    return `${a.name} ${a.asset_tag} ${a.serial_number}`.toLowerCase().includes(state.search.toLowerCase());
+  });
+  
+  return `
+    <div class="header">
+      <h1 class="title">Assets</h1>
+      <div style="display:flex;gap:12px">
+        <input class="search" placeholder="Search..." value="${state.search}" oninput="state.search=this.value;render()">
+        <button class="btn btn-primary" onclick="openAssetModal()">+ Add Asset</button>
+      </div>
+    </div>
+    <div class="filters">
+      ${[['all', 'All'], ...STATUSES.map(s => [s, s.replace('_', ' ')])].map(([k, l]) => `<button class="filter-btn ${state.filter === k ? 'active' : ''}" onclick="state.filter='${k}';render()">${l}</button>`).join('')}
+    </div>
+    <div class="card">
+      <table><thead><tr><th>Tag</th><th>Name</th><th>Category</th><th>Location</th><th>Status</th><th>Condition</th><th>Value</th></tr></thead>
+      <tbody>${filtered.map(a => {
+        const d = calcDep(a);
+        return `<tr style="cursor:pointer" onclick="selectAsset(${a.id})">
+          <td><strong>${a.asset_tag}</strong></td><td>${a.name}</td><td>${getCat(a.category_id)?.name || '-'}</td><td>${getLoc(a.location_id)?.name || '-'}</td>
+          <td><span class="status-badge" style="background:${STATUS_COLORS[a.status]}22;color:${STATUS_COLORS[a.status]}">${a.status.replace('_', ' ')}</span></td>
+          <td><span class="cond-badge" style="background:${COND_COLORS[a.condition]}22;color:${COND_COLORS[a.condition]}">${a.condition}</span></td>
+          <td>$${Math.round(d.current).toLocaleString()}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderAssetDetail() {
+  const a = state.selectedAsset;
+  const d = calcDep(a);
+  const maint = state.maintenance.filter(m => m.asset_id === a.id);
+  const checks = state.checkouts.filter(c => c.asset_id === a.id);
+  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(a.asset_tag)}`;
+  
+  return `
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-sm btn-secondary" onclick="state.selectedAsset=null;render()">← Back</button>
+        <h1 class="title">${a.asset_tag}</h1>
+        <span class="status-badge" style="background:${STATUS_COLORS[a.status]}22;color:${STATUS_COLORS[a.status]}">${a.status.replace('_', ' ')}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-secondary" onclick="openAssetModal(${a.id})">Edit</button>
+        <button class="btn btn-secondary" onclick="openMaintenanceModal(${a.id})">+ Maintenance</button>
+        <button class="btn btn-primary" onclick="openCheckoutModal(${a.id})">Check Out</button>
+      </div>
+    </div>
+    <div class="grid-detail">
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">${a.name}</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div><strong>Serial:</strong> ${a.serial_number || '-'}</div>
+            <div><strong>Model:</strong> ${a.model || '-'}</div>
+            <div><strong>Manufacturer:</strong> ${a.manufacturer || '-'}</div>
+            <div><strong>Category:</strong> ${getCat(a.category_id)?.name || '-'}</div>
+            <div><strong>Location:</strong> ${getLoc(a.location_id)?.name || '-'}</div>
+            <div><strong>Condition:</strong> <span class="cond-badge" style="background:${COND_COLORS[a.condition]}22;color:${COND_COLORS[a.condition]}">${a.condition}</span></div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-bottom:16px">Financial</h3>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div><strong>Purchase Date:</strong> ${a.purchase_date || '-'}</div>
+            <div><strong>Purchase Price:</strong> $${(a.purchase_price || 0).toLocaleString()}</div>
+            <div><strong>Current Value:</strong> <span style="color:#22c55e;font-weight:600">$${Math.round(d.current).toLocaleString()}</span></div>
+            <div><strong>Depreciation:</strong> $${Math.round(d.acc).toLocaleString()}</div>
+            <div><strong>Method:</strong> ${(a.depreciation_method || 'straight_line').replace('_', ' ')}</div>
+            <div><strong>Useful Life:</strong> ${a.useful_life} years</div>
+            <div><strong>Salvage Value:</strong> $${(a.salvage_value || 0).toLocaleString()}</div>
+            <div><strong>Warranty:</strong> ${a.warranty_expiry || '-'}</div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-bottom:16px">Maintenance History</h3>
+          <table><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Cost</th></tr></thead>
+          <tbody>${maint.map(m => `<tr><td>${m.performed_date}</td><td>${m.type}</td><td>${m.description}</td><td>$${m.cost || 0}</td></tr>`).join('') || '<tr><td colspan="4" style="text-align:center;color:#64748b">No maintenance records</td></tr>'}</tbody></table>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h4 style="margin-bottom:12px">QR Code</h4>
+          <img src="${qr}" alt="QR Code" style="width:100%;max-width:150px">
+          <p style="font-size:12px;color:#64748b;margin-top:8px">${a.asset_tag}</p>
+          <button class="btn btn-sm" style="margin-top:8px" onclick="window.open('${qr}')">Download</button>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h4 style="margin-bottom:12px">Checkout History</h4>
+          ${checks.map(c => `<div style="padding:8px 0;border-bottom:1px solid #e2e8f0;font-size:13px"><strong>${c.checked_out_to}</strong><div style="color:#64748b">${c.checkout_date} ${c.returned ? '- Returned' : ''}</div></div>`).join('') || '<p style="color:#64748b;font-size:13px">No checkouts</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderMaintenance() {
+  return `
+    <div class="header"><h1 class="title">Maintenance</h1><button class="btn btn-primary" onclick="openMaintenanceModal()">+ Log Maintenance</button></div>
+    <div class="card">
+      <table><thead><tr><th>Date</th><th>Asset</th><th>Type</th><th>Description</th><th>Cost</th><th>Next Due</th></tr></thead>
+      <tbody>${state.maintenance.map(m => {
+        const a = getAsset(m.asset_id);
+        return `<tr><td>${m.performed_date}</td><td><strong>${a?.asset_tag}</strong> - ${a?.name}</td><td>${m.type}</td><td>${m.description}</td><td>$${m.cost || 0}</td><td>${m.next_due || '-'}</td></tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderCheckouts() {
+  return `
+    <div class="header"><h1 class="title">Checkouts</h1><button class="btn btn-primary" onclick="openCheckoutModal()">+ Check Out</button></div>
+    <div class="card">
+      <table><thead><tr><th>Asset</th><th>Checked Out To</th><th>Date</th><th>Expected Return</th><th>Status</th><th>Actions</th></tr></thead>
+      <tbody>${state.checkouts.map(c => {
+        const a = getAsset(c.asset_id);
+        return `<tr><td><strong>${a?.asset_tag}</strong></td><td>${c.checked_out_to}</td><td>${c.checkout_date}</td><td>${c.expected_return || '-'}</td><td>${c.returned ? '<span style="color:#22c55e">Returned</span>' : '<span style="color:#f59e0b">Out</span>'}</td><td>${!c.returned ? `<button class="btn btn-sm" onclick="returnAsset(${c.id})">Return</button>` : ''}</td></tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderLocations() {
+  return `
+    <div class="header"><h1 class="title">Locations</h1><button class="btn btn-primary" onclick="openLocationModal()">+ Add Location</button></div>
+    <div class="grid">
+      ${state.locations.map(l => `<div class="card"><h3>${l.name}</h3>${l.building ? `<p>Building: ${l.building}</p>` : ''}${l.floor ? `<p>Floor: ${l.floor}</p>` : ''}<p style="margin-top:8px;color:#64748b">${state.assets.filter(a => a.location_id === l.id).length} assets</p></div>`).join('')}
+    </div>
+  `;
+}
+
+function selectAsset(id) { state.selectedAsset = getAsset(id); render(); }
+
+function openModal(title, content) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalContent').innerHTML = content; document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function openAssetModal(id) {
+  const a = id ? getAsset(id) : {};
+  openModal(id ? 'Edit Asset' : 'Add Asset', `
+    <form onsubmit="saveAsset(event, ${id || 'null'})">
+      <div class="field"><label>Name</label><input name="name" value="${a.name || ''}" required></div>
+      <div class="row"><div class="field"><label>Category</label><select name="category_id">${state.categories.map(c => `<option value="${c.id}" ${a.category_id === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div><div class="field"><label>Location</label><select name="location_id">${state.locations.map(l => `<option value="${l.id}" ${a.location_id === l.id ? 'selected' : ''}>${l.name}</option>`).join('')}</select></div></div>
+      <div class="row"><div class="field"><label>Status</label><select name="status">${STATUSES.map(s => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}</select></div><div class="field"><label>Condition</label><select name="condition">${CONDITIONS.map(c => `<option value="${c}" ${a.condition === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div></div>
+      <div class="row"><div class="field"><label>Serial Number</label><input name="serial_number" value="${a.serial_number || ''}"></div><div class="field"><label>Model</label><input name="model" value="${a.model || ''}"></div></div>
+      <div class="row"><div class="field"><label>Manufacturer</label><input name="manufacturer" value="${a.manufacturer || ''}"></div><div class="field"><label>Warranty Expiry</label><input type="date" name="warranty_expiry" value="${a.warranty_expiry || ''}"></div></div>
+      <div class="row"><div class="field"><label>Purchase Date</label><input type="date" name="purchase_date" value="${a.purchase_date || ''}"></div><div class="field"><label>Purchase Price</label><input type="number" step="0.01" name="purchase_price" value="${a.purchase_price || ''}"></div></div>
+      <div class="row"><div class="field"><label>Useful Life (years)</label><input type="number" name="useful_life" value="${a.useful_life || 5}"></div><div class="field"><label>Salvage Value</label><input type="number" step="0.01" name="salvage_value" value="${a.salvage_value || 0}"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveAsset(e, id) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, category_id: parseInt(f.category_id.value), location_id: parseInt(f.location_id.value), status: f.status.value, condition: f.condition.value, serial_number: f.serial_number.value, model: f.model.value, manufacturer: f.manufacturer.value, warranty_expiry: f.warranty_expiry.value, purchase_date: f.purchase_date.value, purchase_price: parseFloat(f.purchase_price.value) || 0, useful_life: parseInt(f.useful_life.value) || 5, salvage_value: parseFloat(f.salvage_value.value) || 0, depreciation_method: 'straight_line' };
+  if (id) {
+    const idx = state.assets.findIndex(a => a.id === id);
+    state.assets[idx] = { ...state.assets[idx], ...data };
+    if (state.selectedAsset?.id === id) state.selectedAsset = state.assets[idx];
+  } else {
+    data.id = Math.max(0, ...state.assets.map(a => a.id)) + 1;
+    data.asset_tag = 'AST-' + String(data.id).padStart(6, '0');
+    state.assets.push(data);
+  }
+  saveData(); closeModal(); render(); toast('Asset saved');
+}
+
+function openMaintenanceModal(assetId) {
+  openModal('Log Maintenance', `
+    <form onsubmit="saveMaintenance(event)">
+      <div class="field"><label>Asset</label><select name="asset_id">${state.assets.map(a => `<option value="${a.id}" ${a.id === assetId ? 'selected' : ''}>${a.asset_tag} - ${a.name}</option>`).join('')}</select></div>
+      <div class="row"><div class="field"><label>Type</label><select name="type"><option value="preventive">Preventive</option><option value="repair">Repair</option><option value="inspection">Inspection</option><option value="upgrade">Upgrade</option></select></div><div class="field"><label>Date</label><input type="date" name="performed_date" value="${new Date().toISOString().split('T')[0]}" required></div></div>
+      <div class="field"><label>Description</label><textarea name="description"></textarea></div>
+      <div class="row"><div class="field"><label>Performed By</label><input name="performed_by"></div><div class="field"><label>Cost</label><input type="number" step="0.01" name="cost"></div></div>
+      <div class="field"><label>Next Due Date</label><input type="date" name="next_due"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveMaintenance(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.maintenance.unshift({ id: Date.now(), asset_id: parseInt(f.asset_id.value), type: f.type.value, description: f.description.value, performed_by: f.performed_by.value, performed_date: f.performed_date.value, cost: parseFloat(f.cost.value) || 0, next_due: f.next_due.value });
+  saveData(); closeModal(); render(); toast('Maintenance logged');
+}
+
+function openCheckoutModal(assetId) {
+  openModal('Check Out Asset', `
+    <form onsubmit="saveCheckout(event)">
+      <div class="field"><label>Asset</label><select name="asset_id">${state.assets.filter(a => a.status === 'active').map(a => `<option value="${a.id}" ${a.id === assetId ? 'selected' : ''}>${a.asset_tag} - ${a.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Check Out To</label><input name="checked_out_to" required></div>
+      <div class="row"><div class="field"><label>Expected Return</label><input type="date" name="expected_return"></div><div class="field"><label>Condition</label><select name="condition_out">${CONDITIONS.map(c => `<option value="${c}">${c}</option>`).join('')}</select></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Check Out</button></div>
+    </form>
+  `);
+}
+
+function saveCheckout(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.checkouts.unshift({ id: Date.now(), asset_id: parseInt(f.asset_id.value), checked_out_to: f.checked_out_to.value, checkout_date: new Date().toISOString().split('T')[0], expected_return: f.expected_return.value, condition_out: f.condition_out.value, returned: false });
+  saveData(); closeModal(); render(); toast('Asset checked out');
+}
+
+function returnAsset(id) {
+  const idx = state.checkouts.findIndex(c => c.id === id);
+  state.checkouts[idx].returned = true;
+  state.checkouts[idx].return_date = new Date().toISOString().split('T')[0];
+  saveData(); render(); toast('Asset returned');
+}
+
+function openLocationModal() {
+  openModal('Add Location', `
+    <form onsubmit="saveLocation(event)">
+      <div class="field"><label>Name</label><input name="name" required></div>
+      <div class="row"><div class="field"><label>Building</label><input name="building"></div><div class="field"><label>Floor</label><input name="floor"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveLocation(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.locations.push({ id: Math.max(0, ...state.locations.map(l => l.id)) + 1, name: f.name.value, building: f.building.value, floor: f.floor.value });
+  saveData(); closeModal(); render(); toast('Location added');
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
