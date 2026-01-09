@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComplianceHQ - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --primary-light: #f5f3ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 2rem; font-weight: 700; }
+    .stat-value.green { color: var(--success); }
+    .stat-value.red { color: var(--danger); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.purple { color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-group { display: flex; align-items: center; gap: 0.5rem; }
+    .filter-group label { font-size: 0.875rem; color: var(--gray-600); }
+    
+    .filter-select {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    
+    th, td {
+      padding: 0.75rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    th {
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      color: var(--gray-500);
+      background: var(--gray-50);
+    }
+    
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.625rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.compliant { background: #dcfce7; color: #166534; }
+    .status-badge.expiring { background: #fef3c7; color: #92400e; }
+    .status-badge.expired { background: #fee2e2; color: #991b1b; }
+    .status-badge.pending { background: #dbeafe; color: #1e40af; }
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.inactive { background: var(--gray-200); color: var(--gray-600); }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    
+    .progress-fill.green { background: var(--success); }
+    .progress-fill.yellow { background: var(--warning); }
+    .progress-fill.red { background: var(--danger); }
+    
+    .grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .grid-item {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .grid-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    
+    .grid-item-title { font-weight: 600; }
+    .grid-item-subtitle { font-size: 0.875rem; color: var(--gray-500); }
+    .grid-item-actions { display: flex; gap: 0.25rem; margin-top: 0.75rem; }
+    
+    .employee-compliance {
+      margin-top: 0.75rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--gray-200);
+    }
+    
+    .compliance-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      padding: 0.25rem 0;
+    }
+    
+    .alert-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    
+    .alert-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      background: var(--gray-50);
+      border-left: 4px solid var(--danger);
+    }
+    
+    .alert-item.warning { border-left-color: var(--warning); }
+    .alert-item-icon { font-size: 1.5rem; }
+    .alert-item-content { flex: 1; }
+    .alert-item-title { font-weight: 600; }
+    .alert-item-desc { font-size: 0.875rem; color: var(--gray-600); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-check { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .form-check input { width: auto; }
+    
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2000;
+    }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .hidden { display: none !important; }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      table { font-size: 0.875rem; }
+      th, td { padding: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🛡️ ComplianceHQ</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="requirements">Requirements</div>
+    <div class="nav-tab" data-tab="employees">Employees</div>
+    <div class="nav-tab" data-tab="records">Records</div>
+    <div class="nav-tab" data-tab="audits">Audits</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-compliant">0</div>
+          <div class="stat-label">Compliant</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-expiring">0</div>
+          <div class="stat-label">Expiring Soon</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value red" id="stat-expired">0</div>
+          <div class="stat-label">Expired/Missing</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value purple" id="stat-compliance-rate">0%</div>
+          <div class="stat-label">Compliance Rate</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Export Reports</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+          <button class="btn btn-primary" onclick="exportComplianceReport()">📋 Full Compliance Report</button>
+          <button class="btn btn-secondary" onclick="exportExpiringReport()">⚠️ Expiring/Expired Items</button>
+          <button class="btn btn-secondary" onclick="exportEmployeeReport()">👥 Employee Summary</button>
+          <button class="btn btn-secondary" onclick="exportRequirementsReport()">📑 Requirements List</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">⚠️ Alerts & Action Items</h2>
+        </div>
+        <div class="alert-list" id="alerts-list"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Compliance by Requirement</h2>
+        </div>
+        <div id="compliance-by-req"></div>
+      </div>
+    </div>
+    
+    <!-- Requirements -->
+    <div class="tab-content" id="tab-requirements">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Compliance Requirements</h2>
+          <button class="btn btn-primary" onclick="openRequirementModal()">+ Add Requirement</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Requirement</th>
+              <th>Category</th>
+              <th>Renewal</th>
+              <th>Applies To</th>
+              <th>Compliance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requirements-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Employees -->
+    <div class="tab-content" id="tab-employees">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Employees</h2>
+          <button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button>
+        </div>
+        <div class="grid-list" id="employees-list"></div>
+      </div>
+    </div>
+    
+    <!-- Records -->
+    <div class="tab-content" id="tab-records">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Compliance Records</h2>
+          <button class="btn btn-primary" onclick="openRecordModal()">+ Add Record</button>
+        </div>
+        <div class="filters">
+          <div class="filter-group">
+            <label>Employee:</label>
+            <select class="filter-select" id="filter-employee" onchange="renderRecords()">
+              <option value="">All Employees</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Requirement:</label>
+            <select class="filter-select" id="filter-requirement" onchange="renderRecords()">
+              <option value="">All Requirements</option>
+            </select>
+          </div>
+          <div class="filter-group">
+            <label>Status:</label>
+            <select class="filter-select" id="filter-status" onchange="renderRecords()">
+              <option value="">All Statuses</option>
+              <option value="compliant">Compliant</option>
+              <option value="expiring">Expiring Soon</option>
+              <option value="expired">Expired</option>
+            </select>
+          </div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Requirement</th>
+              <th>Completed</th>
+              <th>Expires</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="records-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Audits -->
+    <div class="tab-content" id="tab-audits">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Audit Log</h2>
+          <button class="btn btn-secondary" onclick="exportAuditLog()">Export CSV</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Action</th>
+              <th>Details</th>
+              <th>User</th>
+            </tr>
+          </thead>
+          <tbody id="audits-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Requirement Modal -->
+  <div class="modal-overlay" id="requirement-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="req-modal-title">Add Requirement</h3>
+        <button class="modal-close" onclick="closeModal('requirement-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="req-id">
+        <div class="form-group">
+          <label class="form-label">Requirement Name *</label>
+          <input type="text" class="form-input" id="req-name" placeholder="e.g., CPR Certification">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="req-category">
+              <option value="certification">Certification</option>
+              <option value="license">License</option>
+              <option value="training">Training</option>
+              <option value="background">Background Check</option>
+              <option value="health">Health & Safety</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Renewal Period</label>
+            <select class="form-input" id="req-renewal">
+              <option value="0">One-time</option>
+              <option value="12">Annual (12 months)</option>
+              <option value="24">Biennial (24 months)</option>
+              <option value="36">Triennial (36 months)</option>
+              <option value="6">Semi-annual (6 months)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Applies To</label>
+          <select class="form-input" id="req-applies">
+            <option value="all">All Employees</option>
+            <option value="role">Specific Roles</option>
+          </select>
+        </div>
+        <div class="form-group" id="req-roles-group" style="display:none;">
+          <label class="form-label">Select Roles</label>
+          <div id="req-roles-checkboxes"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="req-description" rows="2" placeholder="Additional details..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('requirement-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRequirement()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Employee Modal -->
+  <div class="modal-overlay" id="employee-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="emp-modal-title">Add Employee</h3>
+        <button class="modal-close" onclick="closeModal('employee-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="emp-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="emp-name" placeholder="e.g., John Smith">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role *</label>
+            <input type="text" class="form-input" id="emp-role" placeholder="e.g., Nurse">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" class="form-input" id="emp-department" placeholder="e.g., Emergency">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="emp-email" placeholder="john@example.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Start Date</label>
+          <input type="date" class="form-input" id="emp-start">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="emp-status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="emp-delete-btn" onclick="deleteEmployee()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('employee-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEmployee()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Record Modal -->
+  <div class="modal-overlay" id="record-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="rec-modal-title">Add Compliance Record</h3>
+        <button class="modal-close" onclick="closeModal('record-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="rec-id">
+        <div class="form-group">
+          <label class="form-label">Employee *</label>
+          <select class="form-input" id="rec-employee"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Requirement *</label>
+          <select class="form-input" id="rec-requirement" onchange="updateRecExpiry()"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date Completed *</label>
+            <input type="date" class="form-input" id="rec-completed">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expiration Date</label>
+            <input type="date" class="form-input" id="rec-expires">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Certificate/Document #</label>
+          <input type="text" class="form-input" id="rec-docnum" placeholder="Optional reference number">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="rec-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="rec-delete-btn" onclick="deleteRecord()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('record-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRecord()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let requirements = [], employees = [], records = [], audits = [];
+    const ROLES = ['Manager', 'Nurse', 'Technician', 'Driver', 'Staff', 'Supervisor'];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        requirements: localStorage.getItem('chq_requirements'),
+        employees: localStorage.getItem('chq_employees'),
+        records: localStorage.getItem('chq_records'),
+        audits: localStorage.getItem('chq_audits')
+      };
+      
+      requirements = saved.requirements ? JSON.parse(saved.requirements) : [
+        { id: 1, name: 'CPR Certification', category: 'certification', renewal: 24, applies: 'all', roles: [], description: 'Basic Life Support certification' },
+        { id: 2, name: 'HIPAA Training', category: 'training', renewal: 12, applies: 'all', roles: [], description: 'Annual privacy training' },
+        { id: 3, name: 'Background Check', category: 'background', renewal: 0, applies: 'all', roles: [], description: 'Initial background screening' },
+        { id: 4, name: 'Driver License', category: 'license', renewal: 48, applies: 'role', roles: ['Driver'], description: 'Valid commercial driver license' },
+        { id: 5, name: 'Safety Training', category: 'training', renewal: 12, applies: 'all', roles: [], description: 'Workplace safety certification' },
+      ];
+      
+      const today = new Date();
+      const monthAgo = new Date(today); monthAgo.setMonth(monthAgo.getMonth() - 1);
+      const yearAgo = new Date(today); yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+      
+      employees = saved.employees ? JSON.parse(saved.employees) : [
+        { id: 1, name: 'Sarah Johnson', role: 'Nurse', department: 'Emergency', email: 'sarah@example.com', start: '2022-03-15', status: 'active' },
+        { id: 2, name: 'Mike Chen', role: 'Driver', department: 'Transport', email: 'mike@example.com', start: '2021-06-01', status: 'active' },
+        { id: 3, name: 'Lisa Park', role: 'Technician', department: 'Lab', email: 'lisa@example.com', start: '2023-01-10', status: 'active' },
+        { id: 4, name: 'James Wilson', role: 'Manager', department: 'Admin', email: 'james@example.com', start: '2020-09-20', status: 'active' },
+      ];
+      
+      records = saved.records ? JSON.parse(saved.records) : [
+        { id: 1, employeeId: 1, requirementId: 1, completed: '2024-01-15', expires: '2026-01-15', docNum: 'CPR-2024-001', notes: '' },
+        { id: 2, employeeId: 1, requirementId: 2, completed: '2024-06-01', expires: '2025-06-01', docNum: '', notes: '' },
+        { id: 3, employeeId: 1, requirementId: 3, completed: '2022-03-10', expires: null, docNum: 'BG-22-1001', notes: '' },
+        { id: 4, employeeId: 2, requirementId: 1, completed: '2023-08-20', expires: '2025-08-20', docNum: 'CPR-2023-088', notes: '' },
+        { id: 5, employeeId: 2, requirementId: 4, completed: '2023-01-05', expires: '2027-01-05', docNum: 'DL-445566', notes: '' },
+        { id: 6, employeeId: 3, requirementId: 1, completed: '2024-11-01', expires: '2026-11-01', docNum: 'CPR-2024-112', notes: '' },
+        { id: 7, employeeId: 4, requirementId: 2, completed: '2024-03-15', expires: '2025-03-15', docNum: '', notes: '' },
+        { id: 8, employeeId: 2, requirementId: 5, completed: '2024-02-01', expires: '2025-02-01', docNum: 'ST-2024-22', notes: '' },
+      ];
+      
+      audits = saved.audits ? JSON.parse(saved.audits) : [
+        { id: 1, date: new Date().toISOString(), action: 'System', details: 'Demo data loaded', user: 'System' }
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('chq_requirements', JSON.stringify(requirements));
+      localStorage.setItem('chq_employees', JSON.stringify(employees));
+      localStorage.setItem('chq_records', JSON.stringify(records));
+      localStorage.setItem('chq_audits', JSON.stringify(audits));
+    }
+    
+    function addAudit(action, details) {
+      audits.unshift({ id: Date.now(), date: new Date().toISOString(), action, details, user: 'Admin' });
+      saveData();
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderRequirements();
+      renderEmployees();
+      renderRecords();
+      renderAudits();
+      updateFilters();
+    }
+    
+    // Calculate compliance status for a record
+    function getRecordStatus(record) {
+      if (!record.expires) return 'compliant';
+      const today = new Date();
+      const expires = new Date(record.expires);
+      const daysUntil = Math.ceil((expires - today) / (1000 * 60 * 60 * 24));
+      if (daysUntil < 0) return 'expired';
+      if (daysUntil <= 30) return 'expiring';
+      return 'compliant';
+    }
+    
+    // Get applicable requirements for an employee
+    function getApplicableRequirements(employee) {
+      return requirements.filter(r => {
+        if (r.applies === 'all') return true;
+        return r.roles.includes(employee.role);
+      });
+    }
+    
+    // Get compliance status for an employee and requirement
+    function getEmployeeReqStatus(employee, requirement) {
+      const rec = records.find(r => r.employeeId === employee.id && r.requirementId === requirement.id);
+      if (!rec) return 'expired'; // Missing = expired
+      return getRecordStatus(rec);
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      let compliant = 0, expiring = 0, expired = 0, total = 0;
+      const alerts = [];
+      const reqStats = {};
+      
+      employees.filter(e => e.status === 'active').forEach(emp => {
+        const applicable = getApplicableRequirements(emp);
+        applicable.forEach(req => {
+          total++;
+          if (!reqStats[req.id]) reqStats[req.id] = { compliant: 0, expiring: 0, expired: 0, total: 0 };
+          reqStats[req.id].total++;
+          
+          const status = getEmployeeReqStatus(emp, req);
+          if (status === 'compliant') { compliant++; reqStats[req.id].compliant++; }
+          else if (status === 'expiring') {
+            expiring++;
+            reqStats[req.id].expiring++;
+            const rec = records.find(r => r.employeeId === emp.id && r.requirementId === req.id);
+            const days = Math.ceil((new Date(rec.expires) - new Date()) / (1000*60*60*24));
+            alerts.push({ type: 'warning', title: `${req.name} expiring`, desc: `${emp.name} - expires in ${days} days`, empId: emp.id, reqId: req.id });
+          } else {
+            expired++;
+            reqStats[req.id].expired++;
+            alerts.push({ type: 'danger', title: `${req.name} expired/missing`, desc: emp.name, empId: emp.id, reqId: req.id });
+          }
+        });
+      });
+      
+      document.getElementById('stat-compliant').textContent = compliant;
+      document.getElementById('stat-expiring').textContent = expiring;
+      document.getElementById('stat-expired').textContent = expired;
+      document.getElementById('stat-compliance-rate').textContent = total ? Math.round(compliant / total * 100) + '%' : '0%';
+      
+      // Alerts
+      const alertsList = document.getElementById('alerts-list');
+      if (alerts.length === 0) {
+        alertsList.innerHTML = '<div class="empty-state"><div class="empty-state-icon">✅</div><p>No alerts - all employees are compliant!</p></div>';
+      } else {
+        alertsList.innerHTML = alerts.slice(0, 10).map(a => `
+          <div class="alert-item${a.type === 'warning' ? ' warning' : ''}">
+            <span class="alert-item-icon">${a.type === 'warning' ? '⚠️' : '🚨'}</span>
+            <div class="alert-item-content">
+              <div class="alert-item-title">${a.title}</div>
+              <div class="alert-item-desc">${a.desc}</div>
+            </div>
+            <button class="btn btn-sm btn-primary" onclick="openRecordModalFor(${a.empId}, ${a.reqId})">Update</button>
+          </div>
+        `).join('');
+      }
+      
+      // Compliance by requirement
+      const reqContainer = document.getElementById('compliance-by-req');
+      reqContainer.innerHTML = requirements.map(req => {
+        const stats = reqStats[req.id] || { compliant: 0, total: 0 };
+        const pct = stats.total ? Math.round(stats.compliant / stats.total * 100) : 100;
+        const color = pct >= 90 ? 'green' : pct >= 70 ? 'yellow' : 'red';
+        return `<div style="margin-bottom: 1rem;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 0.25rem;">
+            <span>${req.name}</span>
+            <span style="font-weight: 600;">${pct}% (${stats.compliant}/${stats.total})</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill ${color}" style="width: ${pct}%"></div></div>
+        </div>`;
+      }).join('');
+    }
+    
+    // Requirements
+    function renderRequirements() {
+      const tbody = document.getElementById('requirements-table');
+      tbody.innerHTML = requirements.map(req => {
+        const applicable = employees.filter(e => e.status === 'active' && (req.applies === 'all' || req.roles.includes(e.role)));
+        const compliantCount = applicable.filter(e => getEmployeeReqStatus(e, req) === 'compliant').length;
+        const pct = applicable.length ? Math.round(compliantCount / applicable.length * 100) : 100;
+        
+        return `<tr>
+          <td><strong>${req.name}</strong><br><small style="color:var(--gray-500)">${req.description || ''}</small></td>
+          <td><span class="status-badge">${req.category}</span></td>
+          <td>${req.renewal ? req.renewal + ' months' : 'One-time'}</td>
+          <td>${req.applies === 'all' ? 'All Employees' : req.roles.join(', ')}</td>
+          <td>
+            <div style="width:100px">
+              <div style="font-size:0.75rem;margin-bottom:0.25rem">${pct}%</div>
+              <div class="progress-bar"><div class="progress-fill ${pct >= 90 ? 'green' : pct >= 70 ? 'yellow' : 'red'}" style="width:${pct}%"></div></div>
+            </div>
+          </td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editRequirement(${req.id})">Edit</button>
+            <button class="btn btn-sm btn-danger" onclick="deleteRequirement(${req.id})">Delete</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openRequirementModal(id = null) {
+      document.getElementById('req-applies').onchange = function() {
+        document.getElementById('req-roles-group').style.display = this.value === 'role' ? 'block' : 'none';
+      };
+      document.getElementById('req-roles-checkboxes').innerHTML = ROLES.map(r => 
+        `<div class="form-check"><input type="checkbox" id="role-${r}" value="${r}"><label for="role-${r}">${r}</label></div>`
+      ).join('');
+      
+      if (id) {
+        const req = requirements.find(r => r.id === id);
+        document.getElementById('req-modal-title').textContent = 'Edit Requirement';
+        document.getElementById('req-id').value = id;
+        document.getElementById('req-name').value = req.name;
+        document.getElementById('req-category').value = req.category;
+        document.getElementById('req-renewal').value = req.renewal;
+        document.getElementById('req-applies').value = req.applies;
+        document.getElementById('req-description').value = req.description || '';
+        document.getElementById('req-roles-group').style.display = req.applies === 'role' ? 'block' : 'none';
+        req.roles.forEach(r => { const cb = document.getElementById('role-' + r); if (cb) cb.checked = true; });
+      } else {
+        document.getElementById('req-modal-title').textContent = 'Add Requirement';
+        document.getElementById('req-id').value = '';
+        document.getElementById('req-name').value = '';
+        document.getElementById('req-category').value = 'certification';
+        document.getElementById('req-renewal').value = '12';
+        document.getElementById('req-applies').value = 'all';
+        document.getElementById('req-description').value = '';
+        document.getElementById('req-roles-group').style.display = 'none';
+      }
+      document.getElementById('requirement-modal').classList.add('active');
+    }
+    
+    function editRequirement(id) { openRequirementModal(id); }
+    
+    function saveRequirement() {
+      const id = document.getElementById('req-id').value;
+      const name = document.getElementById('req-name').value.trim();
+      const category = document.getElementById('req-category').value;
+      const renewal = parseInt(document.getElementById('req-renewal').value);
+      const applies = document.getElementById('req-applies').value;
+      const description = document.getElementById('req-description').value.trim();
+      const roles = applies === 'role' ? ROLES.filter(r => document.getElementById('role-' + r)?.checked) : [];
+      
+      if (!name) { showToast('Please enter requirement name', 'error'); return; }
+      
+      if (id) {
+        const i = requirements.findIndex(r => r.id === parseInt(id));
+        requirements[i] = { ...requirements[i], name, category, renewal, applies, roles, description };
+        addAudit('Updated', `Requirement: ${name}`);
+        showToast('Requirement updated');
+      } else {
+        requirements.push({ id: Math.max(0, ...requirements.map(r => r.id)) + 1, name, category, renewal, applies, roles, description });
+        addAudit('Created', `Requirement: ${name}`);
+        showToast('Requirement added');
+      }
+      saveData(); renderAll(); closeModal('requirement-modal');
+    }
+    
+    function deleteRequirement(id) {
+      const req = requirements.find(r => r.id === id);
+      if (!confirm(`Delete "${req.name}"? This will also delete all related records.`)) return;
+      requirements = requirements.filter(r => r.id !== id);
+      records = records.filter(r => r.requirementId !== id);
+      addAudit('Deleted', `Requirement: ${req.name}`);
+      saveData(); renderAll(); showToast('Requirement deleted');
+    }
+    
+    // Employees
+    function renderEmployees() {
+      const list = document.getElementById('employees-list');
+      if (!employees.length) {
+        list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No employees</p></div>';
+        return;
+      }
+      
+      list.innerHTML = employees.map(emp => {
+        const applicable = getApplicableRequirements(emp);
+        const complianceItems = applicable.map(req => {
+          const status = getEmployeeReqStatus(emp, req);
+          return { name: req.name, status };
+        });
+        
+        return `<div class="grid-item">
+          <div class="grid-item-header">
+            <div>
+              <div class="grid-item-title">${emp.name}</div>
+              <div class="grid-item-subtitle">${emp.role} • ${emp.department || 'No Dept'}</div>
+            </div>
+            <span class="status-badge ${emp.status}">${emp.status}</span>
+          </div>
+          <div style="font-size:0.875rem;color:var(--gray-600)">${emp.email || 'No email'}</div>
+          <div class="employee-compliance">
+            ${complianceItems.map(c => `<div class="compliance-row"><span>${c.name}</span><span class="status-badge ${c.status}">${c.status}</span></div>`).join('')}
+          </div>
+          <div class="grid-item-actions">
+            <button class="btn btn-sm btn-secondary" onclick="editEmployee(${emp.id})">Edit</button>
+            <button class="btn btn-sm btn-primary" onclick="openRecordModalForEmp(${emp.id})">Add Record</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    function openEmployeeModal(id = null) {
+      if (id) {
+        const emp = employees.find(e => e.id === id);
+        document.getElementById('emp-modal-title').textContent = 'Edit Employee';
+        document.getElementById('emp-id').value = id;
+        document.getElementById('emp-name').value = emp.name;
+        document.getElementById('emp-role').value = emp.role;
+        document.getElementById('emp-department').value = emp.department || '';
+        document.getElementById('emp-email').value = emp.email || '';
+        document.getElementById('emp-start').value = emp.start || '';
+        document.getElementById('emp-status').value = emp.status;
+        document.getElementById('emp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('emp-modal-title').textContent = 'Add Employee';
+        document.getElementById('emp-id').value = '';
+        document.getElementById('emp-name').value = '';
+        document.getElementById('emp-role').value = '';
+        document.getElementById('emp-department').value = '';
+        document.getElementById('emp-email').value = '';
+        document.getElementById('emp-start').value = '';
+        document.getElementById('emp-status').value = 'active';
+        document.getElementById('emp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('employee-modal').classList.add('active');
+    }
+    
+    function editEmployee(id) { openEmployeeModal(id); }
+    
+    function saveEmployee() {
+      const id = document.getElementById('emp-id').value;
+      const name = document.getElementById('emp-name').value.trim();
+      const role = document.getElementById('emp-role').value.trim();
+      const department = document.getElementById('emp-department').value.trim();
+      const email = document.getElementById('emp-email').value.trim();
+      const start = document.getElementById('emp-start').value;
+      const status = document.getElementById('emp-status').value;
+      
+      if (!name || !role) { showToast('Please enter name and role', 'error'); return; }
+      
+      if (id) {
+        const i = employees.findIndex(e => e.id === parseInt(id));
+        employees[i] = { ...employees[i], name, role, department, email, start, status };
+        addAudit('Updated', `Employee: ${name}`);
+        showToast('Employee updated');
+      } else {
+        employees.push({ id: Math.max(0, ...employees.map(e => e.id)) + 1, name, role, department, email, start, status });
+        addAudit('Created', `Employee: ${name}`);
+        showToast('Employee added');
+      }
+      saveData(); renderAll(); closeModal('employee-modal');
+    }
+    
+    function deleteEmployee() {
+      const id = parseInt(document.getElementById('emp-id').value);
+      const emp = employees.find(e => e.id === id);
+      if (!confirm(`Delete "${emp.name}"? This will also delete their compliance records.`)) return;
+      employees = employees.filter(e => e.id !== id);
+      records = records.filter(r => r.employeeId !== id);
+      addAudit('Deleted', `Employee: ${emp.name}`);
+      saveData(); renderAll(); closeModal('employee-modal'); showToast('Employee deleted');
+    }
+    
+    // Records
+    function updateFilters() {
+      document.getElementById('filter-employee').innerHTML = '<option value="">All Employees</option>' + 
+        employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('filter-requirement').innerHTML = '<option value="">All Requirements</option>' + 
+        requirements.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+    }
+    
+    function renderRecords() {
+      const tbody = document.getElementById('records-table');
+      const filterEmp = document.getElementById('filter-employee').value;
+      const filterReq = document.getElementById('filter-requirement').value;
+      const filterStatus = document.getElementById('filter-status').value;
+      
+      let filtered = records;
+      if (filterEmp) filtered = filtered.filter(r => r.employeeId === parseInt(filterEmp));
+      if (filterReq) filtered = filtered.filter(r => r.requirementId === parseInt(filterReq));
+      if (filterStatus) filtered = filtered.filter(r => getRecordStatus(r) === filterStatus);
+      
+      filtered.sort((a, b) => new Date(b.completed) - new Date(a.completed));
+      
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty-state">No records found</td></tr>';
+        return;
+      }
+      
+      tbody.innerHTML = filtered.map(rec => {
+        const emp = employees.find(e => e.id === rec.employeeId);
+        const req = requirements.find(r => r.id === rec.requirementId);
+        const status = getRecordStatus(rec);
+        return `<tr>
+          <td>${emp ? emp.name : 'Unknown'}</td>
+          <td>${req ? req.name : 'Unknown'}</td>
+          <td>${formatDate(rec.completed)}</td>
+          <td>${rec.expires ? formatDate(rec.expires) : 'N/A'}</td>
+          <td><span class="status-badge ${status}">${status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editRecord(${rec.id})">Edit</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openRecordModal(id = null) {
+      document.getElementById('rec-employee').innerHTML = '<option value="">Select Employee</option>' +
+        employees.filter(e => e.status === 'active').map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('rec-requirement').innerHTML = '<option value="">Select Requirement</option>' +
+        requirements.map(r => `<option value="${r.id}">${r.name}</option>`).join('');
+      
+      if (id) {
+        const rec = records.find(r => r.id === id);
+        document.getElementById('rec-modal-title').textContent = 'Edit Record';
+        document.getElementById('rec-id').value = id;
+        document.getElementById('rec-employee').value = rec.employeeId;
+        document.getElementById('rec-requirement').value = rec.requirementId;
+        document.getElementById('rec-completed').value = rec.completed;
+        document.getElementById('rec-expires').value = rec.expires || '';
+        document.getElementById('rec-docnum').value = rec.docNum || '';
+        document.getElementById('rec-notes').value = rec.notes || '';
+        document.getElementById('rec-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('rec-modal-title').textContent = 'Add Record';
+        document.getElementById('rec-id').value = '';
+        document.getElementById('rec-employee').value = '';
+        document.getElementById('rec-requirement').value = '';
+        document.getElementById('rec-completed').value = new Date().toISOString().split('T')[0];
+        document.getElementById('rec-expires').value = '';
+        document.getElementById('rec-docnum').value = '';
+        document.getElementById('rec-notes').value = '';
+        document.getElementById('rec-delete-btn').style.display = 'none';
+      }
+      document.getElementById('record-modal').classList.add('active');
+    }
+    
+    function openRecordModalFor(empId, reqId) {
+      openRecordModal();
+      document.getElementById('rec-employee').value = empId;
+      document.getElementById('rec-requirement').value = reqId;
+      updateRecExpiry();
+    }
+    
+    function openRecordModalForEmp(empId) {
+      openRecordModal();
+      document.getElementById('rec-employee').value = empId;
+    }
+    
+    function updateRecExpiry() {
+      const reqId = parseInt(document.getElementById('rec-requirement').value);
+      const completed = document.getElementById('rec-completed').value;
+      const req = requirements.find(r => r.id === reqId);
+      
+      if (req && req.renewal > 0 && completed) {
+        const expDate = new Date(completed);
+        expDate.setMonth(expDate.getMonth() + req.renewal);
+        document.getElementById('rec-expires').value = expDate.toISOString().split('T')[0];
+      }
+    }
+    
+    document.getElementById('rec-completed').addEventListener('change', updateRecExpiry);
+    
+    function editRecord(id) { openRecordModal(id); }
+    
+    function saveRecord() {
+      const id = document.getElementById('rec-id').value;
+      const employeeId = parseInt(document.getElementById('rec-employee').value);
+      const requirementId = parseInt(document.getElementById('rec-requirement').value);
+      const completed = document.getElementById('rec-completed').value;
+      const expires = document.getElementById('rec-expires').value || null;
+      const docNum = document.getElementById('rec-docnum').value.trim();
+      const notes = document.getElementById('rec-notes').value.trim();
+      
+      if (!employeeId || !requirementId || !completed) { showToast('Please fill required fields', 'error'); return; }
+      
+      const emp = employees.find(e => e.id === employeeId);
+      const req = requirements.find(r => r.id === requirementId);
+      
+      if (id) {
+        const i = records.findIndex(r => r.id === parseInt(id));
+        records[i] = { ...records[i], employeeId, requirementId, completed, expires, docNum, notes };
+        addAudit('Updated', `Record: ${emp.name} - ${req.name}`);
+        showToast('Record updated');
+      } else {
+        // Check for existing record
+        const existing = records.find(r => r.employeeId === employeeId && r.requirementId === requirementId);
+        if (existing) {
+          if (!confirm('A record already exists for this employee/requirement. Replace it?')) return;
+          records = records.filter(r => r.id !== existing.id);
+        }
+        records.push({ id: Math.max(0, ...records.map(r => r.id)) + 1, employeeId, requirementId, completed, expires, docNum, notes });
+        addAudit('Created', `Record: ${emp.name} - ${req.name}`);
+        showToast('Record added');
+      }
+      saveData(); renderAll(); closeModal('record-modal');
+    }
+    
+    function deleteRecord() {
+      const id = parseInt(document.getElementById('rec-id').value);
+      if (!confirm('Delete this record?')) return;
+      const rec = records.find(r => r.id === id);
+      const emp = employees.find(e => e.id === rec.employeeId);
+      const req = requirements.find(r => r.id === rec.requirementId);
+      records = records.filter(r => r.id !== id);
+      addAudit('Deleted', `Record: ${emp?.name} - ${req?.name}`);
+      saveData(); renderAll(); closeModal('record-modal'); showToast('Record deleted');
+    }
+    
+    // Audits
+    function renderAudits() {
+      const tbody = document.getElementById('audits-table');
+      tbody.innerHTML = audits.slice(0, 50).map(a => `<tr>
+        <td>${formatDateTime(a.date)}</td>
+        <td>${a.action}</td>
+        <td>${a.details}</td>
+        <td>${a.user}</td>
+      </tr>`).join('');
+    }
+    
+    function exportAuditLog() {
+      const headers = ['Date', 'Action', 'Details', 'User'];
+      const rows = audits.map(a => [formatDateTime(a.date), a.action, a.details, a.user]);
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      downloadCSV(csv, 'audit-log.csv');
+      showToast('Audit log exported');
+    }
+    
+    function exportComplianceReport() {
+      const headers = ['Employee', 'Role', 'Department', 'Requirement', 'Category', 'Status', 'Completed', 'Expires', 'Document #'];
+      const rows = [];
+      
+      employees.filter(e => e.status === 'active').forEach(emp => {
+        const applicable = getApplicableRequirements(emp);
+        applicable.forEach(req => {
+          const rec = records.find(r => r.employeeId === emp.id && r.requirementId === req.id);
+          const status = getEmployeeReqStatus(emp, req);
+          rows.push([
+            emp.name,
+            emp.role,
+            emp.department || '',
+            req.name,
+            req.category,
+            status.toUpperCase(),
+            rec ? formatDate(rec.completed) : 'N/A',
+            rec && rec.expires ? formatDate(rec.expires) : 'N/A',
+            rec ? rec.docNum || '' : ''
+          ]);
+        });
+      });
+      
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      downloadCSV(csv, 'compliance-report-' + new Date().toISOString().split('T')[0] + '.csv');
+      showToast('Compliance report exported');
+      addAudit('Export', 'Full Compliance Report');
+    }
+    
+    function exportExpiringReport() {
+      const headers = ['Employee', 'Role', 'Requirement', 'Status', 'Expires', 'Days Until Expiry'];
+      const rows = [];
+      const today = new Date();
+      
+      employees.filter(e => e.status === 'active').forEach(emp => {
+        const applicable = getApplicableRequirements(emp);
+        applicable.forEach(req => {
+          const status = getEmployeeReqStatus(emp, req);
+          if (status === 'expiring' || status === 'expired') {
+            const rec = records.find(r => r.employeeId === emp.id && r.requirementId === req.id);
+            const days = rec && rec.expires ? Math.ceil((new Date(rec.expires) - today) / (1000*60*60*24)) : 'Missing';
+            rows.push([
+              emp.name,
+              emp.role,
+              req.name,
+              status.toUpperCase(),
+              rec && rec.expires ? formatDate(rec.expires) : 'N/A',
+              days
+            ]);
+          }
+        });
+      });
+      
+      rows.sort((a, b) => (typeof a[5] === 'number' ? a[5] : -9999) - (typeof b[5] === 'number' ? b[5] : -9999));
+      
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      downloadCSV(csv, 'expiring-items-' + new Date().toISOString().split('T')[0] + '.csv');
+      showToast('Expiring items report exported');
+      addAudit('Export', 'Expiring/Expired Items Report');
+    }
+    
+    function exportEmployeeReport() {
+      const headers = ['Employee', 'Role', 'Department', 'Email', 'Start Date', 'Status', 'Compliant', 'Expiring', 'Expired', 'Compliance Rate'];
+      const rows = employees.map(emp => {
+        const applicable = getApplicableRequirements(emp);
+        let compliant = 0, expiring = 0, expired = 0;
+        applicable.forEach(req => {
+          const status = getEmployeeReqStatus(emp, req);
+          if (status === 'compliant') compliant++;
+          else if (status === 'expiring') expiring++;
+          else expired++;
+        });
+        const rate = applicable.length ? Math.round(compliant / applicable.length * 100) + '%' : 'N/A';
+        return [emp.name, emp.role, emp.department || '', emp.email || '', emp.start || '', emp.status, compliant, expiring, expired, rate];
+      });
+      
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      downloadCSV(csv, 'employee-summary-' + new Date().toISOString().split('T')[0] + '.csv');
+      showToast('Employee summary exported');
+      addAudit('Export', 'Employee Summary Report');
+    }
+    
+    function exportRequirementsReport() {
+      const headers = ['Requirement', 'Category', 'Renewal Period', 'Applies To', 'Roles', 'Total Applicable', 'Compliant', 'Expiring', 'Expired', 'Compliance Rate'];
+      const rows = requirements.map(req => {
+        const applicable = employees.filter(e => e.status === 'active' && (req.applies === 'all' || req.roles.includes(e.role)));
+        let compliant = 0, expiring = 0, expired = 0;
+        applicable.forEach(emp => {
+          const status = getEmployeeReqStatus(emp, req);
+          if (status === 'compliant') compliant++;
+          else if (status === 'expiring') expiring++;
+          else expired++;
+        });
+        const rate = applicable.length ? Math.round(compliant / applicable.length * 100) + '%' : 'N/A';
+        return [
+          req.name,
+          req.category,
+          req.renewal ? req.renewal + ' months' : 'One-time',
+          req.applies === 'all' ? 'All Employees' : 'Specific Roles',
+          req.roles.join('; ') || 'All',
+          applicable.length,
+          compliant,
+          expiring,
+          expired,
+          rate
+        ];
+      });
+      
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      downloadCSV(csv, 'requirements-' + new Date().toISOString().split('T')[0] + '.csv');
+      showToast('Requirements report exported');
+      addAudit('Export', 'Requirements List Report');
+    }
+    
+    function downloadCSV(content, filename) {
+      const blob = new Blob([content], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function formatDateTime(dateStr) {
+      return new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+    }
+    
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
