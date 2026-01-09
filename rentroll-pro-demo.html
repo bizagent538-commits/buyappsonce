@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentRoll Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { width: 32px; height: 32px; background: linear-gradient(135deg, #22c55e, #16a34a); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    .logo-text { font-weight: 700; }
+    .badge { background: #22c55e; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .user-info { padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 16px; }
+    .user-name { font-weight: 600; font-size: 14px; }
+    .user-role { font-size: 12px; color: #64748b; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #64748b; font-size: 14px; margin-bottom: 2px; }
+    .nav-item:hover { background: #f8fafc; }
+    .nav-item.active { background: rgba(34,197,94,0.1); color: #16a34a; font-weight: 500; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #22c55e; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background: #f8fafc; }
+    .property-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .property-name { font-weight: 700; font-size: 18px; margin-bottom: 4px; }
+    .property-addr { color: #64748b; font-size: 14px; margin-bottom: 8px; }
+    .property-meta { font-size: 12px; color: #94a3b8; }
+    .status-badge, .priority-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-vacant { background: #fef3c7; color: #92400e; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-in_progress { background: #dbeafe; color: #1e40af; }
+    .status-completed { background: #dcfce7; color: #166534; }
+    .priority-low { background: #f1f5f9; color: #64748b; }
+    .priority-medium { background: #fef3c7; color: #92400e; }
+    .priority-high { background: #fee2e2; color: #dc2626; }
+    .priority-urgent { background: #dc2626; color: #fff; }
+    .select-sm { padding: 6px 10px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 12px; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; display: flex; justify-content: center; align-items: center; gap: 16px; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .view-toggle { background: rgba(255,255,255,0.2); border: none; padding: 6px 12px; border-radius: 6px; color: #fff; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .view-toggle:hover { background: rgba(255,255,255,0.3); }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+    .empty { text-align: center; color: #64748b; padding: 40px; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">
+    <span>🏠 RentRoll Pro Demo - Data stored in browser</span>
+    <button class="view-toggle" onclick="toggleView()">Switch to <span id="viewToggleLabel">Tenant</span> View</button>
+    <a href="https://buyappsonce.com/landing-rentroll-pro.html">Get RentRoll Pro →</a>
+  </div>
+  
+  <div class="app">
+    <nav class="sidebar" id="sidebar"></nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 class="modal-title" id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+let state = {
+  view: 'landlord', // 'landlord' or 'tenant'
+  tab: 'dashboard',
+  properties: [],
+  units: [],
+  tenants: [],
+  leases: [],
+  payments: [],
+  requests: []
+};
+
+function init() {
+  loadData();
+  if (state.properties.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.properties = JSON.parse(localStorage.getItem('rr_properties') || '[]');
+  state.units = JSON.parse(localStorage.getItem('rr_units') || '[]');
+  state.tenants = JSON.parse(localStorage.getItem('rr_tenants') || '[]');
+  state.leases = JSON.parse(localStorage.getItem('rr_leases') || '[]');
+  state.payments = JSON.parse(localStorage.getItem('rr_payments') || '[]');
+  state.requests = JSON.parse(localStorage.getItem('rr_requests') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('rr_properties', JSON.stringify(state.properties));
+  localStorage.setItem('rr_units', JSON.stringify(state.units));
+  localStorage.setItem('rr_tenants', JSON.stringify(state.tenants));
+  localStorage.setItem('rr_leases', JSON.stringify(state.leases));
+  localStorage.setItem('rr_payments', JSON.stringify(state.payments));
+  localStorage.setItem('rr_requests', JSON.stringify(state.requests));
+}
+
+function loadSampleData() {
+  state.properties = [
+    { id: 1, name: 'Sunset Apartments', address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701', type: 'residential' },
+    { id: 2, name: 'Oak Grove Townhomes', address: '456 Oak Ave', city: 'Springfield', state: 'IL', zip: '62702', type: 'residential' }
+  ];
+  state.units = [
+    { id: 1, property_id: 1, unit_number: '101', bedrooms: 1, bathrooms: 1, sqft: 650, rent: 950, status: 'occupied' },
+    { id: 2, property_id: 1, unit_number: '102', bedrooms: 2, bathrooms: 1, sqft: 850, rent: 1200, status: 'occupied' },
+    { id: 3, property_id: 1, unit_number: '103', bedrooms: 2, bathrooms: 2, sqft: 950, rent: 1400, status: 'vacant' },
+    { id: 4, property_id: 2, unit_number: 'A', bedrooms: 3, bathrooms: 2.5, sqft: 1400, rent: 1800, status: 'occupied' },
+    { id: 5, property_id: 2, unit_number: 'B', bedrooms: 3, bathrooms: 2.5, sqft: 1400, rent: 1800, status: 'vacant' }
+  ];
+  state.tenants = [
+    { id: 1, name: 'John Smith', email: 'john@example.com', phone: '555-1234' },
+    { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', phone: '555-5678' },
+    { id: 3, name: 'Michael Williams', email: 'michael@example.com', phone: '555-9012' }
+  ];
+  state.leases = [
+    { id: 1, unit_id: 1, tenant_id: 1, start_date: '2024-01-01', end_date: '2024-12-31', rent: 950, deposit: 950, status: 'active' },
+    { id: 2, unit_id: 2, tenant_id: 2, start_date: '2024-03-01', end_date: '2025-02-28', rent: 1200, deposit: 1200, status: 'active' },
+    { id: 3, unit_id: 4, tenant_id: 3, start_date: '2024-06-01', end_date: '2025-05-31', rent: 1800, deposit: 1800, status: 'active' }
+  ];
+  const now = Date.now();
+  state.payments = [
+    { id: 1, lease_id: 1, date: '2024-12-01', amount: 950, type: 'rent', method: 'ach' },
+    { id: 2, lease_id: 2, date: '2024-12-01', amount: 1200, type: 'rent', method: 'check' },
+    { id: 3, lease_id: 3, date: '2024-12-01', amount: 1800, type: 'rent', method: 'ach' },
+    { id: 4, lease_id: 1, date: '2024-11-01', amount: 950, type: 'rent', method: 'ach' },
+    { id: 5, lease_id: 2, date: '2024-11-01', amount: 1200, type: 'rent', method: 'check' }
+  ];
+  state.requests = [
+    { id: 1, unit_id: 1, tenant_id: 1, title: 'Leaky faucet', description: 'Kitchen sink faucet is dripping', priority: 'medium', status: 'in_progress', created_at: new Date(now - 3*86400000).toISOString() },
+    { id: 2, unit_id: 2, tenant_id: 2, title: 'Broken garbage disposal', description: 'Disposal makes grinding noise and won\'t work', priority: 'high', status: 'pending', created_at: new Date(now - 86400000).toISOString() },
+    { id: 3, unit_id: 4, tenant_id: 3, title: 'AC not cooling', description: 'Air conditioner running but not cooling properly', priority: 'urgent', status: 'pending', created_at: new Date(now - 3600000).toISOString() }
+  ];
+  saveData();
+}
+
+function toggleView() {
+  state.view = state.view === 'landlord' ? 'tenant' : 'landlord';
+  state.tab = 'dashboard';
+  document.getElementById('viewToggleLabel').textContent = state.view === 'landlord' ? 'Tenant' : 'Landlord';
+  render();
+}
+
+function showTab(tab) { state.tab = tab; render(); }
+
+function getProperty(id) { return state.properties.find(p => p.id === id); }
+function getUnit(id) { return state.units.find(u => u.id === id); }
+function getTenant(id) { return state.tenants.find(t => t.id === id); }
+function getLease(id) { return state.leases.find(l => l.id === id); }
+function fmt(d) { return d ? new Date(d).toLocaleDateString() : '-'; }
+function fmtMoney(n) { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+function render() {
+  document.getElementById('sidebar').innerHTML = state.view === 'landlord' ? renderLandlordNav() : renderTenantNav();
+  document.getElementById('mainContent').innerHTML = state.view === 'landlord' ? renderLandlordMain() : renderTenantMain();
+}
+
+function renderLandlordNav() {
+  const tabs = [['dashboard', '📊', 'Dashboard'], ['properties', '🏢', 'Properties'], ['units', '🚪', 'Units'], ['tenants', '👥', 'Tenants'], ['leases', '📄', 'Leases'], ['payments', '💰', 'Payments'], ['maintenance', '🔧', 'Maintenance']];
+  return `
+    <div class="logo"><span class="logo-icon">🏠</span><span class="logo-text">RentRoll</span><span class="badge">PRO</span></div>
+    <div class="user-info"><div class="user-name">Demo Manager</div><div class="user-role">Property Manager</div></div>
+    ${tabs.map(([t, i, l]) => `<div class="nav-item ${state.tab === t ? 'active' : ''}" onclick="showTab('${t}')">${i} ${l}</div>`).join('')}
+  `;
+}
+
+function renderTenantNav() {
+  const tabs = [['dashboard', '🏠', 'My Home'], ['payments', '💳', 'Payments'], ['maintenance', '🔧', 'Maintenance']];
+  return `
+    <div class="logo"><span class="logo-icon">🏠</span><span class="logo-text">RentRoll</span><span class="badge">TENANT</span></div>
+    <div class="user-info"><div class="user-name">John Smith</div><div class="user-role">Tenant Portal</div></div>
+    ${tabs.map(([t, i, l]) => `<div class="nav-item ${state.tab === t ? 'active' : ''}" onclick="showTab('${t}')">${i} ${l}</div>`).join('')}
+  `;
+}
+
+function renderLandlordMain() {
+  const totalUnits = state.units.length;
+  const occupied = state.units.filter(u => u.status === 'occupied').length;
+  const vacant = state.units.filter(u => u.status === 'vacant').length;
+  const monthlyIncome = state.leases.filter(l => l.status === 'active').reduce((s, l) => s + l.rent, 0);
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const collected = state.payments.filter(p => p.date.startsWith(thisMonth) && p.type === 'rent').reduce((s, p) => s + p.amount, 0);
+  const openReqs = state.requests.filter(r => r.status !== 'completed').length;
+
+  switch (state.tab) {
+    case 'dashboard': return `
+      <div class="header"><h1 class="title">Dashboard</h1></div>
+      <div class="stats">
+        <div class="stat-card"><div class="stat-label">Total Units</div><div class="stat-value">${totalUnits}</div></div>
+        <div class="stat-card"><div class="stat-label">Occupied</div><div class="stat-value" style="color:#22c55e">${occupied}</div></div>
+        <div class="stat-card"><div class="stat-label">Vacant</div><div class="stat-value" style="color:#f59e0b">${vacant}</div></div>
+        <div class="stat-card"><div class="stat-label">Monthly Income</div><div class="stat-value" style="color:#3b82f6">${fmtMoney(monthlyIncome)}</div></div>
+      </div>
+      <div class="grid-2">
+        <div class="card"><h3 style="margin-bottom:16px">Collections This Month</h3><div style="font-size:32px;font-weight:700;color:#22c55e">${fmtMoney(collected)}</div><div style="color:#64748b">of ${fmtMoney(monthlyIncome)} expected</div></div>
+        <div class="card"><h3 style="margin-bottom:16px">Open Maintenance</h3><div style="font-size:32px;font-weight:700;color:${openReqs > 0 ? '#ef4444' : '#22c55e'}">${openReqs}</div><div style="color:#64748b">requests pending</div></div>
+      </div>
+    `;
+    case 'properties': return `
+      <div class="header"><h1 class="title">Properties</h1><button class="btn btn-primary" onclick="openPropertyModal()">+ Add Property</button></div>
+      <div class="grid">${state.properties.map(p => `
+        <div class="property-card">
+          <div class="property-name">${p.name}</div>
+          <div class="property-addr">${p.address}, ${p.city}, ${p.state} ${p.zip}</div>
+          <div class="property-meta">${state.units.filter(u => u.property_id === p.id).length} units • ${p.type}</div>
+          <button class="btn btn-sm btn-secondary" style="margin-top:12px" onclick="editProperty(${p.id})">Edit</button>
+        </div>
+      `).join('')}</div>
+    `;
+    case 'units': return `
+      <div class="header"><h1 class="title">Units</h1><button class="btn btn-primary" onclick="openUnitModal()">+ Add Unit</button></div>
+      <div class="card">
+        <table><thead><tr><th>Unit</th><th>Property</th><th>Beds/Baths</th><th>Rent</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${state.units.map(u => `
+          <tr><td><strong>${u.unit_number}</strong></td><td>${getProperty(u.property_id)?.name || '-'}</td><td>${u.bedrooms}bd / ${u.bathrooms}ba</td><td>${fmtMoney(u.rent)}</td><td><span class="status-badge status-${u.status === 'occupied' ? 'active' : 'vacant'}">${u.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="editUnit(${u.id})">Edit</button></td></tr>
+        `).join('')}</tbody></table>
+      </div>
+    `;
+    case 'tenants': return `
+      <div class="header"><h1 class="title">Tenants</h1></div>
+      <div class="card">
+        <table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Unit</th><th>Lease Status</th></tr></thead>
+        <tbody>${state.tenants.map(t => {
+          const lease = state.leases.find(l => l.tenant_id === t.id && l.status === 'active');
+          const unit = lease ? getUnit(lease.unit_id) : null;
+          return `<tr><td><strong>${t.name}</strong></td><td>${t.email}</td><td>${t.phone || '-'}</td><td>${unit?.unit_number || '-'}</td><td>${lease ? '<span class="status-badge status-active">Active</span>' : '<span class="status-badge status-vacant">No Lease</span>'}</td></tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    `;
+    case 'leases': return `
+      <div class="header"><h1 class="title">Leases</h1><button class="btn btn-primary" onclick="openLeaseModal()">+ New Lease</button></div>
+      <div class="card">
+        <table><thead><tr><th>Unit</th><th>Tenant</th><th>Start</th><th>End</th><th>Rent</th><th>Status</th></tr></thead>
+        <tbody>${state.leases.map(l => {
+          const unit = getUnit(l.unit_id);
+          const tenant = getTenant(l.tenant_id);
+          const prop = unit ? getProperty(unit.property_id) : null;
+          return `<tr><td>${unit?.unit_number || '-'} - ${prop?.name || ''}</td><td>${tenant?.name || '-'}</td><td>${fmt(l.start_date)}</td><td>${fmt(l.end_date)}</td><td>${fmtMoney(l.rent)}</td><td><span class="status-badge status-${l.status === 'active' ? 'active' : 'vacant'}">${l.status}</span></td></tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    `;
+    case 'payments': return `
+      <div class="header"><h1 class="title">Payments</h1><button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button></div>
+      <div class="card">
+        <table><thead><tr><th>Date</th><th>Unit</th><th>Tenant</th><th>Type</th><th>Method</th><th>Amount</th></tr></thead>
+        <tbody>${state.payments.map(p => {
+          const lease = getLease(p.lease_id);
+          const unit = lease ? getUnit(lease.unit_id) : null;
+          const tenant = lease ? getTenant(lease.tenant_id) : null;
+          return `<tr><td>${fmt(p.date)}</td><td>${unit?.unit_number || '-'}</td><td>${tenant?.name || '-'}</td><td>${p.type}</td><td>${p.method}</td><td style="color:#22c55e;font-weight:600">${fmtMoney(p.amount)}</td></tr>`;
+        }).join('')}</tbody></table>
+      </div>
+    `;
+    case 'maintenance': return `
+      <div class="header"><h1 class="title">Maintenance Requests</h1></div>
+      <div class="card">
+        ${state.requests.length === 0 ? '<p class="empty">No requests</p>' : `
+        <table><thead><tr><th>Date</th><th>Unit</th><th>Tenant</th><th>Issue</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>${state.requests.map(r => {
+          const unit = getUnit(r.unit_id);
+          const tenant = getTenant(r.tenant_id);
+          return `<tr><td>${fmt(r.created_at)}</td><td>${unit?.unit_number || '-'}</td><td>${tenant?.name || '-'}</td><td><strong>${r.title}</strong><br><span style="font-size:12px;color:#64748b">${r.description}</span></td><td><span class="priority-badge priority-${r.priority}">${r.priority}</span></td><td><span class="status-badge status-${r.status}">${r.status.replace('_', ' ')}</span></td><td><select class="select-sm" onchange="updateRequestStatus(${r.id}, this.value)"><option value="pending" ${r.status === 'pending' ? 'selected' : ''}>Pending</option><option value="in_progress" ${r.status === 'in_progress' ? 'selected' : ''}>In Progress</option><option value="completed" ${r.status === 'completed' ? 'selected' : ''}>Completed</option></select></td></tr>`;
+        }).join('')}</tbody></table>`}
+      </div>
+    `;
+  }
+}
+
+function renderTenantMain() {
+  // Tenant view - show first tenant's data
+  const tenant = state.tenants[0];
+  const lease = state.leases.find(l => l.tenant_id === tenant?.id && l.status === 'active');
+  const unit = lease ? getUnit(lease.unit_id) : null;
+  const prop = unit ? getProperty(unit.property_id) : null;
+  const myPayments = state.payments.filter(p => p.lease_id === lease?.id);
+  const myRequests = state.requests.filter(r => r.tenant_id === tenant?.id);
+  const lastPayment = myPayments[0];
+
+  switch (state.tab) {
+    case 'dashboard': return `
+      <div class="header"><h1 class="title">Welcome, ${tenant?.name}</h1></div>
+      ${lease ? `
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Unit</div><div class="stat-value">${unit?.unit_number}</div><div class="stat-meta">${prop?.name}</div></div>
+          <div class="stat-card"><div class="stat-label">Monthly Rent</div><div class="stat-value" style="color:#3b82f6">${fmtMoney(lease.rent)}</div></div>
+          <div class="stat-card"><div class="stat-label">Lease Ends</div><div class="stat-value">${fmt(lease.end_date)}</div></div>
+          <div class="stat-card"><div class="stat-label">Last Payment</div><div class="stat-value" style="color:#22c55e">${lastPayment ? fmtMoney(lastPayment.amount) : '-'}</div><div class="stat-meta">${lastPayment ? fmt(lastPayment.date) : ''}</div></div>
+        </div>
+      ` : '<div class="card"><p class="empty">No active lease found. Contact your landlord.</p></div>'}
+      <div class="card">
+        <h3 style="margin-bottom:16px">Quick Actions</h3>
+        <div style="display:flex;gap:12px">
+          <button class="btn btn-secondary" onclick="showTab('payments')">💳 View Payments</button>
+          <button class="btn btn-primary" onclick="openRequestModal()">🔧 Submit Request</button>
+        </div>
+      </div>
+    `;
+    case 'payments': return `
+      <div class="header"><h1 class="title">Payment History</h1></div>
+      <div class="card">
+        ${myPayments.length === 0 ? '<p class="empty">No payments yet</p>' : `
+        <table><thead><tr><th>Date</th><th>Type</th><th>Method</th><th>Amount</th></tr></thead>
+        <tbody>${myPayments.map(p => `
+          <tr><td>${fmt(p.date)}</td><td>${p.type}</td><td>${p.method}</td><td style="color:#22c55e;font-weight:600">${fmtMoney(p.amount)}</td></tr>
+        `).join('')}</tbody></table>`}
+      </div>
+    `;
+    case 'maintenance': return `
+      <div class="header"><h1 class="title">Maintenance Requests</h1><button class="btn btn-primary" onclick="openRequestModal()">+ New Request</button></div>
+      <div class="card">
+        ${myRequests.length === 0 ? '<p class="empty">No requests</p>' : `
+        <table><thead><tr><th>Date</th><th>Title</th><th>Priority</th><th>Status</th></tr></thead>
+        <tbody>${myRequests.map(r => `
+          <tr><td>${fmt(r.created_at)}</td><td><strong>${r.title}</strong><br><span style="font-size:12px;color:#64748b">${r.description}</span></td><td><span class="priority-badge priority-${r.priority}">${r.priority}</span></td><td><span class="status-badge status-${r.status}">${r.status.replace('_', ' ')}</span></td></tr>
+        `).join('')}</tbody></table>`}
+      </div>
+    `;
+  }
+}
+
+function updateRequestStatus(id, status) {
+  const r = state.requests.find(x => x.id === id);
+  if (r) r.status = status;
+  saveData(); render(); toast('Status updated');
+}
+
+function openModal(title, content) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalContent').innerHTML = content; document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function openPropertyModal(prop) {
+  openModal(prop ? 'Edit Property' : 'Add Property', `
+    <form onsubmit="saveProperty(event, ${prop?.id || 'null'})">
+      <div class="field"><label>Name</label><input name="name" value="${prop?.name || ''}" required></div>
+      <div class="field"><label>Address</label><input name="address" value="${prop?.address || ''}" required></div>
+      <div class="row"><div class="field"><label>City</label><input name="city" value="${prop?.city || ''}" required></div><div class="field"><label>State</label><input name="state" value="${prop?.state || ''}" required></div></div>
+      <div class="row"><div class="field"><label>ZIP</label><input name="zip" value="${prop?.zip || ''}"></div><div class="field"><label>Type</label><select name="type"><option value="residential" ${prop?.type === 'residential' ? 'selected' : ''}>Residential</option><option value="commercial" ${prop?.type === 'commercial' ? 'selected' : ''}>Commercial</option></select></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function editProperty(id) { openPropertyModal(state.properties.find(p => p.id === id)); }
+
+function saveProperty(e, id) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, address: f.address.value, city: f.city.value, state: f.state.value, zip: f.zip.value, type: f.type.value };
+  if (id) { Object.assign(state.properties.find(p => p.id === id), data); }
+  else { data.id = Math.max(0, ...state.properties.map(p => p.id)) + 1; state.properties.push(data); }
+  saveData(); closeModal(); render(); toast('Property saved');
+}
+
+function openUnitModal(unit) {
+  openModal(unit ? 'Edit Unit' : 'Add Unit', `
+    <form onsubmit="saveUnit(event, ${unit?.id || 'null'})">
+      <div class="field"><label>Property</label><select name="property_id" required>${state.properties.map(p => `<option value="${p.id}" ${unit?.property_id === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Unit Number</label><input name="unit_number" value="${unit?.unit_number || ''}" required></div>
+      <div class="row"><div class="field"><label>Bedrooms</label><input type="number" name="bedrooms" value="${unit?.bedrooms || 1}"></div><div class="field"><label>Bathrooms</label><input type="number" step="0.5" name="bathrooms" value="${unit?.bathrooms || 1}"></div></div>
+      <div class="row"><div class="field"><label>Sq Ft</label><input type="number" name="sqft" value="${unit?.sqft || ''}"></div><div class="field"><label>Rent</label><input type="number" name="rent" value="${unit?.rent || ''}"></div></div>
+      <div class="field"><label>Status</label><select name="status"><option value="vacant" ${unit?.status === 'vacant' ? 'selected' : ''}>Vacant</option><option value="occupied" ${unit?.status === 'occupied' ? 'selected' : ''}>Occupied</option></select></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function editUnit(id) { openUnitModal(state.units.find(u => u.id === id)); }
+
+function saveUnit(e, id) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { property_id: parseInt(f.property_id.value), unit_number: f.unit_number.value, bedrooms: parseInt(f.bedrooms.value), bathrooms: parseFloat(f.bathrooms.value), sqft: parseInt(f.sqft.value) || 0, rent: parseFloat(f.rent.value) || 0, status: f.status.value };
+  if (id) { Object.assign(state.units.find(u => u.id === id), data); }
+  else { data.id = Math.max(0, ...state.units.map(u => u.id)) + 1; state.units.push(data); }
+  saveData(); closeModal(); render(); toast('Unit saved');
+}
+
+function openLeaseModal() {
+  const vacantUnits = state.units.filter(u => u.status === 'vacant');
+  openModal('New Lease', `
+    <form onsubmit="saveLease(event)">
+      <div class="field"><label>Unit</label><select name="unit_id" required>${vacantUnits.map(u => `<option value="${u.id}">${u.unit_number} - ${getProperty(u.property_id)?.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Tenant</label><select name="tenant_id" required>${state.tenants.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}</select></div>
+      <div class="row"><div class="field"><label>Start Date</label><input type="date" name="start_date" required></div><div class="field"><label>End Date</label><input type="date" name="end_date" required></div></div>
+      <div class="row"><div class="field"><label>Monthly Rent</label><input type="number" name="rent" required></div><div class="field"><label>Security Deposit</label><input type="number" name="deposit"></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Create Lease</button></div>
+    </form>
+  `);
+}
+
+function saveLease(e) {
+  e.preventDefault();
+  const f = e.target;
+  const unitId = parseInt(f.unit_id.value);
+  state.leases.push({ id: Math.max(0, ...state.leases.map(l => l.id)) + 1, unit_id: unitId, tenant_id: parseInt(f.tenant_id.value), start_date: f.start_date.value, end_date: f.end_date.value, rent: parseFloat(f.rent.value), deposit: parseFloat(f.deposit.value) || 0, status: 'active' });
+  const unit = state.units.find(u => u.id === unitId);
+  if (unit) unit.status = 'occupied';
+  saveData(); closeModal(); render(); toast('Lease created');
+}
+
+function openPaymentModal() {
+  const activeLeases = state.leases.filter(l => l.status === 'active');
+  openModal('Record Payment', `
+    <form onsubmit="savePayment(event)">
+      <div class="field"><label>Lease</label><select name="lease_id" required>${activeLeases.map(l => { const u = getUnit(l.unit_id); const t = getTenant(l.tenant_id); return `<option value="${l.id}">${u?.unit_number} - ${t?.name}</option>`; }).join('')}</select></div>
+      <div class="field"><label>Date</label><input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      <div class="row"><div class="field"><label>Amount</label><input type="number" step="0.01" name="amount" required></div><div class="field"><label>Type</label><select name="type"><option value="rent">Rent</option><option value="deposit">Deposit</option><option value="late_fee">Late Fee</option><option value="other">Other</option></select></div></div>
+      <div class="field"><label>Method</label><select name="method"><option value="check">Check</option><option value="cash">Cash</option><option value="ach">ACH/Bank Transfer</option><option value="card">Credit Card</option></select></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Record</button></div>
+    </form>
+  `);
+}
+
+function savePayment(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.payments.unshift({ id: Math.max(0, ...state.payments.map(p => p.id)) + 1, lease_id: parseInt(f.lease_id.value), date: f.date.value, amount: parseFloat(f.amount.value), type: f.type.value, method: f.method.value });
+  saveData(); closeModal(); render(); toast('Payment recorded');
+}
+
+function openRequestModal() {
+  const tenant = state.tenants[0];
+  const lease = state.leases.find(l => l.tenant_id === tenant?.id && l.status === 'active');
+  if (!lease) { toast('No active lease'); return; }
+  openModal('Submit Maintenance Request', `
+    <form onsubmit="saveRequest(event)">
+      <div class="field"><label>Title</label><input name="title" required placeholder="e.g., Leaky faucet"></div>
+      <div class="field"><label>Description</label><textarea name="description" required placeholder="Describe the issue..."></textarea></div>
+      <div class="field"><label>Priority</label><select name="priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option><option value="urgent">Urgent</option></select></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
+    </form>
+  `);
+}
+
+function saveRequest(e) {
+  e.preventDefault();
+  const f = e.target;
+  const tenant = state.tenants[0];
+  const lease = state.leases.find(l => l.tenant_id === tenant?.id && l.status === 'active');
+  state.requests.unshift({ id: Math.max(0, ...state.requests.map(r => r.id)) + 1, unit_id: lease.unit_id, tenant_id: tenant.id, title: f.title.value, description: f.description.value, priority: f.priority.value, status: 'pending', created_at: new Date().toISOString() });
+  saveData(); closeModal(); render(); toast('Request submitted');
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
