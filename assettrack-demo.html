@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AssetTrack - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-900);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      transition: all 0.2s;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-success:hover { background: #059669; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { background: #dc2626; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-secondary:hover { background: var(--gray-300); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; }
+    
+    .toolbar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    
+    .search-box {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .search-box:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .filter-select {
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    /* Table */
+    .table-container { overflow-x: auto; }
+    
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    
+    th, td {
+      padding: 0.75rem 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    th {
+      background: var(--gray-50);
+      font-weight: 600;
+      color: var(--gray-600);
+      text-transform: uppercase;
+      font-size: 0.75rem;
+    }
+    
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-available { background: #dcfce7; color: #166534; }
+    .status-checked-out { background: #fef3c7; color: #92400e; }
+    .status-maintenance { background: #fee2e2; color: #991b1b; }
+    .status-retired { background: var(--gray-200); color: var(--gray-600); }
+    
+    .category-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .actions { display: flex; gap: 0.25rem; }
+    
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray-400);
+    }
+    
+    .modal-close:hover { color: var(--gray-600); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    /* Activity Log */
+    .activity-list { display: flex; flex-direction: column; gap: 0.5rem; }
+    
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .activity-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+    }
+    
+    .activity-icon.checkout { background: #fef3c7; }
+    .activity-icon.checkin { background: #dcfce7; }
+    .activity-icon.add { background: #dbeafe; }
+    .activity-icon.edit { background: #e9d5ff; }
+    
+    .activity-content { flex: 1; }
+    .activity-title { font-weight: 500; }
+    .activity-meta { font-size: 0.75rem; color: var(--gray-500); }
+    
+    /* Categories Grid */
+    .categories-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .category-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .category-icon { font-size: 1.5rem; }
+    .category-info { flex: 1; }
+    .category-name { font-weight: 600; }
+    .category-count { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem;
+      color: var(--gray-500);
+    }
+    
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      th, td { padding: 0.5rem; }
+      .actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📦 AssetTrack</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="assets">Assets</div>
+    <div class="nav-tab" data-tab="categories">Categories</div>
+    <div class="nav-tab" data-tab="activity">Activity Log</div>
+  </nav>
+  
+  <main class="main-content">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-total">0</div>
+        <div class="stat-label">Total Assets</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-available">0</div>
+        <div class="stat-label">Available</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-checked-out">0</div>
+        <div class="stat-label">Checked Out</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="stat-value">$0</div>
+        <div class="stat-label">Total Value</div>
+      </div>
+    </div>
+    
+    <!-- Assets Tab -->
+    <div class="tab-content active" id="tab-assets">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Asset Inventory</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportAssets()">📥 Export CSV</button>
+            <button class="btn btn-primary" onclick="openAssetModal()">+ Add Asset</button>
+          </div>
+        </div>
+        
+        <div class="toolbar">
+          <input type="text" class="search-box" id="search-assets" placeholder="Search assets..." oninput="renderAssets()">
+          <select class="filter-select" id="filter-category" onchange="renderAssets()">
+            <option value="">All Categories</option>
+          </select>
+          <select class="filter-select" id="filter-status" onchange="renderAssets()">
+            <option value="">All Status</option>
+            <option value="available">Available</option>
+            <option value="checked-out">Checked Out</option>
+            <option value="maintenance">Maintenance</option>
+            <option value="retired">Retired</option>
+          </select>
+        </div>
+        
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Asset</th>
+                <th>Category</th>
+                <th>Serial/Tag</th>
+                <th>Location</th>
+                <th>Status</th>
+                <th>Value</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="assets-table"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Categories Tab -->
+    <div class="tab-content" id="tab-categories">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Asset Categories</h2>
+          <button class="btn btn-primary" onclick="openCategoryModal()">+ Add Category</button>
+        </div>
+        <div class="categories-grid" id="categories-grid"></div>
+      </div>
+    </div>
+    
+    <!-- Activity Tab -->
+    <div class="tab-content" id="tab-activity">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Activity</h2>
+          <button class="btn btn-secondary" onclick="clearActivity()">Clear Log</button>
+        </div>
+        <div class="activity-list" id="activity-list"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Asset Modal -->
+  <div class="modal-overlay" id="asset-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="asset-modal-title">Add Asset</h3>
+        <button class="modal-close" onclick="closeModal('asset-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="asset-id">
+        <div class="form-group">
+          <label class="form-label">Asset Name *</label>
+          <input type="text" class="form-input" id="asset-name" placeholder="e.g., MacBook Pro 16">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-input" id="asset-category"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="asset-status">
+              <option value="available">Available</option>
+              <option value="checked-out">Checked Out</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="retired">Retired</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Serial Number / Asset Tag</label>
+            <input type="text" class="form-input" id="asset-serial" placeholder="e.g., SN-12345">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purchase Value ($)</label>
+            <input type="number" class="form-input" id="asset-value" placeholder="e.g., 2500">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Location</label>
+            <input type="text" class="form-input" id="asset-location" placeholder="e.g., Office 201">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purchase Date</label>
+            <input type="date" class="form-input" id="asset-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="asset-notes" rows="2" placeholder="Additional notes..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('asset-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAsset()">Save Asset</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Category Modal -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="category-modal-title">Add Category</h3>
+        <button class="modal-close" onclick="closeModal('category-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="category-id">
+        <div class="form-group">
+          <label class="form-label">Icon</label>
+          <div class="icon-grid" id="category-icon-grid"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Category Name *</label>
+          <input type="text" class="form-input" id="category-name" placeholder="e.g., Electronics">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('category-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCategory()">Save Category</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Checkout Modal -->
+  <div class="modal-overlay" id="checkout-modal">
+    <div class="modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3 class="modal-title">Check Out Asset</h3>
+        <button class="modal-close" onclick="closeModal('checkout-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="checkout-asset-id">
+        <p style="margin-bottom: 1rem;"><strong id="checkout-asset-name"></strong></p>
+        <div class="form-group">
+          <label class="form-label">Checked Out To *</label>
+          <input type="text" class="form-input" id="checkout-person" placeholder="e.g., John Smith">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expected Return Date</label>
+          <input type="date" class="form-input" id="checkout-return">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="checkout-notes" placeholder="Purpose or notes...">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('checkout-modal')">Cancel</button>
+        <button class="btn btn-warning" onclick="confirmCheckout()">Check Out</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    // Data
+    let assets = [];
+    let categories = [];
+    let activity = [];
+    let selectedCategoryIcon = '📦';
+    
+    const CATEGORY_ICONS = ['💻', '🖥️', '📱', '🎧', '📷', '🔧', '🪑', '🚗', '📦', '🏢', '🔌', '📁'];
+    
+    // Initialize
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const savedAssets = localStorage.getItem('assettrack_assets');
+      const savedCategories = localStorage.getItem('assettrack_categories');
+      const savedActivity = localStorage.getItem('assettrack_activity');
+      
+      if (savedCategories) {
+        categories = JSON.parse(savedCategories);
+      } else {
+        categories = [
+          { id: 1, name: 'Electronics', icon: '💻' },
+          { id: 2, name: 'Furniture', icon: '🪑' },
+          { id: 3, name: 'Tools', icon: '🔧' },
+          { id: 4, name: 'Vehicles', icon: '🚗' },
+        ];
+      }
+      
+      if (savedAssets) {
+        assets = JSON.parse(savedAssets);
+      } else {
+        assets = [
+          { id: 1, name: 'MacBook Pro 16"', categoryId: 1, serial: 'MBP-2024-001', location: 'Office 201', status: 'available', value: 2499, purchaseDate: '2024-01-15', notes: '16GB RAM, 512GB SSD' },
+          { id: 2, name: 'Dell Monitor 27"', categoryId: 1, serial: 'DM-2024-003', location: 'Office 201', status: 'available', value: 449, purchaseDate: '2024-02-01', notes: '4K UHD' },
+          { id: 3, name: 'Standing Desk', categoryId: 2, serial: 'SD-2024-001', location: 'Office 202', status: 'available', value: 599, purchaseDate: '2024-01-20', notes: 'Electric height adjustable' },
+          { id: 4, name: 'Projector Epson', categoryId: 1, serial: 'PRJ-2023-002', location: 'Conf Room A', status: 'checked-out', value: 899, purchaseDate: '2023-06-10', notes: '', checkedOutTo: 'Marketing Team', checkedOutDate: '2026-01-05' },
+          { id: 5, name: 'Cordless Drill', categoryId: 3, serial: 'TL-2024-005', location: 'Maintenance', status: 'available', value: 129, purchaseDate: '2024-03-01', notes: 'DeWalt 20V' },
+        ];
+      }
+      
+      if (savedActivity) {
+        activity = JSON.parse(savedActivity);
+      } else {
+        activity = [
+          { id: 1, type: 'checkout', asset: 'Projector Epson', person: 'Marketing Team', date: '2026-01-05T10:30:00' },
+          { id: 2, type: 'add', asset: 'Cordless Drill', date: '2024-03-01T09:00:00' },
+          { id: 3, type: 'add', asset: 'Standing Desk', date: '2024-01-20T14:00:00' },
+        ];
+      }
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('assettrack_assets', JSON.stringify(assets));
+      localStorage.setItem('assettrack_categories', JSON.stringify(categories));
+      localStorage.setItem('assettrack_activity', JSON.stringify(activity));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderStats();
+      renderAssets();
+      renderCategories();
+      renderActivity();
+      updateCategorySelects();
+    }
+    
+    // Stats
+    function renderStats() {
+      const available = assets.filter(a => a.status === 'available').length;
+      const checkedOut = assets.filter(a => a.status === 'checked-out').length;
+      const totalValue = assets.reduce((sum, a) => sum + (a.value || 0), 0);
+      
+      document.getElementById('stat-total').textContent = assets.length;
+      document.getElementById('stat-available').textContent = available;
+      document.getElementById('stat-checked-out').textContent = checkedOut;
+      document.getElementById('stat-value').textContent = '$' + totalValue.toLocaleString();
+    }
+    
+    // Assets
+    function renderAssets() {
+      const tbody = document.getElementById('assets-table');
+      const search = document.getElementById('search-assets').value.toLowerCase();
+      const filterCat = document.getElementById('filter-category').value;
+      const filterStatus = document.getElementById('filter-status').value;
+      
+      let filtered = assets.filter(a => {
+        const matchSearch = a.name.toLowerCase().includes(search) || 
+                           (a.serial && a.serial.toLowerCase().includes(search)) ||
+                           (a.location && a.location.toLowerCase().includes(search));
+        const matchCat = !filterCat || a.categoryId === parseInt(filterCat);
+        const matchStatus = !filterStatus || a.status === filterStatus;
+        return matchSearch && matchCat && matchStatus;
+      });
+      
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="7" class="empty-state">No assets found</td></tr>`;
+        return;
+      }
+      
+      tbody.innerHTML = filtered.map(a => {
+        const cat = categories.find(c => c.id === a.categoryId);
+        return `<tr>
+          <td>
+            <strong>${a.name}</strong>
+            ${a.checkedOutTo ? `<br><small style="color: var(--warning);">→ ${a.checkedOutTo}</small>` : ''}
+          </td>
+          <td><span class="category-badge">${cat ? cat.icon + ' ' + cat.name : 'Uncategorized'}</span></td>
+          <td>${a.serial || '—'}</td>
+          <td>${a.location || '—'}</td>
+          <td><span class="status-badge status-${a.status}">${a.status.replace('-', ' ')}</span></td>
+          <td>${a.value ? '$' + a.value.toLocaleString() : '—'}</td>
+          <td class="actions">
+            ${a.status === 'available' ? 
+              `<button class="btn btn-warning btn-sm" onclick="openCheckoutModal(${a.id})">Check Out</button>` :
+              a.status === 'checked-out' ?
+              `<button class="btn btn-success btn-sm" onclick="checkInAsset(${a.id})">Check In</button>` : ''
+            }
+            <button class="btn btn-secondary btn-sm" onclick="editAsset(${a.id})">Edit</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteAsset(${a.id})">🗑️</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function updateCategorySelects() {
+      const options = categories.map(c => `<option value="${c.id}">${c.icon} ${c.name}</option>`).join('');
+      document.getElementById('asset-category').innerHTML = '<option value="">Select Category</option>' + options;
+      document.getElementById('filter-category').innerHTML = '<option value="">All Categories</option>' + options;
+    }
+    
+    function openAssetModal(id = null) {
+      const modal = document.getElementById('asset-modal');
+      const title = document.getElementById('asset-modal-title');
+      
+      if (id) {
+        const asset = assets.find(a => a.id === id);
+        title.textContent = 'Edit Asset';
+        document.getElementById('asset-id').value = id;
+        document.getElementById('asset-name').value = asset.name;
+        document.getElementById('asset-category').value = asset.categoryId || '';
+        document.getElementById('asset-status').value = asset.status;
+        document.getElementById('asset-serial').value = asset.serial || '';
+        document.getElementById('asset-value').value = asset.value || '';
+        document.getElementById('asset-location').value = asset.location || '';
+        document.getElementById('asset-date').value = asset.purchaseDate || '';
+        document.getElementById('asset-notes').value = asset.notes || '';
+      } else {
+        title.textContent = 'Add Asset';
+        document.getElementById('asset-id').value = '';
+        document.getElementById('asset-name').value = '';
+        document.getElementById('asset-category').value = '';
+        document.getElementById('asset-status').value = 'available';
+        document.getElementById('asset-serial').value = '';
+        document.getElementById('asset-value').value = '';
+        document.getElementById('asset-location').value = '';
+        document.getElementById('asset-date').value = '';
+        document.getElementById('asset-notes').value = '';
+      }
+      
+      modal.classList.add('active');
+    }
+    
+    function editAsset(id) {
+      openAssetModal(id);
+    }
+    
+    function saveAsset() {
+      const id = document.getElementById('asset-id').value;
+      const name = document.getElementById('asset-name').value.trim();
+      const categoryId = parseInt(document.getElementById('asset-category').value) || null;
+      const status = document.getElementById('asset-status').value;
+      const serial = document.getElementById('asset-serial').value.trim();
+      const value = parseFloat(document.getElementById('asset-value').value) || 0;
+      const location = document.getElementById('asset-location').value.trim();
+      const purchaseDate = document.getElementById('asset-date').value;
+      const notes = document.getElementById('asset-notes').value.trim();
+      
+      if (!name) {
+        showToast('Please enter asset name', 'error');
+        return;
+      }
+      
+      if (id) {
+        const index = assets.findIndex(a => a.id === parseInt(id));
+        assets[index] = { ...assets[index], name, categoryId, status, serial, value, location, purchaseDate, notes };
+        logActivity('edit', name);
+        showToast('Asset updated');
+      } else {
+        const newId = Math.max(0, ...assets.map(a => a.id)) + 1;
+        assets.push({ id: newId, name, categoryId, status, serial, value, location, purchaseDate, notes });
+        logActivity('add', name);
+        showToast('Asset added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('asset-modal');
+    }
+    
+    function deleteAsset(id) {
+      if (!confirm('Delete this asset?')) return;
+      const asset = assets.find(a => a.id === id);
+      assets = assets.filter(a => a.id !== id);
+      logActivity('delete', asset.name);
+      saveData();
+      renderAll();
+      showToast('Asset deleted');
+    }
+    
+    // Check out / Check in
+    function openCheckoutModal(id) {
+      const asset = assets.find(a => a.id === id);
+      document.getElementById('checkout-asset-id').value = id;
+      document.getElementById('checkout-asset-name').textContent = asset.name;
+      document.getElementById('checkout-person').value = '';
+      document.getElementById('checkout-return').value = '';
+      document.getElementById('checkout-notes').value = '';
+      document.getElementById('checkout-modal').classList.add('active');
+    }
+    
+    function confirmCheckout() {
+      const id = parseInt(document.getElementById('checkout-asset-id').value);
+      const person = document.getElementById('checkout-person').value.trim();
+      
+      if (!person) {
+        showToast('Please enter who is checking out', 'error');
+        return;
+      }
+      
+      const index = assets.findIndex(a => a.id === id);
+      assets[index].status = 'checked-out';
+      assets[index].checkedOutTo = person;
+      assets[index].checkedOutDate = new Date().toISOString().split('T')[0];
+      
+      logActivity('checkout', assets[index].name, person);
+      saveData();
+      renderAll();
+      closeModal('checkout-modal');
+      showToast(`${assets[index].name} checked out to ${person}`);
+    }
+    
+    function checkInAsset(id) {
+      const index = assets.findIndex(a => a.id === id);
+      const person = assets[index].checkedOutTo;
+      assets[index].status = 'available';
+      assets[index].checkedOutTo = null;
+      assets[index].checkedOutDate = null;
+      
+      logActivity('checkin', assets[index].name, person);
+      saveData();
+      renderAll();
+      showToast(`${assets[index].name} checked in`);
+    }
+    
+    // Categories
+    function renderCategories() {
+      const grid = document.getElementById('categories-grid');
+      
+      if (categories.length === 0) {
+        grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📁</div><p>No categories yet</p></div>`;
+        return;
+      }
+      
+      grid.innerHTML = categories.map(c => {
+        const count = assets.filter(a => a.categoryId === c.id).length;
+        return `<div class="category-card">
+          <div class="category-icon">${c.icon}</div>
+          <div class="category-info">
+            <div class="category-name">${c.name}</div>
+            <div class="category-count">${count} asset${count !== 1 ? 's' : ''}</div>
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="editCategory(${c.id})">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteCategory(${c.id})">🗑️</button>
+        </div>`;
+      }).join('');
+    }
+    
+    function renderCategoryIconGrid() {
+      const grid = document.getElementById('category-icon-grid');
+      grid.innerHTML = `<style>.icon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:0.5rem;margin-bottom:1rem;}.icon-opt{padding:0.5rem;text-align:center;font-size:1.25rem;border:2px solid var(--gray-200);border-radius:0.25rem;cursor:pointer;}.icon-opt:hover{border-color:var(--gray-400);}.icon-opt.selected{border-color:var(--primary);background:#f3e8ff;}</style>` +
+        CATEGORY_ICONS.map(icon => 
+          `<div class="icon-opt${icon === selectedCategoryIcon ? ' selected' : ''}" onclick="selectCategoryIcon('${icon}')">${icon}</div>`
+        ).join('');
+    }
+    
+    function selectCategoryIcon(icon) {
+      selectedCategoryIcon = icon;
+      renderCategoryIconGrid();
+    }
+    
+    function openCategoryModal(id = null) {
+      const modal = document.getElementById('category-modal');
+      const title = document.getElementById('category-modal-title');
+      
+      if (id) {
+        const cat = categories.find(c => c.id === id);
+        title.textContent = 'Edit Category';
+        document.getElementById('category-id').value = id;
+        document.getElementById('category-name').value = cat.name;
+        selectedCategoryIcon = cat.icon;
+      } else {
+        title.textContent = 'Add Category';
+        document.getElementById('category-id').value = '';
+        document.getElementById('category-name').value = '';
+        selectedCategoryIcon = '📦';
+      }
+      
+      renderCategoryIconGrid();
+      modal.classList.add('active');
+    }
+    
+    function editCategory(id) {
+      openCategoryModal(id);
+    }
+    
+    function saveCategory() {
+      const id = document.getElementById('category-id').value;
+      const name = document.getElementById('category-name').value.trim();
+      
+      if (!name) {
+        showToast('Please enter category name', 'error');
+        return;
+      }
+      
+      if (id) {
+        const index = categories.findIndex(c => c.id === parseInt(id));
+        categories[index] = { ...categories[index], name, icon: selectedCategoryIcon };
+        showToast('Category updated');
+      } else {
+        const newId = Math.max(0, ...categories.map(c => c.id)) + 1;
+        categories.push({ id: newId, name, icon: selectedCategoryIcon });
+        showToast('Category added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('category-modal');
+    }
+    
+    function deleteCategory(id) {
+      const count = assets.filter(a => a.categoryId === id).length;
+      if (count > 0) {
+        if (!confirm(`This category has ${count} asset(s). They will become uncategorized. Continue?`)) return;
+      }
+      
+      categories = categories.filter(c => c.id !== id);
+      assets.forEach(a => { if (a.categoryId === id) a.categoryId = null; });
+      
+      saveData();
+      renderAll();
+      showToast('Category deleted');
+    }
+    
+    // Activity
+    function logActivity(type, asset, person = null) {
+      const newId = Math.max(0, ...activity.map(a => a.id)) + 1;
+      activity.unshift({
+        id: newId,
+        type,
+        asset,
+        person,
+        date: new Date().toISOString()
+      });
+      
+      if (activity.length > 100) activity = activity.slice(0, 100);
+    }
+    
+    function renderActivity() {
+      const list = document.getElementById('activity-list');
+      
+      if (activity.length === 0) {
+        list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📋</div><p>No activity yet</p></div>`;
+        return;
+      }
+      
+      const icons = { checkout: '📤', checkin: '📥', add: '➕', edit: '✏️', delete: '🗑️' };
+      const labels = { 
+        checkout: (a) => `<strong>${a.asset}</strong> checked out to ${a.person}`,
+        checkin: (a) => `<strong>${a.asset}</strong> checked in from ${a.person}`,
+        add: (a) => `<strong>${a.asset}</strong> added`,
+        edit: (a) => `<strong>${a.asset}</strong> updated`,
+        delete: (a) => `<strong>${a.asset}</strong> deleted`
+      };
+      
+      list.innerHTML = activity.slice(0, 50).map(a => {
+        const date = new Date(a.date);
+        return `<div class="activity-item">
+          <div class="activity-icon ${a.type}">${icons[a.type] || '📋'}</div>
+          <div class="activity-content">
+            <div class="activity-title">${labels[a.type](a)}</div>
+            <div class="activity-meta">${date.toLocaleDateString()} at ${date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    function clearActivity() {
+      if (!confirm('Clear all activity logs?')) return;
+      activity = [];
+      saveData();
+      renderActivity();
+      showToast('Activity log cleared');
+    }
+    
+    // Export
+    function exportAssets() {
+      const headers = ['Name', 'Category', 'Serial', 'Location', 'Status', 'Value', 'Purchase Date', 'Notes'];
+      const rows = assets.map(a => {
+        const cat = categories.find(c => c.id === a.categoryId);
+        return [
+          a.name,
+          cat ? cat.name : '',
+          a.serial || '',
+          a.location || '',
+          a.status,
+          a.value || '',
+          a.purchaseDate || '',
+          a.notes || ''
+        ];
+      });
+      
+      const csv = [headers, ...rows].map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'assets-export.csv';
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast('Exported to CSV');
+    }
+    
+    // Helpers
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+    
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = message;
+      container.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) overlay.classList.remove('active');
+      });
+    });
+    
+    init();
+  </script>
+</body>
+</html>
