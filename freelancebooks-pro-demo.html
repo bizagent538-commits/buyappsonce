@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceBooks Pro - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --primary-light: #f5f3ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header h1 span { font-size: 0.75rem; background: var(--warning); color: var(--gray-800); padding: 0.125rem 0.5rem; border-radius: 0.25rem; margin-left: 0.5rem; vertical-align: middle; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+      font-size: 0.875rem;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-value.green { color: var(--success); }
+    .stat-value.purple { color: var(--primary); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.7rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; font-size: 0.875rem; }
+    th, td { padding: 0.625rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.7rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.draft { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.sent { background: #dbeafe; color: #1e40af; }
+    .status-badge.paid { background: #dcfce7; color: #166534; }
+    .status-badge.overdue { background: #fee2e2; color: #991b1b; }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.accepted { background: #dcfce7; color: #166534; }
+    .status-badge.declined { background: #fee2e2; color: #991b1b; }
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.completed { background: var(--gray-200); color: var(--gray-600); }
+    
+    .timer-display {
+      font-size: 2rem;
+      font-weight: 700;
+      font-family: monospace;
+      color: var(--primary);
+    }
+    
+    .timer-controls { display: flex; gap: 0.5rem; margin-top: 1rem; }
+    
+    .timer-panel {
+      background: var(--primary-light);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .project-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .project-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem; }
+    .project-name { font-weight: 600; }
+    .project-client { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 0.5rem 0;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+    }
+    
+    .progress-fill.warning { background: var(--warning); }
+    .progress-fill.danger { background: var(--danger); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal.wide { max-width: 800px; }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    
+    .line-item-row {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .line-item-row input, .line-item-row select {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .remove-item {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .time-entry {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .time-entry-info { flex: 1; }
+    .time-entry-project { font-weight: 500; font-size: 0.875rem; }
+    .time-entry-desc { font-size: 0.75rem; color: var(--gray-500); }
+    .time-entry-hours { font-weight: 600; color: var(--primary); }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .empty-state { text-align: center; padding: 2rem; color: var(--gray-500); }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row, .form-row-3 { grid-template-columns: 1fr; }
+      .grid-2 { grid-template-columns: 1fr; }
+      .line-item-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>💼 FreelanceBooks <span>PRO</span></h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="time">Time Tracking</div>
+    <div class="nav-tab" data-tab="projects">Projects</div>
+    <div class="nav-tab" data-tab="invoices">Invoices</div>
+    <div class="nav-tab" data-tab="estimates">Estimates</div>
+    <div class="nav-tab" data-tab="expenses">Expenses</div>
+    <div class="nav-tab" data-tab="mileage">Mileage</div>
+    <div class="nav-tab" data-tab="clients">Clients</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-revenue">$0</div>
+          <div class="stat-label">Revenue YTD</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-outstanding">$0</div>
+          <div class="stat-label">Outstanding</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value purple" id="stat-hours">0</div>
+          <div class="stat-label">Hours This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value red" id="stat-expenses">$0</div>
+          <div class="stat-label">Expenses YTD</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-profit">$0</div>
+          <div class="stat-label">Net Profit</div>
+        </div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Active Projects</h2>
+          </div>
+          <div id="dash-projects"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Recent Time</h2>
+          </div>
+          <div id="dash-time"></div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Pending Invoices</h2>
+        </div>
+        <table>
+          <thead><tr><th>Invoice</th><th>Client</th><th>Amount</th><th>Due</th><th>Status</th></tr></thead>
+          <tbody id="dash-invoices"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Time Tracking -->
+    <div class="tab-content" id="tab-time">
+      <div class="timer-panel">
+        <div>
+          <select class="form-input" id="timer-project" style="max-width: 300px; margin-bottom: 0.5rem;">
+            <option value="">Select Project</option>
+          </select>
+        </div>
+        <input type="text" class="form-input" id="timer-desc" placeholder="What are you working on?" style="max-width: 400px; margin-bottom: 1rem;">
+        <div class="timer-display" id="timer-display">00:00:00</div>
+        <div class="timer-controls" style="justify-content: center;">
+          <button class="btn btn-success" id="timer-start" onclick="startTimer()">▶ Start</button>
+          <button class="btn btn-warning" id="timer-pause" onclick="pauseTimer()" style="display:none;">⏸ Pause</button>
+          <button class="btn btn-danger" id="timer-stop" onclick="stopTimer()" style="display:none;">⏹ Stop & Save</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Time Entries</h2>
+          <button class="btn btn-primary" onclick="openTimeModal()">+ Manual Entry</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-time-project" onchange="renderTimeEntries()">
+            <option value="">All Projects</option>
+          </select>
+          <input type="date" class="filter-input" id="filter-time-from" onchange="renderTimeEntries()">
+          <input type="date" class="filter-input" id="filter-time-to" onchange="renderTimeEntries()">
+        </div>
+        <table>
+          <thead><tr><th>Date</th><th>Project</th><th>Description</th><th>Hours</th><th>Billable</th><th>Actions</th></tr></thead>
+          <tbody id="time-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Projects -->
+    <div class="tab-content" id="tab-projects">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Projects</h2>
+          <button class="btn btn-primary" onclick="openProjectModal()">+ New Project</button>
+        </div>
+        <div id="projects-list"></div>
+      </div>
+    </div>
+    
+    <!-- Invoices -->
+    <div class="tab-content" id="tab-invoices">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Invoices</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportInvoices()">Export</button>
+            <button class="btn btn-primary" onclick="openInvoiceModal()">+ New Invoice</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-inv-status" onchange="renderInvoices()">
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
+          <select class="filter-select" id="filter-inv-client" onchange="renderInvoices()">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Invoice</th><th>Client</th><th>Date</th><th>Due</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="invoices-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Estimates -->
+    <div class="tab-content" id="tab-estimates">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Estimates / Quotes</h2>
+          <button class="btn btn-primary" onclick="openEstimateModal()">+ New Estimate</button>
+        </div>
+        <table>
+          <thead><tr><th>Estimate</th><th>Client</th><th>Date</th><th>Valid Until</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="estimates-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Expenses -->
+    <div class="tab-content" id="tab-expenses">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Expenses</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportExpenses()">Export</button>
+            <button class="btn btn-primary" onclick="openExpenseModal()">+ Add Expense</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-exp-category" onchange="renderExpenses()">
+            <option value="">All Categories</option>
+            <option value="software">Software</option>
+            <option value="equipment">Equipment</option>
+            <option value="office">Office</option>
+            <option value="travel">Travel</option>
+            <option value="marketing">Marketing</option>
+            <option value="professional">Professional</option>
+            <option value="other">Other</option>
+          </select>
+          <select class="filter-select" id="filter-exp-project" onchange="renderExpenses()">
+            <option value="">All Projects</option>
+          </select>
+        </div>
+        <table>
+          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Project</th><th>Amount</th><th>Actions</th></tr></thead>
+          <tbody id="expenses-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Mileage -->
+    <div class="tab-content" id="tab-mileage">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Mileage Tracking</h2>
+          <button class="btn btn-primary" onclick="openMileageModal()">+ Log Trip</button>
+        </div>
+        <div class="stats-grid" style="margin-bottom: 1rem;">
+          <div class="stat-card">
+            <div class="stat-value purple" id="stat-miles-ytd">0</div>
+            <div class="stat-label">Miles YTD</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value green" id="stat-mileage-value">$0</div>
+            <div class="stat-label">Deduction Value</div>
+          </div>
+        </div>
+        <table>
+          <thead><tr><th>Date</th><th>Purpose</th><th>From / To</th><th>Miles</th><th>Value</th><th>Actions</th></tr></thead>
+          <tbody id="mileage-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Clients -->
+    <div class="tab-content" id="tab-clients">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Clients</h2>
+          <button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button>
+        </div>
+        <table>
+          <thead><tr><th>Client</th><th>Email</th><th>Projects</th><th>Total Billed</th><th>Outstanding</th><th>Actions</th></tr></thead>
+          <tbody id="clients-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports & Exports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportProfitLoss()">📋 Profit & Loss</button>
+          <button class="btn btn-secondary" onclick="exportTimeReport()">⏱️ Time Report</button>
+          <button class="btn btn-secondary" onclick="exportProjectReport()">📁 Project Report</button>
+          <button class="btn btn-secondary" onclick="exportTaxSummary()">📑 Tax Summary</button>
+          <button class="btn btn-secondary" onclick="exportMileageReport()">🚗 Mileage Report</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Billable Hours by Project</h3>
+        <div id="hours-by-project"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Time Entry Modal -->
+  <div class="modal-overlay" id="time-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="time-modal-title">Add Time Entry</h3>
+        <button class="modal-close" onclick="closeModal('time-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="time-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Project *</label>
+            <select class="form-input" id="time-project"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="time-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <input type="text" class="form-input" id="time-description">
+        </div>
+        <div class="form-row-3">
+          <div class="form-group">
+            <label class="form-label">Hours *</label>
+            <input type="number" class="form-input" id="time-hours" min="0" step="0.25">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rate ($/hr)</label>
+            <input type="number" class="form-input" id="time-rate" min="0" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Billable</label>
+            <select class="form-input" id="time-billable">
+              <option value="yes">Yes</option>
+              <option value="no">No</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="time-delete-btn" onclick="deleteTimeEntry()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('time-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTimeEntry()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Project Modal -->
+  <div class="modal-overlay" id="project-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="project-modal-title">New Project</h3>
+        <button class="modal-close" onclick="closeModal('project-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="proj-id">
+        <div class="form-group">
+          <label class="form-label">Project Name *</label>
+          <input type="text" class="form-input" id="proj-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-input" id="proj-client"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="proj-status">
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+              <option value="on-hold">On Hold</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Budget Type</label>
+            <select class="form-input" id="proj-budget-type">
+              <option value="none">No Budget</option>
+              <option value="fixed">Fixed Fee</option>
+              <option value="hourly">Hourly Budget</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Budget Amount</label>
+            <input type="number" class="form-input" id="proj-budget" min="0" step="100">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Hourly Rate ($/hr)</label>
+          <input type="number" class="form-input" id="proj-rate" min="0" step="5">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="proj-description" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="proj-delete-btn" onclick="deleteProject()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('project-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProject()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Invoice Modal -->
+  <div class="modal-overlay" id="invoice-modal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inv-modal-title">New Invoice</h3>
+        <button class="modal-close" onclick="closeModal('invoice-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="inv-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-input" id="inv-client" onchange="loadUnbilledTime()"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Invoice #</label>
+            <input type="text" class="form-input" id="inv-number" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="inv-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date *</label>
+            <input type="date" class="form-input" id="inv-due">
+          </div>
+        </div>
+        
+        <div class="form-group" id="unbilled-time-section" style="display:none;">
+          <label class="form-label">Unbilled Time</label>
+          <div id="unbilled-time-list" style="max-height: 150px; overflow-y: auto; border: 1px solid var(--gray-200); border-radius: 0.375rem; padding: 0.5rem;"></div>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="addUnbilledToInvoice()" style="margin-top: 0.5rem;">Add Selected to Invoice</button>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Line Items</label>
+          <div id="inv-line-items"></div>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="addInvoiceItem()" style="margin-top: 0.5rem;">+ Add Item</button>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <table style="width: 200px;">
+            <tr><td>Subtotal:</td><td style="text-align: right;" id="inv-subtotal">$0.00</td></tr>
+            <tr><td>Tax:</td><td style="text-align: right;" id="inv-tax">$0.00</td></tr>
+            <tr style="font-weight: 700;"><td>Total:</td><td style="text-align: right;" id="inv-total">$0.00</td></tr>
+          </table>
+        </div>
+        
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Tax Rate (%)</label>
+            <input type="number" class="form-input" id="inv-tax-rate" value="0" min="0" max="100" step="0.1" onchange="calcInvoice()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="inv-status">
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="inv-delete-btn" onclick="deleteInvoice()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('invoice-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveInvoice()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Estimate Modal -->
+  <div class="modal-overlay" id="estimate-modal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 class="modal-title" id="est-modal-title">New Estimate</h3>
+        <button class="modal-close" onclick="closeModal('estimate-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="est-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-input" id="est-client"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Estimate #</label>
+            <input type="text" class="form-input" id="est-number" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="est-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Valid Until</label>
+            <input type="date" class="form-input" id="est-valid">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Line Items</label>
+          <div id="est-line-items"></div>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="addEstimateItem()" style="margin-top: 0.5rem;">+ Add Item</button>
+        </div>
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <div><strong>Total: <span id="est-total">$0.00</span></strong></div>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="est-status">
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="accepted">Accepted</option>
+            <option value="declined">Declined</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="est-delete-btn" onclick="deleteEstimate()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('estimate-modal')">Cancel</button>
+        <button class="btn btn-success" id="est-convert-btn" onclick="convertToInvoice()" style="display:none;">Convert to Invoice</button>
+        <button class="btn btn-primary" onclick="saveEstimate()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Expense Modal -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exp-modal-title">Add Expense</h3>
+        <button class="modal-close" onclick="closeModal('expense-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="exp-id">
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <input type="text" class="form-input" id="exp-description">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount *</label>
+            <input type="number" class="form-input" id="exp-amount" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="exp-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="exp-category">
+              <option value="software">Software</option>
+              <option value="equipment">Equipment</option>
+              <option value="office">Office</option>
+              <option value="travel">Travel</option>
+              <option value="marketing">Marketing</option>
+              <option value="professional">Professional</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project</label>
+            <select class="form-input" id="exp-project">
+              <option value="">None</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label"><input type="checkbox" id="exp-billable"> Billable to client</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="exp-delete-btn" onclick="deleteExpense()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('expense-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Mileage Modal -->
+  <div class="modal-overlay" id="mileage-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="mile-modal-title">Log Trip</h3>
+        <button class="modal-close" onclick="closeModal('mileage-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="mile-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="mile-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Miles *</label>
+            <input type="number" class="form-input" id="mile-miles" min="0" step="0.1">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purpose *</label>
+          <input type="text" class="form-input" id="mile-purpose" placeholder="e.g., Client meeting, Site visit">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">From</label>
+            <input type="text" class="form-input" id="mile-from" placeholder="Starting location">
+          </div>
+          <div class="form-group">
+            <label class="form-label">To</label>
+            <input type="text" class="form-input" id="mile-to" placeholder="Destination">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project</label>
+          <select class="form-input" id="mile-project">
+            <option value="">None</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="mile-delete-btn" onclick="deleteMileage()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('mileage-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveMileage()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Client Modal -->
+  <div class="modal-overlay" id="client-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="client-modal-title">Add Client</h3>
+        <button class="modal-close" onclick="closeModal('client-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="client-id">
+        <div class="form-group">
+          <label class="form-label">Client / Company Name *</label>
+          <input type="text" class="form-input" id="client-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="client-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="client-phone">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea class="form-input" id="client-address" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Default Hourly Rate</label>
+          <input type="number" class="form-input" id="client-rate" min="0" step="5">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="client-delete-btn" onclick="deleteClient()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClient()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    const MILEAGE_RATE = 0.67; // 2024 IRS rate
+    let clients = [], projects = [], timeEntries = [], invoices = [], estimates = [], expenses = [], mileage = [];
+    let invLineItems = [], estLineItems = [];
+    let nextInvNum = 1001, nextEstNum = 101;
+    let timerInterval = null, timerSeconds = 0, timerRunning = false;
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const keys = ['clients', 'projects', 'timeEntries', 'invoices', 'estimates', 'expenses', 'mileage'];
+      const saved = {};
+      keys.forEach(k => saved[k] = localStorage.getItem('flbpro_' + k));
+      
+      clients = saved.clients ? JSON.parse(saved.clients) : [
+        { id: 1, name: 'Acme Corp', email: 'billing@acme.com', phone: '555-1234', address: '123 Business Ave', rate: 100 },
+        { id: 2, name: 'TechStart Inc', email: 'ap@techstart.com', phone: '555-2345', address: '456 Innovation Dr', rate: 125 },
+        { id: 3, name: 'Design Studio', email: 'finance@designstudio.com', phone: '555-3456', address: '789 Creative Blvd', rate: 85 },
+      ];
+      
+      projects = saved.projects ? JSON.parse(saved.projects) : [
+        { id: 1, name: 'Website Redesign', clientId: 1, status: 'active', budgetType: 'fixed', budget: 8000, rate: 100, description: 'Complete website overhaul' },
+        { id: 2, name: 'Mobile App MVP', clientId: 2, status: 'active', budgetType: 'hourly', budget: 80, rate: 125, description: 'iOS app development' },
+        { id: 3, name: 'Brand Identity', clientId: 3, status: 'completed', budgetType: 'fixed', budget: 3000, rate: 85, description: 'Logo and brand guidelines' },
+      ];
+      
+      timeEntries = saved.timeEntries ? JSON.parse(saved.timeEntries) : [
+        { id: 1, projectId: 1, date: '2024-07-01', description: 'Homepage design', hours: 4, rate: 100, billable: true, invoiced: false },
+        { id: 2, projectId: 1, date: '2024-07-02', description: 'About page layout', hours: 3, rate: 100, billable: true, invoiced: false },
+        { id: 3, projectId: 2, date: '2024-07-01', description: 'User authentication', hours: 6, rate: 125, billable: true, invoiced: false },
+        { id: 4, projectId: 2, date: '2024-07-03', description: 'Dashboard UI', hours: 5, rate: 125, billable: true, invoiced: false },
+        { id: 5, projectId: 3, date: '2024-06-15', description: 'Logo concepts', hours: 4, rate: 85, billable: true, invoiced: true },
+        { id: 6, projectId: 1, date: '2024-07-05', description: 'Internal meeting', hours: 1, rate: 100, billable: false, invoiced: false },
+      ];
+      
+      invoices = saved.invoices ? JSON.parse(saved.invoices) : [
+        { id: 1, number: 'INV-1001', clientId: 3, date: '2024-06-20', due: '2024-07-20', items: [{desc: 'Brand Identity Project', qty: 1, rate: 3000}], taxRate: 0, status: 'paid' },
+        { id: 2, number: 'INV-1002', clientId: 1, date: '2024-06-25', due: '2024-07-25', items: [{desc: 'Website Consultation', qty: 5, rate: 100}], taxRate: 0, status: 'sent' },
+      ];
+      
+      estimates = saved.estimates ? JSON.parse(saved.estimates) : [
+        { id: 1, number: 'EST-101', clientId: 1, date: '2024-06-01', valid: '2024-07-01', items: [{desc: 'Website Redesign', qty: 1, rate: 8000}], status: 'accepted' },
+        { id: 2, number: 'EST-102', clientId: 2, date: '2024-06-15', valid: '2024-07-15', items: [{desc: 'Mobile App Development', qty: 80, rate: 125}], status: 'pending' },
+      ];
+      
+      expenses = saved.expenses ? JSON.parse(saved.expenses) : [
+        { id: 1, description: 'Adobe CC', amount: 54.99, date: '2024-07-01', category: 'software', projectId: null, billable: false },
+        { id: 2, description: 'Domain hosting', amount: 120, date: '2024-07-01', category: 'software', projectId: 1, billable: true },
+        { id: 3, description: 'Client lunch', amount: 65, date: '2024-07-03', category: 'travel', projectId: 1, billable: false },
+      ];
+      
+      mileage = saved.mileage ? JSON.parse(saved.mileage) : [
+        { id: 1, date: '2024-07-02', miles: 25, purpose: 'Client meeting - Acme', from: 'Home office', to: 'Acme HQ', projectId: 1 },
+        { id: 2, date: '2024-07-05', miles: 40, purpose: 'Site visit - TechStart', from: 'Home office', to: 'TechStart Inc', projectId: 2 },
+      ];
+      
+      nextInvNum = Math.max(1001, ...invoices.map(i => parseInt(i.number.replace('INV-', '')) || 0)) + 1;
+      nextEstNum = Math.max(101, ...estimates.map(e => parseInt(e.number.replace('EST-', '')) || 0)) + 1;
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('flbpro_clients', JSON.stringify(clients));
+      localStorage.setItem('flbpro_projects', JSON.stringify(projects));
+      localStorage.setItem('flbpro_timeEntries', JSON.stringify(timeEntries));
+      localStorage.setItem('flbpro_invoices', JSON.stringify(invoices));
+      localStorage.setItem('flbpro_estimates', JSON.stringify(estimates));
+      localStorage.setItem('flbpro_expenses', JSON.stringify(expenses));
+      localStorage.setItem('flbpro_mileage', JSON.stringify(mileage));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderTimeEntries();
+      renderProjects();
+      renderInvoices();
+      renderEstimates();
+      renderExpenses();
+      renderMileage();
+      renderClients();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const clientOpts = '<option value="">Select</option>' + clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      const projectOpts = '<option value="">Select</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      const projectOptsWithNone = '<option value="">None</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      
+      ['inv-client', 'est-client', 'proj-client', 'filter-inv-client'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = clientOpts;
+      });
+      ['time-project', 'timer-project', 'filter-time-project', 'exp-project', 'mile-project', 'filter-exp-project'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = id.includes('filter') || id === 'exp-project' || id === 'mile-project' ? projectOptsWithNone : projectOpts;
+      });
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const thisYear = new Date().getFullYear();
+      const thisMonth = new Date().getMonth();
+      
+      const paidInv = invoices.filter(i => i.status === 'paid' && new Date(i.date).getFullYear() === thisYear);
+      const revenue = paidInv.reduce((s, i) => s + getInvTotal(i), 0);
+      const outstanding = invoices.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((s, i) => s + getInvTotal(i), 0);
+      const monthHours = timeEntries.filter(t => { const d = new Date(t.date); return d.getFullYear() === thisYear && d.getMonth() === thisMonth; }).reduce((s, t) => s + t.hours, 0);
+      const ytdExp = expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((s, e) => s + e.amount, 0) + mileage.filter(m => new Date(m.date).getFullYear() === thisYear).reduce((s, m) => s + m.miles * MILEAGE_RATE, 0);
+      
+      document.getElementById('stat-revenue').textContent = formatCurrency(revenue);
+      document.getElementById('stat-outstanding').textContent = formatCurrency(outstanding);
+      document.getElementById('stat-hours').textContent = monthHours.toFixed(1);
+      document.getElementById('stat-expenses').textContent = formatCurrency(ytdExp);
+      document.getElementById('stat-profit').textContent = formatCurrency(revenue - ytdExp);
+      
+      // Active projects
+      const activeProjs = projects.filter(p => p.status === 'active');
+      document.getElementById('dash-projects').innerHTML = activeProjs.length ? activeProjs.map(p => {
+        const hours = timeEntries.filter(t => t.projectId === p.id).reduce((s, t) => s + t.hours, 0);
+        const spent = hours * p.rate;
+        let pct = 0, cls = '';
+        if (p.budgetType === 'fixed') { pct = Math.min(100, spent / p.budget * 100); }
+        else if (p.budgetType === 'hourly') { pct = Math.min(100, hours / p.budget * 100); }
+        if (pct > 90) cls = 'danger'; else if (pct > 75) cls = 'warning';
+        return `<div class="project-card">
+          <div class="project-header"><span class="project-name">${p.name}</span><span class="status-badge active">Active</span></div>
+          <div class="project-client">${clients.find(c => c.id === p.clientId)?.name || ''}</div>
+          ${p.budgetType !== 'none' ? `<div class="progress-bar"><div class="progress-fill ${cls}" style="width:${pct}%"></div></div>
+          <div style="font-size:0.75rem;color:var(--gray-500);">${p.budgetType === 'hourly' ? hours.toFixed(1) + ' / ' + p.budget + ' hrs' : formatCurrency(spent) + ' / ' + formatCurrency(p.budget)}</div>` : ''}
+        </div>`;
+      }).join('') : '<div class="empty-state">No active projects</div>';
+      
+      // Recent time
+      const recentTime = [...timeEntries].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      document.getElementById('dash-time').innerHTML = recentTime.map(t => {
+        const proj = projects.find(p => p.id === t.projectId);
+        return `<div class="time-entry">
+          <div class="time-entry-info"><div class="time-entry-project">${proj?.name || 'Unknown'}</div><div class="time-entry-desc">${t.description || 'No description'}</div></div>
+          <div class="time-entry-hours">${t.hours}h</div>
+        </div>`;
+      }).join('');
+      
+      // Pending invoices
+      const pending = invoices.filter(i => i.status === 'sent' || i.status === 'overdue');
+      document.getElementById('dash-invoices').innerHTML = pending.map(i => {
+        const client = clients.find(c => c.id === i.clientId);
+        return `<tr><td>${i.number}</td><td>${client?.name || ''}</td><td>${formatCurrency(getInvTotal(i))}</td><td>${formatDate(i.due)}</td><td><span class="status-badge ${i.status}">${i.status}</span></td></tr>`;
+      }).join('') || '<tr><td colspan="5" class="empty-state">No pending invoices</td></tr>';
+    }
+    
+    // Timer
+    function startTimer() {
+      if (!document.getElementById('timer-project').value) { showToast('Select a project first', 'error'); return; }
+      timerRunning = true;
+      document.getElementById('timer-start').style.display = 'none';
+      document.getElementById('timer-pause').style.display = '';
+      document.getElementById('timer-stop').style.display = '';
+      timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+      }, 1000);
+    }
+    
+    function pauseTimer() {
+      timerRunning = false;
+      clearInterval(timerInterval);
+      document.getElementById('timer-pause').style.display = 'none';
+      document.getElementById('timer-start').textContent = '▶ Resume';
+      document.getElementById('timer-start').style.display = '';
+    }
+    
+    function stopTimer() {
+      clearInterval(timerInterval);
+      const hours = Math.round(timerSeconds / 3600 * 4) / 4; // Round to 15 min
+      if (hours > 0) {
+        const projId = parseInt(document.getElementById('timer-project').value);
+        const proj = projects.find(p => p.id === projId);
+        timeEntries.push({
+          id: Math.max(0, ...timeEntries.map(t => t.id)) + 1,
+          projectId: projId,
+          date: formatDateInput(new Date()),
+          description: document.getElementById('timer-desc').value || 'Timer entry',
+          hours: hours,
+          rate: proj?.rate || 0,
+          billable: true,
+          invoiced: false
+        });
+        saveData();
+        renderAll();
+        showToast(`Logged ${hours} hours`);
+      }
+      timerSeconds = 0;
+      timerRunning = false;
+      updateTimerDisplay();
+      document.getElementById('timer-start').textContent = '▶ Start';
+      document.getElementById('timer-start').style.display = '';
+      document.getElementById('timer-pause').style.display = 'none';
+      document.getElementById('timer-stop').style.display = 'none';
+      document.getElementById('timer-desc').value = '';
+    }
+    
+    function updateTimerDisplay() {
+      const h = Math.floor(timerSeconds / 3600);
+      const m = Math.floor((timerSeconds % 3600) / 60);
+      const s = timerSeconds % 60;
+      document.getElementById('timer-display').textContent = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    }
+    
+    // Time Entries
+    function renderTimeEntries() {
+      const projFilter = document.getElementById('filter-time-project').value;
+      const fromFilter = document.getElementById('filter-time-from').value;
+      const toFilter = document.getElementById('filter-time-to').value;
+      
+      let filtered = [...timeEntries];
+      if (projFilter) filtered = filtered.filter(t => t.projectId === parseInt(projFilter));
+      if (fromFilter) filtered = filtered.filter(t => t.date >= fromFilter);
+      if (toFilter) filtered = filtered.filter(t => t.date <= toFilter);
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('time-table').innerHTML = filtered.map(t => {
+        const proj = projects.find(p => p.id === t.projectId);
+        return `<tr>
+          <td>${formatDate(t.date)}</td>
+          <td>${proj?.name || 'Unknown'}</td>
+          <td>${t.description || '-'}</td>
+          <td>${t.hours}h</td>
+          <td>${t.billable ? '✓ $' + (t.hours * t.rate).toFixed(0) : '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editTimeEntry(${t.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openTimeModal(id = null) {
+      if (id) {
+        const t = timeEntries.find(x => x.id === id);
+        document.getElementById('time-modal-title').textContent = 'Edit Time Entry';
+        document.getElementById('time-id').value = id;
+        document.getElementById('time-project').value = t.projectId;
+        document.getElementById('time-date').value = t.date;
+        document.getElementById('time-description').value = t.description || '';
+        document.getElementById('time-hours').value = t.hours;
+        document.getElementById('time-rate').value = t.rate;
+        document.getElementById('time-billable').value = t.billable ? 'yes' : 'no';
+        document.getElementById('time-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('time-modal-title').textContent = 'Add Time Entry';
+        document.getElementById('time-id').value = '';
+        document.getElementById('time-project').value = '';
+        document.getElementById('time-date').value = formatDateInput(new Date());
+        document.getElementById('time-description').value = '';
+        document.getElementById('time-hours').value = '';
+        document.getElementById('time-rate').value = '';
+        document.getElementById('time-billable').value = 'yes';
+        document.getElementById('time-delete-btn').style.display = 'none';
+      }
+      document.getElementById('time-modal').classList.add('active');
+    }
+    
+    function editTimeEntry(id) { openTimeModal(id); }
+    
+    function saveTimeEntry() {
+      const id = document.getElementById('time-id').value;
+      const projectId = parseInt(document.getElementById('time-project').value);
+      const date = document.getElementById('time-date').value;
+      const description = document.getElementById('time-description').value.trim();
+      const hours = parseFloat(document.getElementById('time-hours').value);
+      const rate = parseFloat(document.getElementById('time-rate').value) || 0;
+      const billable = document.getElementById('time-billable').value === 'yes';
+      
+      if (!projectId || !date || !hours) { showToast('Fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = timeEntries.findIndex(t => t.id === parseInt(id));
+        timeEntries[i] = { ...timeEntries[i], projectId, date, description, hours, rate, billable };
+        showToast('Time entry updated');
+      } else {
+        timeEntries.push({ id: Math.max(0, ...timeEntries.map(t => t.id)) + 1, projectId, date, description, hours, rate, billable, invoiced: false });
+        showToast('Time entry added');
+      }
+      saveData(); renderAll(); closeModal('time-modal');
+    }
+    
+    function deleteTimeEntry() {
+      const id = parseInt(document.getElementById('time-id').value);
+      if (!confirm('Delete this entry?')) return;
+      timeEntries = timeEntries.filter(t => t.id !== id);
+      saveData(); renderAll(); closeModal('time-modal'); showToast('Deleted');
+    }
+    
+    // Projects
+    function renderProjects() {
+      document.getElementById('projects-list').innerHTML = projects.map(p => {
+        const client = clients.find(c => c.id === p.clientId);
+        const hours = timeEntries.filter(t => t.projectId === p.id).reduce((s, t) => s + t.hours, 0);
+        const spent = hours * p.rate;
+        let pct = 0;
+        if (p.budgetType === 'fixed') pct = Math.min(100, spent / p.budget * 100);
+        else if (p.budgetType === 'hourly') pct = Math.min(100, hours / p.budget * 100);
+        
+        return `<div class="project-card">
+          <div class="project-header">
+            <span class="project-name">${p.name}</span>
+            <span class="status-badge ${p.status}">${p.status}</span>
+          </div>
+          <div class="project-client">${client?.name || 'Unknown'} • ${hours.toFixed(1)} hours logged</div>
+          ${p.budgetType !== 'none' ? `<div class="progress-bar"><div class="progress-fill ${pct > 90 ? 'danger' : pct > 75 ? 'warning' : ''}" style="width:${pct}%"></div></div>
+          <div style="font-size:0.75rem;color:var(--gray-500);">${p.budgetType === 'hourly' ? hours.toFixed(1) + ' / ' + p.budget + ' hrs' : formatCurrency(spent) + ' / ' + formatCurrency(p.budget)}</div>` : ''}
+          <div style="margin-top:0.5rem;"><button class="btn btn-sm btn-secondary" onclick="editProject(${p.id})">Edit</button></div>
+        </div>`;
+      }).join('');
+    }
+    
+    function openProjectModal(id = null) {
+      if (id) {
+        const p = projects.find(x => x.id === id);
+        document.getElementById('project-modal-title').textContent = 'Edit Project';
+        document.getElementById('proj-id').value = id;
+        document.getElementById('proj-name').value = p.name;
+        document.getElementById('proj-client').value = p.clientId;
+        document.getElementById('proj-status').value = p.status;
+        document.getElementById('proj-budget-type').value = p.budgetType;
+        document.getElementById('proj-budget').value = p.budget || '';
+        document.getElementById('proj-rate').value = p.rate || '';
+        document.getElementById('proj-description').value = p.description || '';
+        document.getElementById('proj-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('project-modal-title').textContent = 'New Project';
+        document.getElementById('proj-id').value = '';
+        document.getElementById('proj-name').value = '';
+        document.getElementById('proj-client').value = '';
+        document.getElementById('proj-status').value = 'active';
+        document.getElementById('proj-budget-type').value = 'none';
+        document.getElementById('proj-budget').value = '';
+        document.getElementById('proj-rate').value = '';
+        document.getElementById('proj-description').value = '';
+        document.getElementById('proj-delete-btn').style.display = 'none';
+      }
+      document.getElementById('project-modal').classList.add('active');
+    }
+    
+    function editProject(id) { openProjectModal(id); }
+    
+    function saveProject() {
+      const id = document.getElementById('proj-id').value;
+      const name = document.getElementById('proj-name').value.trim();
+      const clientId = parseInt(document.getElementById('proj-client').value);
+      const status = document.getElementById('proj-status').value;
+      const budgetType = document.getElementById('proj-budget-type').value;
+      const budget = parseFloat(document.getElementById('proj-budget').value) || 0;
+      const rate = parseFloat(document.getElementById('proj-rate').value) || 0;
+      const description = document.getElementById('proj-description').value.trim();
+      
+      if (!name || !clientId) { showToast('Enter name and client', 'error'); return; }
+      
+      if (id) {
+        const i = projects.findIndex(p => p.id === parseInt(id));
+        projects[i] = { ...projects[i], name, clientId, status, budgetType, budget, rate, description };
+        showToast('Project updated');
+      } else {
+        projects.push({ id: Math.max(0, ...projects.map(p => p.id)) + 1, name, clientId, status, budgetType, budget, rate, description });
+        showToast('Project created');
+      }
+      saveData(); renderAll(); closeModal('project-modal');
+    }
+    
+    function deleteProject() {
+      const id = parseInt(document.getElementById('proj-id').value);
+      if (!confirm('Delete project?')) return;
+      projects = projects.filter(p => p.id !== id);
+      saveData(); renderAll(); closeModal('project-modal'); showToast('Deleted');
+    }
+    
+    // Invoices
+    function getInvTotal(inv) {
+      const sub = inv.items.reduce((s, i) => s + (i.qty * i.rate), 0);
+      return sub + sub * (inv.taxRate || 0) / 100;
+    }
+    
+    function renderInvoices() {
+      const statusFilter = document.getElementById('filter-inv-status').value;
+      const clientFilter = document.getElementById('filter-inv-client').value;
+      let filtered = [...invoices];
+      if (statusFilter) filtered = filtered.filter(i => i.status === statusFilter);
+      if (clientFilter) filtered = filtered.filter(i => i.clientId === parseInt(clientFilter));
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // Update overdue
+      const today = new Date();
+      filtered.forEach(i => { if (i.status === 'sent' && new Date(i.due) < today) i.status = 'overdue'; });
+      
+      document.getElementById('invoices-table').innerHTML = filtered.map(i => {
+        const client = clients.find(c => c.id === i.clientId);
+        return `<tr>
+          <td>${i.number}</td><td>${client?.name || ''}</td><td>${formatDate(i.date)}</td><td>${formatDate(i.due)}</td>
+          <td>${formatCurrency(getInvTotal(i))}</td><td><span class="status-badge ${i.status}">${i.status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editInvoice(${i.id})">Edit</button>
+            ${i.status !== 'paid' ? `<button class="btn btn-sm btn-success" onclick="markPaid(${i.id})">Paid</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openInvoiceModal(id = null) {
+      invLineItems = [];
+      document.getElementById('unbilled-time-section').style.display = 'none';
+      
+      if (id) {
+        const inv = invoices.find(i => i.id === id);
+        document.getElementById('inv-modal-title').textContent = 'Edit Invoice';
+        document.getElementById('inv-id').value = id;
+        document.getElementById('inv-client').value = inv.clientId;
+        document.getElementById('inv-number').value = inv.number;
+        document.getElementById('inv-date').value = inv.date;
+        document.getElementById('inv-due').value = inv.due;
+        document.getElementById('inv-tax-rate').value = inv.taxRate || 0;
+        document.getElementById('inv-status').value = inv.status;
+        invLineItems = [...inv.items];
+        document.getElementById('inv-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('inv-modal-title').textContent = 'New Invoice';
+        document.getElementById('inv-id').value = '';
+        document.getElementById('inv-client').value = '';
+        document.getElementById('inv-number').value = 'INV-' + nextInvNum;
+        document.getElementById('inv-date').value = formatDateInput(new Date());
+        const due = new Date(); due.setDate(due.getDate() + 30);
+        document.getElementById('inv-due').value = formatDateInput(due);
+        document.getElementById('inv-tax-rate').value = 0;
+        document.getElementById('inv-status').value = 'draft';
+        invLineItems = [{ desc: '', qty: 1, rate: 0 }];
+        document.getElementById('inv-delete-btn').style.display = 'none';
+      }
+      renderInvLineItems();
+      document.getElementById('invoice-modal').classList.add('active');
+    }
+    
+    function editInvoice(id) { openInvoiceModal(id); }
+    
+    function loadUnbilledTime() {
+      const clientId = parseInt(document.getElementById('inv-client').value);
+      if (!clientId) { document.getElementById('unbilled-time-section').style.display = 'none'; return; }
+      
+      const clientProjects = projects.filter(p => p.clientId === clientId).map(p => p.id);
+      const unbilled = timeEntries.filter(t => clientProjects.includes(t.projectId) && t.billable && !t.invoiced);
+      
+      if (unbilled.length) {
+        document.getElementById('unbilled-time-section').style.display = 'block';
+        document.getElementById('unbilled-time-list').innerHTML = unbilled.map(t => {
+          const proj = projects.find(p => p.id === t.projectId);
+          return `<label style="display:flex;gap:0.5rem;padding:0.25rem 0;"><input type="checkbox" value="${t.id}"> ${formatDate(t.date)} - ${proj?.name}: ${t.description || 'No desc'} (${t.hours}h × $${t.rate})</label>`;
+        }).join('');
+      } else {
+        document.getElementById('unbilled-time-section').style.display = 'none';
+      }
+    }
+    
+    function addUnbilledToInvoice() {
+      const checkboxes = document.querySelectorAll('#unbilled-time-list input:checked');
+      checkboxes.forEach(cb => {
+        const t = timeEntries.find(x => x.id === parseInt(cb.value));
+        if (t) {
+          const proj = projects.find(p => p.id === t.projectId);
+          invLineItems.push({ desc: `${proj?.name}: ${t.description || 'Work'} (${formatDate(t.date)})`, qty: t.hours, rate: t.rate, timeId: t.id });
+        }
+      });
+      renderInvLineItems();
+      document.getElementById('unbilled-time-section').style.display = 'none';
+    }
+    
+    function renderInvLineItems() {
+      document.getElementById('inv-line-items').innerHTML = invLineItems.map((item, i) => `
+        <div class="line-item-row">
+          <input type="text" placeholder="Description" value="${item.desc}" onchange="invLineItems[${i}].desc=this.value">
+          <input type="number" placeholder="Qty" value="${item.qty}" min="0" step="0.25" onchange="invLineItems[${i}].qty=parseFloat(this.value)||0;calcInvoice()">
+          <input type="number" placeholder="Rate" value="${item.rate}" min="0" step="1" onchange="invLineItems[${i}].rate=parseFloat(this.value)||0;calcInvoice()">
+          <span style="text-align:right;min-width:70px;">${formatCurrency(item.qty * item.rate)}</span>
+          <button type="button" class="remove-item" onclick="removeInvItem(${i})">×</button>
+        </div>
+      `).join('');
+      calcInvoice();
+    }
+    
+    function addInvoiceItem() { invLineItems.push({ desc: '', qty: 1, rate: 0 }); renderInvLineItems(); }
+    function removeInvItem(i) { invLineItems.splice(i, 1); renderInvLineItems(); }
+    
+    function calcInvoice() {
+      const sub = invLineItems.reduce((s, i) => s + (i.qty * i.rate), 0);
+      const tax = sub * (parseFloat(document.getElementById('inv-tax-rate').value) || 0) / 100;
+      document.getElementById('inv-subtotal').textContent = formatCurrency(sub);
+      document.getElementById('inv-tax').textContent = formatCurrency(tax);
+      document.getElementById('inv-total').textContent = formatCurrency(sub + tax);
+    }
+    
+    function saveInvoice() {
+      const id = document.getElementById('inv-id').value;
+      const clientId = parseInt(document.getElementById('inv-client').value);
+      const number = document.getElementById('inv-number').value;
+      const date = document.getElementById('inv-date').value;
+      const due = document.getElementById('inv-due').value;
+      const taxRate = parseFloat(document.getElementById('inv-tax-rate').value) || 0;
+      const status = document.getElementById('inv-status').value;
+      
+      if (!clientId || !date || !due || !invLineItems.length) { showToast('Fill required fields', 'error'); return; }
+      
+      // Mark time entries as invoiced
+      invLineItems.filter(i => i.timeId).forEach(item => {
+        const t = timeEntries.find(x => x.id === item.timeId);
+        if (t) t.invoiced = true;
+      });
+      
+      const items = invLineItems.map(i => ({ desc: i.desc, qty: i.qty, rate: i.rate }));
+      
+      if (id) {
+        const i = invoices.findIndex(inv => inv.id === parseInt(id));
+        invoices[i] = { ...invoices[i], clientId, date, due, items, taxRate, status };
+        showToast('Invoice updated');
+      } else {
+        invoices.push({ id: Math.max(0, ...invoices.map(i => i.id)) + 1, number, clientId, date, due, items, taxRate, status });
+        nextInvNum++;
+        showToast('Invoice created');
+      }
+      saveData(); renderAll(); closeModal('invoice-modal');
+    }
+    
+    function deleteInvoice() {
+      const id = parseInt(document.getElementById('inv-id').value);
+      if (!confirm('Delete invoice?')) return;
+      invoices = invoices.filter(i => i.id !== id);
+      saveData(); renderAll(); closeModal('invoice-modal'); showToast('Deleted');
+    }
+    
+    function markPaid(id) {
+      const inv = invoices.find(i => i.id === id);
+      inv.status = 'paid';
+      saveData(); renderAll(); showToast('Marked as paid');
+    }
+    
+    // Estimates
+    function renderEstimates() {
+      document.getElementById('estimates-table').innerHTML = estimates.map(e => {
+        const client = clients.find(c => c.id === e.clientId);
+        const total = e.items.reduce((s, i) => s + (i.qty * i.rate), 0);
+        return `<tr>
+          <td>${e.number}</td><td>${client?.name || ''}</td><td>${formatDate(e.date)}</td><td>${formatDate(e.valid)}</td>
+          <td>${formatCurrency(total)}</td><td><span class="status-badge ${e.status}">${e.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editEstimate(${e.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openEstimateModal(id = null) {
+      estLineItems = [];
+      if (id) {
+        const e = estimates.find(x => x.id === id);
+        document.getElementById('est-modal-title').textContent = 'Edit Estimate';
+        document.getElementById('est-id').value = id;
+        document.getElementById('est-client').value = e.clientId;
+        document.getElementById('est-number').value = e.number;
+        document.getElementById('est-date').value = e.date;
+        document.getElementById('est-valid').value = e.valid;
+        document.getElementById('est-status').value = e.status;
+        estLineItems = [...e.items];
+        document.getElementById('est-delete-btn').style.display = 'block';
+        document.getElementById('est-convert-btn').style.display = e.status === 'accepted' ? '' : 'none';
+      } else {
+        document.getElementById('est-modal-title').textContent = 'New Estimate';
+        document.getElementById('est-id').value = '';
+        document.getElementById('est-client').value = '';
+        document.getElementById('est-number').value = 'EST-' + nextEstNum;
+        document.getElementById('est-date').value = formatDateInput(new Date());
+        const valid = new Date(); valid.setDate(valid.getDate() + 30);
+        document.getElementById('est-valid').value = formatDateInput(valid);
+        document.getElementById('est-status').value = 'draft';
+        estLineItems = [{ desc: '', qty: 1, rate: 0 }];
+        document.getElementById('est-delete-btn').style.display = 'none';
+        document.getElementById('est-convert-btn').style.display = 'none';
+      }
+      renderEstLineItems();
+      document.getElementById('estimate-modal').classList.add('active');
+    }
+    
+    function editEstimate(id) { openEstimateModal(id); }
+    
+    function renderEstLineItems() {
+      document.getElementById('est-line-items').innerHTML = estLineItems.map((item, i) => `
+        <div class="line-item-row">
+          <input type="text" placeholder="Description" value="${item.desc}" onchange="estLineItems[${i}].desc=this.value">
+          <input type="number" placeholder="Qty" value="${item.qty}" min="0" step="1" onchange="estLineItems[${i}].qty=parseFloat(this.value)||0;calcEstimate()">
+          <input type="number" placeholder="Rate" value="${item.rate}" min="0" step="1" onchange="estLineItems[${i}].rate=parseFloat(this.value)||0;calcEstimate()">
+          <span style="text-align:right;min-width:70px;">${formatCurrency(item.qty * item.rate)}</span>
+          <button type="button" class="remove-item" onclick="removeEstItem(${i})">×</button>
+        </div>
+      `).join('');
+      calcEstimate();
+    }
+    
+    function addEstimateItem() { estLineItems.push({ desc: '', qty: 1, rate: 0 }); renderEstLineItems(); }
+    function removeEstItem(i) { estLineItems.splice(i, 1); renderEstLineItems(); }
+    function calcEstimate() {
+      document.getElementById('est-total').textContent = formatCurrency(estLineItems.reduce((s, i) => s + (i.qty * i.rate), 0));
+    }
+    
+    function saveEstimate() {
+      const id = document.getElementById('est-id').value;
+      const clientId = parseInt(document.getElementById('est-client').value);
+      const number = document.getElementById('est-number').value;
+      const date = document.getElementById('est-date').value;
+      const valid = document.getElementById('est-valid').value;
+      const status = document.getElementById('est-status').value;
+      
+      if (!clientId || !estLineItems.length) { showToast('Fill required fields', 'error'); return; }
+      
+      const items = estLineItems.map(i => ({ desc: i.desc, qty: i.qty, rate: i.rate }));
+      
+      if (id) {
+        const i = estimates.findIndex(e => e.id === parseInt(id));
+        estimates[i] = { ...estimates[i], clientId, date, valid, items, status };
+        showToast('Estimate updated');
+      } else {
+        estimates.push({ id: Math.max(0, ...estimates.map(e => e.id)) + 1, number, clientId, date, valid, items, status });
+        nextEstNum++;
+        showToast('Estimate created');
+      }
+      saveData(); renderAll(); closeModal('estimate-modal');
+    }
+    
+    function deleteEstimate() {
+      const id = parseInt(document.getElementById('est-id').value);
+      if (!confirm('Delete estimate?')) return;
+      estimates = estimates.filter(e => e.id !== id);
+      saveData(); renderAll(); closeModal('estimate-modal'); showToast('Deleted');
+    }
+    
+    function convertToInvoice() {
+      const id = parseInt(document.getElementById('est-id').value);
+      const est = estimates.find(e => e.id === id);
+      closeModal('estimate-modal');
+      openInvoiceModal();
+      document.getElementById('inv-client').value = est.clientId;
+      invLineItems = [...est.items];
+      renderInvLineItems();
+      showToast('Estimate converted - save to create invoice');
+    }
+    
+    // Expenses
+    function renderExpenses() {
+      const catFilter = document.getElementById('filter-exp-category').value;
+      const projFilter = document.getElementById('filter-exp-project').value;
+      let filtered = [...expenses];
+      if (catFilter) filtered = filtered.filter(e => e.category === catFilter);
+      if (projFilter) filtered = filtered.filter(e => e.projectId === parseInt(projFilter));
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('expenses-table').innerHTML = filtered.map(e => {
+        const proj = projects.find(p => p.id === e.projectId);
+        return `<tr>
+          <td>${formatDate(e.date)}</td><td>${e.description}</td><td>${e.category}</td>
+          <td>${proj?.name || '-'}</td><td>${formatCurrency(e.amount)}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editExpense(${e.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openExpenseModal(id = null) {
+      if (id) {
+        const e = expenses.find(x => x.id === id);
+        document.getElementById('exp-modal-title').textContent = 'Edit Expense';
+        document.getElementById('exp-id').value = id;
+        document.getElementById('exp-description').value = e.description;
+        document.getElementById('exp-amount').value = e.amount;
+        document.getElementById('exp-date').value = e.date;
+        document.getElementById('exp-category').value = e.category;
+        document.getElementById('exp-project').value = e.projectId || '';
+        document.getElementById('exp-billable').checked = e.billable;
+        document.getElementById('exp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('exp-modal-title').textContent = 'Add Expense';
+        document.getElementById('exp-id').value = '';
+        document.getElementById('exp-description').value = '';
+        document.getElementById('exp-amount').value = '';
+        document.getElementById('exp-date').value = formatDateInput(new Date());
+        document.getElementById('exp-category').value = 'software';
+        document.getElementById('exp-project').value = '';
+        document.getElementById('exp-billable').checked = false;
+        document.getElementById('exp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('expense-modal').classList.add('active');
+    }
+    
+    function editExpense(id) { openExpenseModal(id); }
+    
+    function saveExpense() {
+      const id = document.getElementById('exp-id').value;
+      const description = document.getElementById('exp-description').value.trim();
+      const amount = parseFloat(document.getElementById('exp-amount').value);
+      const date = document.getElementById('exp-date').value;
+      const category = document.getElementById('exp-category').value;
+      const projectId = document.getElementById('exp-project').value ? parseInt(document.getElementById('exp-project').value) : null;
+      const billable = document.getElementById('exp-billable').checked;
+      
+      if (!description || !amount || !date) { showToast('Fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = expenses.findIndex(e => e.id === parseInt(id));
+        expenses[i] = { ...expenses[i], description, amount, date, category, projectId, billable };
+        showToast('Expense updated');
+      } else {
+        expenses.push({ id: Math.max(0, ...expenses.map(e => e.id)) + 1, description, amount, date, category, projectId, billable });
+        showToast('Expense added');
+      }
+      saveData(); renderAll(); closeModal('expense-modal');
+    }
+    
+    function deleteExpense() {
+      const id = parseInt(document.getElementById('exp-id').value);
+      if (!confirm('Delete?')) return;
+      expenses = expenses.filter(e => e.id !== id);
+      saveData(); renderAll(); closeModal('expense-modal'); showToast('Deleted');
+    }
+    
+    // Mileage
+    function renderMileage() {
+      const thisYear = new Date().getFullYear();
+      const ytdMiles = mileage.filter(m => new Date(m.date).getFullYear() === thisYear).reduce((s, m) => s + m.miles, 0);
+      document.getElementById('stat-miles-ytd').textContent = ytdMiles.toFixed(1);
+      document.getElementById('stat-mileage-value').textContent = formatCurrency(ytdMiles * MILEAGE_RATE);
+      
+      const sorted = [...mileage].sort((a, b) => new Date(b.date) - new Date(a.date));
+      document.getElementById('mileage-table').innerHTML = sorted.map(m => {
+        const proj = projects.find(p => p.id === m.projectId);
+        return `<tr>
+          <td>${formatDate(m.date)}</td><td>${m.purpose}</td><td>${m.from} → ${m.to}</td>
+          <td>${m.miles}</td><td>${formatCurrency(m.miles * MILEAGE_RATE)}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editMileage(${m.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openMileageModal(id = null) {
+      if (id) {
+        const m = mileage.find(x => x.id === id);
+        document.getElementById('mile-modal-title').textContent = 'Edit Trip';
+        document.getElementById('mile-id').value = id;
+        document.getElementById('mile-date').value = m.date;
+        document.getElementById('mile-miles').value = m.miles;
+        document.getElementById('mile-purpose').value = m.purpose;
+        document.getElementById('mile-from').value = m.from || '';
+        document.getElementById('mile-to').value = m.to || '';
+        document.getElementById('mile-project').value = m.projectId || '';
+        document.getElementById('mile-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('mile-modal-title').textContent = 'Log Trip';
+        document.getElementById('mile-id').value = '';
+        document.getElementById('mile-date').value = formatDateInput(new Date());
+        document.getElementById('mile-miles').value = '';
+        document.getElementById('mile-purpose').value = '';
+        document.getElementById('mile-from').value = '';
+        document.getElementById('mile-to').value = '';
+        document.getElementById('mile-project').value = '';
+        document.getElementById('mile-delete-btn').style.display = 'none';
+      }
+      document.getElementById('mileage-modal').classList.add('active');
+    }
+    
+    function editMileage(id) { openMileageModal(id); }
+    
+    function saveMileage() {
+      const id = document.getElementById('mile-id').value;
+      const date = document.getElementById('mile-date').value;
+      const miles = parseFloat(document.getElementById('mile-miles').value);
+      const purpose = document.getElementById('mile-purpose').value.trim();
+      const from = document.getElementById('mile-from').value.trim();
+      const to = document.getElementById('mile-to').value.trim();
+      const projectId = document.getElementById('mile-project').value ? parseInt(document.getElementById('mile-project').value) : null;
+      
+      if (!date || !miles || !purpose) { showToast('Fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = mileage.findIndex(m => m.id === parseInt(id));
+        mileage[i] = { ...mileage[i], date, miles, purpose, from, to, projectId };
+        showToast('Trip updated');
+      } else {
+        mileage.push({ id: Math.max(0, ...mileage.map(m => m.id)) + 1, date, miles, purpose, from, to, projectId });
+        showToast('Trip logged');
+      }
+      saveData(); renderAll(); closeModal('mileage-modal');
+    }
+    
+    function deleteMileage() {
+      const id = parseInt(document.getElementById('mile-id').value);
+      if (!confirm('Delete?')) return;
+      mileage = mileage.filter(m => m.id !== id);
+      saveData(); renderAll(); closeModal('mileage-modal'); showToast('Deleted');
+    }
+    
+    // Clients
+    function renderClients() {
+      document.getElementById('clients-table').innerHTML = clients.map(c => {
+        const clientProjects = projects.filter(p => p.clientId === c.id);
+        const clientInvoices = invoices.filter(i => i.clientId === c.id);
+        const totalBilled = clientInvoices.reduce((s, i) => s + getInvTotal(i), 0);
+        const outstanding = clientInvoices.filter(i => i.status !== 'paid').reduce((s, i) => s + getInvTotal(i), 0);
+        return `<tr>
+          <td><strong>${c.name}</strong></td><td>${c.email || '-'}</td>
+          <td>${clientProjects.length}</td><td>${formatCurrency(totalBilled)}</td>
+          <td>${outstanding > 0 ? `<span style="color:var(--warning)">${formatCurrency(outstanding)}</span>` : '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editClient(${c.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openClientModal(id = null) {
+      if (id) {
+        const c = clients.find(x => x.id === id);
+        document.getElementById('client-modal-title').textContent = 'Edit Client';
+        document.getElementById('client-id').value = id;
+        document.getElementById('client-name').value = c.name;
+        document.getElementById('client-email').value = c.email || '';
+        document.getElementById('client-phone').value = c.phone || '';
+        document.getElementById('client-address').value = c.address || '';
+        document.getElementById('client-rate').value = c.rate || '';
+        document.getElementById('client-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('client-modal-title').textContent = 'Add Client';
+        document.getElementById('client-id').value = '';
+        document.getElementById('client-name').value = '';
+        document.getElementById('client-email').value = '';
+        document.getElementById('client-phone').value = '';
+        document.getElementById('client-address').value = '';
+        document.getElementById('client-rate').value = '';
+        document.getElementById('client-delete-btn').style.display = 'none';
+      }
+      document.getElementById('client-modal').classList.add('active');
+    }
+    
+    function editClient(id) { openClientModal(id); }
+    
+    function saveClient() {
+      const id = document.getElementById('client-id').value;
+      const name = document.getElementById('client-name').value.trim();
+      const email = document.getElementById('client-email').value.trim();
+      const phone = document.getElementById('client-phone').value.trim();
+      const address = document.getElementById('client-address').value.trim();
+      const rate = parseFloat(document.getElementById('client-rate').value) || 0;
+      
+      if (!name) { showToast('Enter client name', 'error'); return; }
+      
+      if (id) {
+        const i = clients.findIndex(c => c.id === parseInt(id));
+        clients[i] = { ...clients[i], name, email, phone, address, rate };
+        showToast('Client updated');
+      } else {
+        clients.push({ id: Math.max(0, ...clients.map(c => c.id)) + 1, name, email, phone, address, rate });
+        showToast('Client added');
+      }
+      saveData(); renderAll(); closeModal('client-modal');
+    }
+    
+    function deleteClient() {
+      const id = parseInt(document.getElementById('client-id').value);
+      if (!confirm('Delete client?')) return;
+      clients = clients.filter(c => c.id !== id);
+      saveData(); renderAll(); closeModal('client-modal'); showToast('Deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const projHours = {};
+      timeEntries.filter(t => t.billable).forEach(t => {
+        const proj = projects.find(p => p.id === t.projectId);
+        const name = proj?.name || 'Unknown';
+        projHours[name] = (projHours[name] || 0) + t.hours;
+      });
+      
+      const maxHours = Math.max(...Object.values(projHours), 1);
+      document.getElementById('hours-by-project').innerHTML = Object.entries(projHours).sort((a, b) => b[1] - a[1]).map(([name, hours]) => `
+        <div style="display:flex;align-items:center;margin-bottom:0.75rem;">
+          <span style="width:150px;font-size:0.875rem;">${name}</span>
+          <div style="flex:1;height:20px;background:var(--gray-200);border-radius:4px;margin:0 1rem;">
+            <div style="width:${hours/maxHours*100}%;height:100%;background:var(--primary);border-radius:4px;"></div>
+          </div>
+          <span style="width:60px;text-align:right;font-weight:600;">${hours.toFixed(1)}h</span>
+        </div>
+      `).join('');
+    }
+    
+    function exportInvoices() { downloadCSV([['Invoice', 'Client', 'Date', 'Amount', 'Status'], ...invoices.map(i => [i.number, clients.find(c => c.id === i.clientId)?.name, i.date, getInvTotal(i), i.status])], 'invoices.csv'); showToast('Exported'); }
+    function exportExpenses() { downloadCSV([['Date', 'Description', 'Category', 'Amount'], ...expenses.map(e => [e.date, e.description, e.category, e.amount])], 'expenses.csv'); showToast('Exported'); }
+    function exportTimeReport() { downloadCSV([['Date', 'Project', 'Description', 'Hours', 'Billable', 'Amount'], ...timeEntries.map(t => [t.date, projects.find(p => p.id === t.projectId)?.name, t.description, t.hours, t.billable ? 'Yes' : 'No', t.hours * t.rate])], 'time-report.csv'); showToast('Exported'); }
+    function exportProjectReport() { downloadCSV([['Project', 'Client', 'Hours', 'Budget', 'Status'], ...projects.map(p => [p.name, clients.find(c => c.id === p.clientId)?.name, timeEntries.filter(t => t.projectId === p.id).reduce((s, t) => s + t.hours, 0), p.budget || 'N/A', p.status])], 'projects.csv'); showToast('Exported'); }
+    function exportMileageReport() { downloadCSV([['Date', 'Purpose', 'Miles', 'Value'], ...mileage.map(m => [m.date, m.purpose, m.miles, m.miles * MILEAGE_RATE])], 'mileage.csv'); showToast('Exported'); }
+    function exportProfitLoss() {
+      const rev = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + getInvTotal(i), 0);
+      const exp = expenses.reduce((s, e) => s + e.amount, 0) + mileage.reduce((s, m) => s + m.miles * MILEAGE_RATE, 0);
+      downloadCSV([['Category', 'Amount'], ['Revenue', rev], ['Expenses', exp], ['Net Profit', rev - exp]], 'profit-loss.csv');
+      showToast('Exported');
+    }
+    function exportTaxSummary() {
+      const rev = invoices.filter(i => i.status === 'paid').reduce((s, i) => s + getInvTotal(i), 0);
+      const exp = expenses.reduce((s, e) => s + e.amount, 0);
+      const miles = mileage.reduce((s, m) => s + m.miles, 0);
+      downloadCSV([['Item', 'Amount'], ['Total Revenue', rev], ['Total Expenses', exp], ['Mileage (' + miles + ' mi @ $' + MILEAGE_RATE + ')', miles * MILEAGE_RATE], ['Total Deductions', exp + miles * MILEAGE_RATE], ['Net Income', rev - exp - miles * MILEAGE_RATE]], 'tax-summary.csv');
+      showToast('Exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatCurrency(n) { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+    function formatDateInput(d) { return d.toISOString().split('T')[0]; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    function showToast(msg, type = 'success') { const t = document.createElement('div'); t.className = `toast ${type}`; t.textContent = msg; document.getElementById('toast-container').appendChild(t); setTimeout(() => t.remove(), 3000); }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
