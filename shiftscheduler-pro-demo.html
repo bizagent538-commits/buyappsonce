@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftScheduler Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 16px; color: #fff; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 14px; color: #fff; }
+    .user-name { font-size: 12px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 14px; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(59,130,246,0.2); color: #fff; font-weight: 500; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 24px; max-width: 400px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; }
+    .schedule-grid { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; overflow: hidden; }
+    .schedule-header { display: flex; background: #f8fafc; border-bottom: 1px solid #e2e8f0; font-weight: 600; font-size: 13px; }
+    .schedule-row { display: flex; border-bottom: 1px solid #e2e8f0; }
+    .employee-col { width: 150px; padding: 12px; display: flex; align-items: center; gap: 8px; border-right: 1px solid #e2e8f0; font-size: 13px; }
+    .day-col { flex: 1; padding: 8px; text-align: center; border-right: 1px solid #e2e8f0; min-height: 80px; }
+    .day-cell { cursor: pointer; display: flex; flex-direction: column; gap: 4px; }
+    .hours-col { width: 70px; padding: 12px; text-align: center; font-weight: 600; }
+    .emp-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .shift-block { padding: 4px 6px; border-radius: 4px; color: #fff; font-size: 11px; cursor: pointer; margin-bottom: 2px; }
+    .time-off-badge { background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 600; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-approved { background: #dcfce7; color: #166534; }
+    .status-denied { background: #fee2e2; color: #dc2626; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">📅 ShiftScheduler Pro Demo - Data stored in browser | <a href="https://buyappsonce.com/landing-shiftscheduler-pro.html">Get ShiftScheduler Pro →</a></div>
+  
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">📅</span><span class="logo-text">ShiftScheduler</span></div>
+      <div class="org-info"><div class="org-name">Demo Business</div><div class="user-name">Admin User</div></div>
+      <div class="nav-item active" onclick="showTab('schedule')">📅 Schedule</div>
+      <div class="nav-item" onclick="showTab('myshifts')">👤 My Shifts</div>
+      <div class="nav-item" onclick="showTab('timeoff')">🏖️ Time Off</div>
+      <div class="nav-item" onclick="showTab('employees')">👥 Employees</div>
+      <div class="nav-item" onclick="showTab('positions')">🏷️ Positions</div>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const COLORS = ['#3b82f6', '#22c55e', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16'];
+
+let state = {
+  tab: 'schedule',
+  selectedWeek: getWeekStart(new Date()),
+  employees: [],
+  positions: [],
+  shifts: [],
+  timeOffRequests: [],
+  editingShift: null,
+  currentUser: { id: 1, name: 'Admin User', role: 'admin' }
+};
+
+function init() {
+  loadData();
+  if (state.employees.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.employees = JSON.parse(localStorage.getItem('ss_employees') || '[]');
+  state.positions = JSON.parse(localStorage.getItem('ss_positions') || '[]');
+  state.shifts = JSON.parse(localStorage.getItem('ss_shifts') || '[]');
+  state.timeOffRequests = JSON.parse(localStorage.getItem('ss_timeoff') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('ss_employees', JSON.stringify(state.employees));
+  localStorage.setItem('ss_positions', JSON.stringify(state.positions));
+  localStorage.setItem('ss_shifts', JSON.stringify(state.shifts));
+  localStorage.setItem('ss_timeoff', JSON.stringify(state.timeOffRequests));
+}
+
+function loadSampleData() {
+  state.employees = [
+    { id: 1, name: 'Admin User', email: 'admin@demo.com', role: 'admin', color: '#3b82f6', max_hours_week: 40 },
+    { id: 2, name: 'Sarah Johnson', email: 'sarah@demo.com', role: 'employee', color: '#22c55e', max_hours_week: 40 },
+    { id: 3, name: 'Mike Chen', email: 'mike@demo.com', role: 'employee', color: '#f59e0b', max_hours_week: 32 },
+    { id: 4, name: 'Emily Davis', email: 'emily@demo.com', role: 'employee', color: '#8b5cf6', max_hours_week: 40 }
+  ];
+  state.positions = [
+    { id: 1, name: 'Manager', color: '#3b82f6', min_staff: 1 },
+    { id: 2, name: 'Staff', color: '#22c55e', min_staff: 2 },
+    { id: 3, name: 'Part-Time', color: '#f59e0b', min_staff: 1 }
+  ];
+  
+  const weekDates = getWeekDates();
+  state.shifts = [
+    { id: 1, employee_id: 1, position_id: 1, date: weekDates[1], start_time: '08:00', end_time: '16:00', break_minutes: 30 },
+    { id: 2, employee_id: 1, position_id: 1, date: weekDates[2], start_time: '08:00', end_time: '16:00', break_minutes: 30 },
+    { id: 3, employee_id: 1, position_id: 1, date: weekDates[3], start_time: '08:00', end_time: '16:00', break_minutes: 30 },
+    { id: 4, employee_id: 2, position_id: 2, date: weekDates[1], start_time: '09:00', end_time: '17:00', break_minutes: 30 },
+    { id: 5, employee_id: 2, position_id: 2, date: weekDates[2], start_time: '09:00', end_time: '17:00', break_minutes: 30 },
+    { id: 6, employee_id: 2, position_id: 2, date: weekDates[4], start_time: '09:00', end_time: '17:00', break_minutes: 30 },
+    { id: 7, employee_id: 2, position_id: 2, date: weekDates[5], start_time: '09:00', end_time: '17:00', break_minutes: 30 },
+    { id: 8, employee_id: 3, position_id: 3, date: weekDates[1], start_time: '12:00', end_time: '18:00', break_minutes: 0 },
+    { id: 9, employee_id: 3, position_id: 3, date: weekDates[3], start_time: '12:00', end_time: '18:00', break_minutes: 0 },
+    { id: 10, employee_id: 3, position_id: 3, date: weekDates[5], start_time: '10:00', end_time: '16:00', break_minutes: 0 },
+    { id: 11, employee_id: 4, position_id: 2, date: weekDates[2], start_time: '07:00', end_time: '15:00', break_minutes: 30 },
+    { id: 12, employee_id: 4, position_id: 2, date: weekDates[3], start_time: '07:00', end_time: '15:00', break_minutes: 30 },
+    { id: 13, employee_id: 4, position_id: 2, date: weekDates[4], start_time: '07:00', end_time: '15:00', break_minutes: 30 },
+    { id: 14, employee_id: 4, position_id: 2, date: weekDates[5], start_time: '07:00', end_time: '15:00', break_minutes: 30 }
+  ];
+  state.timeOffRequests = [
+    { id: 1, employee_id: 3, start_date: weekDates[4], end_date: weekDates[4], reason: 'Doctor appointment', status: 'approved' },
+    { id: 2, employee_id: 4, start_date: weekDates[0], end_date: weekDates[0], reason: 'Family event', status: 'approved' }
+  ];
+  saveData();
+}
+
+function getWeekStart(d) { const date = new Date(d); date.setDate(date.getDate() - date.getDay()); date.setHours(0, 0, 0, 0); return date; }
+function getWeekDates() { return Array.from({ length: 7 }, (_, i) => { const d = new Date(state.selectedWeek); d.setDate(d.getDate() + i); return d.toISOString().split('T')[0]; }); }
+function formatTime(t) { if (!t) return ''; const [h, m] = t.split(':'); const hr = parseInt(h); return `${hr > 12 ? hr - 12 : hr || 12}:${m}${hr >= 12 ? 'p' : 'a'}`; }
+function calcHours(start, end, brk) { const [sh, sm] = start.split(':').map(Number); const [eh, em] = end.split(':').map(Number); return Math.max(0, ((eh * 60 + em) - (sh * 60 + sm) - (brk || 0)) / 60); }
+function getWeekHours(empId) { const weekDates = getWeekDates(); return state.shifts.filter(s => s.employee_id === empId && weekDates.includes(s.date)).reduce((sum, s) => sum + calcHours(s.start_time, s.end_time, s.break_minutes), 0); }
+function getEmployee(id) { return state.employees.find(e => e.id === id); }
+function getPosition(id) { return state.positions.find(p => p.id === id); }
+function isTimeOff(empId, date) { return state.timeOffRequests.some(r => r.employee_id === empId && r.status === 'approved' && date >= r.start_date && date <= r.end_date); }
+
+function showTab(tab) { state.tab = tab; updateNav(); render(); }
+function updateNav() { document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['schedule', 'myshifts', 'timeoff', 'employees', 'positions'].indexOf(state.tab))); }
+
+function render() {
+  const main = document.getElementById('mainContent');
+  const weekDates = getWeekDates();
+  const weekStart = new Date(state.selectedWeek);
+  const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6);
+  
+  switch (state.tab) {
+    case 'schedule':
+      main.innerHTML = `
+        <div class="header">
+          <h1 class="title">Schedule</h1>
+          <div style="display:flex;gap:12px;align-items:center">
+            <button class="btn btn-sm btn-secondary" onclick="prevWeek()">← Prev</button>
+            <span style="font-weight:600">${weekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+            <button class="btn btn-sm btn-secondary" onclick="nextWeek()">Next →</button>
+            <button class="btn btn-secondary" onclick="copyWeek()">📋 Copy Last Week</button>
+            <button class="btn btn-primary" onclick="openShiftModal()">+ Add Shift</button>
+          </div>
+        </div>
+        <div class="schedule-grid">
+          <div class="schedule-header">
+            <div class="employee-col">Employee</div>
+            ${weekDates.map((d, i) => `<div class="day-col"><div style="font-weight:600">${DAYS[new Date(d).getDay()]}</div><div style="font-size:12px;color:#64748b">${new Date(d).getDate()}</div></div>`).join('')}
+            <div class="hours-col">Hours</div>
+          </div>
+          ${state.employees.map(emp => `
+            <div class="schedule-row">
+              <div class="employee-col"><div class="emp-dot" style="background:${emp.color}"></div><span>${emp.name}</span></div>
+              ${weekDates.map(date => {
+                const dayShifts = state.shifts.filter(s => s.employee_id === emp.id && s.date === date);
+                const off = isTimeOff(emp.id, date);
+                return `<div class="day-col day-cell" style="${off ? 'background:#fef3c7' : ''}" onclick="${off ? '' : `openShiftModal(${emp.id}, '${date}')`}">
+                  ${off ? '<div class="time-off-badge">OFF</div>' : ''}
+                  ${dayShifts.map(s => {
+                    const pos = getPosition(s.position_id);
+                    return `<div class="shift-block" style="background:${pos?.color || emp.color}" onclick="event.stopPropagation();editShift(${s.id})">
+                      <div style="font-weight:600">${formatTime(s.start_time)}-${formatTime(s.end_time)}</div>
+                      ${pos ? `<div style="font-size:10px;opacity:0.9">${pos.name}</div>` : ''}
+                    </div>`;
+                  }).join('')}
+                </div>`;
+              }).join('')}
+              <div class="hours-col" style="color:${getWeekHours(emp.id) > emp.max_hours_week ? '#ef4444' : '#22c55e'}">${getWeekHours(emp.id).toFixed(1)}h</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      break;
+      
+    case 'myshifts':
+      const myShifts = state.shifts.filter(s => s.employee_id === state.currentUser.id && weekDates.includes(s.date));
+      main.innerHTML = `
+        <div class="header"><h1 class="title">My Shifts</h1></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" style="color:#3b82f6">${getWeekHours(state.currentUser.id).toFixed(1)}h</div></div>
+          <div class="stat-card"><div class="stat-label">Shifts</div><div class="stat-value">${myShifts.length}</div></div>
+        </div>
+        <div class="card">
+          <h3 style="margin-bottom:16px">Upcoming Shifts</h3>
+          ${myShifts.length === 0 ? '<p style="color:#64748b">No shifts scheduled this week</p>' : `
+          <table><thead><tr><th>Date</th><th>Time</th><th>Position</th><th>Hours</th></tr></thead>
+          <tbody>${myShifts.map(s => `
+            <tr><td>${new Date(s.date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</td><td>${formatTime(s.start_time)} - ${formatTime(s.end_time)}</td><td>${getPosition(s.position_id)?.name || '-'}</td><td>${calcHours(s.start_time, s.end_time, s.break_minutes).toFixed(1)}h</td></tr>
+          `).join('')}</tbody></table>`}
+        </div>
+      `;
+      break;
+      
+    case 'timeoff':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Time Off</h1><button class="btn btn-primary" onclick="openTimeOffModal()">+ Request Time Off</button></div>
+        <div class="card">
+          <table><thead><tr><th>Employee</th><th>Dates</th><th>Reason</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody>${state.timeOffRequests.map(r => `
+            <tr><td>${getEmployee(r.employee_id)?.name}</td><td>${new Date(r.start_date).toLocaleDateString()} - ${new Date(r.end_date).toLocaleDateString()}</td><td>${r.reason || '-'}</td><td><span class="status-badge status-${r.status}">${r.status}</span></td><td>${r.status === 'pending' ? `<button class="btn btn-sm" style="color:#22c55e" onclick="updateTimeOff(${r.id}, 'approved')">✓</button> <button class="btn btn-sm" style="color:#ef4444" onclick="updateTimeOff(${r.id}, 'denied')">✗</button>` : ''}</td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+      
+    case 'employees':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Employees</h1><button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button></div>
+        <div class="card">
+          <table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Max Hours</th><th>This Week</th></tr></thead>
+          <tbody>${state.employees.map(e => `
+            <tr><td><div style="display:flex;align-items:center;gap:8px"><div class="emp-dot" style="background:${e.color}"></div><strong>${e.name}</strong></div></td><td>${e.email}</td><td>${e.role}</td><td>${e.max_hours_week}h</td><td style="color:${getWeekHours(e.id) > e.max_hours_week ? '#ef4444' : '#22c55e'}">${getWeekHours(e.id).toFixed(1)}h</td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+      
+    case 'positions':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Positions</h1><button class="btn btn-primary" onclick="openPositionModal()">+ Add Position</button></div>
+        <div class="grid">
+          ${state.positions.map(p => `
+            <div class="card"><div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="width:16px;height:16px;border-radius:4px;background:${p.color}"></div><h3>${p.name}</h3></div><div style="color:#64748b;font-size:14px">Min staff: ${p.min_staff}</div></div>
+          `).join('')}
+        </div>
+      `;
+      break;
+  }
+}
+
+function prevWeek() { state.selectedWeek = new Date(state.selectedWeek.getTime() - 7 * 86400000); render(); }
+function nextWeek() { state.selectedWeek = new Date(state.selectedWeek.getTime() + 7 * 86400000); render(); }
+
+function copyWeek() {
+  const prevWeekStart = new Date(state.selectedWeek.getTime() - 7 * 86400000);
+  const prevDates = Array.from({ length: 7 }, (_, i) => { const d = new Date(prevWeekStart); d.setDate(d.getDate() + i); return d.toISOString().split('T')[0]; });
+  const prevShifts = state.shifts.filter(s => prevDates.includes(s.date));
+  if (prevShifts.length === 0) { toast('No shifts to copy from last week'); return; }
+  const newShifts = prevShifts.map(s => {
+    const newDate = new Date(s.date); newDate.setDate(newDate.getDate() + 7);
+    return { ...s, id: Math.max(0, ...state.shifts.map(x => x.id)) + 1 + state.shifts.length, date: newDate.toISOString().split('T')[0] };
+  });
+  state.shifts.push(...newShifts);
+  saveData(); render(); toast(`Copied ${newShifts.length} shifts`);
+}
+
+function openModal(title, content) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalContent').innerHTML = content; document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); state.editingShift = null; }
+
+function openShiftModal(empId, date) {
+  const shift = state.editingShift;
+  openModal(shift ? 'Edit Shift' : 'Add Shift', `
+    <form onsubmit="saveShift(event)">
+      <div class="field"><label>Employee</label><select name="employee_id"><option value="">Unassigned</option>${state.employees.map(e => `<option value="${e.id}" ${(shift?.employee_id || empId) === e.id ? 'selected' : ''}>${e.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Position</label><select name="position_id"><option value="">None</option>${state.positions.map(p => `<option value="${p.id}" ${shift?.position_id === p.id ? 'selected' : ''}>${p.name}</option>`).join('')}</select></div>
+      <div class="field"><label>Date</label><input type="date" name="date" value="${shift?.date || date || getWeekDates()[1]}" required></div>
+      <div class="row"><div class="field"><label>Start Time</label><input type="time" name="start_time" value="${shift?.start_time || '09:00'}" required></div><div class="field"><label>End Time</label><input type="time" name="end_time" value="${shift?.end_time || '17:00'}" required></div></div>
+      <div class="row"><div class="field"><label>Break (min)</label><input type="number" name="break_minutes" value="${shift?.break_minutes || 0}"></div><div class="field"><label>Notes</label><input name="notes" value="${shift?.notes || ''}"></div></div>
+      <div class="modal-actions">
+        ${shift ? `<button type="button" class="btn btn-secondary" style="color:#ef4444" onclick="deleteShift(${shift.id})">Delete</button>` : ''}
+        <div style="flex:1"></div>
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function editShift(id) { state.editingShift = state.shifts.find(s => s.id === id); openShiftModal(); }
+
+function saveShift(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { employee_id: f.employee_id.value ? parseInt(f.employee_id.value) : null, position_id: f.position_id.value ? parseInt(f.position_id.value) : null, date: f.date.value, start_time: f.start_time.value, end_time: f.end_time.value, break_minutes: parseInt(f.break_minutes.value) || 0, notes: f.notes.value };
+  if (state.editingShift) { Object.assign(state.shifts.find(s => s.id === state.editingShift.id), data); }
+  else { data.id = Math.max(0, ...state.shifts.map(s => s.id)) + 1; state.shifts.push(data); }
+  saveData(); closeModal(); render(); toast('Shift saved');
+}
+
+function deleteShift(id) {
+  if (!confirm('Delete this shift?')) return;
+  state.shifts = state.shifts.filter(s => s.id !== id);
+  saveData(); closeModal(); render(); toast('Shift deleted');
+}
+
+function openEmployeeModal() {
+  openModal('Add Employee', `
+    <form onsubmit="saveEmployee(event)">
+      <div class="row"><div class="field"><label>Name</label><input name="name" required></div><div class="field"><label>Email</label><input type="email" name="email" required></div></div>
+      <div class="row"><div class="field"><label>Role</label><select name="role"><option value="employee">Employee</option><option value="manager">Manager</option><option value="admin">Admin</option></select></div><div class="field"><label>Max Hours/Week</label><input type="number" name="max_hours_week" value="40"></div></div>
+      <div class="field"><label>Color</label><input type="color" name="color" value="${COLORS[state.employees.length % COLORS.length]}" style="height:42px;padding:4px"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveEmployee(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.employees.push({ id: Math.max(0, ...state.employees.map(e => e.id)) + 1, name: f.name.value, email: f.email.value, role: f.role.value, color: f.color.value, max_hours_week: parseInt(f.max_hours_week.value) || 40 });
+  saveData(); closeModal(); render(); toast('Employee added');
+}
+
+function openPositionModal() {
+  openModal('Add Position', `
+    <form onsubmit="savePosition(event)">
+      <div class="row"><div class="field"><label>Name</label><input name="name" required></div><div class="field"><label>Color</label><input type="color" name="color" value="${COLORS[state.positions.length % COLORS.length]}" style="height:42px;padding:4px"></div></div>
+      <div class="field"><label>Min Staff Required</label><input type="number" name="min_staff" value="1"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function savePosition(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.positions.push({ id: Math.max(0, ...state.positions.map(p => p.id)) + 1, name: f.name.value, color: f.color.value, min_staff: parseInt(f.min_staff.value) || 1 });
+  saveData(); closeModal(); render(); toast('Position added');
+}
+
+function openTimeOffModal() {
+  openModal('Request Time Off', `
+    <form onsubmit="saveTimeOff(event)">
+      <div class="row"><div class="field"><label>Start Date</label><input type="date" name="start_date" required></div><div class="field"><label>End Date</label><input type="date" name="end_date" required></div></div>
+      <div class="field"><label>Reason</label><textarea name="reason" placeholder="Optional"></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Submit</button></div>
+    </form>
+  `);
+}
+
+function saveTimeOff(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.timeOffRequests.push({ id: Math.max(0, ...state.timeOffRequests.map(r => r.id)) + 1, employee_id: state.currentUser.id, start_date: f.start_date.value, end_date: f.end_date.value, reason: f.reason.value, status: 'pending' });
+  saveData(); closeModal(); render(); toast('Request submitted');
+}
+
+function updateTimeOff(id, status) {
+  const r = state.timeOffRequests.find(x => x.id === id);
+  if (r) r.status = status;
+  saveData(); render(); toast('Request ' + status);
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
