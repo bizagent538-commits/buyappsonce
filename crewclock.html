@@ -1253,7 +1253,7 @@ const App = () => {
           <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
           <footer style={{ textAlign: 'center', padding: '1.5rem', borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
             {settings.businessName || 'CrewClock'} • v2.0.1
-          <p style="margin-top:1rem;font-size:.8rem;text-align:center;color:#64748b">© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+          </footer>
 
           {/* Employee Modal */}
           <Modal isOpen={showEmployeeModal} onClose={() => { setShowEmployeeModal(false); setEditingEmployee(null); }} title={editingEmployee ? 'Edit Employee' : 'Add Employee'}>
