@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EventPro - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --primary-light: #f5f3ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.75rem; font-weight: 700; }
+    .stat-value.purple { color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.blue { color: #2563eb; }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .event-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .event-card {
+      background: white;
+      border-radius: 0.5rem;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid var(--gray-200);
+    }
+    
+    .event-banner {
+      height: 120px;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+    
+    .event-body { padding: 1rem; }
+    
+    .event-date {
+      font-size: 0.75rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .event-name {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    
+    .event-meta {
+      font-size: 0.875rem;
+      color: var(--gray-500);
+      margin-bottom: 0.75rem;
+    }
+    
+    .event-stats {
+      display: flex;
+      gap: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid var(--gray-200);
+      font-size: 0.875rem;
+    }
+    
+    .event-stat { display: flex; align-items: center; gap: 0.25rem; }
+    .event-stat-icon { font-size: 1rem; }
+    
+    .event-actions {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.upcoming { background: #dbeafe; color: #1e40af; }
+    .status-badge.ongoing { background: #dcfce7; color: #166534; }
+    .status-badge.completed { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+    .status-badge.confirmed { background: #dcfce7; color: #166534; }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.checked-in { background: var(--primary-light); color: var(--primary-dark); }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .ticket-type {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .ticket-name { font-weight: 500; }
+    .ticket-price { color: var(--primary); font-weight: 600; }
+    .ticket-sold { font-size: 0.75rem; color: var(--gray-500); }
+    
+    .checkin-panel {
+      background: var(--primary-light);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .checkin-search {
+      max-width: 400px;
+      margin: 1rem auto;
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .checkin-search input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--primary);
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+    
+    .checkin-result {
+      background: white;
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      max-width: 400px;
+      margin: 1rem auto;
+      text-align: left;
+    }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .ticket-builder {
+      border: 1px solid var(--gray-200);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .ticket-builder-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+    }
+    
+    .ticket-row {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .ticket-row input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .remove-ticket {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .capacity-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: 0.5rem;
+    }
+    
+    .capacity-fill {
+      height: 100%;
+      border-radius: 4px;
+      background: var(--primary);
+    }
+    
+    .capacity-fill.warning { background: var(--warning); }
+    .capacity-fill.full { background: var(--danger); }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .ticket-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🎪 EventPro</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="events">Events</div>
+    <div class="nav-tab" data-tab="registrations">Registrations</div>
+    <div class="nav-tab" data-tab="checkin">Check-In</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Events -->
+    <div class="tab-content active" id="tab-events">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value purple" id="stat-events">0</div>
+          <div class="stat-label">Active Events</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-registrations">0</div>
+          <div class="stat-label">Total Registrations</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-checkedin">0</div>
+          <div class="stat-label">Checked In Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-revenue">$0</div>
+          <div class="stat-label">Total Revenue</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Upcoming & Active Events</h2>
+          <button class="btn btn-primary" onclick="openEventModal()">+ Create Event</button>
+        </div>
+        <div class="event-grid" id="events-grid"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Past Events</h2>
+        </div>
+        <div class="event-grid" id="past-events-grid"></div>
+      </div>
+    </div>
+    
+    <!-- Registrations -->
+    <div class="tab-content" id="tab-registrations">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Registrations</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportRegistrations()">Export</button>
+            <button class="btn btn-primary" onclick="openRegistrationModal()">+ Add Registration</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-event" onchange="renderRegistrations()">
+            <option value="">All Events</option>
+          </select>
+          <select class="filter-select" id="filter-status" onchange="renderRegistrations()">
+            <option value="">All Statuses</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="checked-in">Checked In</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search by name or email..." id="filter-search" oninput="renderRegistrations()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Attendee</th>
+              <th>Email</th>
+              <th>Event</th>
+              <th>Ticket</th>
+              <th>Registered</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="registrations-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Check-In -->
+    <div class="tab-content" id="tab-checkin">
+      <div class="checkin-panel">
+        <h2 style="margin-bottom: 0.5rem;">📱 Event Check-In</h2>
+        <p style="color: var(--gray-600);">Search by name, email, or confirmation code</p>
+        
+        <div class="form-group" style="max-width: 300px; margin: 1rem auto;">
+          <select class="form-input" id="checkin-event" onchange="renderCheckinList()">
+            <option value="">Select Event</option>
+          </select>
+        </div>
+        
+        <div class="checkin-search">
+          <input type="text" id="checkin-search" placeholder="Search attendee..." onkeyup="if(event.key==='Enter')searchCheckin()">
+          <button class="btn btn-primary" onclick="searchCheckin()">Search</button>
+        </div>
+        
+        <div id="checkin-result"></div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Attendee List</h2>
+          <div id="checkin-stats" style="font-size: 0.875rem; color: var(--gray-600);"></div>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Ticket</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="checkin-list"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports & Exports</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportAllRegistrations()">📋 All Registrations</button>
+          <button class="btn btn-secondary" onclick="exportEventSummary()">🎪 Event Summary</button>
+          <button class="btn btn-secondary" onclick="exportRevenueReport()">💰 Revenue Report</button>
+          <button class="btn btn-secondary" onclick="exportCheckinReport()">✓ Check-In Report</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Event Performance</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Event</th>
+              <th>Date</th>
+              <th>Capacity</th>
+              <th>Registered</th>
+              <th>Checked In</th>
+              <th>Revenue</th>
+              <th>Fill Rate</th>
+            </tr>
+          </thead>
+          <tbody id="event-performance-table"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Event Modal -->
+  <div class="modal-overlay" id="event-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="event-modal-title">Create Event</h3>
+        <button class="modal-close" onclick="closeModal('event-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="event-id">
+        <div class="form-group">
+          <label class="form-label">Event Name *</label>
+          <input type="text" class="form-input" id="event-name" placeholder="e.g., Annual Gala 2024">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="event-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" id="event-time">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location</label>
+          <input type="text" class="form-input" id="event-location" placeholder="Venue name and address">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Capacity</label>
+            <input type="number" class="form-input" id="event-capacity" min="1" placeholder="Max attendees">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="event-status">
+              <option value="upcoming">Upcoming</option>
+              <option value="ongoing">Ongoing</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="event-description" rows="2"></textarea>
+        </div>
+        
+        <div class="ticket-builder">
+          <div class="ticket-builder-header">
+            <span class="form-label" style="margin: 0;">Ticket Types</span>
+            <button type="button" class="btn btn-sm btn-secondary" onclick="addTicketType()">+ Add Ticket</button>
+          </div>
+          <div id="ticket-types-container"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="event-delete-btn" onclick="deleteEvent()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('event-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEvent()">Save Event</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Registration Modal -->
+  <div class="modal-overlay" id="registration-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="reg-modal-title">Add Registration</h3>
+        <button class="modal-close" onclick="closeModal('registration-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="reg-id">
+        <div class="form-group">
+          <label class="form-label">Event *</label>
+          <select class="form-input" id="reg-event" onchange="updateTicketOptions()"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-input" id="reg-first">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input type="text" class="form-input" id="reg-last">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-input" id="reg-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" class="form-input" id="reg-phone">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Ticket Type *</label>
+            <select class="form-input" id="reg-ticket"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="reg-status">
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+              <option value="checked-in">Checked In</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="reg-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="reg-delete-btn" onclick="deleteRegistration()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('registration-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRegistration()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let events = [], registrations = [];
+    let tempTickets = [];
+    
+    const EVENT_ICONS = ['🎪', '🎭', '🎵', '🎨', '🏆', '🎓', '💼', '🎉'];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        events: localStorage.getItem('eventpro_events'),
+        registrations: localStorage.getItem('eventpro_registrations')
+      };
+      
+      const today = new Date();
+      const nextWeek = new Date(today); nextWeek.setDate(nextWeek.getDate() + 7);
+      const nextMonth = new Date(today); nextMonth.setMonth(nextMonth.getMonth() + 1);
+      const lastMonth = new Date(today); lastMonth.setMonth(lastMonth.getMonth() - 1);
+      
+      events = saved.events ? JSON.parse(saved.events) : [
+        { id: 1, name: 'Annual Fundraising Gala', date: formatDate(nextWeek), time: '18:00', location: 'Grand Ballroom, Downtown Hotel', capacity: 200, status: 'upcoming', description: 'Our premier annual fundraising event', icon: '🎭', tickets: [{name: 'General Admission', price: 75, qty: 150}, {name: 'VIP Table', price: 200, qty: 50}] },
+        { id: 2, name: 'Tech Workshop: AI Basics', date: formatDate(nextMonth), time: '09:00', location: 'Conference Room A', capacity: 30, status: 'upcoming', description: 'Introduction to artificial intelligence', icon: '💼', tickets: [{name: 'Standard', price: 0, qty: 30}] },
+        { id: 3, name: 'Summer Concert Series', date: formatDate(lastMonth), time: '19:00', location: 'City Park Amphitheater', capacity: 500, status: 'completed', description: 'Outdoor music festival', icon: '🎵', tickets: [{name: 'General', price: 25, qty: 400}, {name: 'Premium', price: 50, qty: 100}] },
+      ];
+      
+      registrations = saved.registrations ? JSON.parse(saved.registrations) : [
+        { id: 1001, eventId: 1, first: 'John', last: 'Smith', email: 'john@email.com', phone: '555-1234', ticket: 'General Admission', status: 'confirmed', registered: '2024-06-01', notes: '', code: 'EVT-1001' },
+        { id: 1002, eventId: 1, first: 'Sarah', last: 'Johnson', email: 'sarah@email.com', phone: '555-2345', ticket: 'VIP Table', status: 'confirmed', registered: '2024-06-02', notes: 'Vegetarian meal', code: 'EVT-1002' },
+        { id: 1003, eventId: 1, first: 'Mike', last: 'Williams', email: 'mike@email.com', phone: '555-3456', ticket: 'General Admission', status: 'pending', registered: '2024-06-05', notes: '', code: 'EVT-1003' },
+        { id: 1004, eventId: 2, first: 'Emily', last: 'Brown', email: 'emily@email.com', phone: '555-4567', ticket: 'Standard', status: 'confirmed', registered: '2024-06-10', notes: '', code: 'EVT-1004' },
+        { id: 1005, eventId: 3, first: 'David', last: 'Lee', email: 'david@email.com', phone: '555-5678', ticket: 'Premium', status: 'checked-in', registered: '2024-05-15', notes: '', code: 'EVT-1005' },
+        { id: 1006, eventId: 3, first: 'Lisa', last: 'Garcia', email: 'lisa@email.com', phone: '555-6789', ticket: 'General', status: 'checked-in', registered: '2024-05-16', notes: '', code: 'EVT-1006' },
+        { id: 1007, eventId: 1, first: 'Robert', last: 'Chen', email: 'robert@email.com', phone: '555-7890', ticket: 'General Admission', status: 'confirmed', registered: '2024-06-08', notes: '', code: 'EVT-1007' },
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('eventpro_events', JSON.stringify(events));
+      localStorage.setItem('eventpro_registrations', JSON.stringify(registrations));
+    }
+    
+    function formatDate(d) {
+      return d.toISOString().split('T')[0];
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderEvents();
+      renderRegistrations();
+      renderCheckin();
+      renderReports();
+      updateSelects();
+      renderStats();
+    }
+    
+    function renderStats() {
+      const activeEvents = events.filter(e => e.status === 'upcoming' || e.status === 'ongoing').length;
+      const totalRegs = registrations.filter(r => r.status !== 'cancelled').length;
+      const today = formatDate(new Date());
+      const checkedInToday = registrations.filter(r => r.status === 'checked-in').length;
+      const revenue = registrations.filter(r => r.status !== 'cancelled').reduce((sum, r) => {
+        const event = events.find(e => e.id === r.eventId);
+        if (!event) return sum;
+        const ticket = event.tickets.find(t => t.name === r.ticket);
+        return sum + (ticket ? ticket.price : 0);
+      }, 0);
+      
+      document.getElementById('stat-events').textContent = activeEvents;
+      document.getElementById('stat-registrations').textContent = totalRegs;
+      document.getElementById('stat-checkedin').textContent = checkedInToday;
+      document.getElementById('stat-revenue').textContent = '$' + revenue.toLocaleString();
+    }
+    
+    function renderEvents() {
+      const upcoming = events.filter(e => e.status === 'upcoming' || e.status === 'ongoing');
+      const past = events.filter(e => e.status === 'completed' || e.status === 'cancelled');
+      
+      document.getElementById('events-grid').innerHTML = upcoming.length ? upcoming.map(e => renderEventCard(e)).join('') : '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No upcoming events</p></div>';
+      document.getElementById('past-events-grid').innerHTML = past.length ? past.map(e => renderEventCard(e)).join('') : '<div class="empty-state"><p>No past events</p></div>';
+    }
+    
+    function renderEventCard(e) {
+      const regs = registrations.filter(r => r.eventId === e.id && r.status !== 'cancelled');
+      const checkedIn = regs.filter(r => r.status === 'checked-in').length;
+      const revenue = regs.reduce((sum, r) => {
+        const ticket = e.tickets.find(t => t.name === r.ticket);
+        return sum + (ticket ? ticket.price : 0);
+      }, 0);
+      const fillPct = e.capacity ? Math.round(regs.length / e.capacity * 100) : 0;
+      
+      return `<div class="event-card">
+        <div class="event-banner">${e.icon || '🎪'}</div>
+        <div class="event-body">
+          <div class="event-date">${formatDisplayDate(e.date)} ${e.time ? '• ' + formatTime(e.time) : ''}</div>
+          <div class="event-name">${e.name}</div>
+          <div class="event-meta">📍 ${e.location || 'TBD'}</div>
+          <span class="status-badge ${e.status}">${e.status}</span>
+          
+          <div class="capacity-bar">
+            <div class="capacity-fill ${fillPct > 90 ? 'full' : fillPct > 75 ? 'warning' : ''}" style="width: ${fillPct}%"></div>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.25rem;">${regs.length}/${e.capacity || '∞'} registered (${fillPct}%)</div>
+          
+          <div class="event-stats">
+            <div class="event-stat"><span class="event-stat-icon">👥</span> ${regs.length}</div>
+            <div class="event-stat"><span class="event-stat-icon">✓</span> ${checkedIn}</div>
+            <div class="event-stat"><span class="event-stat-icon">💰</span> $${revenue}</div>
+          </div>
+          
+          <div class="event-actions">
+            <button class="btn btn-sm btn-secondary" onclick="editEvent(${e.id})">Edit</button>
+            <button class="btn btn-sm btn-primary" onclick="quickRegister(${e.id})">+ Register</button>
+          </div>
+        </div>
+      </div>`;
+    }
+    
+    function updateSelects() {
+      const eventOpts = '<option value="">Select Event</option>' + events.map(e => `<option value="${e.id}">${e.name} (${formatDisplayDate(e.date)})</option>`).join('');
+      document.getElementById('reg-event').innerHTML = eventOpts;
+      document.getElementById('filter-event').innerHTML = '<option value="">All Events</option>' + events.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('checkin-event').innerHTML = '<option value="">Select Event</option>' + events.filter(e => e.status !== 'completed' && e.status !== 'cancelled').map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+    }
+    
+    // Events
+    function openEventModal(id = null) {
+      tempTickets = [];
+      
+      if (id) {
+        const e = events.find(x => x.id === id);
+        document.getElementById('event-modal-title').textContent = 'Edit Event';
+        document.getElementById('event-id').value = id;
+        document.getElementById('event-name').value = e.name;
+        document.getElementById('event-date').value = e.date;
+        document.getElementById('event-time').value = e.time || '';
+        document.getElementById('event-location').value = e.location || '';
+        document.getElementById('event-capacity').value = e.capacity || '';
+        document.getElementById('event-status').value = e.status;
+        document.getElementById('event-description').value = e.description || '';
+        tempTickets = [...e.tickets];
+        document.getElementById('event-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('event-modal-title').textContent = 'Create Event';
+        document.getElementById('event-id').value = '';
+        document.getElementById('event-name').value = '';
+        document.getElementById('event-date').value = '';
+        document.getElementById('event-time').value = '';
+        document.getElementById('event-location').value = '';
+        document.getElementById('event-capacity').value = '';
+        document.getElementById('event-status').value = 'upcoming';
+        document.getElementById('event-description').value = '';
+        tempTickets = [{ name: 'General Admission', price: 0, qty: 100 }];
+        document.getElementById('event-delete-btn').style.display = 'none';
+      }
+      
+      renderTicketTypes();
+      document.getElementById('event-modal').classList.add('active');
+    }
+    
+    function editEvent(id) { openEventModal(id); }
+    
+    function renderTicketTypes() {
+      document.getElementById('ticket-types-container').innerHTML = tempTickets.map((t, i) => `
+        <div class="ticket-row">
+          <input type="text" placeholder="Ticket name" value="${t.name}" onchange="tempTickets[${i}].name = this.value">
+          <input type="number" placeholder="Price" value="${t.price}" min="0" onchange="tempTickets[${i}].price = parseFloat(this.value) || 0">
+          <input type="number" placeholder="Qty" value="${t.qty}" min="1" onchange="tempTickets[${i}].qty = parseInt(this.value) || 1">
+          <button type="button" class="remove-ticket" onclick="removeTicketType(${i})">×</button>
+        </div>
+      `).join('');
+    }
+    
+    function addTicketType() {
+      tempTickets.push({ name: '', price: 0, qty: 50 });
+      renderTicketTypes();
+    }
+    
+    function removeTicketType(index) {
+      if (tempTickets.length <= 1) {
+        showToast('Must have at least one ticket type', 'error');
+        return;
+      }
+      tempTickets.splice(index, 1);
+      renderTicketTypes();
+    }
+    
+    function saveEvent() {
+      const id = document.getElementById('event-id').value;
+      const name = document.getElementById('event-name').value.trim();
+      const date = document.getElementById('event-date').value;
+      const time = document.getElementById('event-time').value;
+      const location = document.getElementById('event-location').value.trim();
+      const capacity = parseInt(document.getElementById('event-capacity').value) || null;
+      const status = document.getElementById('event-status').value;
+      const description = document.getElementById('event-description').value.trim();
+      
+      if (!name || !date) { showToast('Please enter event name and date', 'error'); return; }
+      if (tempTickets.some(t => !t.name)) { showToast('All ticket types must have a name', 'error'); return; }
+      
+      const icon = EVENT_ICONS[Math.floor(Math.random() * EVENT_ICONS.length)];
+      
+      if (id) {
+        const i = events.findIndex(e => e.id === parseInt(id));
+        events[i] = { ...events[i], name, date, time, location, capacity, status, description, tickets: tempTickets };
+        showToast('Event updated');
+      } else {
+        events.push({ id: Math.max(0, ...events.map(e => e.id)) + 1, name, date, time, location, capacity, status, description, icon, tickets: tempTickets });
+        showToast('Event created');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('event-modal');
+    }
+    
+    function deleteEvent() {
+      const id = parseInt(document.getElementById('event-id').value);
+      const hasRegs = registrations.some(r => r.eventId === id);
+      if (hasRegs && !confirm('This event has registrations. Delete anyway?')) return;
+      if (!hasRegs && !confirm('Delete this event?')) return;
+      
+      events = events.filter(e => e.id !== id);
+      registrations = registrations.filter(r => r.eventId !== id);
+      saveData();
+      renderAll();
+      closeModal('event-modal');
+      showToast('Event deleted');
+    }
+    
+    // Registrations
+    function renderRegistrations() {
+      const eventFilter = document.getElementById('filter-event').value;
+      const statusFilter = document.getElementById('filter-status').value;
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      
+      let filtered = [...registrations];
+      if (eventFilter) filtered = filtered.filter(r => r.eventId === parseInt(eventFilter));
+      if (statusFilter) filtered = filtered.filter(r => r.status === statusFilter);
+      if (search) filtered = filtered.filter(r => 
+        r.first.toLowerCase().includes(search) || 
+        r.last.toLowerCase().includes(search) || 
+        r.email.toLowerCase().includes(search) ||
+        r.code.toLowerCase().includes(search)
+      );
+      
+      filtered.sort((a, b) => new Date(b.registered) - new Date(a.registered));
+      
+      const tbody = document.getElementById('registrations-table');
+      tbody.innerHTML = filtered.length ? filtered.map(r => {
+        const event = events.find(e => e.id === r.eventId);
+        return `<tr>
+          <td><strong>${r.first} ${r.last}</strong><br><small style="color:var(--gray-400)">${r.code}</small></td>
+          <td>${r.email}</td>
+          <td>${event ? event.name : 'Unknown'}</td>
+          <td>${r.ticket}</td>
+          <td>${formatDisplayDate(r.registered)}</td>
+          <td><span class="status-badge ${r.status}">${r.status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editRegistration(${r.id})">Edit</button>
+            ${r.status === 'confirmed' ? `<button class="btn btn-sm btn-success" onclick="checkIn(${r.id})">Check In</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('') : '<tr><td colspan="7" class="empty-state">No registrations found</td></tr>';
+    }
+    
+    function openRegistrationModal(id = null) {
+      if (id) {
+        const r = registrations.find(x => x.id === id);
+        document.getElementById('reg-modal-title').textContent = 'Edit Registration';
+        document.getElementById('reg-id').value = id;
+        document.getElementById('reg-event').value = r.eventId;
+        updateTicketOptions();
+        document.getElementById('reg-first').value = r.first;
+        document.getElementById('reg-last').value = r.last;
+        document.getElementById('reg-email').value = r.email;
+        document.getElementById('reg-phone').value = r.phone || '';
+        document.getElementById('reg-ticket').value = r.ticket;
+        document.getElementById('reg-status').value = r.status;
+        document.getElementById('reg-notes').value = r.notes || '';
+        document.getElementById('reg-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('reg-modal-title').textContent = 'Add Registration';
+        document.getElementById('reg-id').value = '';
+        document.getElementById('reg-event').value = '';
+        document.getElementById('reg-first').value = '';
+        document.getElementById('reg-last').value = '';
+        document.getElementById('reg-email').value = '';
+        document.getElementById('reg-phone').value = '';
+        document.getElementById('reg-ticket').innerHTML = '<option value="">Select event first</option>';
+        document.getElementById('reg-status').value = 'confirmed';
+        document.getElementById('reg-notes').value = '';
+        document.getElementById('reg-delete-btn').style.display = 'none';
+      }
+      document.getElementById('registration-modal').classList.add('active');
+    }
+    
+    function editRegistration(id) { openRegistrationModal(id); }
+    function quickRegister(eventId) { openRegistrationModal(); document.getElementById('reg-event').value = eventId; updateTicketOptions(); }
+    
+    function updateTicketOptions() {
+      const eventId = parseInt(document.getElementById('reg-event').value);
+      const event = events.find(e => e.id === eventId);
+      
+      if (event) {
+        document.getElementById('reg-ticket').innerHTML = event.tickets.map(t => 
+          `<option value="${t.name}">${t.name} ${t.price > 0 ? '($' + t.price + ')' : '(Free)'}</option>`
+        ).join('');
+      } else {
+        document.getElementById('reg-ticket').innerHTML = '<option value="">Select event first</option>';
+      }
+    }
+    
+    function saveRegistration() {
+      const id = document.getElementById('reg-id').value;
+      const eventId = parseInt(document.getElementById('reg-event').value);
+      const first = document.getElementById('reg-first').value.trim();
+      const last = document.getElementById('reg-last').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const ticket = document.getElementById('reg-ticket').value;
+      const status = document.getElementById('reg-status').value;
+      const notes = document.getElementById('reg-notes').value.trim();
+      
+      if (!eventId || !first || !last || !email || !ticket) {
+        showToast('Please fill required fields', 'error');
+        return;
+      }
+      
+      if (id) {
+        const i = registrations.findIndex(r => r.id === parseInt(id));
+        registrations[i] = { ...registrations[i], eventId, first, last, email, phone, ticket, status, notes };
+        showToast('Registration updated');
+      } else {
+        const newId = Math.max(1000, ...registrations.map(r => r.id)) + 1;
+        registrations.push({
+          id: newId,
+          eventId, first, last, email, phone, ticket, status, notes,
+          registered: formatDate(new Date()),
+          code: 'EVT-' + newId
+        });
+        showToast('Registration added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('registration-modal');
+    }
+    
+    function deleteRegistration() {
+      const id = parseInt(document.getElementById('reg-id').value);
+      if (!confirm('Delete this registration?')) return;
+      registrations = registrations.filter(r => r.id !== id);
+      saveData();
+      renderAll();
+      closeModal('registration-modal');
+      showToast('Registration deleted');
+    }
+    
+    // Check-In
+    function renderCheckin() {
+      renderCheckinList();
+    }
+    
+    function renderCheckinList() {
+      const eventId = parseInt(document.getElementById('checkin-event').value);
+      const list = document.getElementById('checkin-list');
+      const stats = document.getElementById('checkin-stats');
+      
+      if (!eventId) {
+        list.innerHTML = '<tr><td colspan="5" class="empty-state">Select an event to view attendees</td></tr>';
+        stats.innerHTML = '';
+        return;
+      }
+      
+      const eventRegs = registrations.filter(r => r.eventId === eventId && r.status !== 'cancelled');
+      const checkedIn = eventRegs.filter(r => r.status === 'checked-in').length;
+      
+      stats.innerHTML = `${checkedIn} / ${eventRegs.length} checked in`;
+      
+      list.innerHTML = eventRegs.map(r => `<tr>
+        <td>${r.first} ${r.last}</td>
+        <td>${r.email}</td>
+        <td>${r.ticket}</td>
+        <td><span class="status-badge ${r.status}">${r.status}</span></td>
+        <td>
+          ${r.status === 'checked-in' 
+            ? `<button class="btn btn-sm btn-warning" onclick="undoCheckIn(${r.id})">Undo</button>`
+            : `<button class="btn btn-sm btn-success" onclick="checkIn(${r.id})">Check In</button>`
+          }
+        </td>
+      </tr>`).join('');
+    }
+    
+    function searchCheckin() {
+      const eventId = parseInt(document.getElementById('checkin-event').value);
+      const query = document.getElementById('checkin-search').value.trim().toLowerCase();
+      const resultDiv = document.getElementById('checkin-result');
+      
+      if (!eventId) {
+        showToast('Please select an event first', 'error');
+        return;
+      }
+      
+      if (!query) {
+        resultDiv.innerHTML = '';
+        return;
+      }
+      
+      const found = registrations.find(r => 
+        r.eventId === eventId && 
+        r.status !== 'cancelled' &&
+        (r.first.toLowerCase().includes(query) || 
+         r.last.toLowerCase().includes(query) || 
+         r.email.toLowerCase().includes(query) ||
+         r.code.toLowerCase().includes(query))
+      );
+      
+      if (found) {
+        resultDiv.innerHTML = `<div class="checkin-result">
+          <div style="font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem;">${found.first} ${found.last}</div>
+          <div style="color: var(--gray-500); margin-bottom: 0.25rem;">${found.email}</div>
+          <div style="margin-bottom: 0.5rem;"><strong>Ticket:</strong> ${found.ticket}</div>
+          <div style="margin-bottom: 1rem;"><span class="status-badge ${found.status}">${found.status}</span></div>
+          ${found.status === 'checked-in' 
+            ? `<button class="btn btn-warning" onclick="undoCheckIn(${found.id})">Undo Check-In</button>`
+            : `<button class="btn btn-success" onclick="checkIn(${found.id})">✓ Check In</button>`
+          }
+        </div>`;
+      } else {
+        resultDiv.innerHTML = '<div class="checkin-result"><p style="color: var(--danger);">No attendee found</p></div>';
+      }
+    }
+    
+    function checkIn(id) {
+      const reg = registrations.find(r => r.id === id);
+      reg.status = 'checked-in';
+      saveData();
+      renderAll();
+      document.getElementById('checkin-search').value = '';
+      document.getElementById('checkin-result').innerHTML = '';
+      showToast(`${reg.first} ${reg.last} checked in!`);
+    }
+    
+    function undoCheckIn(id) {
+      const reg = registrations.find(r => r.id === id);
+      reg.status = 'confirmed';
+      saveData();
+      renderAll();
+      document.getElementById('checkin-result').innerHTML = '';
+      showToast('Check-in undone');
+    }
+    
+    // Reports
+    function renderReports() {
+      const tbody = document.getElementById('event-performance-table');
+      tbody.innerHTML = events.map(e => {
+        const regs = registrations.filter(r => r.eventId === e.id && r.status !== 'cancelled');
+        const checkedIn = regs.filter(r => r.status === 'checked-in').length;
+        const revenue = regs.reduce((sum, r) => {
+          const ticket = e.tickets.find(t => t.name === r.ticket);
+          return sum + (ticket ? ticket.price : 0);
+        }, 0);
+        const fillRate = e.capacity ? Math.round(regs.length / e.capacity * 100) : '-';
+        
+        return `<tr>
+          <td>${e.name}</td>
+          <td>${formatDisplayDate(e.date)}</td>
+          <td>${e.capacity || '∞'}</td>
+          <td>${regs.length}</td>
+          <td>${checkedIn}</td>
+          <td>$${revenue.toLocaleString()}</td>
+          <td>${fillRate}%</td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function exportRegistrations() {
+      const eventId = document.getElementById('filter-event').value;
+      let data = registrations;
+      if (eventId) data = data.filter(r => r.eventId === parseInt(eventId));
+      
+      const headers = ['Code', 'First Name', 'Last Name', 'Email', 'Phone', 'Event', 'Ticket', 'Status', 'Registered'];
+      const rows = data.map(r => {
+        const event = events.find(e => e.id === r.eventId);
+        return [r.code, r.first, r.last, r.email, r.phone, event?.name || '', r.ticket, r.status, r.registered];
+      });
+      downloadCSV([headers, ...rows], 'registrations.csv');
+      showToast('Registrations exported');
+    }
+    
+    function exportAllRegistrations() { exportRegistrations(); }
+    
+    function exportEventSummary() {
+      const headers = ['Event', 'Date', 'Location', 'Capacity', 'Registered', 'Checked In', 'Revenue', 'Status'];
+      const rows = events.map(e => {
+        const regs = registrations.filter(r => r.eventId === e.id && r.status !== 'cancelled');
+        const checkedIn = regs.filter(r => r.status === 'checked-in').length;
+        const revenue = regs.reduce((sum, r) => {
+          const ticket = e.tickets.find(t => t.name === r.ticket);
+          return sum + (ticket ? ticket.price : 0);
+        }, 0);
+        return [e.name, e.date, e.location, e.capacity || 'Unlimited', regs.length, checkedIn, '$' + revenue, e.status];
+      });
+      downloadCSV([headers, ...rows], 'event-summary.csv');
+      showToast('Event summary exported');
+    }
+    
+    function exportRevenueReport() {
+      const headers = ['Event', 'Ticket Type', 'Price', 'Sold', 'Revenue'];
+      const rows = [];
+      events.forEach(e => {
+        e.tickets.forEach(t => {
+          const sold = registrations.filter(r => r.eventId === e.id && r.ticket === t.name && r.status !== 'cancelled').length;
+          rows.push([e.name, t.name, '$' + t.price, sold, '$' + (sold * t.price)]);
+        });
+      });
+      downloadCSV([headers, ...rows], 'revenue-report.csv');
+      showToast('Revenue report exported');
+    }
+    
+    function exportCheckinReport() {
+      const headers = ['Event', 'Attendee', 'Email', 'Ticket', 'Status'];
+      const rows = registrations.filter(r => r.status === 'checked-in').map(r => {
+        const event = events.find(e => e.id === r.eventId);
+        return [event?.name || '', r.first + ' ' + r.last, r.email, r.ticket, r.status];
+      });
+      downloadCSV([headers, ...rows], 'checkin-report.csv');
+      showToast('Check-in report exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function formatDisplayDate(dateStr) {
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function formatTime(timeStr) {
+      const [h, m] = timeStr.split(':');
+      const hour = parseInt(h);
+      return `${hour > 12 ? hour - 12 : hour}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+    }
+    
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
