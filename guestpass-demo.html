@@ -1,0 +1,1439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GuestPass - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #eff6ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.75rem; font-weight: 700; }
+    .stat-value.blue { color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    
+    .checkin-panel {
+      background: var(--primary-light);
+      border-radius: 0.75rem;
+      padding: 2rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .checkin-panel h2 { margin-bottom: 0.5rem; color: var(--primary-dark); }
+    .checkin-panel p { color: var(--gray-600); margin-bottom: 1.5rem; }
+    
+    .checkin-buttons {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    
+    .checkin-btn {
+      background: white;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+      padding: 1rem 2rem;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .checkin-btn:hover {
+      background: var(--primary);
+      color: white;
+    }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.checked-in { background: #dcfce7; color: #166534; }
+    .status-badge.checked-out { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.expected { background: #dbeafe; color: #1e40af; }
+    .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+    .status-badge.no-show { background: #fef3c7; color: #92400e; }
+    
+    .visitor-type {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      background: var(--gray-100);
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--gray-600);
+    }
+    
+    .visitor-type.guest { background: #dbeafe; color: #1e40af; }
+    .visitor-type.contractor { background: #fef3c7; color: #92400e; }
+    .visitor-type.interview { background: #f3e8ff; color: #7c3aed; }
+    .visitor-type.delivery { background: #dcfce7; color: #166534; }
+    .visitor-type.vendor { background: #ffe4e6; color: #be123c; }
+    
+    .current-visitors {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .visitor-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      display: flex;
+      gap: 1rem;
+      align-items: flex-start;
+    }
+    
+    .visitor-avatar {
+      width: 50px;
+      height: 50px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 1.25rem;
+      flex-shrink: 0;
+    }
+    
+    .visitor-info { flex: 1; }
+    .visitor-name { font-weight: 600; margin-bottom: 0.25rem; }
+    .visitor-meta { font-size: 0.75rem; color: var(--gray-500); }
+    .visitor-host { font-size: 0.875rem; color: var(--gray-600); }
+    
+    .badge-preview {
+      background: white;
+      border: 2px solid var(--gray-300);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      max-width: 300px;
+      margin: 1rem auto;
+      text-align: center;
+    }
+    
+    .badge-logo { font-size: 2rem; margin-bottom: 0.5rem; }
+    .badge-visitor-name { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; }
+    .badge-company { color: var(--gray-500); margin-bottom: 0.5rem; }
+    .badge-host { font-size: 0.875rem; }
+    .badge-type { margin-top: 0.5rem; }
+    .badge-date { font-size: 0.75rem; color: var(--gray-400); margin-top: 0.5rem; }
+    
+    .host-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.75rem;
+    }
+    
+    .host-item {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    
+    .host-avatar {
+      width: 36px;
+      height: 36px;
+      background: var(--gray-400);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+    
+    .host-name { font-weight: 500; font-size: 0.875rem; }
+    .host-dept { font-size: 0.75rem; color: var(--gray-500); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .nda-section {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .nda-section h4 { margin-bottom: 0.5rem; }
+    .nda-text { font-size: 0.75rem; color: var(--gray-600); max-height: 100px; overflow-y: auto; margin-bottom: 0.75rem; }
+    
+    .chart-container { height: 200px; display: flex; align-items: flex-end; gap: 0.5rem; padding: 1rem 0; }
+    .chart-bar { flex: 1; background: var(--primary); border-radius: 4px 4px 0 0; min-height: 4px; position: relative; }
+    .chart-bar-label { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: var(--gray-500); }
+    .chart-bar-value { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 0.75rem; font-weight: 600; }
+    
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    @media (max-width: 768px) {
+      .form-row, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🎫 GuestPass</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="checkin">Check In</div>
+    <div class="nav-tab" data-tab="preregister">Pre-Register</div>
+    <div class="nav-tab" data-tab="visitors">Visitor Log</div>
+    <div class="nav-tab" data-tab="hosts">Hosts</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-onsite">0</div>
+          <div class="stat-label">Currently On Site</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-today">0</div>
+          <div class="stat-label">Checked In Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-expected">0</div>
+          <div class="stat-label">Expected Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-week">0</div>
+          <div class="stat-label">This Week</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">👥 Currently On Site</h2>
+          <button class="btn btn-primary" onclick="switchTab('checkin')">+ Check In Visitor</button>
+        </div>
+        <div class="current-visitors" id="current-visitors"></div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">📋 Expected Today</h2>
+          </div>
+          <div id="expected-today"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🕐 Recent Activity</h2>
+          </div>
+          <div id="recent-activity"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Check In -->
+    <div class="tab-content" id="tab-checkin">
+      <div class="checkin-panel">
+        <h2>👋 Welcome!</h2>
+        <p>Please select how you'd like to check in</p>
+        <div class="checkin-buttons">
+          <button class="checkin-btn" onclick="openCheckinModal('guest')">🧑‍💼 Guest</button>
+          <button class="checkin-btn" onclick="openCheckinModal('contractor')">🔧 Contractor</button>
+          <button class="checkin-btn" onclick="openCheckinModal('interview')">💼 Interview</button>
+          <button class="checkin-btn" onclick="openCheckinModal('delivery')">📦 Delivery</button>
+          <button class="checkin-btn" onclick="openCheckinModal('vendor')">🏢 Vendor</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🔍 Pre-Registered Visitors</h2>
+        </div>
+        <p style="color: var(--gray-500); margin-bottom: 1rem;">Search for your pre-registration to check in faster</p>
+        <div class="filters">
+          <input type="text" class="filter-input" id="search-preregistered" placeholder="Search by name or email..." style="flex: 1; max-width: 400px;" oninput="searchPreregistered()">
+        </div>
+        <div id="preregistered-results"></div>
+      </div>
+    </div>
+    
+    <!-- Pre-Register -->
+    <div class="tab-content" id="tab-preregister">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📝 Pre-Register Visitors</h2>
+          <button class="btn btn-primary" onclick="openPreregisterModal()">+ Add Pre-Registration</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-prereg-status" onchange="renderPreregistrations()">
+            <option value="">All Statuses</option>
+            <option value="expected">Expected</option>
+            <option value="checked-in">Checked In</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="no-show">No Show</option>
+          </select>
+          <input type="date" class="filter-input" id="filter-prereg-date" onchange="renderPreregistrations()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Visitor</th>
+              <th>Company</th>
+              <th>Host</th>
+              <th>Expected</th>
+              <th>Type</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="preregistrations-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Visitor Log -->
+    <div class="tab-content" id="tab-visitors">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📖 Visitor Log</h2>
+          <button class="btn btn-secondary" onclick="exportVisitorLog()">Export</button>
+        </div>
+        <div class="filters">
+          <input type="date" class="filter-input" id="filter-log-from" onchange="renderVisitorLog()">
+          <input type="date" class="filter-input" id="filter-log-to" onchange="renderVisitorLog()">
+          <select class="filter-select" id="filter-log-type" onchange="renderVisitorLog()">
+            <option value="">All Types</option>
+            <option value="guest">Guest</option>
+            <option value="contractor">Contractor</option>
+            <option value="interview">Interview</option>
+            <option value="delivery">Delivery</option>
+            <option value="vendor">Vendor</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search..." id="filter-log-search" oninput="renderVisitorLog()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Visitor</th>
+              <th>Company</th>
+              <th>Host</th>
+              <th>Type</th>
+              <th>Check In</th>
+              <th>Check Out</th>
+              <th>Duration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="visitor-log-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Hosts -->
+    <div class="tab-content" id="tab-hosts">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🏢 Hosts / Employees</h2>
+          <button class="btn btn-primary" onclick="openHostModal()">+ Add Host</button>
+        </div>
+        <div class="host-list" id="hosts-list"></div>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Visitor Analytics</h2>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Daily Visitors (Last 7 Days)</h3>
+        <div class="chart-container" id="daily-chart"></div>
+        
+        <div class="grid-2" style="margin-top: 2rem;">
+          <div>
+            <h3 style="margin-bottom: 1rem;">By Visitor Type</h3>
+            <div id="type-breakdown"></div>
+          </div>
+          <div>
+            <h3 style="margin-bottom: 1rem;">Top Hosts</h3>
+            <div id="top-hosts"></div>
+          </div>
+        </div>
+        
+        <div style="margin-top: 2rem;">
+          <h3 style="margin-bottom: 1rem;">Export Reports</h3>
+          <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="exportVisitorLog()">📋 Full Visitor Log</button>
+            <button class="btn btn-secondary" onclick="exportDailyReport()">📅 Daily Summary</button>
+            <button class="btn btn-secondary" onclick="exportHostReport()">👥 Host Report</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Check In Modal -->
+  <div class="modal-overlay" id="checkin-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="checkin-modal-title">Check In - Guest</h3>
+        <button class="modal-close" onclick="closeModal('checkin-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="checkin-type">
+        <input type="hidden" id="checkin-prereg-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-input" id="checkin-first">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input type="text" class="form-input" id="checkin-last">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input type="text" class="form-input" id="checkin-company">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="checkin-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="checkin-phone">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Host *</label>
+          <select class="form-input" id="checkin-host"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purpose of Visit</label>
+          <input type="text" class="form-input" id="checkin-purpose" placeholder="Meeting, tour, etc.">
+        </div>
+        
+        <div class="nda-section" id="nda-section">
+          <h4>📜 Visitor Agreement</h4>
+          <div class="nda-text">
+            By signing in, I agree to comply with all facility rules and regulations. I understand that I am a guest on company premises and will conduct myself professionally. I agree not to disclose any confidential information I may encounter during my visit. I understand that my visit may be logged for security purposes.
+          </div>
+          <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="checkin-agree">
+            <span>I agree to the visitor terms</span>
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('checkin-modal')">Cancel</button>
+        <button class="btn btn-success" onclick="completeCheckin()">✓ Check In</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Badge Modal -->
+  <div class="modal-overlay" id="badge-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">🎫 Visitor Badge</h3>
+        <button class="modal-close" onclick="closeModal('badge-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="badge-preview" id="badge-preview"></div>
+        <p style="text-align: center; color: var(--gray-500); margin-top: 1rem;">Host has been notified of your arrival</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('badge-modal')">Close</button>
+        <button class="btn btn-primary" onclick="printBadge()">🖨️ Print Badge</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Pre-Register Modal -->
+  <div class="modal-overlay" id="prereg-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="prereg-modal-title">Pre-Register Visitor</h3>
+        <button class="modal-close" onclick="closeModal('prereg-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="prereg-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-input" id="prereg-first">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input type="text" class="form-input" id="prereg-last">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input type="text" class="form-input" id="prereg-company">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="prereg-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="prereg-phone">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Expected Date *</label>
+            <input type="date" class="form-input" id="prereg-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Expected Time</label>
+            <input type="time" class="form-input" id="prereg-time">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Host *</label>
+            <select class="form-input" id="prereg-host"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Visitor Type</label>
+            <select class="form-input" id="prereg-type">
+              <option value="guest">Guest</option>
+              <option value="contractor">Contractor</option>
+              <option value="interview">Interview</option>
+              <option value="delivery">Delivery</option>
+              <option value="vendor">Vendor</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Purpose of Visit</label>
+          <input type="text" class="form-input" id="prereg-purpose">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="prereg-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="prereg-delete-btn" onclick="deletePreregistration()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('prereg-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePreregistration()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Host Modal -->
+  <div class="modal-overlay" id="host-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="host-modal-title">Add Host</h3>
+        <button class="modal-close" onclick="closeModal('host-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="host-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name *</label>
+            <input type="text" class="form-input" id="host-first">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name *</label>
+            <input type="text" class="form-input" id="host-last">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-input" id="host-email">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Department</label>
+            <input type="text" class="form-input" id="host-dept">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="host-phone">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="host-delete-btn" onclick="deleteHost()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('host-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveHost()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let hosts = [], preregistrations = [], visits = [];
+    
+    const TYPE_LABELS = {
+      guest: '🧑‍💼 Guest',
+      contractor: '🔧 Contractor',
+      interview: '💼 Interview',
+      delivery: '📦 Delivery',
+      vendor: '🏢 Vendor'
+    };
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        hosts: localStorage.getItem('guestpass_hosts'),
+        preregistrations: localStorage.getItem('guestpass_prereg'),
+        visits: localStorage.getItem('guestpass_visits')
+      };
+      
+      hosts = saved.hosts ? JSON.parse(saved.hosts) : [
+        { id: 1, first: 'Sarah', last: 'Johnson', email: 'sarah.johnson@company.com', dept: 'Engineering', phone: '555-1001' },
+        { id: 2, first: 'Michael', last: 'Chen', email: 'michael.chen@company.com', dept: 'Marketing', phone: '555-1002' },
+        { id: 3, first: 'Emily', last: 'Davis', email: 'emily.davis@company.com', dept: 'HR', phone: '555-1003' },
+        { id: 4, first: 'James', last: 'Wilson', email: 'james.wilson@company.com', dept: 'Sales', phone: '555-1004' },
+        { id: 5, first: 'Lisa', last: 'Brown', email: 'lisa.brown@company.com', dept: 'Operations', phone: '555-1005' },
+      ];
+      
+      const today = formatDateInput(new Date());
+      const tomorrow = formatDateInput(new Date(Date.now() + 86400000));
+      
+      preregistrations = saved.preregistrations ? JSON.parse(saved.preregistrations) : [
+        { id: 1, first: 'Robert', last: 'Smith', company: 'Acme Corp', email: 'robert@acme.com', phone: '555-2001', date: today, time: '10:00', hostId: 1, type: 'guest', purpose: 'Project kickoff meeting', notes: '', status: 'expected' },
+        { id: 2, first: 'Jennifer', last: 'Lee', company: 'TechStart', email: 'jennifer@techstart.com', phone: '555-2002', date: today, time: '14:00', hostId: 2, type: 'vendor', purpose: 'Product demo', notes: 'Needs parking pass', status: 'expected' },
+        { id: 3, first: 'David', last: 'Martinez', company: '', email: 'david.m@email.com', phone: '555-2003', date: tomorrow, time: '09:00', hostId: 3, type: 'interview', purpose: 'Software Engineer position', notes: 'Panel interview', status: 'expected' },
+      ];
+      
+      const yesterday = formatDateInput(new Date(Date.now() - 86400000));
+      const twoDaysAgo = formatDateInput(new Date(Date.now() - 172800000));
+      
+      visits = saved.visits ? JSON.parse(saved.visits) : [
+        { id: 1, first: 'Amanda', last: 'Taylor', company: 'Design Co', email: 'amanda@design.co', phone: '', hostId: 1, type: 'guest', purpose: 'Design review', checkIn: today + 'T09:15', checkOut: null, preregId: null },
+        { id: 2, first: 'Chris', last: 'Anderson', company: 'BuildRight', email: '', phone: '555-3001', hostId: 5, type: 'contractor', purpose: 'HVAC maintenance', checkIn: today + 'T08:30', checkOut: today + 'T11:45', preregId: null },
+        { id: 3, first: 'Maria', last: 'Garcia', company: 'FedEx', email: '', phone: '', hostId: 5, type: 'delivery', purpose: 'Package delivery', checkIn: today + 'T10:05', checkOut: today + 'T10:15', preregId: null },
+        { id: 4, first: 'Kevin', last: 'White', company: 'Partner Inc', email: 'kevin@partner.com', phone: '555-3002', hostId: 4, type: 'guest', purpose: 'Sales meeting', checkIn: yesterday + 'T14:00', checkOut: yesterday + 'T16:30', preregId: null },
+        { id: 5, first: 'Susan', last: 'Miller', company: '', email: 'susan.m@email.com', phone: '555-3003', hostId: 3, type: 'interview', purpose: 'Product Manager role', checkIn: yesterday + 'T10:00', checkOut: yesterday + 'T12:00', preregId: null },
+        { id: 6, first: 'Tom', last: 'Jackson', company: 'CleanPro', email: '', phone: '555-3004', hostId: 5, type: 'contractor', purpose: 'Window cleaning', checkIn: twoDaysAgo + 'T07:00', checkOut: twoDaysAgo + 'T15:00', preregId: null },
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('guestpass_hosts', JSON.stringify(hosts));
+      localStorage.setItem('guestpass_prereg', JSON.stringify(preregistrations));
+      localStorage.setItem('guestpass_visits', JSON.stringify(visits));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+      });
+    }
+    
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderPreregistrations();
+      renderVisitorLog();
+      renderHosts();
+      renderReports();
+      updateHostSelects();
+    }
+    
+    function updateHostSelects() {
+      const opts = '<option value="">Select Host</option>' + hosts.map(h => `<option value="${h.id}">${h.first} ${h.last} (${h.dept})</option>`).join('');
+      ['checkin-host', 'prereg-host'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = opts;
+      });
+    }
+    
+    function getHostName(hostId) {
+      const h = hosts.find(x => x.id === hostId);
+      return h ? `${h.first} ${h.last}` : 'Unknown';
+    }
+    
+    function getInitials(first, last) {
+      return ((first || '')[0] || '') + ((last || '')[0] || '');
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const today = formatDateInput(new Date());
+      const weekAgo = formatDateInput(new Date(Date.now() - 7 * 86400000));
+      
+      const onsite = visits.filter(v => v.checkIn && !v.checkOut);
+      const todayVisits = visits.filter(v => v.checkIn && v.checkIn.startsWith(today));
+      const expected = preregistrations.filter(p => p.date === today && p.status === 'expected');
+      const weekVisits = visits.filter(v => v.checkIn && v.checkIn >= weekAgo);
+      
+      document.getElementById('stat-onsite').textContent = onsite.length;
+      document.getElementById('stat-today').textContent = todayVisits.length;
+      document.getElementById('stat-expected').textContent = expected.length;
+      document.getElementById('stat-week').textContent = weekVisits.length;
+      
+      // Current visitors
+      document.getElementById('current-visitors').innerHTML = onsite.length ? onsite.map(v => {
+        const duration = getTimeSince(v.checkIn);
+        return `<div class="visitor-card">
+          <div class="visitor-avatar">${getInitials(v.first, v.last)}</div>
+          <div class="visitor-info">
+            <div class="visitor-name">${v.first} ${v.last}</div>
+            <div class="visitor-meta">${v.company || 'No company'} • ${duration}</div>
+            <div class="visitor-host">Host: ${getHostName(v.hostId)}</div>
+          </div>
+          <button class="btn btn-sm btn-warning" onclick="checkoutVisitor(${v.id})">Check Out</button>
+        </div>`;
+      }).join('') : '<div class="empty-state">No visitors currently on site</div>';
+      
+      // Expected today
+      document.getElementById('expected-today').innerHTML = expected.length ? expected.map(p => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);">
+          <div>
+            <strong>${p.first} ${p.last}</strong>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">${p.time || 'Anytime'} • ${getHostName(p.hostId)}</div>
+          </div>
+          <button class="btn btn-sm btn-success" onclick="checkinFromPrereg(${p.id})">Check In</button>
+        </div>
+      `).join('') : '<div class="empty-state">No expected visitors</div>';
+      
+      // Recent activity
+      const recentActivity = [...visits].sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn)).slice(0, 5);
+      document.getElementById('recent-activity').innerHTML = recentActivity.map(v => `
+        <div style="display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);">
+          <div class="visitor-avatar" style="width: 36px; height: 36px; font-size: 0.875rem;">${getInitials(v.first, v.last)}</div>
+          <div style="flex: 1;">
+            <div style="font-weight: 500; font-size: 0.875rem;">${v.first} ${v.last}</div>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">${v.checkOut ? 'Checked out' : 'Checked in'} ${formatTime(v.checkOut || v.checkIn)}</div>
+          </div>
+          <span class="status-badge ${v.checkOut ? 'checked-out' : 'checked-in'}">${v.checkOut ? 'Out' : 'In'}</span>
+        </div>
+      `).join('');
+    }
+    
+    // Check In
+    function openCheckinModal(type, preregId = null) {
+      document.getElementById('checkin-modal-title').textContent = `Check In - ${TYPE_LABELS[type] || type}`;
+      document.getElementById('checkin-type').value = type;
+      document.getElementById('checkin-prereg-id').value = preregId || '';
+      
+      if (preregId) {
+        const p = preregistrations.find(x => x.id === preregId);
+        document.getElementById('checkin-first').value = p.first;
+        document.getElementById('checkin-last').value = p.last;
+        document.getElementById('checkin-company').value = p.company || '';
+        document.getElementById('checkin-email').value = p.email || '';
+        document.getElementById('checkin-phone').value = p.phone || '';
+        document.getElementById('checkin-host').value = p.hostId;
+        document.getElementById('checkin-purpose').value = p.purpose || '';
+      } else {
+        document.getElementById('checkin-first').value = '';
+        document.getElementById('checkin-last').value = '';
+        document.getElementById('checkin-company').value = '';
+        document.getElementById('checkin-email').value = '';
+        document.getElementById('checkin-phone').value = '';
+        document.getElementById('checkin-host').value = '';
+        document.getElementById('checkin-purpose').value = '';
+      }
+      
+      document.getElementById('checkin-agree').checked = false;
+      document.getElementById('nda-section').style.display = type === 'delivery' ? 'none' : 'block';
+      
+      document.getElementById('checkin-modal').classList.add('active');
+    }
+    
+    function completeCheckin() {
+      const type = document.getElementById('checkin-type').value;
+      const first = document.getElementById('checkin-first').value.trim();
+      const last = document.getElementById('checkin-last').value.trim();
+      const company = document.getElementById('checkin-company').value.trim();
+      const email = document.getElementById('checkin-email').value.trim();
+      const phone = document.getElementById('checkin-phone').value.trim();
+      const hostId = parseInt(document.getElementById('checkin-host').value);
+      const purpose = document.getElementById('checkin-purpose').value.trim();
+      const agreed = document.getElementById('checkin-agree').checked;
+      const preregId = document.getElementById('checkin-prereg-id').value;
+      
+      if (!first || !last || !hostId) {
+        showToast('Please fill in required fields', 'error');
+        return;
+      }
+      
+      if (type !== 'delivery' && !agreed) {
+        showToast('Please agree to visitor terms', 'error');
+        return;
+      }
+      
+      const visit = {
+        id: Math.max(0, ...visits.map(v => v.id)) + 1,
+        first, last, company, email, phone, hostId, type, purpose,
+        checkIn: new Date().toISOString(),
+        checkOut: null,
+        preregId: preregId ? parseInt(preregId) : null
+      };
+      
+      visits.push(visit);
+      
+      // Update preregistration status
+      if (preregId) {
+        const p = preregistrations.find(x => x.id === parseInt(preregId));
+        if (p) p.status = 'checked-in';
+      }
+      
+      saveData();
+      closeModal('checkin-modal');
+      showBadge(visit);
+      renderAll();
+    }
+    
+    function showBadge(visit) {
+      const host = hosts.find(h => h.id === visit.hostId);
+      document.getElementById('badge-preview').innerHTML = `
+        <div class="badge-logo">🏢</div>
+        <div class="badge-visitor-name">${visit.first} ${visit.last}</div>
+        <div class="badge-company">${visit.company || 'Visitor'}</div>
+        <div class="badge-host">Host: <strong>${host ? host.first + ' ' + host.last : 'N/A'}</strong></div>
+        <div class="badge-type"><span class="visitor-type ${visit.type}">${TYPE_LABELS[visit.type]}</span></div>
+        <div class="badge-date">${formatDateTime(visit.checkIn)}</div>
+      `;
+      document.getElementById('badge-modal').classList.add('active');
+      showToast(`${visit.first} ${visit.last} checked in successfully!`);
+    }
+    
+    function printBadge() {
+      window.print();
+      closeModal('badge-modal');
+    }
+    
+    function checkoutVisitor(id) {
+      const v = visits.find(x => x.id === id);
+      v.checkOut = new Date().toISOString();
+      saveData();
+      renderAll();
+      showToast(`${v.first} ${v.last} checked out`);
+    }
+    
+    function checkinFromPrereg(preregId) {
+      const p = preregistrations.find(x => x.id === preregId);
+      openCheckinModal(p.type, preregId);
+    }
+    
+    function searchPreregistered() {
+      const query = document.getElementById('search-preregistered').value.toLowerCase();
+      const today = formatDateInput(new Date());
+      const results = preregistrations.filter(p => 
+        p.status === 'expected' && 
+        p.date === today &&
+        (p.first.toLowerCase().includes(query) || 
+         p.last.toLowerCase().includes(query) || 
+         (p.email || '').toLowerCase().includes(query))
+      );
+      
+      document.getElementById('preregistered-results').innerHTML = results.length ? results.map(p => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--gray-50); border-radius: 0.375rem; margin-bottom: 0.5rem;">
+          <div>
+            <strong>${p.first} ${p.last}</strong>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">${p.company || 'No company'} • Expected ${p.time || 'anytime'}</div>
+          </div>
+          <button class="btn btn-success" onclick="checkinFromPrereg(${p.id})">Check In</button>
+        </div>
+      `).join('') : (query ? '<div class="empty-state">No matching pre-registrations found</div>' : '');
+    }
+    
+    // Pre-registrations
+    function renderPreregistrations() {
+      const statusFilter = document.getElementById('filter-prereg-status').value;
+      const dateFilter = document.getElementById('filter-prereg-date').value;
+      
+      let filtered = [...preregistrations];
+      if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+      if (dateFilter) filtered = filtered.filter(p => p.date === dateFilter);
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('preregistrations-table').innerHTML = filtered.map(p => `<tr>
+        <td><strong>${p.first} ${p.last}</strong><br><small>${p.email || ''}</small></td>
+        <td>${p.company || '-'}</td>
+        <td>${getHostName(p.hostId)}</td>
+        <td>${formatDate(p.date)} ${p.time || ''}</td>
+        <td><span class="visitor-type ${p.type}">${TYPE_LABELS[p.type]}</span></td>
+        <td><span class="status-badge ${p.status}">${p.status}</span></td>
+        <td>
+          ${p.status === 'expected' ? `<button class="btn btn-sm btn-success" onclick="checkinFromPrereg(${p.id})">Check In</button>` : ''}
+          <button class="btn btn-sm btn-secondary" onclick="editPreregistration(${p.id})">Edit</button>
+        </td>
+      </tr>`).join('');
+    }
+    
+    function openPreregisterModal(id = null) {
+      if (id) {
+        const p = preregistrations.find(x => x.id === id);
+        document.getElementById('prereg-modal-title').textContent = 'Edit Pre-Registration';
+        document.getElementById('prereg-id').value = id;
+        document.getElementById('prereg-first').value = p.first;
+        document.getElementById('prereg-last').value = p.last;
+        document.getElementById('prereg-company').value = p.company || '';
+        document.getElementById('prereg-email').value = p.email || '';
+        document.getElementById('prereg-phone').value = p.phone || '';
+        document.getElementById('prereg-date').value = p.date;
+        document.getElementById('prereg-time').value = p.time || '';
+        document.getElementById('prereg-host').value = p.hostId;
+        document.getElementById('prereg-type').value = p.type;
+        document.getElementById('prereg-purpose').value = p.purpose || '';
+        document.getElementById('prereg-notes').value = p.notes || '';
+        document.getElementById('prereg-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('prereg-modal-title').textContent = 'Pre-Register Visitor';
+        document.getElementById('prereg-id').value = '';
+        document.getElementById('prereg-first').value = '';
+        document.getElementById('prereg-last').value = '';
+        document.getElementById('prereg-company').value = '';
+        document.getElementById('prereg-email').value = '';
+        document.getElementById('prereg-phone').value = '';
+        document.getElementById('prereg-date').value = formatDateInput(new Date());
+        document.getElementById('prereg-time').value = '';
+        document.getElementById('prereg-host').value = '';
+        document.getElementById('prereg-type').value = 'guest';
+        document.getElementById('prereg-purpose').value = '';
+        document.getElementById('prereg-notes').value = '';
+        document.getElementById('prereg-delete-btn').style.display = 'none';
+      }
+      document.getElementById('prereg-modal').classList.add('active');
+    }
+    
+    function editPreregistration(id) { openPreregisterModal(id); }
+    
+    function savePreregistration() {
+      const id = document.getElementById('prereg-id').value;
+      const first = document.getElementById('prereg-first').value.trim();
+      const last = document.getElementById('prereg-last').value.trim();
+      const company = document.getElementById('prereg-company').value.trim();
+      const email = document.getElementById('prereg-email').value.trim();
+      const phone = document.getElementById('prereg-phone').value.trim();
+      const date = document.getElementById('prereg-date').value;
+      const time = document.getElementById('prereg-time').value;
+      const hostId = parseInt(document.getElementById('prereg-host').value);
+      const type = document.getElementById('prereg-type').value;
+      const purpose = document.getElementById('prereg-purpose').value.trim();
+      const notes = document.getElementById('prereg-notes').value.trim();
+      
+      if (!first || !last || !date || !hostId) {
+        showToast('Please fill required fields', 'error');
+        return;
+      }
+      
+      if (id) {
+        const i = preregistrations.findIndex(p => p.id === parseInt(id));
+        preregistrations[i] = { ...preregistrations[i], first, last, company, email, phone, date, time, hostId, type, purpose, notes };
+        showToast('Pre-registration updated');
+      } else {
+        preregistrations.push({
+          id: Math.max(0, ...preregistrations.map(p => p.id)) + 1,
+          first, last, company, email, phone, date, time, hostId, type, purpose, notes,
+          status: 'expected'
+        });
+        showToast('Visitor pre-registered');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('prereg-modal');
+    }
+    
+    function deletePreregistration() {
+      const id = parseInt(document.getElementById('prereg-id').value);
+      if (!confirm('Delete this pre-registration?')) return;
+      preregistrations = preregistrations.filter(p => p.id !== id);
+      saveData();
+      renderAll();
+      closeModal('prereg-modal');
+      showToast('Pre-registration deleted');
+    }
+    
+    // Visitor Log
+    function renderVisitorLog() {
+      const fromFilter = document.getElementById('filter-log-from').value;
+      const toFilter = document.getElementById('filter-log-to').value;
+      const typeFilter = document.getElementById('filter-log-type').value;
+      const search = document.getElementById('filter-log-search').value.toLowerCase();
+      
+      let filtered = [...visits];
+      if (fromFilter) filtered = filtered.filter(v => v.checkIn >= fromFilter);
+      if (toFilter) filtered = filtered.filter(v => v.checkIn <= toFilter + 'T23:59:59');
+      if (typeFilter) filtered = filtered.filter(v => v.type === typeFilter);
+      if (search) filtered = filtered.filter(v => 
+        v.first.toLowerCase().includes(search) || 
+        v.last.toLowerCase().includes(search) ||
+        (v.company || '').toLowerCase().includes(search)
+      );
+      
+      filtered.sort((a, b) => new Date(b.checkIn) - new Date(a.checkIn));
+      
+      document.getElementById('visitor-log-table').innerHTML = filtered.map(v => `<tr>
+        <td><strong>${v.first} ${v.last}</strong></td>
+        <td>${v.company || '-'}</td>
+        <td>${getHostName(v.hostId)}</td>
+        <td><span class="visitor-type ${v.type}">${TYPE_LABELS[v.type]}</span></td>
+        <td>${formatDateTime(v.checkIn)}</td>
+        <td>${v.checkOut ? formatDateTime(v.checkOut) : '<span class="status-badge checked-in">On Site</span>'}</td>
+        <td>${v.checkOut ? formatDuration(v.checkIn, v.checkOut) : '-'}</td>
+        <td>
+          ${!v.checkOut ? `<button class="btn btn-sm btn-warning" onclick="checkoutVisitor(${v.id})">Check Out</button>` : ''}
+        </td>
+      </tr>`).join('');
+    }
+    
+    // Hosts
+    function renderHosts() {
+      document.getElementById('hosts-list').innerHTML = hosts.map(h => `
+        <div class="host-item" onclick="editHost(${h.id})" style="cursor: pointer;">
+          <div class="host-avatar">${getInitials(h.first, h.last)}</div>
+          <div>
+            <div class="host-name">${h.first} ${h.last}</div>
+            <div class="host-dept">${h.dept || 'No department'}</div>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    function openHostModal(id = null) {
+      if (id) {
+        const h = hosts.find(x => x.id === id);
+        document.getElementById('host-modal-title').textContent = 'Edit Host';
+        document.getElementById('host-id').value = id;
+        document.getElementById('host-first').value = h.first;
+        document.getElementById('host-last').value = h.last;
+        document.getElementById('host-email').value = h.email;
+        document.getElementById('host-dept').value = h.dept || '';
+        document.getElementById('host-phone').value = h.phone || '';
+        document.getElementById('host-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('host-modal-title').textContent = 'Add Host';
+        document.getElementById('host-id').value = '';
+        document.getElementById('host-first').value = '';
+        document.getElementById('host-last').value = '';
+        document.getElementById('host-email').value = '';
+        document.getElementById('host-dept').value = '';
+        document.getElementById('host-phone').value = '';
+        document.getElementById('host-delete-btn').style.display = 'none';
+      }
+      document.getElementById('host-modal').classList.add('active');
+    }
+    
+    function editHost(id) { openHostModal(id); }
+    
+    function saveHost() {
+      const id = document.getElementById('host-id').value;
+      const first = document.getElementById('host-first').value.trim();
+      const last = document.getElementById('host-last').value.trim();
+      const email = document.getElementById('host-email').value.trim();
+      const dept = document.getElementById('host-dept').value.trim();
+      const phone = document.getElementById('host-phone').value.trim();
+      
+      if (!first || !last || !email) {
+        showToast('Please fill required fields', 'error');
+        return;
+      }
+      
+      if (id) {
+        const i = hosts.findIndex(h => h.id === parseInt(id));
+        hosts[i] = { ...hosts[i], first, last, email, dept, phone };
+        showToast('Host updated');
+      } else {
+        hosts.push({ id: Math.max(0, ...hosts.map(h => h.id)) + 1, first, last, email, dept, phone });
+        showToast('Host added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('host-modal');
+    }
+    
+    function deleteHost() {
+      const id = parseInt(document.getElementById('host-id').value);
+      if (!confirm('Delete this host?')) return;
+      hosts = hosts.filter(h => h.id !== id);
+      saveData();
+      renderAll();
+      closeModal('host-modal');
+      showToast('Host deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      // Daily chart
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        days.push({ date: formatDateInput(d), label: d.toLocaleDateString('en-US', { weekday: 'short' }) });
+      }
+      
+      const dailyCounts = days.map(d => visits.filter(v => v.checkIn && v.checkIn.startsWith(d.date)).length);
+      const maxCount = Math.max(...dailyCounts, 1);
+      
+      document.getElementById('daily-chart').innerHTML = days.map((d, i) => `
+        <div class="chart-bar" style="height: ${dailyCounts[i] / maxCount * 180}px;">
+          <span class="chart-bar-value">${dailyCounts[i]}</span>
+          <span class="chart-bar-label">${d.label}</span>
+        </div>
+      `).join('');
+      
+      // Type breakdown
+      const typeCounts = {};
+      visits.forEach(v => typeCounts[v.type] = (typeCounts[v.type] || 0) + 1);
+      const totalVisits = visits.length || 1;
+      
+      document.getElementById('type-breakdown').innerHTML = Object.entries(typeCounts).map(([type, count]) => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+          <span class="visitor-type ${type}" style="width: 120px;">${TYPE_LABELS[type]}</span>
+          <div style="flex: 1; height: 20px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${count / totalVisits * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 40px; text-align: right;">${count}</span>
+        </div>
+      `).join('');
+      
+      // Top hosts
+      const hostCounts = {};
+      visits.forEach(v => hostCounts[v.hostId] = (hostCounts[v.hostId] || 0) + 1);
+      const topHosts = Object.entries(hostCounts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      
+      document.getElementById('top-hosts').innerHTML = topHosts.map(([hostId, count]) => {
+        const h = hosts.find(x => x.id === parseInt(hostId));
+        return `<div style="display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid var(--gray-200);">
+          <span>${h ? h.first + ' ' + h.last : 'Unknown'}</span>
+          <strong>${count} visitors</strong>
+        </div>`;
+      }).join('');
+    }
+    
+    function exportVisitorLog() {
+      const headers = ['First Name', 'Last Name', 'Company', 'Email', 'Host', 'Type', 'Purpose', 'Check In', 'Check Out'];
+      const rows = visits.map(v => [v.first, v.last, v.company, v.email, getHostName(v.hostId), v.type, v.purpose, v.checkIn, v.checkOut || '']);
+      downloadCSV([headers, ...rows], 'visitor-log.csv');
+      showToast('Visitor log exported');
+    }
+    
+    function exportDailyReport() {
+      const today = formatDateInput(new Date());
+      const todayVisits = visits.filter(v => v.checkIn && v.checkIn.startsWith(today));
+      const headers = ['Name', 'Company', 'Host', 'Type', 'Check In', 'Check Out'];
+      const rows = todayVisits.map(v => [`${v.first} ${v.last}`, v.company, getHostName(v.hostId), v.type, formatTime(v.checkIn), v.checkOut ? formatTime(v.checkOut) : 'On Site']);
+      downloadCSV([headers, ...rows], `daily-report-${today}.csv`);
+      showToast('Daily report exported');
+    }
+    
+    function exportHostReport() {
+      const hostCounts = {};
+      visits.forEach(v => {
+        const h = hosts.find(x => x.id === v.hostId);
+        const name = h ? `${h.first} ${h.last}` : 'Unknown';
+        hostCounts[name] = (hostCounts[name] || 0) + 1;
+      });
+      const headers = ['Host', 'Total Visitors'];
+      const rows = Object.entries(hostCounts).sort((a, b) => b[1] - a[1]);
+      downloadCSV([headers, ...rows], 'host-report.csv');
+      showToast('Host report exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    // Helpers
+    function formatDateInput(d) { return d.toISOString().split('T')[0]; }
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
+    function formatDateTime(d) { return d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : ''; }
+    function formatTime(d) { return d ? new Date(d).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }) : ''; }
+    
+    function formatDuration(start, end) {
+      const ms = new Date(end) - new Date(start);
+      const mins = Math.floor(ms / 60000);
+      if (mins < 60) return mins + ' min';
+      const hrs = Math.floor(mins / 60);
+      const remMins = mins % 60;
+      return hrs + 'h ' + remMins + 'm';
+    }
+    
+    function getTimeSince(dateStr) {
+      const ms = Date.now() - new Date(dateStr);
+      const mins = Math.floor(ms / 60000);
+      if (mins < 60) return mins + ' min';
+      const hrs = Math.floor(mins / 60);
+      return hrs + 'h ' + (mins % 60) + 'm';
+    }
+    
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
