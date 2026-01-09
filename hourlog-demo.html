@@ -1,0 +1,1236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HourLog - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #d1fae5;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--primary); }
+    .stat-value.blue { color: var(--info); }
+    .stat-value.green { color: var(--success); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-info { background: var(--info); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    
+    .quick-log {
+      background: var(--primary-light);
+      border: 2px solid var(--primary);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .quick-log h2 {
+      color: var(--primary-dark);
+      margin-bottom: 1rem;
+      font-size: 1.125rem;
+    }
+    
+    .quick-log-form {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-end;
+    }
+    
+    .quick-log-form .form-group {
+      flex: 1;
+      min-width: 150px;
+    }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.inactive { background: var(--gray-200); color: var(--gray-600); }
+    
+    .project-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+    
+    .value-highlight {
+      background: linear-gradient(135deg, var(--primary-light), #a7f3d0);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .value-highlight .amount {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-dark);
+    }
+    
+    .value-highlight .label {
+      color: var(--gray-600);
+      font-size: 0.875rem;
+    }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .info-box {
+      background: #dbeafe;
+      border: 1px solid #3b82f6;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      font-size: 0.875rem;
+      color: #1e40af;
+      margin-bottom: 1rem;
+    }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .quick-log-form { flex-direction: column; }
+      .quick-log-form .form-group { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🕐 HourLog</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="log">Log Hours</div>
+    <div class="nav-tab" data-tab="volunteers">Volunteers</div>
+    <div class="nav-tab" data-tab="projects">Projects</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="value-highlight">
+        <div class="amount" id="total-value">$0.00</div>
+        <div class="label">Total Volunteer Value This Year (@ $33.49/hour - Independent Sector Rate)</div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-hours">0</div>
+          <div class="stat-label">Total Hours (YTD)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-volunteers">0</div>
+          <div class="stat-label">Active Volunteers</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-month">0</div>
+          <div class="stat-label">Hours This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-entries">0</div>
+          <div class="stat-label">Log Entries</div>
+        </div>
+      </div>
+      
+      <div class="quick-log">
+        <h2>⚡ Quick Log Hours</h2>
+        <div class="quick-log-form">
+          <div class="form-group">
+            <label class="form-label">Volunteer</label>
+            <select class="form-input" id="quick-volunteer"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Project</label>
+            <select class="form-input" id="quick-project"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="quick-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours</label>
+            <input type="number" class="form-input" id="quick-hours" step="0.25" min="0.25" placeholder="2.5">
+          </div>
+          <button class="btn btn-primary btn-lg" onclick="quickLogHours()">Log Hours</button>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📋 Recent Activity</h2>
+        </div>
+        <div id="recent-entries"></div>
+      </div>
+    </div>
+    
+    <!-- Log Hours -->
+    <div class="tab-content" id="tab-log">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Hour Log</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportLog()">Export CSV</button>
+            <button class="btn btn-primary" onclick="openEntryModal()">+ Log Hours</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-volunteer" onchange="renderLog()">
+            <option value="">All Volunteers</option>
+          </select>
+          <select class="filter-select" id="filter-project" onchange="renderLog()">
+            <option value="">All Projects</option>
+          </select>
+          <input type="date" class="filter-input" id="filter-start" onchange="renderLog()">
+          <input type="date" class="filter-input" id="filter-end" onchange="renderLog()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Volunteer</th>
+              <th>Project</th>
+              <th>Hours</th>
+              <th>Value</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="log-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Volunteers -->
+    <div class="tab-content" id="tab-volunteers">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Volunteers</h2>
+          <button class="btn btn-primary" onclick="openVolunteerModal()">+ Add Volunteer</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Type</th>
+              <th>Total Hours</th>
+              <th>Value</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="volunteers-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Projects -->
+    <div class="tab-content" id="tab-projects">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Projects / Committees</h2>
+          <button class="btn btn-primary" onclick="openProjectModal()">+ Add Project</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th>Description</th>
+              <th>Total Hours</th>
+              <th>Value</th>
+              <th>Volunteers</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="projects-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Grant Reports & Exports</h2>
+        </div>
+        
+        <div class="info-box">
+          💡 <strong>For Grant Applications:</strong> The Independent Sector values volunteer time at <strong>$33.49/hour</strong> (2024 rate). Use these reports to document in-kind contributions for grant applications.
+        </div>
+        
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 2rem;">
+          <button class="btn btn-primary" onclick="exportGrantReport()">📄 Grant Summary Report</button>
+          <button class="btn btn-secondary" onclick="exportByVolunteer()">👤 Hours by Volunteer</button>
+          <button class="btn btn-secondary" onclick="exportByProject()">📁 Hours by Project</button>
+          <button class="btn btn-secondary" onclick="exportLog()">📋 Full Hour Log</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Hours by Project</h3>
+        <div id="project-chart" style="margin-bottom: 2rem;"></div>
+        
+        <h3 style="margin-bottom: 1rem;">Monthly Trend</h3>
+        <div id="monthly-chart" style="display: flex; align-items: flex-end; gap: 0.5rem; height: 150px; margin-bottom: 2rem;"></div>
+        
+        <h3 style="margin-bottom: 1rem;">Top Volunteers</h3>
+        <div id="top-volunteers"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Entry Modal -->
+  <div class="modal-overlay" id="entry-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="entry-modal-title">Log Hours</h3>
+        <button class="modal-close" onclick="closeModal('entry-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="e-id">
+        <div class="form-group">
+          <label class="form-label">Volunteer *</label>
+          <select class="form-input" id="e-volunteer"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Project / Committee *</label>
+          <select class="form-input" id="e-project"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="e-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Hours *</label>
+            <input type="number" class="form-input" id="e-hours" step="0.25" min="0.25" placeholder="2.5">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes / Description</label>
+          <textarea class="form-input" id="e-notes" rows="2" placeholder="What did they work on?"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="e-delete-btn" onclick="deleteEntry()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('entry-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEntry()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Volunteer Modal -->
+  <div class="modal-overlay" id="volunteer-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="volunteer-modal-title">Add Volunteer</h3>
+        <button class="modal-close" onclick="closeModal('volunteer-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="v-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="v-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="v-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="v-phone">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type</label>
+            <select class="form-input" id="v-type">
+              <option value="adult">Adult</option>
+              <option value="student">Student</option>
+              <option value="senior">Senior</option>
+              <option value="corporate">Corporate</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="v-status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="v-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="v-delete-btn" onclick="deleteVolunteer()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('volunteer-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveVolunteer()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Project Modal -->
+  <div class="modal-overlay" id="project-modal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="project-modal-title">Add Project</h3>
+        <button class="modal-close" onclick="closeModal('project-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="p-id">
+        <div class="form-group">
+          <label class="form-label">Project / Committee Name *</label>
+          <input type="text" class="form-input" id="p-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="p-description" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="p-status">
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="p-delete-btn" onclick="deleteProject()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('project-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveProject()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    const HOURLY_RATE = 33.49; // Independent Sector 2024 rate
+    
+    let volunteers = [];
+    let projects = [];
+    let entries = [];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+      
+      // Set default date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('quick-date').value = today;
+    }
+    
+    function loadData() {
+      const saved = {
+        volunteers: localStorage.getItem('hourlog_volunteers'),
+        projects: localStorage.getItem('hourlog_projects'),
+        entries: localStorage.getItem('hourlog_entries')
+      };
+      
+      volunteers = saved.volunteers ? JSON.parse(saved.volunteers) : [
+        { id: 1, name: 'Sarah Johnson', email: 'sarah@email.com', phone: '555-0101', type: 'adult', status: 'active', notes: '' },
+        { id: 2, name: 'Mike Chen', email: 'mike@email.com', phone: '555-0102', type: 'adult', status: 'active', notes: '' },
+        { id: 3, name: 'Emily Rodriguez', email: 'emily@email.com', phone: '555-0103', type: 'student', status: 'active', notes: 'High school senior - needs 40 service hours' },
+        { id: 4, name: 'Robert Williams', email: 'robert@email.com', phone: '555-0104', type: 'senior', status: 'active', notes: '' },
+        { id: 5, name: 'Lisa Park', email: 'lisa@email.com', phone: '555-0105', type: 'corporate', status: 'active', notes: 'From ABC Corp volunteer program' },
+      ];
+      
+      projects = saved.projects ? JSON.parse(saved.projects) : [
+        { id: 1, name: 'Food Pantry', description: 'Weekly food distribution', status: 'active' },
+        { id: 2, name: 'Youth Mentoring', description: 'After-school tutoring program', status: 'active' },
+        { id: 3, name: 'Facilities', description: 'Building maintenance and grounds', status: 'active' },
+        { id: 4, name: 'Events', description: 'Fundraisers and community events', status: 'active' },
+        { id: 5, name: 'Administration', description: 'Office support and data entry', status: 'active' },
+      ];
+      
+      const today = new Date();
+      const dates = [];
+      for (let i = 0; i < 30; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+      
+      entries = saved.entries ? JSON.parse(saved.entries) : [
+        { id: 1, volunteerId: 1, projectId: 1, date: dates[1], hours: 4, notes: 'Sorted donations and helped with distribution' },
+        { id: 2, volunteerId: 2, projectId: 2, date: dates[1], hours: 2.5, notes: 'Math tutoring' },
+        { id: 3, volunteerId: 3, projectId: 1, date: dates[2], hours: 3, notes: 'Stocking shelves' },
+        { id: 4, volunteerId: 4, projectId: 3, date: dates[3], hours: 5, notes: 'Painted community room' },
+        { id: 5, volunteerId: 5, projectId: 4, date: dates[4], hours: 6, notes: 'Gala setup and registration' },
+        { id: 6, volunteerId: 1, projectId: 1, date: dates[8], hours: 4, notes: 'Regular shift' },
+        { id: 7, volunteerId: 2, projectId: 2, date: dates[8], hours: 2.5, notes: 'Reading help' },
+        { id: 8, volunteerId: 3, projectId: 5, date: dates[10], hours: 2, notes: 'Filing and data entry' },
+        { id: 9, volunteerId: 4, projectId: 3, date: dates[12], hours: 4, notes: 'Landscaping' },
+        { id: 10, volunteerId: 1, projectId: 1, date: dates[15], hours: 4, notes: 'Food distribution' },
+        { id: 11, volunteerId: 2, projectId: 2, date: dates[15], hours: 3, notes: 'Science project help' },
+        { id: 12, volunteerId: 5, projectId: 4, date: dates[20], hours: 8, notes: '5K run volunteer' },
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('hourlog_volunteers', JSON.stringify(volunteers));
+      localStorage.setItem('hourlog_projects', JSON.stringify(projects));
+      localStorage.setItem('hourlog_entries', JSON.stringify(entries));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderLog();
+      renderVolunteers();
+      renderProjects();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const activeVolunteers = volunteers.filter(v => v.status === 'active');
+      const activeProjects = projects.filter(p => p.status === 'active');
+      
+      const volOpts = '<option value="">Select Volunteer</option>' + activeVolunteers.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      const projOpts = '<option value="">Select Project</option>' + activeProjects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      
+      document.getElementById('quick-volunteer').innerHTML = volOpts;
+      document.getElementById('quick-project').innerHTML = projOpts;
+      document.getElementById('e-volunteer').innerHTML = volOpts;
+      document.getElementById('e-project').innerHTML = projOpts;
+      
+      document.getElementById('filter-volunteer').innerHTML = '<option value="">All Volunteers</option>' + volunteers.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      document.getElementById('filter-project').innerHTML = '<option value="">All Projects</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+    
+    function getYearStart() {
+      const now = new Date();
+      return new Date(now.getFullYear(), 0, 1).toISOString().split('T')[0];
+    }
+    
+    function getMonthStart() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const yearStart = getYearStart();
+      const monthStart = getMonthStart();
+      
+      const yearEntries = entries.filter(e => e.date >= yearStart);
+      const monthEntries = entries.filter(e => e.date >= monthStart);
+      
+      const totalHours = yearEntries.reduce((sum, e) => sum + e.hours, 0);
+      const monthHours = monthEntries.reduce((sum, e) => sum + e.hours, 0);
+      const totalValue = totalHours * HOURLY_RATE;
+      const activeVolunteers = new Set(yearEntries.map(e => e.volunteerId)).size;
+      
+      document.getElementById('total-value').textContent = '$' + totalValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('stat-hours').textContent = totalHours.toFixed(1);
+      document.getElementById('stat-volunteers').textContent = activeVolunteers;
+      document.getElementById('stat-month').textContent = monthHours.toFixed(1);
+      document.getElementById('stat-entries').textContent = yearEntries.length;
+      
+      // Recent entries
+      const recent = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      document.getElementById('recent-entries').innerHTML = recent.length ? recent.map(e => {
+        const vol = volunteers.find(v => v.id === e.volunteerId);
+        const proj = projects.find(p => p.id === e.projectId);
+        return `<div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--gray-200);">
+          <div>
+            <div style="font-weight: 500;">${vol?.name || 'Unknown'}</div>
+            <div style="font-size: 0.875rem; color: var(--gray-500);">
+              <span class="project-badge">${proj?.name || 'Unknown'}</span>
+              <span style="margin-left: 0.5rem;">${formatDate(e.date)}</span>
+            </div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-weight: 600; font-size: 1.125rem;">${e.hours} hrs</div>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">$${(e.hours * HOURLY_RATE).toFixed(2)}</div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align: center; color: var(--gray-500); padding: 2rem;">No entries yet. Log some hours!</div>';
+    }
+    
+    function quickLogHours() {
+      const volunteerId = parseInt(document.getElementById('quick-volunteer').value);
+      const projectId = parseInt(document.getElementById('quick-project').value);
+      const date = document.getElementById('quick-date').value;
+      const hours = parseFloat(document.getElementById('quick-hours').value);
+      
+      if (!volunteerId || !projectId || !date || !hours) {
+        showToast('Please fill all fields', 'error');
+        return;
+      }
+      
+      entries.push({
+        id: Math.max(0, ...entries.map(e => e.id)) + 1,
+        volunteerId, projectId, date, hours, notes: ''
+      });
+      
+      saveData();
+      renderAll();
+      
+      document.getElementById('quick-hours').value = '';
+      showToast(`Logged ${hours} hours!`);
+    }
+    
+    // Log
+    function renderLog() {
+      const volFilter = document.getElementById('filter-volunteer').value;
+      const projFilter = document.getElementById('filter-project').value;
+      const startFilter = document.getElementById('filter-start').value;
+      const endFilter = document.getElementById('filter-end').value;
+      
+      let filtered = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      if (volFilter) filtered = filtered.filter(e => e.volunteerId === parseInt(volFilter));
+      if (projFilter) filtered = filtered.filter(e => e.projectId === parseInt(projFilter));
+      if (startFilter) filtered = filtered.filter(e => e.date >= startFilter);
+      if (endFilter) filtered = filtered.filter(e => e.date <= endFilter);
+      
+      document.getElementById('log-table').innerHTML = filtered.map(e => {
+        const vol = volunteers.find(v => v.id === e.volunteerId);
+        const proj = projects.find(p => p.id === e.projectId);
+        return `<tr>
+          <td>${formatDate(e.date)}</td>
+          <td>${vol?.name || 'Unknown'}</td>
+          <td><span class="project-badge">${proj?.name || 'Unknown'}</span></td>
+          <td><strong>${e.hours}</strong></td>
+          <td>$${(e.hours * HOURLY_RATE).toFixed(2)}</td>
+          <td>${e.notes || '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openEntryModal(${e.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openEntryModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (id) {
+        const e = entries.find(x => x.id === id);
+        document.getElementById('entry-modal-title').textContent = 'Edit Entry';
+        document.getElementById('e-id').value = id;
+        document.getElementById('e-volunteer').value = e.volunteerId;
+        document.getElementById('e-project').value = e.projectId;
+        document.getElementById('e-date').value = e.date;
+        document.getElementById('e-hours').value = e.hours;
+        document.getElementById('e-notes').value = e.notes || '';
+        document.getElementById('e-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('entry-modal-title').textContent = 'Log Hours';
+        document.getElementById('e-id').value = '';
+        document.getElementById('e-volunteer').value = '';
+        document.getElementById('e-project').value = '';
+        document.getElementById('e-date').value = today;
+        document.getElementById('e-hours').value = '';
+        document.getElementById('e-notes').value = '';
+        document.getElementById('e-delete-btn').style.display = 'none';
+      }
+      document.getElementById('entry-modal').classList.add('active');
+    }
+    
+    function saveEntry() {
+      const id = document.getElementById('e-id').value;
+      const volunteerId = parseInt(document.getElementById('e-volunteer').value);
+      const projectId = parseInt(document.getElementById('e-project').value);
+      const date = document.getElementById('e-date').value;
+      const hours = parseFloat(document.getElementById('e-hours').value);
+      const notes = document.getElementById('e-notes').value.trim();
+      
+      if (!volunteerId || !projectId || !date || !hours) {
+        showToast('Please fill required fields', 'error');
+        return;
+      }
+      
+      if (id) {
+        const i = entries.findIndex(e => e.id === parseInt(id));
+        entries[i] = { ...entries[i], volunteerId, projectId, date, hours, notes };
+        showToast('Entry updated');
+      } else {
+        entries.push({ id: Math.max(0, ...entries.map(e => e.id)) + 1, volunteerId, projectId, date, hours, notes });
+        showToast('Hours logged');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('entry-modal');
+    }
+    
+    function deleteEntry() {
+      const id = parseInt(document.getElementById('e-id').value);
+      if (!confirm('Delete this entry?')) return;
+      entries = entries.filter(e => e.id !== id);
+      saveData();
+      renderAll();
+      closeModal('entry-modal');
+      showToast('Entry deleted');
+    }
+    
+    // Volunteers
+    function renderVolunteers() {
+      document.getElementById('volunteers-table').innerHTML = volunteers.map(v => {
+        const volEntries = entries.filter(e => e.volunteerId === v.id);
+        const totalHours = volEntries.reduce((sum, e) => sum + e.hours, 0);
+        
+        return `<tr>
+          <td><strong>${v.name}</strong></td>
+          <td>${v.email || '-'}</td>
+          <td>${v.phone || '-'}</td>
+          <td>${v.type}</td>
+          <td>${totalHours.toFixed(1)}</td>
+          <td>$${(totalHours * HOURLY_RATE).toFixed(2)}</td>
+          <td><span class="status-badge ${v.status}">${v.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openVolunteerModal(${v.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openVolunteerModal(id = null) {
+      if (id) {
+        const v = volunteers.find(x => x.id === id);
+        document.getElementById('volunteer-modal-title').textContent = 'Edit Volunteer';
+        document.getElementById('v-id').value = id;
+        document.getElementById('v-name').value = v.name;
+        document.getElementById('v-email').value = v.email || '';
+        document.getElementById('v-phone').value = v.phone || '';
+        document.getElementById('v-type').value = v.type;
+        document.getElementById('v-status').value = v.status;
+        document.getElementById('v-notes').value = v.notes || '';
+        document.getElementById('v-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('volunteer-modal-title').textContent = 'Add Volunteer';
+        document.getElementById('v-id').value = '';
+        document.getElementById('v-name').value = '';
+        document.getElementById('v-email').value = '';
+        document.getElementById('v-phone').value = '';
+        document.getElementById('v-type').value = 'adult';
+        document.getElementById('v-status').value = 'active';
+        document.getElementById('v-notes').value = '';
+        document.getElementById('v-delete-btn').style.display = 'none';
+      }
+      document.getElementById('volunteer-modal').classList.add('active');
+    }
+    
+    function saveVolunteer() {
+      const id = document.getElementById('v-id').value;
+      const name = document.getElementById('v-name').value.trim();
+      const email = document.getElementById('v-email').value.trim();
+      const phone = document.getElementById('v-phone').value.trim();
+      const type = document.getElementById('v-type').value;
+      const status = document.getElementById('v-status').value;
+      const notes = document.getElementById('v-notes').value.trim();
+      
+      if (!name) { showToast('Please enter a name', 'error'); return; }
+      
+      if (id) {
+        const i = volunteers.findIndex(v => v.id === parseInt(id));
+        volunteers[i] = { ...volunteers[i], name, email, phone, type, status, notes };
+        showToast('Volunteer updated');
+      } else {
+        volunteers.push({ id: Math.max(0, ...volunteers.map(v => v.id)) + 1, name, email, phone, type, status, notes });
+        showToast('Volunteer added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('volunteer-modal');
+    }
+    
+    function deleteVolunteer() {
+      const id = parseInt(document.getElementById('v-id').value);
+      const hasEntries = entries.some(e => e.volunteerId === id);
+      if (hasEntries && !confirm('This volunteer has logged hours. Delete anyway?')) return;
+      
+      volunteers = volunteers.filter(v => v.id !== id);
+      saveData();
+      renderAll();
+      closeModal('volunteer-modal');
+      showToast('Volunteer deleted');
+    }
+    
+    // Projects
+    function renderProjects() {
+      document.getElementById('projects-table').innerHTML = projects.map(p => {
+        const projEntries = entries.filter(e => e.projectId === p.id);
+        const totalHours = projEntries.reduce((sum, e) => sum + e.hours, 0);
+        const uniqueVols = new Set(projEntries.map(e => e.volunteerId)).size;
+        
+        return `<tr>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.description || '-'}</td>
+          <td>${totalHours.toFixed(1)}</td>
+          <td>$${(totalHours * HOURLY_RATE).toFixed(2)}</td>
+          <td>${uniqueVols}</td>
+          <td><span class="status-badge ${p.status}">${p.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openProjectModal(${p.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openProjectModal(id = null) {
+      if (id) {
+        const p = projects.find(x => x.id === id);
+        document.getElementById('project-modal-title').textContent = 'Edit Project';
+        document.getElementById('p-id').value = id;
+        document.getElementById('p-name').value = p.name;
+        document.getElementById('p-description').value = p.description || '';
+        document.getElementById('p-status').value = p.status;
+        document.getElementById('p-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('project-modal-title').textContent = 'Add Project';
+        document.getElementById('p-id').value = '';
+        document.getElementById('p-name').value = '';
+        document.getElementById('p-description').value = '';
+        document.getElementById('p-status').value = 'active';
+        document.getElementById('p-delete-btn').style.display = 'none';
+      }
+      document.getElementById('project-modal').classList.add('active');
+    }
+    
+    function saveProject() {
+      const id = document.getElementById('p-id').value;
+      const name = document.getElementById('p-name').value.trim();
+      const description = document.getElementById('p-description').value.trim();
+      const status = document.getElementById('p-status').value;
+      
+      if (!name) { showToast('Please enter a name', 'error'); return; }
+      
+      if (id) {
+        const i = projects.findIndex(p => p.id === parseInt(id));
+        projects[i] = { ...projects[i], name, description, status };
+        showToast('Project updated');
+      } else {
+        projects.push({ id: Math.max(0, ...projects.map(p => p.id)) + 1, name, description, status });
+        showToast('Project added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('project-modal');
+    }
+    
+    function deleteProject() {
+      const id = parseInt(document.getElementById('p-id').value);
+      const hasEntries = entries.some(e => e.projectId === id);
+      if (hasEntries && !confirm('This project has logged hours. Delete anyway?')) return;
+      
+      projects = projects.filter(p => p.id !== id);
+      saveData();
+      renderAll();
+      closeModal('project-modal');
+      showToast('Project deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const yearStart = getYearStart();
+      const yearEntries = entries.filter(e => e.date >= yearStart);
+      
+      // Project chart
+      const projectHours = projects.map(p => ({
+        name: p.name,
+        hours: yearEntries.filter(e => e.projectId === p.id).reduce((sum, e) => sum + e.hours, 0)
+      })).filter(p => p.hours > 0).sort((a, b) => b.hours - a.hours);
+      
+      const maxHours = Math.max(...projectHours.map(p => p.hours), 1);
+      
+      document.getElementById('project-chart').innerHTML = projectHours.length ? projectHours.map(p => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+          <span style="width: 120px; font-size: 0.875rem;">${p.name}</span>
+          <div style="flex: 1; height: 24px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${p.hours / maxHours * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 80px; text-align: right; font-weight: 600;">${p.hours.toFixed(1)} hrs</span>
+        </div>
+      `).join('') : '<div style="color: var(--gray-500);">No hours logged yet</div>';
+      
+      // Monthly chart
+      const months = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        months.push({
+          key: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`,
+          label: d.toLocaleDateString('en-US', { month: 'short' })
+        });
+      }
+      
+      const monthlyHours = months.map(m => ({
+        label: m.label,
+        hours: entries.filter(e => e.date.startsWith(m.key)).reduce((sum, e) => sum + e.hours, 0)
+      }));
+      
+      const maxMonth = Math.max(...monthlyHours.map(m => m.hours), 1);
+      
+      document.getElementById('monthly-chart').innerHTML = monthlyHours.map(m => `
+        <div style="flex: 1; text-align: center;">
+          <div style="background: var(--primary); border-radius: 4px 4px 0 0; height: ${m.hours / maxMonth * 120}px; min-height: ${m.hours > 0 ? 10 : 4}px;"></div>
+          <div style="font-size: 0.65rem; color: var(--gray-500); margin-top: 0.25rem;">${m.label}</div>
+          <div style="font-size: 0.65rem; font-weight: 600;">${m.hours > 0 ? m.hours.toFixed(0) : ''}</div>
+        </div>
+      `).join('');
+      
+      // Top volunteers
+      const volunteerHours = volunteers.map(v => ({
+        name: v.name,
+        hours: yearEntries.filter(e => e.volunteerId === v.id).reduce((sum, e) => sum + e.hours, 0)
+      })).filter(v => v.hours > 0).sort((a, b) => b.hours - a.hours).slice(0, 5);
+      
+      document.getElementById('top-volunteers').innerHTML = volunteerHours.length ? volunteerHours.map((v, i) => `
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem; background: var(--gray-50); border-radius: 0.375rem; margin-bottom: 0.5rem;">
+          <div>
+            <span style="font-weight: 600; color: var(--primary); margin-right: 0.5rem;">#${i + 1}</span>
+            ${v.name}
+          </div>
+          <div style="font-weight: 600;">${v.hours.toFixed(1)} hrs ($${(v.hours * HOURLY_RATE).toFixed(2)})</div>
+        </div>
+      `).join('') : '<div style="color: var(--gray-500);">No hours logged yet</div>';
+    }
+    
+    // Exports
+    function exportLog() {
+      const headers = ['Date', 'Volunteer', 'Project', 'Hours', 'Value', 'Notes'];
+      const rows = entries.map(e => {
+        const vol = volunteers.find(v => v.id === e.volunteerId);
+        const proj = projects.find(p => p.id === e.projectId);
+        return [e.date, vol?.name || '', proj?.name || '', e.hours, (e.hours * HOURLY_RATE).toFixed(2), e.notes || ''];
+      });
+      downloadCSV([headers, ...rows], 'hour-log.csv');
+      showToast('Hour log exported');
+    }
+    
+    function exportByVolunteer() {
+      const headers = ['Volunteer', 'Type', 'Email', 'Total Hours', 'Dollar Value'];
+      const rows = volunteers.map(v => {
+        const hours = entries.filter(e => e.volunteerId === v.id).reduce((sum, e) => sum + e.hours, 0);
+        return [v.name, v.type, v.email || '', hours.toFixed(1), (hours * HOURLY_RATE).toFixed(2)];
+      });
+      downloadCSV([headers, ...rows], 'hours-by-volunteer.csv');
+      showToast('Report exported');
+    }
+    
+    function exportByProject() {
+      const headers = ['Project', 'Description', 'Total Hours', 'Dollar Value', 'Unique Volunteers'];
+      const rows = projects.map(p => {
+        const projEntries = entries.filter(e => e.projectId === p.id);
+        const hours = projEntries.reduce((sum, e) => sum + e.hours, 0);
+        const uniqueVols = new Set(projEntries.map(e => e.volunteerId)).size;
+        return [p.name, p.description || '', hours.toFixed(1), (hours * HOURLY_RATE).toFixed(2), uniqueVols];
+      });
+      downloadCSV([headers, ...rows], 'hours-by-project.csv');
+      showToast('Report exported');
+    }
+    
+    function exportGrantReport() {
+      const yearStart = getYearStart();
+      const yearEntries = entries.filter(e => e.date >= yearStart);
+      const totalHours = yearEntries.reduce((sum, e) => sum + e.hours, 0);
+      const totalValue = totalHours * HOURLY_RATE;
+      const uniqueVols = new Set(yearEntries.map(e => e.volunteerId)).size;
+      
+      const lines = [
+        ['VOLUNTEER CONTRIBUTION SUMMARY'],
+        [''],
+        ['Report Generated', new Date().toLocaleDateString()],
+        ['Period', `${yearStart} to Present`],
+        [''],
+        ['SUMMARY'],
+        ['Total Volunteer Hours', totalHours.toFixed(1)],
+        ['Hourly Rate (Independent Sector 2024)', '$' + HOURLY_RATE.toFixed(2)],
+        ['Total In-Kind Value', '$' + totalValue.toFixed(2)],
+        ['Number of Volunteers', uniqueVols],
+        ['Number of Entries', yearEntries.length],
+        [''],
+        ['HOURS BY PROJECT'],
+        ['Project', 'Hours', 'Value']
+      ];
+      
+      projects.forEach(p => {
+        const hours = yearEntries.filter(e => e.projectId === p.id).reduce((sum, e) => sum + e.hours, 0);
+        if (hours > 0) {
+          lines.push([p.name, hours.toFixed(1), '$' + (hours * HOURLY_RATE).toFixed(2)]);
+        }
+      });
+      
+      downloadCSV(lines, 'grant-summary-report.csv');
+      showToast('Grant report exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = filename;
+      a.click();
+    }
+    
+    function formatDate(d) {
+      return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    }
+    
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => {
+      o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); });
+    });
+    
+    init();
+  </script>
+</body>
+</html>
