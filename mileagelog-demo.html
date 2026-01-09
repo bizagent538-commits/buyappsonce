@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MileageLog - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #059669;
+      --primary-dark: #047857;
+      --primary-light: #d1fae5;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1200px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-value.green { color: var(--primary); }
+    .stat-value.blue { color: #3b82f6; }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .purpose-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .purpose-badge.business { background: #dbeafe; color: #1e40af; }
+    .purpose-badge.medical { background: #fce7f3; color: #9d174d; }
+    .purpose-badge.charity { background: #dcfce7; color: #166534; }
+    .purpose-badge.personal { background: var(--gray-200); color: var(--gray-600); }
+    
+    .quick-log {
+      background: var(--primary-light);
+      border: 2px dashed var(--primary);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .quick-log-title { font-weight: 600; margin-bottom: 1rem; color: var(--primary-dark); }
+    
+    .quick-log-form {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    
+    .quick-log-form .form-group { margin: 0; }
+    .quick-log-form label { font-size: 0.75rem; color: var(--gray-600); display: block; margin-bottom: 0.25rem; }
+    .quick-log-form input, .quick-log-form select { padding: 0.5rem; min-width: 120px; }
+    
+    .recent-trip {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .trip-route { font-weight: 500; }
+    .trip-meta { font-size: 0.875rem; color: var(--gray-500); }
+    .trip-miles { font-weight: 600; color: var(--primary); }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .vehicle-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .vehicle-info h4 { font-size: 1rem; margin-bottom: 0.25rem; }
+    .vehicle-info p { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .rate-info {
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .rate-info strong { color: var(--primary); }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row, .grid-2 { grid-template-columns: 1fr; }
+      .quick-log-form { flex-direction: column; align-items: stretch; }
+      .quick-log-form input, .quick-log-form select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🚗 MileageLog</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="trips">All Trips</div>
+    <div class="nav-tab" data-tab="vehicles">Vehicles</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+    <div class="nav-tab" data-tab="settings">Settings</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="quick-log">
+        <div class="quick-log-title">⚡ Quick Log Trip</div>
+        <div class="quick-log-form">
+          <div class="form-group">
+            <label>Date</label>
+            <input type="date" id="quick-date" class="form-input">
+          </div>
+          <div class="form-group">
+            <label>From</label>
+            <input type="text" id="quick-from" class="form-input" placeholder="Start location">
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            <input type="text" id="quick-to" class="form-input" placeholder="End location">
+          </div>
+          <div class="form-group">
+            <label>Miles</label>
+            <input type="number" id="quick-miles" class="form-input" min="0" step="0.1" placeholder="0.0">
+          </div>
+          <div class="form-group">
+            <label>Purpose</label>
+            <select id="quick-purpose" class="form-input">
+              <option value="business">Business</option>
+              <option value="medical">Medical</option>
+              <option value="charity">Charity</option>
+              <option value="personal">Personal</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="quickLogTrip()">Log Trip</button>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-ytd-miles">0</div>
+          <div class="stat-label">YTD Miles</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-ytd-value">$0</div>
+          <div class="stat-label">YTD Deduction</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-month-miles">0</div>
+          <div class="stat-label">This Month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-trips">0</div>
+          <div class="stat-label">Total Trips</div>
+        </div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🚘 Recent Trips</h2>
+            <button class="btn btn-sm btn-secondary" onclick="switchTab('trips')">View All</button>
+          </div>
+          <div id="recent-trips"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">📊 Miles by Purpose</h2>
+          </div>
+          <div id="purpose-breakdown"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- All Trips -->
+    <div class="tab-content" id="tab-trips">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Trip Log</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportTrips()">Export</button>
+            <button class="btn btn-primary" onclick="openTripModal()">+ Log Trip</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-purpose" onchange="renderTrips()">
+            <option value="">All Purposes</option>
+            <option value="business">Business</option>
+            <option value="medical">Medical</option>
+            <option value="charity">Charity</option>
+            <option value="personal">Personal</option>
+          </select>
+          <select class="filter-select" id="filter-vehicle" onchange="renderTrips()">
+            <option value="">All Vehicles</option>
+          </select>
+          <input type="month" class="filter-input" id="filter-month" onchange="renderTrips()">
+          <input type="text" class="filter-input" placeholder="Search..." id="filter-search" oninput="renderTrips()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Route</th>
+              <th>Purpose</th>
+              <th>Vehicle</th>
+              <th>Miles</th>
+              <th>Value</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="trips-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Vehicles -->
+    <div class="tab-content" id="tab-vehicles">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Vehicles</h2>
+          <button class="btn btn-primary" onclick="openVehicleModal()">+ Add Vehicle</button>
+        </div>
+        <div id="vehicles-list"></div>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Mileage Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportIRSReport()">📋 IRS Mileage Log</button>
+          <button class="btn btn-secondary" onclick="exportTrips()">🚗 All Trips</button>
+          <button class="btn btn-secondary" onclick="exportByMonth()">📅 Monthly Summary</button>
+          <button class="btn btn-secondary" onclick="exportByPurpose()">📊 By Purpose</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Year to Date Summary</h3>
+        <div class="rate-info" style="margin-bottom: 1.5rem;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div>
+              <div style="color: var(--gray-500); font-size: 0.75rem;">Business Miles</div>
+              <div style="font-size: 1.25rem; font-weight: 600;" id="report-business-miles">0</div>
+              <div style="color: var(--primary);" id="report-business-value">$0.00</div>
+            </div>
+            <div>
+              <div style="color: var(--gray-500); font-size: 0.75rem;">Medical Miles</div>
+              <div style="font-size: 1.25rem; font-weight: 600;" id="report-medical-miles">0</div>
+              <div style="color: var(--primary);" id="report-medical-value">$0.00</div>
+            </div>
+            <div>
+              <div style="color: var(--gray-500); font-size: 0.75rem;">Charity Miles</div>
+              <div style="font-size: 1.25rem; font-weight: 600;" id="report-charity-miles">0</div>
+              <div style="color: var(--primary);" id="report-charity-value">$0.00</div>
+            </div>
+            <div>
+              <div style="color: var(--gray-500); font-size: 0.75rem;">Total Deductible</div>
+              <div style="font-size: 1.25rem; font-weight: 600; color: var(--primary);" id="report-total-value">$0.00</div>
+            </div>
+          </div>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Monthly Breakdown</h3>
+        <div id="monthly-chart"></div>
+      </div>
+    </div>
+    
+    <!-- Settings -->
+    <div class="tab-content" id="tab-settings">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">⚙️ Mileage Rates</h2>
+        </div>
+        <p style="margin-bottom: 1rem; color: var(--gray-600);">IRS standard mileage rates for tax year 2024:</p>
+        <div class="form-row" style="margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label class="form-label">Business Rate (per mile)</label>
+            <input type="number" class="form-input" id="rate-business" step="0.001" value="0.67">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Medical Rate (per mile)</label>
+            <input type="number" class="form-input" id="rate-medical" step="0.001" value="0.21">
+          </div>
+        </div>
+        <div class="form-row" style="margin-bottom: 1.5rem;">
+          <div class="form-group">
+            <label class="form-label">Charity Rate (per mile)</label>
+            <input type="number" class="form-input" id="rate-charity" step="0.001" value="0.14">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Personal Rate (per mile)</label>
+            <input type="number" class="form-input" id="rate-personal" step="0.001" value="0" disabled>
+            <small style="color: var(--gray-500);">Personal miles are not deductible</small>
+          </div>
+        </div>
+        <button class="btn btn-primary" onclick="saveRates()">Save Rates</button>
+        
+        <hr style="margin: 2rem 0; border: none; border-top: 1px solid var(--gray-200);">
+        
+        <h3 style="margin-bottom: 1rem;">Data Management</h3>
+        <div style="display: flex; gap: 0.75rem;">
+          <button class="btn btn-secondary" onclick="exportAllData()">📥 Export All Data</button>
+          <button class="btn btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Trip Modal -->
+  <div class="modal-overlay" id="trip-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="trip-modal-title">Log Trip</h3>
+        <button class="modal-close" onclick="closeModal('trip-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="trip-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="trip-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purpose *</label>
+            <select class="form-input" id="trip-purpose">
+              <option value="business">Business</option>
+              <option value="medical">Medical</option>
+              <option value="charity">Charity</option>
+              <option value="personal">Personal</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">From *</label>
+          <input type="text" class="form-input" id="trip-from" placeholder="Starting address">
+        </div>
+        <div class="form-group">
+          <label class="form-label">To *</label>
+          <input type="text" class="form-input" id="trip-to" placeholder="Destination address">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Miles *</label>
+            <input type="number" class="form-input" id="trip-miles" min="0" step="0.1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vehicle</label>
+            <select class="form-input" id="trip-vehicle"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Business Purpose / Notes</label>
+          <textarea class="form-input" id="trip-notes" rows="2" placeholder="Client meeting, site visit, etc."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Odometer Start</label>
+            <input type="number" class="form-input" id="trip-odo-start" min="0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Odometer End</label>
+            <input type="number" class="form-input" id="trip-odo-end" min="0">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="trip-delete-btn" onclick="deleteTrip()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('trip-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTrip()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Vehicle Modal -->
+  <div class="modal-overlay" id="vehicle-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="vehicle-modal-title">Add Vehicle</h3>
+        <button class="modal-close" onclick="closeModal('vehicle-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="veh-id">
+        <div class="form-group">
+          <label class="form-label">Vehicle Name *</label>
+          <input type="text" class="form-input" id="veh-name" placeholder="e.g., Work Truck, Personal Car">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Year</label>
+            <input type="number" class="form-input" id="veh-year" min="1900" max="2030">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Make</label>
+            <input type="text" class="form-input" id="veh-make" placeholder="e.g., Toyota">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Model</label>
+            <input type="text" class="form-input" id="veh-model" placeholder="e.g., Camry">
+          </div>
+          <div class="form-group">
+            <label class="form-label">License Plate</label>
+            <input type="text" class="form-input" id="veh-plate">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Current Odometer</label>
+          <input type="number" class="form-input" id="veh-odometer" min="0">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="veh-delete-btn" onclick="deleteVehicle()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('vehicle-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveVehicle()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let trips = [], vehicles = [];
+    let rates = { business: 0.67, medical: 0.21, charity: 0.14, personal: 0 };
+    
+    function init() {
+      loadData();
+      setupTabs();
+      document.getElementById('quick-date').value = new Date().toISOString().split('T')[0];
+      renderAll();
+    }
+    
+    function loadData() {
+      const savedTrips = localStorage.getItem('mileage_trips');
+      const savedVehicles = localStorage.getItem('mileage_vehicles');
+      const savedRates = localStorage.getItem('mileage_rates');
+      
+      vehicles = savedVehicles ? JSON.parse(savedVehicles) : [
+        { id: 1, name: 'Work Truck', year: 2022, make: 'Ford', model: 'F-150', plate: 'ABC-1234', odometer: 45000 },
+        { id: 2, name: 'Personal Car', year: 2020, make: 'Toyota', model: 'Camry', plate: 'XYZ-5678', odometer: 32000 },
+      ];
+      
+      if (savedRates) rates = JSON.parse(savedRates);
+      
+      const today = new Date();
+      const lastWeek = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+      const twoDaysAgo = new Date(today.getTime() - 2 * 86400000).toISOString().split('T')[0];
+      const yesterday = new Date(today.getTime() - 86400000).toISOString().split('T')[0];
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().split('T')[0];
+      
+      trips = savedTrips ? JSON.parse(savedTrips) : [
+        { id: 1, date: lastWeek, from: 'Office', to: 'Client Site - ABC Corp', purpose: 'business', vehicleId: 1, miles: 24.5, notes: 'Quarterly review meeting', odoStart: 44900, odoEnd: 44924.5 },
+        { id: 2, date: twoDaysAgo, from: 'Home', to: 'Downtown Medical Center', purpose: 'medical', vehicleId: 2, miles: 12.3, notes: 'Annual checkup', odoStart: null, odoEnd: null },
+        { id: 3, date: twoDaysAgo, from: 'Office', to: 'Supplier Warehouse', purpose: 'business', vehicleId: 1, miles: 18.7, notes: 'Inventory pickup', odoStart: 44924.5, odoEnd: 44943.2 },
+        { id: 4, date: yesterday, from: 'Home', to: 'Food Bank', purpose: 'charity', vehicleId: 2, miles: 8.5, notes: 'Volunteer delivery', odoStart: null, odoEnd: null },
+        { id: 5, date: yesterday, from: 'Office', to: 'Client Site - XYZ Inc', purpose: 'business', vehicleId: 1, miles: 32.1, notes: 'Project kickoff', odoStart: 44943.2, odoEnd: 44975.3 },
+        { id: 6, date: lastMonth, from: 'Office', to: 'Conference Center', purpose: 'business', vehicleId: 1, miles: 45.0, notes: 'Industry conference', odoStart: null, odoEnd: null },
+        { id: 7, date: lastMonth, from: 'Home', to: 'Charity Event', purpose: 'charity', vehicleId: 2, miles: 15.2, notes: 'Fundraiser', odoStart: null, odoEnd: null },
+      ];
+      
+      saveData();
+      loadRatesUI();
+    }
+    
+    function saveData() {
+      localStorage.setItem('mileage_trips', JSON.stringify(trips));
+      localStorage.setItem('mileage_vehicles', JSON.stringify(vehicles));
+      localStorage.setItem('mileage_rates', JSON.stringify(rates));
+    }
+    
+    function loadRatesUI() {
+      document.getElementById('rate-business').value = rates.business;
+      document.getElementById('rate-medical').value = rates.medical;
+      document.getElementById('rate-charity').value = rates.charity;
+    }
+    
+    function saveRates() {
+      rates.business = parseFloat(document.getElementById('rate-business').value) || 0;
+      rates.medical = parseFloat(document.getElementById('rate-medical').value) || 0;
+      rates.charity = parseFloat(document.getElementById('rate-charity').value) || 0;
+      saveData();
+      renderAll();
+      showToast('Rates updated');
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => switchTab(tab.dataset.tab));
+      });
+    }
+    
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderTrips();
+      renderVehicles();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const vehicleOpts = '<option value="">Select Vehicle</option>' + vehicles.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      document.getElementById('trip-vehicle').innerHTML = vehicleOpts;
+      document.getElementById('filter-vehicle').innerHTML = '<option value="">All Vehicles</option>' + vehicles.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+    }
+    
+    function getTripValue(trip) {
+      return trip.miles * (rates[trip.purpose] || 0);
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const thisYear = new Date().getFullYear();
+      const thisMonth = new Date().getMonth();
+      
+      const ytdTrips = trips.filter(t => new Date(t.date).getFullYear() === thisYear);
+      const monthTrips = ytdTrips.filter(t => new Date(t.date).getMonth() === thisMonth);
+      
+      const ytdMiles = ytdTrips.reduce((sum, t) => sum + t.miles, 0);
+      const ytdValue = ytdTrips.reduce((sum, t) => sum + getTripValue(t), 0);
+      const monthMiles = monthTrips.reduce((sum, t) => sum + t.miles, 0);
+      
+      document.getElementById('stat-ytd-miles').textContent = ytdMiles.toLocaleString('en-US', { maximumFractionDigits: 1 });
+      document.getElementById('stat-ytd-value').textContent = '$' + ytdValue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      document.getElementById('stat-month-miles').textContent = monthMiles.toLocaleString('en-US', { maximumFractionDigits: 1 });
+      document.getElementById('stat-trips').textContent = trips.length;
+      
+      // Recent trips
+      const recent = [...trips].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      document.getElementById('recent-trips').innerHTML = recent.length ? recent.map(t => `
+        <div class="recent-trip">
+          <div>
+            <div class="trip-route">${t.from} → ${t.to}</div>
+            <div class="trip-meta">${formatDate(t.date)} • <span class="purpose-badge ${t.purpose}">${t.purpose}</span></div>
+          </div>
+          <div class="trip-miles">${t.miles} mi</div>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);padding:1rem;">No trips logged</div>';
+      
+      // Purpose breakdown
+      const purposes = { business: 0, medical: 0, charity: 0, personal: 0 };
+      ytdTrips.forEach(t => { purposes[t.purpose] = (purposes[t.purpose] || 0) + t.miles; });
+      const maxMiles = Math.max(...Object.values(purposes), 1);
+      
+      const labels = { business: 'Business', medical: 'Medical', charity: 'Charity', personal: 'Personal' };
+      
+      document.getElementById('purpose-breakdown').innerHTML = Object.entries(purposes).map(([purpose, miles]) => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+          <span style="width: 80px; font-size: 0.875rem;">${labels[purpose]}</span>
+          <div style="flex: 1; height: 20px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${miles / maxMiles * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 60px; text-align: right; font-weight: 600;">${miles.toFixed(1)}</span>
+        </div>
+      `).join('');
+    }
+    
+    // Trips
+    function renderTrips() {
+      const purposeFilter = document.getElementById('filter-purpose').value;
+      const vehicleFilter = document.getElementById('filter-vehicle').value;
+      const monthFilter = document.getElementById('filter-month').value;
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      
+      let filtered = [...trips];
+      if (purposeFilter) filtered = filtered.filter(t => t.purpose === purposeFilter);
+      if (vehicleFilter) filtered = filtered.filter(t => t.vehicleId === parseInt(vehicleFilter));
+      if (monthFilter) filtered = filtered.filter(t => t.date.startsWith(monthFilter));
+      if (search) filtered = filtered.filter(t => 
+        t.from.toLowerCase().includes(search) || 
+        t.to.toLowerCase().includes(search) ||
+        (t.notes && t.notes.toLowerCase().includes(search))
+      );
+      
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('trips-table').innerHTML = filtered.map(t => {
+        const vehicle = vehicles.find(v => v.id === t.vehicleId);
+        const value = getTripValue(t);
+        return `<tr>
+          <td>${formatDate(t.date)}</td>
+          <td>
+            <div style="font-weight: 500;">${t.from} → ${t.to}</div>
+            ${t.notes ? `<div style="font-size: 0.75rem; color: var(--gray-500);">${t.notes}</div>` : ''}
+          </td>
+          <td><span class="purpose-badge ${t.purpose}">${t.purpose}</span></td>
+          <td>${vehicle?.name || '-'}</td>
+          <td><strong>${t.miles}</strong></td>
+          <td style="color: var(--primary);">${value > 0 ? '$' + value.toFixed(2) : '-'}</td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editTrip(${t.id})">Edit</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function quickLogTrip() {
+      const date = document.getElementById('quick-date').value;
+      const from = document.getElementById('quick-from').value.trim();
+      const to = document.getElementById('quick-to').value.trim();
+      const miles = parseFloat(document.getElementById('quick-miles').value);
+      const purpose = document.getElementById('quick-purpose').value;
+      
+      if (!date || !from || !to || !miles) { showToast('Please fill all fields', 'error'); return; }
+      
+      trips.push({
+        id: Math.max(0, ...trips.map(t => t.id)) + 1,
+        date, from, to, miles, purpose,
+        vehicleId: vehicles[0]?.id || null,
+        notes: '', odoStart: null, odoEnd: null
+      });
+      
+      document.getElementById('quick-from').value = '';
+      document.getElementById('quick-to').value = '';
+      document.getElementById('quick-miles').value = '';
+      
+      saveData();
+      renderAll();
+      showToast('Trip logged');
+    }
+    
+    function openTripModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (id) {
+        const t = trips.find(x => x.id === id);
+        document.getElementById('trip-modal-title').textContent = 'Edit Trip';
+        document.getElementById('trip-id').value = id;
+        document.getElementById('trip-date').value = t.date;
+        document.getElementById('trip-purpose').value = t.purpose;
+        document.getElementById('trip-from').value = t.from;
+        document.getElementById('trip-to').value = t.to;
+        document.getElementById('trip-miles').value = t.miles;
+        document.getElementById('trip-vehicle').value = t.vehicleId || '';
+        document.getElementById('trip-notes').value = t.notes || '';
+        document.getElementById('trip-odo-start').value = t.odoStart || '';
+        document.getElementById('trip-odo-end').value = t.odoEnd || '';
+        document.getElementById('trip-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('trip-modal-title').textContent = 'Log Trip';
+        document.getElementById('trip-id').value = '';
+        document.getElementById('trip-date').value = today;
+        document.getElementById('trip-purpose').value = 'business';
+        document.getElementById('trip-from').value = '';
+        document.getElementById('trip-to').value = '';
+        document.getElementById('trip-miles').value = '';
+        document.getElementById('trip-vehicle').value = vehicles[0]?.id || '';
+        document.getElementById('trip-notes').value = '';
+        document.getElementById('trip-odo-start').value = '';
+        document.getElementById('trip-odo-end').value = '';
+        document.getElementById('trip-delete-btn').style.display = 'none';
+      }
+      document.getElementById('trip-modal').classList.add('active');
+    }
+    
+    function editTrip(id) { openTripModal(id); }
+    
+    function saveTrip() {
+      const id = document.getElementById('trip-id').value;
+      const date = document.getElementById('trip-date').value;
+      const purpose = document.getElementById('trip-purpose').value;
+      const from = document.getElementById('trip-from').value.trim();
+      const to = document.getElementById('trip-to').value.trim();
+      const miles = parseFloat(document.getElementById('trip-miles').value);
+      const vehicleId = document.getElementById('trip-vehicle').value ? parseInt(document.getElementById('trip-vehicle').value) : null;
+      const notes = document.getElementById('trip-notes').value.trim();
+      const odoStart = document.getElementById('trip-odo-start').value ? parseFloat(document.getElementById('trip-odo-start').value) : null;
+      const odoEnd = document.getElementById('trip-odo-end').value ? parseFloat(document.getElementById('trip-odo-end').value) : null;
+      
+      if (!date || !from || !to || !miles) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = trips.findIndex(t => t.id === parseInt(id));
+        trips[i] = { ...trips[i], date, purpose, from, to, miles, vehicleId, notes, odoStart, odoEnd };
+        showToast('Trip updated');
+      } else {
+        trips.push({ id: Math.max(0, ...trips.map(t => t.id)) + 1, date, purpose, from, to, miles, vehicleId, notes, odoStart, odoEnd });
+        showToast('Trip logged');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('trip-modal');
+    }
+    
+    function deleteTrip() {
+      const id = parseInt(document.getElementById('trip-id').value);
+      if (!confirm('Delete this trip?')) return;
+      trips = trips.filter(t => t.id !== id);
+      saveData();
+      renderAll();
+      closeModal('trip-modal');
+      showToast('Trip deleted');
+    }
+    
+    // Vehicles
+    function renderVehicles() {
+      document.getElementById('vehicles-list').innerHTML = vehicles.length ? vehicles.map(v => {
+        const tripCount = trips.filter(t => t.vehicleId === v.id).length;
+        const totalMiles = trips.filter(t => t.vehicleId === v.id).reduce((sum, t) => sum + t.miles, 0);
+        return `<div class="vehicle-card" style="margin-bottom: 0.75rem;">
+          <div class="vehicle-info">
+            <h4>🚗 ${v.name}</h4>
+            <p>${v.year} ${v.make} ${v.model} ${v.plate ? '• ' + v.plate : ''}</p>
+            <p style="margin-top: 0.25rem;">${tripCount} trips • ${totalMiles.toFixed(1)} miles logged</p>
+          </div>
+          <button class="btn btn-sm btn-secondary" onclick="editVehicle(${v.id})">Edit</button>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No vehicles added</div>';
+    }
+    
+    function openVehicleModal(id = null) {
+      if (id) {
+        const v = vehicles.find(x => x.id === id);
+        document.getElementById('vehicle-modal-title').textContent = 'Edit Vehicle';
+        document.getElementById('veh-id').value = id;
+        document.getElementById('veh-name').value = v.name;
+        document.getElementById('veh-year').value = v.year || '';
+        document.getElementById('veh-make').value = v.make || '';
+        document.getElementById('veh-model').value = v.model || '';
+        document.getElementById('veh-plate').value = v.plate || '';
+        document.getElementById('veh-odometer').value = v.odometer || '';
+        document.getElementById('veh-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('vehicle-modal-title').textContent = 'Add Vehicle';
+        document.getElementById('veh-id').value = '';
+        document.getElementById('veh-name').value = '';
+        document.getElementById('veh-year').value = '';
+        document.getElementById('veh-make').value = '';
+        document.getElementById('veh-model').value = '';
+        document.getElementById('veh-plate').value = '';
+        document.getElementById('veh-odometer').value = '';
+        document.getElementById('veh-delete-btn').style.display = 'none';
+      }
+      document.getElementById('vehicle-modal').classList.add('active');
+    }
+    
+    function editVehicle(id) { openVehicleModal(id); }
+    
+    function saveVehicle() {
+      const id = document.getElementById('veh-id').value;
+      const name = document.getElementById('veh-name').value.trim();
+      const year = document.getElementById('veh-year').value ? parseInt(document.getElementById('veh-year').value) : null;
+      const make = document.getElementById('veh-make').value.trim();
+      const model = document.getElementById('veh-model').value.trim();
+      const plate = document.getElementById('veh-plate').value.trim();
+      const odometer = document.getElementById('veh-odometer').value ? parseFloat(document.getElementById('veh-odometer').value) : null;
+      
+      if (!name) { showToast('Please enter vehicle name', 'error'); return; }
+      
+      if (id) {
+        const i = vehicles.findIndex(v => v.id === parseInt(id));
+        vehicles[i] = { ...vehicles[i], name, year, make, model, plate, odometer };
+        showToast('Vehicle updated');
+      } else {
+        vehicles.push({ id: Math.max(0, ...vehicles.map(v => v.id)) + 1, name, year, make, model, plate, odometer });
+        showToast('Vehicle added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('vehicle-modal');
+    }
+    
+    function deleteVehicle() {
+      const id = parseInt(document.getElementById('veh-id').value);
+      if (!confirm('Delete this vehicle?')) return;
+      vehicles = vehicles.filter(v => v.id !== id);
+      saveData();
+      renderAll();
+      closeModal('vehicle-modal');
+      showToast('Vehicle deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const thisYear = new Date().getFullYear();
+      const ytdTrips = trips.filter(t => new Date(t.date).getFullYear() === thisYear);
+      
+      const byPurpose = { business: 0, medical: 0, charity: 0 };
+      ytdTrips.forEach(t => {
+        if (t.purpose !== 'personal') byPurpose[t.purpose] = (byPurpose[t.purpose] || 0) + t.miles;
+      });
+      
+      document.getElementById('report-business-miles').textContent = byPurpose.business.toFixed(1);
+      document.getElementById('report-business-value').textContent = '$' + (byPurpose.business * rates.business).toFixed(2);
+      document.getElementById('report-medical-miles').textContent = byPurpose.medical.toFixed(1);
+      document.getElementById('report-medical-value').textContent = '$' + (byPurpose.medical * rates.medical).toFixed(2);
+      document.getElementById('report-charity-miles').textContent = byPurpose.charity.toFixed(1);
+      document.getElementById('report-charity-value').textContent = '$' + (byPurpose.charity * rates.charity).toFixed(2);
+      
+      const totalValue = byPurpose.business * rates.business + byPurpose.medical * rates.medical + byPurpose.charity * rates.charity;
+      document.getElementById('report-total-value').textContent = '$' + totalValue.toFixed(2);
+      
+      // Monthly chart
+      const monthlyMiles = Array(12).fill(0);
+      ytdTrips.forEach(t => {
+        monthlyMiles[new Date(t.date).getMonth()] += t.miles;
+      });
+      
+      const maxMonth = Math.max(...monthlyMiles, 1);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      document.getElementById('monthly-chart').innerHTML = `
+        <div style="display: flex; align-items: flex-end; gap: 0.5rem; height: 150px;">
+          ${monthlyMiles.map((miles, i) => `
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+              <div style="width: 100%; max-width: 40px; background: var(--primary-light); border-radius: 4px 4px 0 0; height: ${miles / maxMonth * 120}px; min-height: 4px;"></div>
+              <div style="font-size: 0.7rem; color: var(--gray-500); margin-top: 0.25rem;">${months[i]}</div>
+              <div style="font-size: 0.65rem; color: var(--gray-400);">${miles > 0 ? miles.toFixed(0) : ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    // Exports
+    function exportTrips() {
+      const headers = ['Date', 'From', 'To', 'Purpose', 'Vehicle', 'Miles', 'Value', 'Notes', 'Odometer Start', 'Odometer End'];
+      const rows = trips.map(t => {
+        const vehicle = vehicles.find(v => v.id === t.vehicleId);
+        return [t.date, t.from, t.to, t.purpose, vehicle?.name || '', t.miles, getTripValue(t).toFixed(2), t.notes || '', t.odoStart || '', t.odoEnd || ''];
+      });
+      downloadCSV([headers, ...rows], 'mileage-log.csv');
+      showToast('Trips exported');
+    }
+    
+    function exportIRSReport() {
+      const thisYear = new Date().getFullYear();
+      const ytdTrips = trips.filter(t => new Date(t.date).getFullYear() === thisYear && t.purpose !== 'personal');
+      
+      const headers = ['Date', 'Business Purpose', 'From', 'To', 'Miles', 'Rate', 'Deduction'];
+      const rows = ytdTrips.map(t => {
+        const rate = rates[t.purpose];
+        return [t.date, t.notes || t.purpose, t.from, t.to, t.miles, '$' + rate.toFixed(3), '$' + (t.miles * rate).toFixed(2)];
+      });
+      
+      const totalMiles = ytdTrips.reduce((sum, t) => sum + t.miles, 0);
+      const totalDeduction = ytdTrips.reduce((sum, t) => sum + getTripValue(t), 0);
+      rows.push(['', '', '', 'TOTAL', totalMiles, '', '$' + totalDeduction.toFixed(2)]);
+      
+      downloadCSV([headers, ...rows], `irs-mileage-log-${thisYear}.csv`);
+      showToast('IRS report exported');
+    }
+    
+    function exportByMonth() {
+      const thisYear = new Date().getFullYear();
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      
+      const headers = ['Month', 'Trips', 'Miles', 'Business Miles', 'Deduction'];
+      const rows = months.map((month, i) => {
+        const monthTrips = trips.filter(t => {
+          const d = new Date(t.date);
+          return d.getFullYear() === thisYear && d.getMonth() === i;
+        });
+        const miles = monthTrips.reduce((sum, t) => sum + t.miles, 0);
+        const businessMiles = monthTrips.filter(t => t.purpose === 'business').reduce((sum, t) => sum + t.miles, 0);
+        const deduction = monthTrips.reduce((sum, t) => sum + getTripValue(t), 0);
+        return [month, monthTrips.length, miles.toFixed(1), businessMiles.toFixed(1), '$' + deduction.toFixed(2)];
+      });
+      
+      downloadCSV([headers, ...rows], `monthly-mileage-${thisYear}.csv`);
+      showToast('Monthly summary exported');
+    }
+    
+    function exportByPurpose() {
+      const thisYear = new Date().getFullYear();
+      const ytdTrips = trips.filter(t => new Date(t.date).getFullYear() === thisYear);
+      
+      const summary = {};
+      ['business', 'medical', 'charity', 'personal'].forEach(p => {
+        const pTrips = ytdTrips.filter(t => t.purpose === p);
+        summary[p] = {
+          trips: pTrips.length,
+          miles: pTrips.reduce((sum, t) => sum + t.miles, 0),
+          value: pTrips.reduce((sum, t) => sum + getTripValue(t), 0)
+        };
+      });
+      
+      const headers = ['Purpose', 'Trips', 'Miles', 'Rate', 'Deduction'];
+      const rows = Object.entries(summary).map(([purpose, data]) => [
+        purpose, data.trips, data.miles.toFixed(1), '$' + (rates[purpose] || 0).toFixed(3), '$' + data.value.toFixed(2)
+      ]);
+      
+      downloadCSV([headers, ...rows], `mileage-by-purpose-${thisYear}.csv`);
+      showToast('Purpose summary exported');
+    }
+    
+    function exportAllData() {
+      const data = { trips, vehicles, rates };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'mileagelog-backup.json'; a.click();
+      showToast('Data exported');
+    }
+    
+    function clearAllData() {
+      if (!confirm('Delete ALL mileage data? This cannot be undone.')) return;
+      trips = []; vehicles = [];
+      saveData();
+      renderAll();
+      showToast('All data cleared');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
