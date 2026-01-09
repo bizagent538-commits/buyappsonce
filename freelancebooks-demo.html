@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreelanceBooks - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #f0fdfa;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.75rem; font-weight: 700; }
+    .stat-value.green { color: var(--success); }
+    .stat-value.teal { color: var(--primary); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.draft { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.sent { background: #dbeafe; color: #1e40af; }
+    .status-badge.paid { background: #dcfce7; color: #166534; }
+    .status-badge.overdue { background: #fee2e2; color: #991b1b; }
+    .status-badge.partial { background: #fef3c7; color: #92400e; }
+    
+    .invoice-preview {
+      background: white;
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .invoice-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--primary);
+    }
+    
+    .invoice-title { font-size: 2rem; font-weight: 700; color: var(--primary); }
+    .invoice-number { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .invoice-parties {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+    
+    .invoice-party-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-bottom: 0.25rem; }
+    .invoice-party-name { font-weight: 600; }
+    
+    .invoice-meta {
+      display: flex;
+      gap: 2rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .invoice-meta-item { font-size: 0.875rem; }
+    .invoice-meta-label { color: var(--gray-500); }
+    
+    .invoice-items { margin-bottom: 1.5rem; }
+    
+    .invoice-items table { border: 1px solid var(--gray-200); }
+    .invoice-items th { background: var(--gray-100); }
+    
+    .invoice-totals {
+      display: flex;
+      justify-content: flex-end;
+    }
+    
+    .invoice-totals-table {
+      width: 250px;
+    }
+    
+    .invoice-totals-table td {
+      padding: 0.5rem;
+      border: none;
+    }
+    
+    .invoice-totals-table .total-row { font-weight: 700; font-size: 1.125rem; border-top: 2px solid var(--gray-300); }
+    
+    .line-item-row {
+      display: grid;
+      grid-template-columns: 3fr 1fr 1fr 1fr auto;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .line-item-row input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+    }
+    
+    .remove-item {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 1.25rem;
+    }
+    
+    .expense-category {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      background: var(--gray-200);
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+    }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal.wide { max-width: 800px; }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .summary-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .summary-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .summary-card-title { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.5rem; }
+    .summary-card-value { font-size: 1.5rem; font-weight: 700; }
+    
+    .chart-bar {
+      display: flex;
+      align-items: flex-end;
+      gap: 0.5rem;
+      height: 150px;
+      padding: 1rem 0;
+    }
+    
+    .chart-bar-item {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .chart-bar-fill {
+      width: 100%;
+      max-width: 40px;
+      background: var(--primary);
+      border-radius: 4px 4px 0 0;
+      min-height: 4px;
+    }
+    
+    .chart-bar-label { font-size: 0.7rem; color: var(--gray-500); margin-top: 0.25rem; }
+    
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .line-item-row { grid-template-columns: 1fr; }
+      .invoice-parties { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>💼 FreelanceBooks</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="invoices">Invoices</div>
+    <div class="nav-tab" data-tab="expenses">Expenses</div>
+    <div class="nav-tab" data-tab="clients">Clients</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-revenue">$0</div>
+          <div class="stat-label">Revenue (YTD)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-outstanding">$0</div>
+          <div class="stat-label">Outstanding</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value red" id="stat-expenses">$0</div>
+          <div class="stat-label">Expenses (YTD)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value teal" id="stat-profit">$0</div>
+          <div class="stat-label">Net Profit</div>
+        </div>
+      </div>
+      
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="summary-card-title">📄 Invoices This Month</div>
+          <div class="summary-card-value" id="dash-invoices-month">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-title">⚠️ Overdue Invoices</div>
+          <div class="summary-card-value" style="color: var(--danger);" id="dash-overdue">0</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-title">👥 Active Clients</div>
+          <div class="summary-card-value" id="dash-clients">0</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Recent Invoices</h2>
+          <button class="btn btn-primary" onclick="openInvoiceModal()">+ New Invoice</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Client</th>
+              <th>Amount</th>
+              <th>Due Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="recent-invoices"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Invoices -->
+    <div class="tab-content" id="tab-invoices">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Invoices</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportInvoices()">Export</button>
+            <button class="btn btn-primary" onclick="openInvoiceModal()">+ New Invoice</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-inv-status" onchange="renderInvoices()">
+            <option value="">All Statuses</option>
+            <option value="draft">Draft</option>
+            <option value="sent">Sent</option>
+            <option value="paid">Paid</option>
+            <option value="overdue">Overdue</option>
+          </select>
+          <select class="filter-select" id="filter-inv-client" onchange="renderInvoices()">
+            <option value="">All Clients</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Invoice #</th>
+              <th>Client</th>
+              <th>Date</th>
+              <th>Due Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="invoices-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Expenses -->
+    <div class="tab-content" id="tab-expenses">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Expenses</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportExpenses()">Export</button>
+            <button class="btn btn-primary" onclick="openExpenseModal()">+ Add Expense</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-exp-category" onchange="renderExpenses()">
+            <option value="">All Categories</option>
+            <option value="software">Software</option>
+            <option value="equipment">Equipment</option>
+            <option value="office">Office Supplies</option>
+            <option value="travel">Travel</option>
+            <option value="marketing">Marketing</option>
+            <option value="professional">Professional Services</option>
+            <option value="other">Other</option>
+          </select>
+          <input type="month" class="filter-input" id="filter-exp-month" onchange="renderExpenses()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Description</th>
+              <th>Category</th>
+              <th>Amount</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="expenses-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Clients -->
+    <div class="tab-content" id="tab-clients">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Clients</h2>
+          <button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Total Billed</th>
+              <th>Outstanding</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="clients-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports & Exports</h2>
+        </div>
+        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportProfitLoss()">📋 Profit & Loss</button>
+          <button class="btn btn-secondary" onclick="exportInvoices()">📄 All Invoices</button>
+          <button class="btn btn-secondary" onclick="exportExpenses()">💳 All Expenses</button>
+          <button class="btn btn-secondary" onclick="exportTaxSummary()">📑 Tax Summary</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Monthly Revenue</h3>
+        <div class="chart-bar" id="revenue-chart"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Expense Breakdown</h3>
+        <div id="expense-breakdown"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Invoice Modal -->
+  <div class="modal-overlay" id="invoice-modal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inv-modal-title">New Invoice</h3>
+        <button class="modal-close" onclick="closeModal('invoice-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="inv-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Client *</label>
+            <select class="form-input" id="inv-client"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Invoice Number</label>
+            <input type="text" class="form-input" id="inv-number" readonly>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Invoice Date *</label>
+            <input type="date" class="form-input" id="inv-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date *</label>
+            <input type="date" class="form-input" id="inv-due">
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Line Items</label>
+          <div id="line-items-container"></div>
+          <button type="button" class="btn btn-sm btn-secondary" onclick="addLineItem()" style="margin-top: 0.5rem;">+ Add Item</button>
+        </div>
+        
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <table style="width: 250px;">
+            <tr><td>Subtotal:</td><td style="text-align: right;" id="inv-subtotal">$0.00</td></tr>
+            <tr><td>Tax (<span id="tax-rate-display">0</span>%):</td><td style="text-align: right;" id="inv-tax">$0.00</td></tr>
+            <tr style="font-weight: 700; font-size: 1.125rem;"><td>Total:</td><td style="text-align: right;" id="inv-total">$0.00</td></tr>
+          </table>
+        </div>
+        
+        <div class="form-row" style="margin-top: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Tax Rate (%)</label>
+            <input type="number" class="form-input" id="inv-tax-rate" value="0" min="0" max="100" step="0.1" onchange="calculateTotals()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="inv-status">
+              <option value="draft">Draft</option>
+              <option value="sent">Sent</option>
+              <option value="paid">Paid</option>
+            </select>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="inv-notes" rows="2" placeholder="Payment terms, thank you message..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="inv-delete-btn" onclick="deleteInvoice()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('invoice-modal')">Cancel</button>
+        <button class="btn btn-secondary" onclick="previewInvoice()">Preview</button>
+        <button class="btn btn-primary" onclick="saveInvoice()">Save Invoice</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Invoice Preview Modal -->
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal wide">
+      <div class="modal-header">
+        <h3 class="modal-title">Invoice Preview</h3>
+        <button class="modal-close" onclick="closeModal('preview-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="preview-content"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('preview-modal')">Close</button>
+        <button class="btn btn-primary" onclick="printInvoice()">Print / Save PDF</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Expense Modal -->
+  <div class="modal-overlay" id="expense-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="exp-modal-title">Add Expense</h3>
+        <button class="modal-close" onclick="closeModal('expense-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="exp-id">
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <input type="text" class="form-input" id="exp-description" placeholder="e.g., Adobe Creative Cloud subscription">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount *</label>
+            <input type="number" class="form-input" id="exp-amount" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="exp-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category</label>
+            <select class="form-input" id="exp-category">
+              <option value="software">Software</option>
+              <option value="equipment">Equipment</option>
+              <option value="office">Office Supplies</option>
+              <option value="travel">Travel</option>
+              <option value="marketing">Marketing</option>
+              <option value="professional">Professional Services</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Vendor</label>
+            <input type="text" class="form-input" id="exp-vendor" placeholder="e.g., Adobe">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="exp-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="exp-delete-btn" onclick="deleteExpense()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('expense-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveExpense()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Client Modal -->
+  <div class="modal-overlay" id="client-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="client-modal-title">Add Client</h3>
+        <button class="modal-close" onclick="closeModal('client-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="client-id">
+        <div class="form-group">
+          <label class="form-label">Client / Company Name *</label>
+          <input type="text" class="form-input" id="client-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="client-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="client-phone">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea class="form-input" id="client-address" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="client-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="client-delete-btn" onclick="deleteClient()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClient()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let invoices = [], expenses = [], clients = [];
+    let lineItems = [];
+    let nextInvoiceNum = 1001;
+    
+    const CATEGORIES = {
+      software: '💻 Software',
+      equipment: '🖥️ Equipment',
+      office: '📎 Office Supplies',
+      travel: '✈️ Travel',
+      marketing: '📢 Marketing',
+      professional: '👔 Professional Services',
+      other: '📦 Other'
+    };
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        invoices: localStorage.getItem('freelance_invoices'),
+        expenses: localStorage.getItem('freelance_expenses'),
+        clients: localStorage.getItem('freelance_clients')
+      };
+      
+      clients = saved.clients ? JSON.parse(saved.clients) : [
+        { id: 1, name: 'Acme Corporation', email: 'billing@acme.com', phone: '555-1234', address: '123 Business Ave\nNew York, NY 10001', notes: 'Net 30 terms' },
+        { id: 2, name: 'StartupXYZ', email: 'accounts@startupxyz.com', phone: '555-2345', address: '456 Innovation Dr\nSan Francisco, CA 94102', notes: '' },
+        { id: 3, name: 'Design Co', email: 'finance@designco.com', phone: '555-3456', address: '789 Creative Blvd\nAustin, TX 78701', notes: 'Preferred client' },
+      ];
+      
+      invoices = saved.invoices ? JSON.parse(saved.invoices) : [
+        { id: 1, number: 'INV-1001', clientId: 1, date: '2024-06-01', due: '2024-07-01', items: [{desc: 'Website Development', qty: 1, rate: 5000}], taxRate: 0, status: 'paid', notes: 'Thank you for your business!', paidDate: '2024-06-28' },
+        { id: 2, number: 'INV-1002', clientId: 2, date: '2024-06-15', due: '2024-07-15', items: [{desc: 'UI/UX Design', qty: 40, rate: 85}, {desc: 'Prototype Development', qty: 1, rate: 1500}], taxRate: 0, status: 'sent', notes: '' },
+        { id: 3, number: 'INV-1003', clientId: 3, date: '2024-05-01', due: '2024-05-31', items: [{desc: 'Logo Design', qty: 1, rate: 1200}, {desc: 'Brand Guidelines', qty: 1, rate: 800}], taxRate: 8.25, status: 'overdue', notes: '' },
+        { id: 4, number: 'INV-1004', clientId: 1, date: '2024-07-01', due: '2024-08-01', items: [{desc: 'Monthly Maintenance', qty: 1, rate: 500}], taxRate: 0, status: 'draft', notes: '' },
+      ];
+      
+      expenses = saved.expenses ? JSON.parse(saved.expenses) : [
+        { id: 1, description: 'Adobe Creative Cloud', amount: 54.99, date: '2024-06-01', category: 'software', vendor: 'Adobe', notes: 'Monthly subscription' },
+        { id: 2, description: 'Laptop Stand', amount: 89.99, date: '2024-06-05', category: 'equipment', vendor: 'Amazon', notes: '' },
+        { id: 3, description: 'Coworking Space', amount: 250, date: '2024-06-01', category: 'office', vendor: 'WeWork', notes: 'Monthly membership' },
+        { id: 4, description: 'Client Meeting - Lunch', amount: 45.50, date: '2024-06-10', category: 'travel', vendor: '', notes: 'Meeting with Acme' },
+        { id: 5, description: 'Figma Pro', amount: 15, date: '2024-06-01', category: 'software', vendor: 'Figma', notes: 'Monthly subscription' },
+        { id: 6, description: 'Domain Renewal', amount: 14.99, date: '2024-05-15', category: 'software', vendor: 'Namecheap', notes: '' },
+      ];
+      
+      nextInvoiceNum = Math.max(1001, ...invoices.map(i => parseInt(i.number.replace('INV-', '')) || 0)) + 1;
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('freelance_invoices', JSON.stringify(invoices));
+      localStorage.setItem('freelance_expenses', JSON.stringify(expenses));
+      localStorage.setItem('freelance_clients', JSON.stringify(clients));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderInvoices();
+      renderExpenses();
+      renderClients();
+      renderReports();
+      updateSelects();
+    }
+    
+    function getInvoiceTotal(inv) {
+      const subtotal = inv.items.reduce((sum, i) => sum + (i.qty * i.rate), 0);
+      const tax = subtotal * (inv.taxRate || 0) / 100;
+      return subtotal + tax;
+    }
+    
+    function renderDashboard() {
+      const thisYear = new Date().getFullYear();
+      const thisMonth = new Date().getMonth();
+      
+      const paidInvoices = invoices.filter(i => i.status === 'paid' && new Date(i.date).getFullYear() === thisYear);
+      const revenue = paidInvoices.reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+      
+      const outstanding = invoices.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+      
+      const ytdExpenses = expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((sum, e) => sum + e.amount, 0);
+      
+      document.getElementById('stat-revenue').textContent = formatCurrency(revenue);
+      document.getElementById('stat-outstanding').textContent = formatCurrency(outstanding);
+      document.getElementById('stat-expenses').textContent = formatCurrency(ytdExpenses);
+      document.getElementById('stat-profit').textContent = formatCurrency(revenue - ytdExpenses);
+      
+      document.getElementById('dash-invoices-month').textContent = invoices.filter(i => {
+        const d = new Date(i.date);
+        return d.getFullYear() === thisYear && d.getMonth() === thisMonth;
+      }).length;
+      
+      document.getElementById('dash-overdue').textContent = invoices.filter(i => i.status === 'overdue').length;
+      document.getElementById('dash-clients').textContent = clients.length;
+      
+      // Recent invoices
+      const recent = [...invoices].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      document.getElementById('recent-invoices').innerHTML = recent.map(i => {
+        const client = clients.find(c => c.id === i.clientId);
+        return `<tr>
+          <td>${i.number}</td>
+          <td>${client ? client.name : 'Unknown'}</td>
+          <td>${formatCurrency(getInvoiceTotal(i))}</td>
+          <td>${formatDate(i.due)}</td>
+          <td><span class="status-badge ${i.status}">${i.status}</span></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function updateSelects() {
+      const clientOpts = '<option value="">Select Client</option>' + clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('inv-client').innerHTML = clientOpts;
+      document.getElementById('filter-inv-client').innerHTML = '<option value="">All Clients</option>' + clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    
+    // Invoices
+    function renderInvoices() {
+      const statusFilter = document.getElementById('filter-inv-status').value;
+      const clientFilter = document.getElementById('filter-inv-client').value;
+      
+      let filtered = [...invoices];
+      if (statusFilter) filtered = filtered.filter(i => i.status === statusFilter);
+      if (clientFilter) filtered = filtered.filter(i => i.clientId === parseInt(clientFilter));
+      
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      // Update overdue status
+      const today = new Date();
+      filtered.forEach(i => {
+        if (i.status === 'sent' && new Date(i.due) < today) {
+          i.status = 'overdue';
+        }
+      });
+      
+      document.getElementById('invoices-table').innerHTML = filtered.map(i => {
+        const client = clients.find(c => c.id === i.clientId);
+        return `<tr>
+          <td><strong>${i.number}</strong></td>
+          <td>${client ? client.name : 'Unknown'}</td>
+          <td>${formatDate(i.date)}</td>
+          <td>${formatDate(i.due)}</td>
+          <td>${formatCurrency(getInvoiceTotal(i))}</td>
+          <td><span class="status-badge ${i.status}">${i.status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editInvoice(${i.id})">Edit</button>
+            <button class="btn btn-sm btn-secondary" onclick="viewInvoice(${i.id})">View</button>
+            ${i.status === 'sent' || i.status === 'overdue' ? `<button class="btn btn-sm btn-success" onclick="markPaid(${i.id})">Mark Paid</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openInvoiceModal(id = null) {
+      lineItems = [];
+      
+      if (id) {
+        const inv = invoices.find(i => i.id === id);
+        document.getElementById('inv-modal-title').textContent = 'Edit Invoice';
+        document.getElementById('inv-id').value = id;
+        document.getElementById('inv-client').value = inv.clientId;
+        document.getElementById('inv-number').value = inv.number;
+        document.getElementById('inv-date').value = inv.date;
+        document.getElementById('inv-due').value = inv.due;
+        document.getElementById('inv-tax-rate').value = inv.taxRate || 0;
+        document.getElementById('inv-status').value = inv.status;
+        document.getElementById('inv-notes').value = inv.notes || '';
+        lineItems = [...inv.items];
+        document.getElementById('inv-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('inv-modal-title').textContent = 'New Invoice';
+        document.getElementById('inv-id').value = '';
+        document.getElementById('inv-client').value = '';
+        document.getElementById('inv-number').value = 'INV-' + nextInvoiceNum;
+        document.getElementById('inv-date').value = formatDateInput(new Date());
+        const due = new Date(); due.setDate(due.getDate() + 30);
+        document.getElementById('inv-due').value = formatDateInput(due);
+        document.getElementById('inv-tax-rate').value = 0;
+        document.getElementById('inv-status').value = 'draft';
+        document.getElementById('inv-notes').value = '';
+        lineItems = [{ desc: '', qty: 1, rate: 0 }];
+        document.getElementById('inv-delete-btn').style.display = 'none';
+      }
+      
+      renderLineItems();
+      document.getElementById('invoice-modal').classList.add('active');
+    }
+    
+    function editInvoice(id) { openInvoiceModal(id); }
+    
+    function renderLineItems() {
+      document.getElementById('line-items-container').innerHTML = lineItems.map((item, i) => `
+        <div class="line-item-row">
+          <input type="text" placeholder="Description" value="${item.desc}" onchange="lineItems[${i}].desc = this.value">
+          <input type="number" placeholder="Qty" value="${item.qty}" min="1" onchange="lineItems[${i}].qty = parseFloat(this.value) || 1; calculateTotals()">
+          <input type="number" placeholder="Rate" value="${item.rate}" min="0" step="0.01" onchange="lineItems[${i}].rate = parseFloat(this.value) || 0; calculateTotals()">
+          <span style="text-align: right; min-width: 80px;">${formatCurrency(item.qty * item.rate)}</span>
+          <button type="button" class="remove-item" onclick="removeLineItem(${i})">×</button>
+        </div>
+      `).join('');
+      calculateTotals();
+    }
+    
+    function addLineItem() {
+      lineItems.push({ desc: '', qty: 1, rate: 0 });
+      renderLineItems();
+    }
+    
+    function removeLineItem(index) {
+      if (lineItems.length <= 1) {
+        showToast('Invoice must have at least one item', 'error');
+        return;
+      }
+      lineItems.splice(index, 1);
+      renderLineItems();
+    }
+    
+    function calculateTotals() {
+      const subtotal = lineItems.reduce((sum, i) => sum + (i.qty * i.rate), 0);
+      const taxRate = parseFloat(document.getElementById('inv-tax-rate').value) || 0;
+      const tax = subtotal * taxRate / 100;
+      
+      document.getElementById('inv-subtotal').textContent = formatCurrency(subtotal);
+      document.getElementById('tax-rate-display').textContent = taxRate;
+      document.getElementById('inv-tax').textContent = formatCurrency(tax);
+      document.getElementById('inv-total').textContent = formatCurrency(subtotal + tax);
+    }
+    
+    function saveInvoice() {
+      const id = document.getElementById('inv-id').value;
+      const clientId = parseInt(document.getElementById('inv-client').value);
+      const number = document.getElementById('inv-number').value;
+      const date = document.getElementById('inv-date').value;
+      const due = document.getElementById('inv-due').value;
+      const taxRate = parseFloat(document.getElementById('inv-tax-rate').value) || 0;
+      const status = document.getElementById('inv-status').value;
+      const notes = document.getElementById('inv-notes').value.trim();
+      
+      if (!clientId || !date || !due) { showToast('Please fill required fields', 'error'); return; }
+      if (lineItems.some(i => !i.desc)) { showToast('All items must have a description', 'error'); return; }
+      
+      if (id) {
+        const i = invoices.findIndex(inv => inv.id === parseInt(id));
+        invoices[i] = { ...invoices[i], clientId, date, due, items: lineItems, taxRate, status, notes };
+        showToast('Invoice updated');
+      } else {
+        invoices.push({ id: Math.max(0, ...invoices.map(i => i.id)) + 1, number, clientId, date, due, items: lineItems, taxRate, status, notes });
+        nextInvoiceNum++;
+        showToast('Invoice created');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('invoice-modal');
+    }
+    
+    function deleteInvoice() {
+      const id = parseInt(document.getElementById('inv-id').value);
+      if (!confirm('Delete this invoice?')) return;
+      invoices = invoices.filter(i => i.id !== id);
+      saveData();
+      renderAll();
+      closeModal('invoice-modal');
+      showToast('Invoice deleted');
+    }
+    
+    function markPaid(id) {
+      const inv = invoices.find(i => i.id === id);
+      inv.status = 'paid';
+      inv.paidDate = formatDateInput(new Date());
+      saveData();
+      renderAll();
+      showToast('Invoice marked as paid');
+    }
+    
+    function viewInvoice(id) {
+      const inv = invoices.find(i => i.id === id);
+      const client = clients.find(c => c.id === inv.clientId);
+      const subtotal = inv.items.reduce((sum, i) => sum + (i.qty * i.rate), 0);
+      const tax = subtotal * (inv.taxRate || 0) / 100;
+      
+      document.getElementById('preview-content').innerHTML = `
+        <div class="invoice-preview">
+          <div class="invoice-header">
+            <div>
+              <div class="invoice-title">INVOICE</div>
+              <div class="invoice-number">${inv.number}</div>
+            </div>
+            <div style="text-align: right;">
+              <strong>Your Business Name</strong><br>
+              <span style="font-size: 0.875rem; color: var(--gray-500);">your@email.com</span>
+            </div>
+          </div>
+          
+          <div class="invoice-parties">
+            <div>
+              <div class="invoice-party-label">Bill To</div>
+              <div class="invoice-party-name">${client ? client.name : 'Unknown'}</div>
+              <div style="font-size: 0.875rem; white-space: pre-line;">${client?.address || ''}</div>
+            </div>
+            <div style="text-align: right;">
+              <div><strong>Invoice Date:</strong> ${formatDate(inv.date)}</div>
+              <div><strong>Due Date:</strong> ${formatDate(inv.due)}</div>
+              <div style="margin-top: 0.5rem;"><span class="status-badge ${inv.status}">${inv.status}</span></div>
+            </div>
+          </div>
+          
+          <div class="invoice-items">
+            <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th style="text-align: right;">Qty</th>
+                  <th style="text-align: right;">Rate</th>
+                  <th style="text-align: right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${inv.items.map(item => `<tr>
+                  <td>${item.desc}</td>
+                  <td style="text-align: right;">${item.qty}</td>
+                  <td style="text-align: right;">${formatCurrency(item.rate)}</td>
+                  <td style="text-align: right;">${formatCurrency(item.qty * item.rate)}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="invoice-totals">
+            <table class="invoice-totals-table">
+              <tr><td>Subtotal:</td><td style="text-align: right;">${formatCurrency(subtotal)}</td></tr>
+              ${inv.taxRate ? `<tr><td>Tax (${inv.taxRate}%):</td><td style="text-align: right;">${formatCurrency(tax)}</td></tr>` : ''}
+              <tr class="total-row"><td>Total:</td><td style="text-align: right;">${formatCurrency(subtotal + tax)}</td></tr>
+            </table>
+          </div>
+          
+          ${inv.notes ? `<div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);"><strong>Notes:</strong><br>${inv.notes}</div>` : ''}
+        </div>
+      `;
+      
+      document.getElementById('preview-modal').classList.add('active');
+    }
+    
+    function previewInvoice() {
+      const clientId = parseInt(document.getElementById('inv-client').value);
+      const client = clients.find(c => c.id === clientId);
+      const number = document.getElementById('inv-number').value;
+      const date = document.getElementById('inv-date').value;
+      const due = document.getElementById('inv-due').value;
+      const taxRate = parseFloat(document.getElementById('inv-tax-rate').value) || 0;
+      const notes = document.getElementById('inv-notes').value;
+      
+      const tempInv = { number, clientId, date, due, items: lineItems, taxRate, status: 'draft', notes };
+      
+      const subtotal = lineItems.reduce((sum, i) => sum + (i.qty * i.rate), 0);
+      const tax = subtotal * taxRate / 100;
+      
+      document.getElementById('preview-content').innerHTML = `
+        <div class="invoice-preview">
+          <div class="invoice-header">
+            <div>
+              <div class="invoice-title">INVOICE</div>
+              <div class="invoice-number">${number}</div>
+            </div>
+            <div style="text-align: right;">
+              <strong>Your Business Name</strong><br>
+              <span style="font-size: 0.875rem; color: var(--gray-500);">your@email.com</span>
+            </div>
+          </div>
+          
+          <div class="invoice-parties">
+            <div>
+              <div class="invoice-party-label">Bill To</div>
+              <div class="invoice-party-name">${client ? client.name : 'Select a client'}</div>
+              <div style="font-size: 0.875rem; white-space: pre-line;">${client?.address || ''}</div>
+            </div>
+            <div style="text-align: right;">
+              <div><strong>Invoice Date:</strong> ${formatDate(date)}</div>
+              <div><strong>Due Date:</strong> ${formatDate(due)}</div>
+            </div>
+          </div>
+          
+          <div class="invoice-items">
+            <table>
+              <thead>
+                <tr>
+                  <th>Description</th>
+                  <th style="text-align: right;">Qty</th>
+                  <th style="text-align: right;">Rate</th>
+                  <th style="text-align: right;">Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${lineItems.map(item => `<tr>
+                  <td>${item.desc || '(No description)'}</td>
+                  <td style="text-align: right;">${item.qty}</td>
+                  <td style="text-align: right;">${formatCurrency(item.rate)}</td>
+                  <td style="text-align: right;">${formatCurrency(item.qty * item.rate)}</td>
+                </tr>`).join('')}
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="invoice-totals">
+            <table class="invoice-totals-table">
+              <tr><td>Subtotal:</td><td style="text-align: right;">${formatCurrency(subtotal)}</td></tr>
+              ${taxRate ? `<tr><td>Tax (${taxRate}%):</td><td style="text-align: right;">${formatCurrency(tax)}</td></tr>` : ''}
+              <tr class="total-row"><td>Total:</td><td style="text-align: right;">${formatCurrency(subtotal + tax)}</td></tr>
+            </table>
+          </div>
+          
+          ${notes ? `<div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--gray-200);"><strong>Notes:</strong><br>${notes}</div>` : ''}
+        </div>
+      `;
+      
+      document.getElementById('preview-modal').classList.add('active');
+    }
+    
+    function printInvoice() {
+      window.print();
+    }
+    
+    // Expenses
+    function renderExpenses() {
+      const catFilter = document.getElementById('filter-exp-category').value;
+      const monthFilter = document.getElementById('filter-exp-month').value;
+      
+      let filtered = [...expenses];
+      if (catFilter) filtered = filtered.filter(e => e.category === catFilter);
+      if (monthFilter) filtered = filtered.filter(e => e.date.startsWith(monthFilter));
+      
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('expenses-table').innerHTML = filtered.map(e => `<tr>
+        <td>${formatDate(e.date)}</td>
+        <td>${e.description}</td>
+        <td><span class="expense-category">${CATEGORIES[e.category] || e.category}</span></td>
+        <td>${formatCurrency(e.amount)}</td>
+        <td><button class="btn btn-sm btn-secondary" onclick="editExpense(${e.id})">Edit</button></td>
+      </tr>`).join('');
+    }
+    
+    function openExpenseModal(id = null) {
+      if (id) {
+        const e = expenses.find(x => x.id === id);
+        document.getElementById('exp-modal-title').textContent = 'Edit Expense';
+        document.getElementById('exp-id').value = id;
+        document.getElementById('exp-description').value = e.description;
+        document.getElementById('exp-amount').value = e.amount;
+        document.getElementById('exp-date').value = e.date;
+        document.getElementById('exp-category').value = e.category;
+        document.getElementById('exp-vendor').value = e.vendor || '';
+        document.getElementById('exp-notes').value = e.notes || '';
+        document.getElementById('exp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('exp-modal-title').textContent = 'Add Expense';
+        document.getElementById('exp-id').value = '';
+        document.getElementById('exp-description').value = '';
+        document.getElementById('exp-amount').value = '';
+        document.getElementById('exp-date').value = formatDateInput(new Date());
+        document.getElementById('exp-category').value = 'software';
+        document.getElementById('exp-vendor').value = '';
+        document.getElementById('exp-notes').value = '';
+        document.getElementById('exp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('expense-modal').classList.add('active');
+    }
+    
+    function editExpense(id) { openExpenseModal(id); }
+    
+    function saveExpense() {
+      const id = document.getElementById('exp-id').value;
+      const description = document.getElementById('exp-description').value.trim();
+      const amount = parseFloat(document.getElementById('exp-amount').value);
+      const date = document.getElementById('exp-date').value;
+      const category = document.getElementById('exp-category').value;
+      const vendor = document.getElementById('exp-vendor').value.trim();
+      const notes = document.getElementById('exp-notes').value.trim();
+      
+      if (!description || !amount || !date) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = expenses.findIndex(e => e.id === parseInt(id));
+        expenses[i] = { ...expenses[i], description, amount, date, category, vendor, notes };
+        showToast('Expense updated');
+      } else {
+        expenses.push({ id: Math.max(0, ...expenses.map(e => e.id)) + 1, description, amount, date, category, vendor, notes });
+        showToast('Expense added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('expense-modal');
+    }
+    
+    function deleteExpense() {
+      const id = parseInt(document.getElementById('exp-id').value);
+      if (!confirm('Delete this expense?')) return;
+      expenses = expenses.filter(e => e.id !== id);
+      saveData();
+      renderAll();
+      closeModal('expense-modal');
+      showToast('Expense deleted');
+    }
+    
+    // Clients
+    function renderClients() {
+      document.getElementById('clients-table').innerHTML = clients.map(c => {
+        const clientInvoices = invoices.filter(i => i.clientId === c.id);
+        const totalBilled = clientInvoices.reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+        const outstanding = clientInvoices.filter(i => i.status === 'sent' || i.status === 'overdue').reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+        
+        return `<tr>
+          <td><strong>${c.name}</strong></td>
+          <td>${c.email || '-'}</td>
+          <td>${c.phone || '-'}</td>
+          <td>${formatCurrency(totalBilled)}</td>
+          <td>${outstanding > 0 ? `<span style="color: var(--warning);">${formatCurrency(outstanding)}</span>` : '-'}</td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editClient(${c.id})">Edit</button>
+            <button class="btn btn-sm btn-primary" onclick="newInvoiceForClient(${c.id})">+ Invoice</button>
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openClientModal(id = null) {
+      if (id) {
+        const c = clients.find(x => x.id === id);
+        document.getElementById('client-modal-title').textContent = 'Edit Client';
+        document.getElementById('client-id').value = id;
+        document.getElementById('client-name').value = c.name;
+        document.getElementById('client-email').value = c.email || '';
+        document.getElementById('client-phone').value = c.phone || '';
+        document.getElementById('client-address').value = c.address || '';
+        document.getElementById('client-notes').value = c.notes || '';
+        document.getElementById('client-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('client-modal-title').textContent = 'Add Client';
+        document.getElementById('client-id').value = '';
+        document.getElementById('client-name').value = '';
+        document.getElementById('client-email').value = '';
+        document.getElementById('client-phone').value = '';
+        document.getElementById('client-address').value = '';
+        document.getElementById('client-notes').value = '';
+        document.getElementById('client-delete-btn').style.display = 'none';
+      }
+      document.getElementById('client-modal').classList.add('active');
+    }
+    
+    function editClient(id) { openClientModal(id); }
+    function newInvoiceForClient(clientId) { openInvoiceModal(); document.getElementById('inv-client').value = clientId; }
+    
+    function saveClient() {
+      const id = document.getElementById('client-id').value;
+      const name = document.getElementById('client-name').value.trim();
+      const email = document.getElementById('client-email').value.trim();
+      const phone = document.getElementById('client-phone').value.trim();
+      const address = document.getElementById('client-address').value.trim();
+      const notes = document.getElementById('client-notes').value.trim();
+      
+      if (!name) { showToast('Please enter client name', 'error'); return; }
+      
+      if (id) {
+        const i = clients.findIndex(c => c.id === parseInt(id));
+        clients[i] = { ...clients[i], name, email, phone, address, notes };
+        showToast('Client updated');
+      } else {
+        clients.push({ id: Math.max(0, ...clients.map(c => c.id)) + 1, name, email, phone, address, notes });
+        showToast('Client added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('client-modal');
+    }
+    
+    function deleteClient() {
+      const id = parseInt(document.getElementById('client-id').value);
+      const hasInvoices = invoices.some(i => i.clientId === id);
+      if (hasInvoices && !confirm('This client has invoices. Delete anyway?')) return;
+      if (!hasInvoices && !confirm('Delete this client?')) return;
+      
+      clients = clients.filter(c => c.id !== id);
+      saveData();
+      renderAll();
+      closeModal('client-modal');
+      showToast('Client deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const thisYear = new Date().getFullYear();
+      
+      // Monthly revenue chart
+      const monthlyRev = Array(12).fill(0);
+      invoices.filter(i => i.status === 'paid' && new Date(i.paidDate || i.date).getFullYear() === thisYear).forEach(i => {
+        const month = new Date(i.paidDate || i.date).getMonth();
+        monthlyRev[month] += getInvoiceTotal(i);
+      });
+      
+      const maxRev = Math.max(...monthlyRev, 1);
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      
+      document.getElementById('revenue-chart').innerHTML = monthlyRev.map((val, i) => `
+        <div class="chart-bar-item">
+          <div class="chart-bar-fill" style="height: ${val / maxRev * 120}px;"></div>
+          <div class="chart-bar-label">${months[i]}</div>
+        </div>
+      `).join('');
+      
+      // Expense breakdown
+      const expByCategory = {};
+      expenses.filter(e => new Date(e.date).getFullYear() === thisYear).forEach(e => {
+        expByCategory[e.category] = (expByCategory[e.category] || 0) + e.amount;
+      });
+      
+      const totalExp = Object.values(expByCategory).reduce((sum, v) => sum + v, 0);
+      
+      document.getElementById('expense-breakdown').innerHTML = Object.entries(expByCategory).sort((a, b) => b[1] - a[1]).map(([cat, amount]) => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+          <span style="width: 150px;">${CATEGORIES[cat] || cat}</span>
+          <div style="flex: 1; height: 20px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${amount / totalExp * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 80px; text-align: right;">${formatCurrency(amount)}</span>
+        </div>
+      `).join('');
+    }
+    
+    function exportInvoices() {
+      const headers = ['Invoice #', 'Client', 'Date', 'Due Date', 'Amount', 'Tax', 'Total', 'Status'];
+      const rows = invoices.map(i => {
+        const client = clients.find(c => c.id === i.clientId);
+        const subtotal = i.items.reduce((sum, item) => sum + (item.qty * item.rate), 0);
+        const tax = subtotal * (i.taxRate || 0) / 100;
+        return [i.number, client?.name || '', i.date, i.due, subtotal, tax, subtotal + tax, i.status];
+      });
+      downloadCSV([headers, ...rows], 'invoices.csv');
+      showToast('Invoices exported');
+    }
+    
+    function exportExpenses() {
+      const headers = ['Date', 'Description', 'Category', 'Vendor', 'Amount'];
+      const rows = expenses.map(e => [e.date, e.description, e.category, e.vendor, e.amount]);
+      downloadCSV([headers, ...rows], 'expenses.csv');
+      showToast('Expenses exported');
+    }
+    
+    function exportProfitLoss() {
+      const thisYear = new Date().getFullYear();
+      const revenue = invoices.filter(i => i.status === 'paid' && new Date(i.date).getFullYear() === thisYear).reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+      const totalExp = expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((sum, e) => sum + e.amount, 0);
+      
+      const headers = ['Category', 'Amount'];
+      const rows = [
+        ['REVENUE', ''],
+        ['Paid Invoices', revenue],
+        ['', ''],
+        ['EXPENSES', ''],
+        ...Object.entries(expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((acc, e) => { acc[e.category] = (acc[e.category] || 0) + e.amount; return acc; }, {})),
+        ['Total Expenses', totalExp],
+        ['', ''],
+        ['NET PROFIT', revenue - totalExp]
+      ];
+      downloadCSV([headers, ...rows], `profit-loss-${thisYear}.csv`);
+      showToast('Profit & Loss exported');
+    }
+    
+    function exportTaxSummary() {
+      const thisYear = new Date().getFullYear();
+      const revenue = invoices.filter(i => i.status === 'paid' && new Date(i.date).getFullYear() === thisYear).reduce((sum, i) => sum + getInvoiceTotal(i), 0);
+      const totalExp = expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((sum, e) => sum + e.amount, 0);
+      
+      const headers = ['Description', 'Amount'];
+      const rows = [
+        ['Total Revenue', revenue],
+        ['Total Deductible Expenses', totalExp],
+        ['Net Income', revenue - totalExp],
+        ['', ''],
+        ['Expense Breakdown:'],
+        ...Object.entries(expenses.filter(e => new Date(e.date).getFullYear() === thisYear).reduce((acc, e) => { acc[CATEGORIES[e.category] || e.category] = (acc[CATEGORIES[e.category] || e.category] || 0) + e.amount; return acc; }, {}))
+      ];
+      downloadCSV([headers, ...rows], `tax-summary-${thisYear}.csv`);
+      showToast('Tax summary exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+    
+    function formatCurrency(amount) {
+      return '$' + (amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+    
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    }
+    
+    function formatDateInput(d) {
+      return d.toISOString().split('T')[0];
+    }
+    
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
