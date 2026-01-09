@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VendorVault - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #7c3aed;
+      --primary-dark: #6d28d9;
+      --primary-light: #ede9fe;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.inactive { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.expiring { background: #fee2e2; color: #991b1b; }
+    .status-badge.expired { background: #fecaca; color: #dc2626; }
+    
+    .category-badge {
+      display: inline-block;
+      padding: 0.125rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 500;
+      background: var(--primary-light);
+      color: var(--primary-dark);
+    }
+    
+    .rating {
+      color: var(--warning);
+      font-weight: 600;
+    }
+    
+    .vendor-card {
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin-bottom: 0.75rem;
+      border-left: 4px solid var(--primary);
+    }
+    
+    .vendor-card.expiring { border-left-color: var(--danger); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .doc-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.5rem;
+      background: var(--gray-100);
+      border-radius: 0.25rem;
+      margin-bottom: 0.25rem;
+    }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>🏢 VendorVault</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="vendors">Vendors</div>
+    <div class="nav-tab" data-tab="contracts">Contracts</div>
+    <div class="nav-tab" data-tab="documents">Documents</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-total">0</div>
+          <div class="stat-label">Total Vendors</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-active">0</div>
+          <div class="stat-label">Active</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-expiring">0</div>
+          <div class="stat-label">Contracts Expiring</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-docs">0</div>
+          <div class="stat-label">Documents</div>
+        </div>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚠️ Expiring Contracts</h2>
+          </div>
+          <div id="expiring-contracts"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⭐ Top Rated Vendors</h2>
+          </div>
+          <div id="top-vendors"></div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Vendors by Category</h2>
+        </div>
+        <div id="category-chart"></div>
+      </div>
+    </div>
+    
+    <!-- Vendors -->
+    <div class="tab-content" id="tab-vendors">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Vendors</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportVendors()">Export</button>
+            <button class="btn btn-primary" onclick="openVendorModal()">+ Add Vendor</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-category" onchange="renderVendors()">
+            <option value="">All Categories</option>
+          </select>
+          <select class="filter-select" id="filter-status" onchange="renderVendors()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="pending">Pending</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search vendors..." id="filter-search" oninput="renderVendors()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Vendor</th>
+              <th>Category</th>
+              <th>Contact</th>
+              <th>Phone</th>
+              <th>Rating</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="vendors-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Contracts -->
+    <div class="tab-content" id="tab-contracts">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Contracts</h2>
+          <button class="btn btn-primary" onclick="openContractModal()">+ Add Contract</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-contract-vendor" onchange="renderContracts()">
+            <option value="">All Vendors</option>
+          </select>
+          <select class="filter-select" id="filter-contract-status" onchange="renderContracts()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="expiring">Expiring Soon</option>
+            <option value="expired">Expired</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Contract</th>
+              <th>Vendor</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Value</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="contracts-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Documents -->
+    <div class="tab-content" id="tab-documents">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Documents</h2>
+          <button class="btn btn-primary" onclick="openDocumentModal()">+ Add Document</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-doc-vendor" onchange="renderDocuments()">
+            <option value="">All Vendors</option>
+          </select>
+          <select class="filter-select" id="filter-doc-type" onchange="renderDocuments()">
+            <option value="">All Types</option>
+            <option value="contract">Contract</option>
+            <option value="insurance">Insurance</option>
+            <option value="license">License</option>
+            <option value="w9">W-9</option>
+            <option value="nda">NDA</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Document</th>
+              <th>Vendor</th>
+              <th>Type</th>
+              <th>Uploaded</th>
+              <th>Expiration</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="documents-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports & Exports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportVendors()">📋 Vendor List</button>
+          <button class="btn btn-secondary" onclick="exportContracts()">📄 Contracts</button>
+          <button class="btn btn-secondary" onclick="exportDocuments()">📁 Documents</button>
+          <button class="btn btn-secondary" onclick="exportCompliance()">✅ Compliance Report</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Spend by Category</h3>
+        <div id="spend-chart" style="margin-bottom: 2rem;"></div>
+        
+        <h3 style="margin-bottom: 1rem;">Contract Renewals (Next 90 Days)</h3>
+        <div id="renewals-list"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Vendor Modal -->
+  <div class="modal-overlay" id="vendor-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="vendor-modal-title">Add Vendor</h3>
+        <button class="modal-close" onclick="closeModal('vendor-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="v-id">
+        <div class="form-group">
+          <label class="form-label">Company Name *</label>
+          <input type="text" class="form-input" id="v-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Category *</label>
+            <select class="form-input" id="v-category">
+              <option value="supplies">Supplies</option>
+              <option value="services">Services</option>
+              <option value="equipment">Equipment</option>
+              <option value="technology">Technology</option>
+              <option value="consulting">Consulting</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="v-status">
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contact Name</label>
+            <input type="text" class="form-input" id="v-contact">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Contact Email</label>
+            <input type="email" class="form-input" id="v-email">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="v-phone">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rating (1-5)</label>
+            <select class="form-input" id="v-rating">
+              <option value="">Not Rated</option>
+              <option value="5">⭐⭐⭐⭐⭐ (5)</option>
+              <option value="4">⭐⭐⭐⭐ (4)</option>
+              <option value="3">⭐⭐⭐ (3)</option>
+              <option value="2">⭐⭐ (2)</option>
+              <option value="1">⭐ (1)</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea class="form-input" id="v-address" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Website</label>
+            <input type="url" class="form-input" id="v-website" placeholder="https://">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tax ID / EIN</label>
+            <input type="text" class="form-input" id="v-taxid">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Terms</label>
+          <select class="form-input" id="v-terms">
+            <option value="net30">Net 30</option>
+            <option value="net15">Net 15</option>
+            <option value="net60">Net 60</option>
+            <option value="due-receipt">Due on Receipt</option>
+            <option value="prepaid">Prepaid</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="v-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="v-delete-btn" onclick="deleteVendor()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('vendor-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveVendor()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Contract Modal -->
+  <div class="modal-overlay" id="contract-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="contract-modal-title">Add Contract</h3>
+        <button class="modal-close" onclick="closeModal('contract-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="c-id">
+        <div class="form-group">
+          <label class="form-label">Contract Title *</label>
+          <input type="text" class="form-input" id="c-title">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor *</label>
+          <select class="form-input" id="c-vendor"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Date *</label>
+            <input type="date" class="form-input" id="c-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date *</label>
+            <input type="date" class="form-input" id="c-end">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Contract Value ($)</label>
+            <input type="number" class="form-input" id="c-value" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Auto-Renew</label>
+            <select class="form-input" id="c-autorenew">
+              <option value="no">No</option>
+              <option value="yes">Yes</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="c-description" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Terms & Conditions</label>
+          <textarea class="form-input" id="c-terms" rows="3"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="c-delete-btn" onclick="deleteContract()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('contract-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveContract()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Document Modal -->
+  <div class="modal-overlay" id="document-modal">
+    <div class="modal" style="max-width: 450px;">
+      <div class="modal-header">
+        <h3 class="modal-title" id="document-modal-title">Add Document</h3>
+        <button class="modal-close" onclick="closeModal('document-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="d-id">
+        <div class="form-group">
+          <label class="form-label">Document Name *</label>
+          <input type="text" class="form-input" id="d-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Vendor *</label>
+          <select class="form-input" id="d-vendor"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Document Type</label>
+          <select class="form-input" id="d-type">
+            <option value="contract">Contract</option>
+            <option value="insurance">Insurance Certificate</option>
+            <option value="license">License</option>
+            <option value="w9">W-9</option>
+            <option value="nda">NDA</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Expiration Date</label>
+          <input type="date" class="form-input" id="d-expiration">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="d-notes" rows="2"></textarea>
+        </div>
+        <p style="font-size: 0.75rem; color: var(--gray-500); margin-top: 0.5rem;">
+          Note: In the full version, you can upload actual files here.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="d-delete-btn" onclick="deleteDocument()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('document-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDocument()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let vendors = [], contracts = [], documents = [];
+    
+    const categories = ['supplies', 'services', 'equipment', 'technology', 'consulting', 'maintenance', 'other'];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        vendors: localStorage.getItem('vendorvault_vendors'),
+        contracts: localStorage.getItem('vendorvault_contracts'),
+        documents: localStorage.getItem('vendorvault_documents')
+      };
+      
+      const today = new Date();
+      const inOneMonth = new Date(today.getTime() + 30 * 86400000).toISOString().split('T')[0];
+      const inTwoMonths = new Date(today.getTime() + 60 * 86400000).toISOString().split('T')[0];
+      const inSixMonths = new Date(today.getTime() + 180 * 86400000).toISOString().split('T')[0];
+      const lastYear = new Date(today.getFullYear() - 1, today.getMonth(), 1).toISOString().split('T')[0];
+      const twoYearsAgo = new Date(today.getFullYear() - 2, today.getMonth(), 1).toISOString().split('T')[0];
+      
+      vendors = saved.vendors ? JSON.parse(saved.vendors) : [
+        { id: 1, name: 'Office Plus Supplies', category: 'supplies', status: 'active', contact: 'Jane Smith', email: 'jane@officeplus.com', phone: '555-0101', address: '123 Commerce St, City, ST 12345', website: 'https://officeplus.com', taxid: '12-3456789', terms: 'net30', rating: 5, notes: 'Preferred vendor for office supplies' },
+        { id: 2, name: 'TechPro Solutions', category: 'technology', status: 'active', contact: 'Mike Johnson', email: 'mike@techpro.com', phone: '555-0102', address: '456 Tech Blvd, City, ST 12345', website: 'https://techpro.com', taxid: '98-7654321', terms: 'net30', rating: 4, notes: 'IT support and equipment' },
+        { id: 3, name: 'CleanRight Services', category: 'services', status: 'active', contact: 'Sarah Wilson', email: 'sarah@cleanright.com', phone: '555-0103', address: '', website: '', taxid: '', terms: 'net15', rating: 4, notes: 'Janitorial services' },
+        { id: 4, name: 'BuildCo Equipment', category: 'equipment', status: 'pending', contact: 'Tom Brown', email: 'tom@buildco.com', phone: '555-0104', address: '789 Industrial Ave', website: '', taxid: '55-1234567', terms: 'net60', rating: null, notes: 'New vendor - reviewing' },
+        { id: 5, name: 'Strategic Consulting Group', category: 'consulting', status: 'active', contact: 'Lisa Park', email: 'lisa@scgroup.com', phone: '555-0105', address: '', website: 'https://scgroup.com', taxid: '33-9876543', terms: 'due-receipt', rating: 5, notes: '' },
+      ];
+      
+      contracts = saved.contracts ? JSON.parse(saved.contracts) : [
+        { id: 1, vendorId: 1, title: 'Office Supplies Agreement', start: lastYear, end: inOneMonth, value: 24000, autoRenew: 'yes', description: 'Annual office supplies contract', terms: 'Quarterly ordering with 5% discount' },
+        { id: 2, vendorId: 2, title: 'IT Support Contract', start: twoYearsAgo, end: inSixMonths, value: 36000, autoRenew: 'yes', description: 'Managed IT services', terms: '24/7 support, 4-hour response SLA' },
+        { id: 3, vendorId: 3, title: 'Cleaning Services', start: lastYear, end: inTwoMonths, value: 18000, autoRenew: 'no', description: 'Daily office cleaning', terms: 'M-F cleaning, monthly deep clean' },
+        { id: 4, vendorId: 5, title: 'Strategy Consulting', start: lastYear, end: inOneMonth, value: 50000, autoRenew: 'no', description: 'Q1 strategic planning project', terms: 'Fixed fee engagement' },
+      ];
+      
+      documents = saved.documents ? JSON.parse(saved.documents) : [
+        { id: 1, vendorId: 1, name: 'W-9 Form 2024', type: 'w9', uploaded: lastYear, expiration: null, notes: '' },
+        { id: 2, vendorId: 1, name: 'Certificate of Insurance', type: 'insurance', uploaded: lastYear, expiration: inTwoMonths, notes: 'General liability $1M' },
+        { id: 3, vendorId: 2, name: 'MSA - IT Services', type: 'contract', uploaded: twoYearsAgo, expiration: inSixMonths, notes: '' },
+        { id: 4, vendorId: 2, name: 'NDA', type: 'nda', uploaded: twoYearsAgo, expiration: null, notes: 'Mutual NDA' },
+        { id: 5, vendorId: 3, name: 'Business License', type: 'license', uploaded: lastYear, expiration: inOneMonth, notes: 'State business license' },
+        { id: 6, vendorId: 5, name: 'W-9 Form', type: 'w9', uploaded: lastYear, expiration: null, notes: '' },
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('vendorvault_vendors', JSON.stringify(vendors));
+      localStorage.setItem('vendorvault_contracts', JSON.stringify(contracts));
+      localStorage.setItem('vendorvault_documents', JSON.stringify(documents));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderVendors();
+      renderContracts();
+      renderDocuments();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const catOpts = '<option value="">All Categories</option>' + categories.map(c => `<option value="${c}">${capitalize(c)}</option>`).join('');
+      document.getElementById('filter-category').innerHTML = catOpts;
+      
+      const vendorOpts = '<option value="">Select Vendor</option>' + vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      document.getElementById('c-vendor').innerHTML = vendorOpts;
+      document.getElementById('d-vendor').innerHTML = vendorOpts;
+      document.getElementById('filter-contract-vendor').innerHTML = '<option value="">All Vendors</option>' + vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+      document.getElementById('filter-doc-vendor').innerHTML = '<option value="">All Vendors</option>' + vendors.map(v => `<option value="${v.id}">${v.name}</option>`).join('');
+    }
+    
+    function getContractStatus(contract) {
+      const today = new Date().toISOString().split('T')[0];
+      const endDate = contract.end;
+      const daysUntilEnd = Math.ceil((new Date(endDate) - new Date()) / 86400000);
+      
+      if (endDate < today) return 'expired';
+      if (daysUntilEnd <= 60) return 'expiring';
+      return 'active';
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const activeVendors = vendors.filter(v => v.status === 'active').length;
+      const expiringContracts = contracts.filter(c => getContractStatus(c) === 'expiring').length;
+      
+      document.getElementById('stat-total').textContent = vendors.length;
+      document.getElementById('stat-active').textContent = activeVendors;
+      document.getElementById('stat-expiring').textContent = expiringContracts;
+      document.getElementById('stat-docs').textContent = documents.length;
+      
+      // Expiring contracts
+      const expiring = contracts.filter(c => getContractStatus(c) === 'expiring').slice(0, 5);
+      document.getElementById('expiring-contracts').innerHTML = expiring.length ? expiring.map(c => {
+        const vendor = vendors.find(v => v.id === c.vendorId);
+        const daysLeft = Math.ceil((new Date(c.end) - new Date()) / 86400000);
+        return `<div class="vendor-card expiring">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 500;">${c.title}</div>
+              <div style="font-size: 0.875rem; color: var(--gray-500);">${vendor?.name || 'Unknown'}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="color: var(--danger); font-weight: 600;">${daysLeft} days left</div>
+              <div style="font-size: 0.875rem;">Expires ${formatDate(c.end)}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No contracts expiring soon 👍</div>';
+      
+      // Top rated vendors
+      const topRated = [...vendors].filter(v => v.rating).sort((a, b) => b.rating - a.rating).slice(0, 5);
+      document.getElementById('top-vendors').innerHTML = topRated.length ? topRated.map(v => `
+        <div class="vendor-card">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 500;">${v.name}</div>
+              <div style="font-size: 0.875rem; color: var(--gray-500);">${capitalize(v.category)}</div>
+            </div>
+            <div class="rating">${'⭐'.repeat(v.rating)}</div>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No rated vendors yet</div>';
+      
+      // Category chart
+      const catCounts = categories.map(cat => ({ name: capitalize(cat), count: vendors.filter(v => v.category === cat).length })).filter(c => c.count > 0);
+      const maxCat = Math.max(...catCounts.map(c => c.count), 1);
+      
+      document.getElementById('category-chart').innerHTML = catCounts.map(c => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+          <span style="width: 120px; font-size: 0.875rem;">${c.name}</span>
+          <div style="flex: 1; height: 24px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${c.count / maxCat * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 30px; text-align: right; font-weight: 600;">${c.count}</span>
+        </div>
+      `).join('');
+    }
+    
+    // Vendors
+    function renderVendors() {
+      const catFilter = document.getElementById('filter-category').value;
+      const statusFilter = document.getElementById('filter-status').value;
+      const search = document.getElementById('filter-search').value.toLowerCase();
+      
+      let filtered = [...vendors];
+      if (catFilter) filtered = filtered.filter(v => v.category === catFilter);
+      if (statusFilter) filtered = filtered.filter(v => v.status === statusFilter);
+      if (search) filtered = filtered.filter(v => v.name.toLowerCase().includes(search) || v.contact?.toLowerCase().includes(search));
+      
+      document.getElementById('vendors-table').innerHTML = filtered.map(v => `
+        <tr>
+          <td><strong>${v.name}</strong></td>
+          <td><span class="category-badge">${capitalize(v.category)}</span></td>
+          <td>${v.contact || '-'}</td>
+          <td>${v.phone || '-'}</td>
+          <td class="rating">${v.rating ? '⭐'.repeat(v.rating) : '-'}</td>
+          <td><span class="status-badge ${v.status}">${v.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openVendorModal(${v.id})">Edit</button></td>
+        </tr>
+      `).join('');
+    }
+    
+    function openVendorModal(id = null) {
+      if (id) {
+        const v = vendors.find(x => x.id === id);
+        document.getElementById('vendor-modal-title').textContent = 'Edit Vendor';
+        document.getElementById('v-id').value = id;
+        document.getElementById('v-name').value = v.name;
+        document.getElementById('v-category').value = v.category;
+        document.getElementById('v-status').value = v.status;
+        document.getElementById('v-contact').value = v.contact || '';
+        document.getElementById('v-email').value = v.email || '';
+        document.getElementById('v-phone').value = v.phone || '';
+        document.getElementById('v-address').value = v.address || '';
+        document.getElementById('v-website').value = v.website || '';
+        document.getElementById('v-taxid').value = v.taxid || '';
+        document.getElementById('v-terms').value = v.terms || 'net30';
+        document.getElementById('v-rating').value = v.rating || '';
+        document.getElementById('v-notes').value = v.notes || '';
+        document.getElementById('v-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('vendor-modal-title').textContent = 'Add Vendor';
+        document.getElementById('v-id').value = '';
+        document.getElementById('v-name').value = '';
+        document.getElementById('v-category').value = 'supplies';
+        document.getElementById('v-status').value = 'active';
+        document.getElementById('v-contact').value = '';
+        document.getElementById('v-email').value = '';
+        document.getElementById('v-phone').value = '';
+        document.getElementById('v-address').value = '';
+        document.getElementById('v-website').value = '';
+        document.getElementById('v-taxid').value = '';
+        document.getElementById('v-terms').value = 'net30';
+        document.getElementById('v-rating').value = '';
+        document.getElementById('v-notes').value = '';
+        document.getElementById('v-delete-btn').style.display = 'none';
+      }
+      document.getElementById('vendor-modal').classList.add('active');
+    }
+    
+    function saveVendor() {
+      const id = document.getElementById('v-id').value;
+      const name = document.getElementById('v-name').value.trim();
+      const category = document.getElementById('v-category').value;
+      const status = document.getElementById('v-status').value;
+      const contact = document.getElementById('v-contact').value.trim();
+      const email = document.getElementById('v-email').value.trim();
+      const phone = document.getElementById('v-phone').value.trim();
+      const address = document.getElementById('v-address').value.trim();
+      const website = document.getElementById('v-website').value.trim();
+      const taxid = document.getElementById('v-taxid').value.trim();
+      const terms = document.getElementById('v-terms').value;
+      const rating = parseInt(document.getElementById('v-rating').value) || null;
+      const notes = document.getElementById('v-notes').value.trim();
+      
+      if (!name) { showToast('Please enter vendor name', 'error'); return; }
+      
+      if (id) {
+        const i = vendors.findIndex(v => v.id === parseInt(id));
+        vendors[i] = { ...vendors[i], name, category, status, contact, email, phone, address, website, taxid, terms, rating, notes };
+        showToast('Vendor updated');
+      } else {
+        vendors.push({ id: Math.max(0, ...vendors.map(v => v.id)) + 1, name, category, status, contact, email, phone, address, website, taxid, terms, rating, notes });
+        showToast('Vendor added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('vendor-modal');
+    }
+    
+    function deleteVendor() {
+      const id = parseInt(document.getElementById('v-id').value);
+      const hasContracts = contracts.some(c => c.vendorId === id);
+      const hasDocs = documents.some(d => d.vendorId === id);
+      
+      if ((hasContracts || hasDocs) && !confirm('This vendor has contracts or documents. Delete anyway?')) return;
+      
+      vendors = vendors.filter(v => v.id !== id);
+      contracts = contracts.filter(c => c.vendorId !== id);
+      documents = documents.filter(d => d.vendorId !== id);
+      saveData();
+      renderAll();
+      closeModal('vendor-modal');
+      showToast('Vendor deleted');
+    }
+    
+    // Contracts
+    function renderContracts() {
+      const vendorFilter = document.getElementById('filter-contract-vendor').value;
+      const statusFilter = document.getElementById('filter-contract-status').value;
+      
+      let filtered = [...contracts];
+      if (vendorFilter) filtered = filtered.filter(c => c.vendorId === parseInt(vendorFilter));
+      if (statusFilter) filtered = filtered.filter(c => getContractStatus(c) === statusFilter);
+      
+      filtered.sort((a, b) => new Date(a.end) - new Date(b.end));
+      
+      document.getElementById('contracts-table').innerHTML = filtered.map(c => {
+        const vendor = vendors.find(v => v.id === c.vendorId);
+        const status = getContractStatus(c);
+        return `<tr>
+          <td><strong>${c.title}</strong></td>
+          <td>${vendor?.name || 'Unknown'}</td>
+          <td>${formatDate(c.start)}</td>
+          <td>${formatDate(c.end)}</td>
+          <td>${c.value ? '$' + c.value.toLocaleString() : '-'}</td>
+          <td><span class="status-badge ${status}">${status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openContractModal(${c.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openContractModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      const nextYear = new Date(Date.now() + 365 * 86400000).toISOString().split('T')[0];
+      
+      if (id) {
+        const c = contracts.find(x => x.id === id);
+        document.getElementById('contract-modal-title').textContent = 'Edit Contract';
+        document.getElementById('c-id').value = id;
+        document.getElementById('c-title').value = c.title;
+        document.getElementById('c-vendor').value = c.vendorId;
+        document.getElementById('c-start').value = c.start;
+        document.getElementById('c-end').value = c.end;
+        document.getElementById('c-value').value = c.value || '';
+        document.getElementById('c-autorenew').value = c.autoRenew || 'no';
+        document.getElementById('c-description').value = c.description || '';
+        document.getElementById('c-terms').value = c.terms || '';
+        document.getElementById('c-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('contract-modal-title').textContent = 'Add Contract';
+        document.getElementById('c-id').value = '';
+        document.getElementById('c-title').value = '';
+        document.getElementById('c-vendor').value = '';
+        document.getElementById('c-start').value = today;
+        document.getElementById('c-end').value = nextYear;
+        document.getElementById('c-value').value = '';
+        document.getElementById('c-autorenew').value = 'no';
+        document.getElementById('c-description').value = '';
+        document.getElementById('c-terms').value = '';
+        document.getElementById('c-delete-btn').style.display = 'none';
+      }
+      document.getElementById('contract-modal').classList.add('active');
+    }
+    
+    function saveContract() {
+      const id = document.getElementById('c-id').value;
+      const title = document.getElementById('c-title').value.trim();
+      const vendorId = parseInt(document.getElementById('c-vendor').value);
+      const start = document.getElementById('c-start').value;
+      const end = document.getElementById('c-end').value;
+      const value = parseFloat(document.getElementById('c-value').value) || null;
+      const autoRenew = document.getElementById('c-autorenew').value;
+      const description = document.getElementById('c-description').value.trim();
+      const terms = document.getElementById('c-terms').value.trim();
+      
+      if (!title || !vendorId || !start || !end) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = contracts.findIndex(c => c.id === parseInt(id));
+        contracts[i] = { ...contracts[i], title, vendorId, start, end, value, autoRenew, description, terms };
+        showToast('Contract updated');
+      } else {
+        contracts.push({ id: Math.max(0, ...contracts.map(c => c.id)) + 1, title, vendorId, start, end, value, autoRenew, description, terms });
+        showToast('Contract added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('contract-modal');
+    }
+    
+    function deleteContract() {
+      const id = parseInt(document.getElementById('c-id').value);
+      if (!confirm('Delete this contract?')) return;
+      contracts = contracts.filter(c => c.id !== id);
+      saveData();
+      renderAll();
+      closeModal('contract-modal');
+      showToast('Contract deleted');
+    }
+    
+    // Documents
+    function renderDocuments() {
+      const vendorFilter = document.getElementById('filter-doc-vendor').value;
+      const typeFilter = document.getElementById('filter-doc-type').value;
+      
+      let filtered = [...documents];
+      if (vendorFilter) filtered = filtered.filter(d => d.vendorId === parseInt(vendorFilter));
+      if (typeFilter) filtered = filtered.filter(d => d.type === typeFilter);
+      
+      const today = new Date().toISOString().split('T')[0];
+      
+      document.getElementById('documents-table').innerHTML = filtered.map(d => {
+        const vendor = vendors.find(v => v.id === d.vendorId);
+        const isExpiring = d.expiration && d.expiration <= new Date(Date.now() + 60 * 86400000).toISOString().split('T')[0];
+        const isExpired = d.expiration && d.expiration < today;
+        
+        return `<tr>
+          <td><strong>📄 ${d.name}</strong></td>
+          <td>${vendor?.name || 'Unknown'}</td>
+          <td>${capitalize(d.type)}</td>
+          <td>${formatDate(d.uploaded)}</td>
+          <td style="${isExpired ? 'color: var(--danger);' : isExpiring ? 'color: var(--warning);' : ''}">${d.expiration ? formatDate(d.expiration) + (isExpired ? ' (Expired)' : isExpiring ? ' (Soon)' : '') : '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="openDocumentModal(${d.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openDocumentModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (id) {
+        const d = documents.find(x => x.id === id);
+        document.getElementById('document-modal-title').textContent = 'Edit Document';
+        document.getElementById('d-id').value = id;
+        document.getElementById('d-name').value = d.name;
+        document.getElementById('d-vendor').value = d.vendorId;
+        document.getElementById('d-type').value = d.type;
+        document.getElementById('d-expiration').value = d.expiration || '';
+        document.getElementById('d-notes').value = d.notes || '';
+        document.getElementById('d-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('document-modal-title').textContent = 'Add Document';
+        document.getElementById('d-id').value = '';
+        document.getElementById('d-name').value = '';
+        document.getElementById('d-vendor').value = '';
+        document.getElementById('d-type').value = 'contract';
+        document.getElementById('d-expiration').value = '';
+        document.getElementById('d-notes').value = '';
+        document.getElementById('d-delete-btn').style.display = 'none';
+      }
+      document.getElementById('document-modal').classList.add('active');
+    }
+    
+    function saveDocument() {
+      const id = document.getElementById('d-id').value;
+      const name = document.getElementById('d-name').value.trim();
+      const vendorId = parseInt(document.getElementById('d-vendor').value);
+      const type = document.getElementById('d-type').value;
+      const expiration = document.getElementById('d-expiration').value || null;
+      const notes = document.getElementById('d-notes').value.trim();
+      const uploaded = new Date().toISOString().split('T')[0];
+      
+      if (!name || !vendorId) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = documents.findIndex(d => d.id === parseInt(id));
+        documents[i] = { ...documents[i], name, vendorId, type, expiration, notes };
+        showToast('Document updated');
+      } else {
+        documents.push({ id: Math.max(0, ...documents.map(d => d.id)) + 1, name, vendorId, type, uploaded, expiration, notes });
+        showToast('Document added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('document-modal');
+    }
+    
+    function deleteDocument() {
+      const id = parseInt(document.getElementById('d-id').value);
+      if (!confirm('Delete this document?')) return;
+      documents = documents.filter(d => d.id !== id);
+      saveData();
+      renderAll();
+      closeModal('document-modal');
+      showToast('Document deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      // Spend by category
+      const catSpend = categories.map(cat => {
+        const catVendors = vendors.filter(v => v.category === cat).map(v => v.id);
+        const spend = contracts.filter(c => catVendors.includes(c.vendorId) && c.value).reduce((sum, c) => sum + c.value, 0);
+        return { name: capitalize(cat), spend };
+      }).filter(c => c.spend > 0);
+      
+      const maxSpend = Math.max(...catSpend.map(c => c.spend), 1);
+      
+      document.getElementById('spend-chart').innerHTML = catSpend.length ? catSpend.map(c => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+          <span style="width: 120px; font-size: 0.875rem;">${c.name}</span>
+          <div style="flex: 1; height: 24px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${c.spend / maxSpend * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 80px; text-align: right; font-weight: 600;">$${c.spend.toLocaleString()}</span>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);">No contract values recorded</div>';
+      
+      // Renewals next 90 days
+      const in90Days = new Date(Date.now() + 90 * 86400000).toISOString().split('T')[0];
+      const today = new Date().toISOString().split('T')[0];
+      
+      const renewals = contracts.filter(c => c.end >= today && c.end <= in90Days).sort((a, b) => new Date(a.end) - new Date(b.end));
+      
+      document.getElementById('renewals-list').innerHTML = renewals.length ? renewals.map(c => {
+        const vendor = vendors.find(v => v.id === c.vendorId);
+        const daysLeft = Math.ceil((new Date(c.end) - new Date()) / 86400000);
+        return `<div class="vendor-card ${daysLeft <= 30 ? 'expiring' : ''}">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="font-weight: 500;">${c.title}</div>
+              <div style="font-size: 0.875rem; color: var(--gray-500);">${vendor?.name || 'Unknown'} • ${c.value ? '$' + c.value.toLocaleString() : 'No value'}</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-weight: 600; ${daysLeft <= 30 ? 'color: var(--danger);' : ''}">${daysLeft} days</div>
+              <div style="font-size: 0.875rem;">${formatDate(c.end)}</div>
+            </div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No renewals in next 90 days</div>';
+    }
+    
+    // Exports
+    function exportVendors() {
+      const headers = ['Name', 'Category', 'Status', 'Contact', 'Email', 'Phone', 'Address', 'Website', 'Tax ID', 'Payment Terms', 'Rating', 'Notes'];
+      const rows = vendors.map(v => [v.name, v.category, v.status, v.contact || '', v.email || '', v.phone || '', v.address || '', v.website || '', v.taxid || '', v.terms || '', v.rating || '', v.notes || '']);
+      downloadCSV([headers, ...rows], 'vendors.csv');
+      showToast('Vendors exported');
+    }
+    
+    function exportContracts() {
+      const headers = ['Title', 'Vendor', 'Start Date', 'End Date', 'Value', 'Auto-Renew', 'Status', 'Description'];
+      const rows = contracts.map(c => {
+        const vendor = vendors.find(v => v.id === c.vendorId);
+        return [c.title, vendor?.name || '', c.start, c.end, c.value || '', c.autoRenew, getContractStatus(c), c.description || ''];
+      });
+      downloadCSV([headers, ...rows], 'contracts.csv');
+      showToast('Contracts exported');
+    }
+    
+    function exportDocuments() {
+      const headers = ['Name', 'Vendor', 'Type', 'Uploaded', 'Expiration', 'Notes'];
+      const rows = documents.map(d => {
+        const vendor = vendors.find(v => v.id === d.vendorId);
+        return [d.name, vendor?.name || '', d.type, d.uploaded, d.expiration || '', d.notes || ''];
+      });
+      downloadCSV([headers, ...rows], 'documents.csv');
+      showToast('Documents exported');
+    }
+    
+    function exportCompliance() {
+      const headers = ['Vendor', 'W-9', 'Insurance', 'License', 'NDA', 'Contract Status'];
+      const rows = vendors.filter(v => v.status === 'active').map(v => {
+        const vendorDocs = documents.filter(d => d.vendorId === v.id);
+        const vendorContracts = contracts.filter(c => c.vendorId === v.id);
+        const activeContract = vendorContracts.find(c => getContractStatus(c) !== 'expired');
+        
+        return [
+          v.name,
+          vendorDocs.some(d => d.type === 'w9') ? 'Yes' : 'Missing',
+          vendorDocs.some(d => d.type === 'insurance') ? 'Yes' : 'Missing',
+          vendorDocs.some(d => d.type === 'license') ? 'Yes' : 'N/A',
+          vendorDocs.some(d => d.type === 'nda') ? 'Yes' : 'N/A',
+          activeContract ? 'Active' : 'No Contract'
+        ];
+      });
+      downloadCSV([headers, ...rows], 'compliance-report.csv');
+      showToast('Compliance report exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function capitalize(str) { return str.charAt(0).toUpperCase() + str.slice(1); }
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
