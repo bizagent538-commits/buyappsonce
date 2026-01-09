@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PatronHQ - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 18px; }
+    .org-info { padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 14px; }
+    .user-name { font-size: 12px; color: #64748b; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #64748b; font-size: 14px; margin-bottom: 2px; transition: all 0.2s; }
+    .nav-item:hover { background: #f1f5f9; }
+    .nav-item.active { background: rgba(236,72,153,0.1); color: #ec4899; font-weight: 500; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; transition: all 0.2s; }
+    .btn-primary { background: #ec4899; color: #fff; }
+    .btn-primary:hover { background: #db2777; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-detail { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background: #f8fafc; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; background: #f1f5f9; text-transform: capitalize; display: inline-block; }
+    .badge-green { background: #dcfce7; color: #22c55e; }
+    .badge-yellow { background: #fef3c7; color: #f59e0b; }
+    .badge-red { background: #fee2e2; color: #ef4444; }
+    .badge-blue { background: #dbeafe; color: #3b82f6; }
+    .search { padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; width: 250px; }
+    .progress-bar { background: #e2e8f0; border-radius: 4px; height: 8px; overflow: hidden; }
+    .progress-fill { background: #22c55e; height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #ec4899, #f472b6); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; animation: slideIn 0.3s; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .donor-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #e2e8f0; }
+    .back-btn { display: flex; align-items: center; gap: 8px; cursor: pointer; color: #64748b; font-size: 14px; }
+    .back-btn:hover { color: #ec4899; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">🎯 Demo Mode - Data stored in browser | <a href="https://buyappsonce.com/landing-patronhq.html">Get PatronHQ →</a></div>
+  
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">💝</span><span class="logo-text">PatronHQ</span></div>
+      <div class="org-info">
+        <div class="org-name">Sample Nonprofit</div>
+        <div class="user-name">Demo User</div>
+      </div>
+      <div class="nav-item active" onclick="showTab('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showTab('donors')">👥 Donors</div>
+      <div class="nav-item" onclick="showTab('donations')">💰 Donations</div>
+      <div class="nav-item" onclick="showTab('campaigns')">🎯 Campaigns</div>
+      <div class="nav-item" onclick="showTab('pledges')">🤝 Pledges</div>
+      <div class="nav-item" onclick="showTab('communications')">📝 Communications</div>
+    </nav>
+    
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">Modal</h2>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const DONOR_TYPES = ['individual', 'business', 'foundation', 'government'];
+const DONOR_STATUSES = ['active', 'lapsed', 'prospect', 'inactive'];
+const PAYMENT_METHODS = ['cash', 'check', 'credit_card', 'bank_transfer', 'paypal', 'other'];
+const COMM_TYPES = ['email', 'phone', 'mail', 'meeting', 'event', 'other'];
+
+let state = {
+  tab: 'dashboard',
+  donors: [],
+  donations: [],
+  campaigns: [],
+  pledges: [],
+  communications: [],
+  selectedDonor: null,
+  search: ''
+};
+
+function init() {
+  loadData();
+  if (state.donors.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.donors = JSON.parse(localStorage.getItem('ph_donors') || '[]');
+  state.donations = JSON.parse(localStorage.getItem('ph_donations') || '[]');
+  state.campaigns = JSON.parse(localStorage.getItem('ph_campaigns') || '[]');
+  state.pledges = JSON.parse(localStorage.getItem('ph_pledges') || '[]');
+  state.communications = JSON.parse(localStorage.getItem('ph_communications') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('ph_donors', JSON.stringify(state.donors));
+  localStorage.setItem('ph_donations', JSON.stringify(state.donations));
+  localStorage.setItem('ph_campaigns', JSON.stringify(state.campaigns));
+  localStorage.setItem('ph_pledges', JSON.stringify(state.pledges));
+  localStorage.setItem('ph_communications', JSON.stringify(state.communications));
+}
+
+function loadSampleData() {
+  state.donors = [
+    { id: 1, first_name: 'John', last_name: 'Smith', email: 'john.smith@email.com', phone: '555-0101', address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701', donor_type: 'individual', status: 'active', notes: 'Annual gala supporter' },
+    { id: 2, first_name: 'Sarah', last_name: 'Johnson', email: 'sarah.j@email.com', phone: '555-0102', address: '456 Oak Ave', city: 'Springfield', state: 'IL', zip: '62702', donor_type: 'individual', status: 'active', notes: '' },
+    { id: 3, first_name: 'Acme', last_name: 'Corporation', email: 'giving@acme.com', phone: '555-0103', address: '789 Business Blvd', city: 'Chicago', state: 'IL', zip: '60601', donor_type: 'business', status: 'active', notes: 'Corporate sponsor' },
+    { id: 4, first_name: 'Community', last_name: 'Foundation', email: 'grants@commfound.org', phone: '555-0104', address: '321 Foundation Way', city: 'Chicago', state: 'IL', zip: '60602', donor_type: 'foundation', status: 'active', notes: 'Grant funder' },
+    { id: 5, first_name: 'Robert', last_name: 'Williams', email: 'rwilliams@email.com', phone: '555-0105', address: '654 Elm St', city: 'Springfield', state: 'IL', zip: '62703', donor_type: 'individual', status: 'lapsed', notes: 'Last gave 2 years ago' },
+    { id: 6, first_name: 'Emily', last_name: 'Davis', email: 'emily.d@email.com', phone: '555-0106', address: '', city: '', state: '', zip: '', donor_type: 'individual', status: 'prospect', notes: 'Met at community event' }
+  ];
+
+  state.campaigns = [
+    { id: 1, name: 'Annual Fund 2025', description: 'General operating support', goal: 50000, start_date: '2025-01-01', end_date: '2025-12-31', status: 'active' },
+    { id: 2, name: 'Building Expansion', description: 'Capital campaign for new facility', goal: 250000, start_date: '2024-06-01', end_date: '2026-06-01', status: 'active' },
+    { id: 3, name: 'Emergency Relief Fund', description: 'Community disaster response', goal: 25000, start_date: '2025-01-01', end_date: '2025-03-31', status: 'active' }
+  ];
+
+  const today = new Date();
+  state.donations = [
+    { id: 1, donor_id: 1, campaign_id: 1, amount: 500, donation_date: getDateOffset(-5), payment_method: 'check', designation: 'General Fund', receipt_sent: true },
+    { id: 2, donor_id: 2, campaign_id: 1, amount: 250, donation_date: getDateOffset(-10), payment_method: 'credit_card', designation: '', receipt_sent: true },
+    { id: 3, donor_id: 3, campaign_id: 2, amount: 10000, donation_date: getDateOffset(-15), payment_method: 'bank_transfer', designation: 'Building Fund', receipt_sent: true },
+    { id: 4, donor_id: 4, campaign_id: 2, amount: 25000, donation_date: getDateOffset(-20), payment_method: 'check', designation: 'Capital Campaign', receipt_sent: true },
+    { id: 5, donor_id: 1, campaign_id: 3, amount: 100, donation_date: getDateOffset(-2), payment_method: 'credit_card', designation: 'Emergency Relief', receipt_sent: false },
+    { id: 6, donor_id: 2, campaign_id: 1, amount: 150, donation_date: getDateOffset(-30), payment_method: 'check', designation: '', receipt_sent: true },
+    { id: 7, donor_id: 3, campaign_id: 1, amount: 5000, donation_date: getDateOffset(-45), payment_method: 'bank_transfer', designation: 'Operations', receipt_sent: true }
+  ];
+
+  state.pledges = [
+    { id: 1, donor_id: 3, campaign_id: 2, amount: 50000, pledge_date: getDateOffset(-60), due_date: getDateOffset(180), status: 'partial', amount_paid: 10000, notes: 'Multi-year pledge' },
+    { id: 2, donor_id: 4, campaign_id: 2, amount: 100000, pledge_date: getDateOffset(-90), due_date: getDateOffset(365), status: 'partial', amount_paid: 25000, notes: 'Foundation grant' },
+    { id: 3, donor_id: 1, campaign_id: 1, amount: 1000, pledge_date: getDateOffset(-30), due_date: getDateOffset(60), status: 'pending', amount_paid: 0, notes: '' }
+  ];
+
+  state.communications = [
+    { id: 1, donor_id: 1, type: 'email', subject: 'Thank you for your donation', notes: 'Sent personalized thank you for annual fund gift', contact_date: getDateOffset(-4) },
+    { id: 2, donor_id: 3, type: 'meeting', subject: 'Quarterly check-in', notes: 'Discussed building campaign progress and next payment', contact_date: getDateOffset(-7) },
+    { id: 3, donor_id: 4, type: 'phone', subject: 'Grant update call', notes: 'Provided progress report on grant deliverables', contact_date: getDateOffset(-14) },
+    { id: 4, donor_id: 6, type: 'event', subject: 'Prospect cultivation event', notes: 'Met at community mixer, showed interest in programs', contact_date: getDateOffset(-21) }
+  ];
+
+  saveData();
+}
+
+function getDateOffset(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function showTab(tab) {
+  state.tab = tab;
+  state.selectedDonor = null;
+  state.search = '';
+  updateNavActive();
+  render();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const tabs = ['dashboard', 'donors', 'donations', 'campaigns', 'pledges', 'communications'];
+  const idx = tabs.indexOf(state.tab);
+  document.querySelectorAll('.nav-item')[idx]?.classList.add('active');
+}
+
+function render() {
+  const main = document.getElementById('mainContent');
+  
+  if (state.selectedDonor) {
+    main.innerHTML = renderDonorDetail();
+    return;
+  }
+
+  switch(state.tab) {
+    case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'donors': main.innerHTML = renderDonors(); break;
+    case 'donations': main.innerHTML = renderDonations(); break;
+    case 'campaigns': main.innerHTML = renderCampaigns(); break;
+    case 'pledges': main.innerHTML = renderPledges(); break;
+    case 'communications': main.innerHTML = renderCommunications(); break;
+  }
+}
+
+function getDonorStats(donorId) {
+  const donorDonations = state.donations.filter(d => d.donor_id === donorId);
+  const now = new Date();
+  const yearAgo = new Date(now.getFullYear() - 1, now.getMonth(), now.getDate()).toISOString().split('T')[0];
+  
+  return {
+    total: donorDonations.length,
+    lifetime: donorDonations.reduce((s, d) => s + d.amount, 0),
+    lastYear: donorDonations.filter(d => d.donation_date >= yearAgo).reduce((s, d) => s + d.amount, 0),
+    average: donorDonations.length ? donorDonations.reduce((s, d) => s + d.amount, 0) / donorDonations.length : 0,
+    first: donorDonations.length ? donorDonations.sort((a, b) => a.donation_date.localeCompare(b.donation_date))[0].donation_date : null,
+    last: donorDonations.length ? donorDonations.sort((a, b) => b.donation_date.localeCompare(a.donation_date))[0].donation_date : null
+  };
+}
+
+function getDonor(id) { return state.donors.find(d => d.id === id); }
+function getCampaign(id) { return state.campaigns.find(c => c.id === id); }
+
+function renderDashboard() {
+  const thisYear = new Date().getFullYear().toString();
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const ytdDonations = state.donations.filter(d => d.donation_date?.startsWith(thisYear));
+  const mtdDonations = state.donations.filter(d => d.donation_date?.startsWith(thisMonth));
+  const ytdTotal = ytdDonations.reduce((s, d) => s + d.amount, 0);
+  const mtdTotal = mtdDonations.reduce((s, d) => s + d.amount, 0);
+  const activeDonors = state.donors.filter(d => d.status === 'active').length;
+  const pendingPledges = state.pledges.filter(p => p.status === 'pending' || p.status === 'partial');
+  const pendingTotal = pendingPledges.reduce((s, p) => s + (p.amount - p.amount_paid), 0);
+
+  return `
+    <div class="header"><h1 class="title">Dashboard</h1></div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">YTD Donations</div><div class="stat-value" style="color: #22c55e">$${ytdTotal.toLocaleString()}</div><div class="stat-meta">${ytdDonations.length} donations</div></div>
+      <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value" style="color: #3b82f6">$${mtdTotal.toLocaleString()}</div><div class="stat-meta">${mtdDonations.length} donations</div></div>
+      <div class="stat-card"><div class="stat-label">Active Donors</div><div class="stat-value">${activeDonors}</div><div class="stat-meta">${state.donors.length} total</div></div>
+      <div class="stat-card"><div class="stat-label">Pending Pledges</div><div class="stat-value" style="color: #f59e0b">$${pendingTotal.toLocaleString()}</div><div class="stat-meta">${pendingPledges.length} pledges</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom: 16px">Recent Donations</h3>
+        ${state.donations.slice(0, 5).map(d => {
+          const donor = getDonor(d.donor_id);
+          return `<div class="donor-item"><div><strong>${donor?.first_name} ${donor?.last_name}</strong><div style="font-size: 12px; color: #64748b">${d.donation_date}</div></div><div style="font-weight: 600; color: #22c55e">$${d.amount.toLocaleString()}</div></div>`;
+        }).join('')}
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom: 16px">Active Campaigns</h3>
+        ${state.campaigns.filter(c => c.status === 'active').map(c => {
+          const raised = state.donations.filter(d => d.campaign_id === c.id).reduce((s, d) => s + d.amount, 0);
+          const pct = c.goal ? Math.min(100, (raised / c.goal) * 100) : 0;
+          return `<div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 8px"><strong>${c.name}</strong><span>$${raised.toLocaleString()} / $${c.goal?.toLocaleString() || '∞'}</span></div>
+            <div class="progress-bar"><div class="progress-fill" style="width: ${pct}%"></div></div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderDonors() {
+  const filtered = state.donors.filter(d => 
+    `${d.first_name} ${d.last_name} ${d.email}`.toLowerCase().includes(state.search.toLowerCase())
+  );
+
+  return `
+    <div class="header">
+      <h1 class="title">Donors</h1>
+      <div style="display: flex; gap: 12px">
+        <input class="search" placeholder="Search donors..." value="${state.search}" oninput="state.search = this.value; render()">
+        <button class="btn btn-primary" onclick="openDonorModal()">+ Add Donor</button>
+      </div>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>Name</th><th>Email</th><th>Type</th><th>Status</th><th>Lifetime</th><th>Last Gift</th><th>Actions</th></tr></thead>
+      <tbody>${filtered.map(d => {
+        const stats = getDonorStats(d.id);
+        const statusClass = d.status === 'active' ? 'badge-green' : d.status === 'prospect' ? 'badge-yellow' : 'badge-red';
+        return `<tr style="cursor: pointer" onclick="selectDonor(${d.id})">
+          <td><strong>${d.first_name} ${d.last_name}</strong></td>
+          <td>${d.email || '-'}</td>
+          <td><span class="badge">${d.donor_type}</span></td>
+          <td><span class="badge ${statusClass}">${d.status}</span></td>
+          <td>$${stats.lifetime.toLocaleString()}</td>
+          <td>${stats.last || '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); openDonorModal(${d.id})">Edit</button></td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderDonorDetail() {
+  const d = state.selectedDonor;
+  const stats = getDonorStats(d.id);
+  const donorDonations = state.donations.filter(x => x.donor_id === d.id);
+  const donorComms = state.communications.filter(x => x.donor_id === d.id);
+  const statusClass = d.status === 'active' ? 'badge-green' : d.status === 'prospect' ? 'badge-yellow' : 'badge-red';
+
+  return `
+    <div class="header">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <span class="back-btn" onclick="state.selectedDonor = null; render()">← Back</span>
+        <h1 class="title">${d.first_name} ${d.last_name}</h1>
+        <span class="badge ${statusClass}">${d.status}</span>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <button class="btn btn-secondary" onclick="openDonorModal(${d.id})">Edit</button>
+        <button class="btn btn-primary" onclick="openDonationModal(${d.id})">+ Donation</button>
+        <button class="btn btn-secondary" onclick="openCommModal(${d.id})">+ Note</button>
+      </div>
+    </div>
+    <div class="grid-detail">
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 16px">Contact Info</h3>
+          <p><strong>Email:</strong> ${d.email || '-'}</p>
+          <p><strong>Phone:</strong> ${d.phone || '-'}</p>
+          <p><strong>Address:</strong><br>${d.address || '-'}<br>${d.city} ${d.state} ${d.zip}</p>
+          <p><strong>Type:</strong> ${d.donor_type}</p>
+          ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+        </div>
+        <div class="card" style="margin-top: 16px">
+          <h3 style="margin-bottom: 16px">Giving Summary</h3>
+          <p><strong>Lifetime:</strong> $${stats.lifetime.toLocaleString()}</p>
+          <p><strong>Last 12mo:</strong> $${stats.lastYear.toLocaleString()}</p>
+          <p><strong>Average:</strong> $${stats.average.toLocaleString()}</p>
+          <p><strong>First Gift:</strong> ${stats.first || '-'}</p>
+          <p><strong>Last Gift:</strong> ${stats.last || '-'}</p>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom: 16px">Donation History</h3>
+          <table><thead><tr><th>Date</th><th>Amount</th><th>Campaign</th><th>Method</th><th>Receipt</th></tr></thead>
+          <tbody>${donorDonations.map(dn => {
+            const camp = getCampaign(dn.campaign_id);
+            return `<tr>
+              <td>${dn.donation_date}</td>
+              <td style="color: #22c55e; font-weight: 600">$${dn.amount.toLocaleString()}</td>
+              <td>${camp?.name || '-'}</td>
+              <td>${dn.payment_method.replace('_', ' ')}</td>
+              <td>${dn.receipt_sent ? '✅' : `<button class="btn btn-sm" onclick="sendReceipt(${dn.id})">Send</button>`}</td>
+            </tr>`;
+          }).join('')}</tbody></table>
+        </div>
+        <div class="card" style="margin-top: 16px">
+          <h3 style="margin-bottom: 16px">Communication Log</h3>
+          ${donorComms.map(c => `
+            <div style="padding: 12px 0; border-bottom: 1px solid #e2e8f0">
+              <div style="display: flex; justify-content: space-between"><span class="badge">${c.type}</span><span style="font-size: 12px; color: #64748b">${c.contact_date}</span></div>
+              ${c.subject ? `<div style="font-weight: 600; margin-top: 4px">${c.subject}</div>` : ''}
+              ${c.notes ? `<div style="font-size: 13px; color: #64748b; margin-top: 4px">${c.notes}</div>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderDonations() {
+  return `
+    <div class="header"><h1 class="title">Donations</h1><button class="btn btn-primary" onclick="openDonationModal()">+ Add Donation</button></div>
+    <div class="card">
+      <table><thead><tr><th>Date</th><th>Donor</th><th>Amount</th><th>Campaign</th><th>Method</th><th>Receipt</th></tr></thead>
+      <tbody>${state.donations.map(d => {
+        const donor = getDonor(d.donor_id);
+        const camp = getCampaign(d.campaign_id);
+        return `<tr>
+          <td>${d.donation_date}</td>
+          <td><strong>${donor?.first_name} ${donor?.last_name}</strong></td>
+          <td style="color: #22c55e; font-weight: 600">$${d.amount.toLocaleString()}</td>
+          <td>${camp?.name || '-'}</td>
+          <td>${d.payment_method.replace('_', ' ')}</td>
+          <td>${d.receipt_sent ? '✅' : `<button class="btn btn-sm" onclick="sendReceipt(${d.id})">Send</button>`}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderCampaigns() {
+  return `
+    <div class="header"><h1 class="title">Campaigns</h1><button class="btn btn-primary" onclick="openCampaignModal()">+ New Campaign</button></div>
+    <div class="grid">
+      ${state.campaigns.map(c => {
+        const raised = state.donations.filter(d => d.campaign_id === c.id).reduce((s, d) => s + d.amount, 0);
+        const pct = c.goal ? Math.min(100, (raised / c.goal) * 100) : 0;
+        const statusClass = c.status === 'active' ? 'badge-green' : c.status === 'completed' ? 'badge-blue' : '';
+        return `<div class="card">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px">
+            <h3>${c.name}</h3>
+            <span class="badge ${statusClass}">${c.status}</span>
+          </div>
+          ${c.description ? `<p style="font-size: 13px; color: #64748b; margin-bottom: 12px">${c.description}</p>` : ''}
+          <div style="margin-bottom: 8px"><strong>$${raised.toLocaleString()}</strong> raised of $${c.goal?.toLocaleString() || '∞'}</div>
+          <div class="progress-bar" style="margin-bottom: 12px"><div class="progress-fill" style="width: ${pct}%"></div></div>
+          <div style="font-size: 12px; color: #64748b">${c.start_date} - ${c.end_date || 'Ongoing'}</div>
+          <button class="btn btn-sm btn-secondary" style="margin-top: 12px" onclick="openCampaignModal(${c.id})">Edit</button>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderPledges() {
+  return `
+    <div class="header"><h1 class="title">Pledges</h1><button class="btn btn-primary" onclick="openPledgeModal()">+ Add Pledge</button></div>
+    <div class="card">
+      <table><thead><tr><th>Date</th><th>Donor</th><th>Pledged</th><th>Paid</th><th>Due</th><th>Status</th><th>Campaign</th></tr></thead>
+      <tbody>${state.pledges.map(p => {
+        const donor = getDonor(p.donor_id);
+        const camp = getCampaign(p.campaign_id);
+        const statusClass = p.status === 'fulfilled' ? 'badge-green' : p.status === 'partial' ? 'badge-yellow' : 'badge-red';
+        return `<tr>
+          <td>${p.pledge_date}</td>
+          <td><strong>${donor?.first_name} ${donor?.last_name}</strong></td>
+          <td>$${p.amount.toLocaleString()}</td>
+          <td style="color: #22c55e">$${p.amount_paid.toLocaleString()}</td>
+          <td>${p.due_date || '-'}</td>
+          <td><span class="badge ${statusClass}">${p.status}</span></td>
+          <td>${camp?.name || '-'}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderCommunications() {
+  return `
+    <div class="header"><h1 class="title">Communications</h1><button class="btn btn-primary" onclick="openCommModal()">+ Log Communication</button></div>
+    <div class="card">
+      <table><thead><tr><th>Date</th><th>Donor</th><th>Type</th><th>Subject</th><th>Notes</th></tr></thead>
+      <tbody>${state.communications.map(c => {
+        const donor = getDonor(c.donor_id);
+        return `<tr>
+          <td>${c.contact_date}</td>
+          <td><strong>${donor?.first_name} ${donor?.last_name}</strong></td>
+          <td><span class="badge">${c.type}</span></td>
+          <td>${c.subject || '-'}</td>
+          <td style="max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">${c.notes || '-'}</td>
+        </tr>`;
+      }).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function selectDonor(id) {
+  state.selectedDonor = getDonor(id);
+  render();
+}
+
+// Modal functions
+function openModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+}
+
+function openDonorModal(id) {
+  const d = id ? getDonor(id) : {};
+  openModal(id ? 'Edit Donor' : 'Add Donor', `
+    <form onsubmit="saveDonor(event, ${id || 'null'})">
+      <div class="row">
+        <div class="field"><label>First Name</label><input name="first_name" value="${d.first_name || ''}" required></div>
+        <div class="field"><label>Last Name</label><input name="last_name" value="${d.last_name || ''}" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Email</label><input type="email" name="email" value="${d.email || ''}"></div>
+        <div class="field"><label>Phone</label><input name="phone" value="${d.phone || ''}"></div>
+      </div>
+      <div class="field"><label>Address</label><input name="address" value="${d.address || ''}"></div>
+      <div class="row">
+        <div class="field"><label>City</label><input name="city" value="${d.city || ''}"></div>
+        <div class="field"><label>State</label><input name="state" value="${d.state || ''}"></div>
+        <div class="field"><label>ZIP</label><input name="zip" value="${d.zip || ''}"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Type</label><select name="donor_type">${DONOR_TYPES.map(t => `<option value="${t}" ${d.donor_type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div>
+        <div class="field"><label>Status</label><select name="status">${DONOR_STATUSES.map(s => `<option value="${s}" ${d.status === s ? 'selected' : ''}>${s}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea name="notes">${d.notes || ''}</textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveDonor(e, id) {
+  e.preventDefault();
+  const f = e.target;
+  const data = {
+    first_name: f.first_name.value, last_name: f.last_name.value, email: f.email.value, phone: f.phone.value,
+    address: f.address.value, city: f.city.value, state: f.state.value, zip: f.zip.value,
+    donor_type: f.donor_type.value, status: f.status.value, notes: f.notes.value
+  };
+  if (id) {
+    const idx = state.donors.findIndex(d => d.id === id);
+    state.donors[idx] = { ...state.donors[idx], ...data };
+    if (state.selectedDonor?.id === id) state.selectedDonor = state.donors[idx];
+  } else {
+    data.id = Math.max(0, ...state.donors.map(d => d.id)) + 1;
+    state.donors.push(data);
+  }
+  saveData(); closeModal(); toast('Donor saved!'); render();
+}
+
+function openDonationModal(donorId) {
+  openModal('Add Donation', `
+    <form onsubmit="saveDonation(event)">
+      <div class="field"><label>Donor</label><select name="donor_id" required>${state.donors.map(d => `<option value="${d.id}" ${d.id === donorId ? 'selected' : ''}>${d.first_name} ${d.last_name}</option>`).join('')}</select></div>
+      <div class="row">
+        <div class="field"><label>Amount</label><input type="number" step="0.01" name="amount" required></div>
+        <div class="field"><label>Date</label><input type="date" name="donation_date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Payment Method</label><select name="payment_method">${PAYMENT_METHODS.map(m => `<option value="${m}">${m.replace('_', ' ')}</option>`).join('')}</select></div>
+        <div class="field"><label>Campaign</label><select name="campaign_id"><option value="">None</option>${state.campaigns.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Designation</label><input name="designation" placeholder="e.g., General Fund"></div>
+      <div class="field"><label>Notes</label><textarea name="notes"></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveDonation(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.donations.unshift({
+    id: Math.max(0, ...state.donations.map(d => d.id)) + 1,
+    donor_id: parseInt(f.donor_id.value),
+    campaign_id: f.campaign_id.value ? parseInt(f.campaign_id.value) : null,
+    amount: parseFloat(f.amount.value),
+    donation_date: f.donation_date.value,
+    payment_method: f.payment_method.value,
+    designation: f.designation.value,
+    notes: f.notes.value,
+    receipt_sent: false
+  });
+  saveData(); closeModal(); toast('Donation saved!'); render();
+}
+
+function openCampaignModal(id) {
+  const c = id ? getCampaign(id) : {};
+  openModal(id ? 'Edit Campaign' : 'New Campaign', `
+    <form onsubmit="saveCampaign(event, ${id || 'null'})">
+      <div class="field"><label>Name</label><input name="name" value="${c.name || ''}" required></div>
+      <div class="field"><label>Description</label><textarea name="description">${c.description || ''}</textarea></div>
+      <div class="row">
+        <div class="field"><label>Goal</label><input type="number" step="0.01" name="goal" value="${c.goal || ''}"></div>
+        <div class="field"><label>Status</label><select name="status"><option value="draft" ${c.status === 'draft' ? 'selected' : ''}>Draft</option><option value="active" ${c.status === 'active' || !c.status ? 'selected' : ''}>Active</option><option value="completed" ${c.status === 'completed' ? 'selected' : ''}>Completed</option><option value="cancelled" ${c.status === 'cancelled' ? 'selected' : ''}>Cancelled</option></select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Start Date</label><input type="date" name="start_date" value="${c.start_date || ''}"></div>
+        <div class="field"><label>End Date</label><input type="date" name="end_date" value="${c.end_date || ''}"></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveCampaign(e, id) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, description: f.description.value, goal: f.goal.value ? parseFloat(f.goal.value) : null, start_date: f.start_date.value, end_date: f.end_date.value, status: f.status.value };
+  if (id) {
+    const idx = state.campaigns.findIndex(c => c.id === id);
+    state.campaigns[idx] = { ...state.campaigns[idx], ...data };
+  } else {
+    data.id = Math.max(0, ...state.campaigns.map(c => c.id)) + 1;
+    state.campaigns.push(data);
+  }
+  saveData(); closeModal(); toast('Campaign saved!'); render();
+}
+
+function openPledgeModal() {
+  openModal('Add Pledge', `
+    <form onsubmit="savePledge(event)">
+      <div class="field"><label>Donor</label><select name="donor_id" required>${state.donors.map(d => `<option value="${d.id}">${d.first_name} ${d.last_name}</option>`).join('')}</select></div>
+      <div class="row">
+        <div class="field"><label>Amount</label><input type="number" step="0.01" name="amount" required></div>
+        <div class="field"><label>Pledge Date</label><input type="date" name="pledge_date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Due Date</label><input type="date" name="due_date"></div>
+        <div class="field"><label>Campaign</label><select name="campaign_id"><option value="">None</option>${state.campaigns.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}</select></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea name="notes"></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function savePledge(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.pledges.unshift({
+    id: Math.max(0, ...state.pledges.map(p => p.id)) + 1,
+    donor_id: parseInt(f.donor_id.value),
+    campaign_id: f.campaign_id.value ? parseInt(f.campaign_id.value) : null,
+    amount: parseFloat(f.amount.value),
+    pledge_date: f.pledge_date.value,
+    due_date: f.due_date.value,
+    status: 'pending',
+    amount_paid: 0,
+    notes: f.notes.value
+  });
+  saveData(); closeModal(); toast('Pledge saved!'); render();
+}
+
+function openCommModal(donorId) {
+  openModal('Log Communication', `
+    <form onsubmit="saveComm(event)">
+      <div class="field"><label>Donor</label><select name="donor_id" required>${state.donors.map(d => `<option value="${d.id}" ${d.id === donorId ? 'selected' : ''}>${d.first_name} ${d.last_name}</option>`).join('')}</select></div>
+      <div class="row">
+        <div class="field"><label>Type</label><select name="type">${COMM_TYPES.map(t => `<option value="${t}">${t}</option>`).join('')}</select></div>
+        <div class="field"><label>Date</label><input type="date" name="contact_date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      </div>
+      <div class="field"><label>Subject</label><input name="subject"></div>
+      <div class="field"><label>Notes</label><textarea name="notes" required></textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveComm(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.communications.unshift({
+    id: Math.max(0, ...state.communications.map(c => c.id)) + 1,
+    donor_id: parseInt(f.donor_id.value),
+    type: f.type.value,
+    subject: f.subject.value,
+    notes: f.notes.value,
+    contact_date: f.contact_date.value
+  });
+  saveData(); closeModal(); toast('Communication logged!'); render();
+}
+
+function sendReceipt(id) {
+  const idx = state.donations.findIndex(d => d.id === id);
+  state.donations[idx].receipt_sent = true;
+  saveData(); toast('Receipt marked as sent!'); render();
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>
