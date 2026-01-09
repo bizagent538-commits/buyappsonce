@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SupportQ Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 18px; color: #fff; }
+    .badge { background: #3b82f6; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 4px; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 14px; color: #fff; }
+    .user-name { font-size: 12px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 14px; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(59,130,246,0.2); color: #fff; font-weight: 500; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    .grid-detail { display: grid; grid-template-columns: 1fr 300px; gap: 24px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    tr:hover { background: #f8fafc; }
+    .status-badge, .priority-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; text-transform: capitalize; display: inline-block; }
+    .filters { display: flex; gap: 8px; margin-bottom: 16px; }
+    .filter-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-size: 13px; }
+    .filter-btn.active { background: #3b82f6; color: #fff; border-color: #3b82f6; }
+    .search { padding: 10px 16px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; width: 200px; }
+    .select { padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; }
+    .reply-card { padding: 16px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; }
+    .internal-reply { background: #fef3c7; border-left: 3px solid #f59e0b; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #1e293b, #334155); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #60a5fa; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">🎫 Demo Mode - Data stored in browser | <a href="https://buyappsonce.com/landing-supportq-pro.html">Get SupportQ Pro →</a></div>
+  
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">🎫</span><span class="logo-text">SupportQ</span><span class="badge">PRO</span></div>
+      <div class="org-info"><div class="org-name">Demo Support</div><div class="user-name">Agent Demo</div></div>
+      <div class="nav-item active" onclick="showTab('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showTab('tickets')">🎫 Tickets</div>
+      <div class="nav-item" onclick="showTab('customers')">👥 Customers</div>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 class="modal-title" id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const STATUSES = ['open', 'pending', 'in_progress', 'resolved', 'closed'];
+const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
+const STATUS_COLORS = { open: '#3b82f6', pending: '#f59e0b', in_progress: '#8b5cf6', resolved: '#22c55e', closed: '#64748b' };
+const PRIORITY_COLORS = { low: '#64748b', medium: '#3b82f6', high: '#f59e0b', urgent: '#ef4444' };
+const SLA_HOURS = { low: { response: 24, resolution: 72 }, medium: { response: 8, resolution: 24 }, high: { response: 4, resolution: 8 }, urgent: { response: 1, resolution: 4 } };
+
+let state = { tab: 'dashboard', tickets: [], customers: [], replies: {}, filter: 'all', search: '', selectedTicket: null };
+
+function init() {
+  loadData();
+  if (state.tickets.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.tickets = JSON.parse(localStorage.getItem('sq_tickets') || '[]');
+  state.customers = JSON.parse(localStorage.getItem('sq_customers') || '[]');
+  state.replies = JSON.parse(localStorage.getItem('sq_replies') || '{}');
+}
+
+function saveData() {
+  localStorage.setItem('sq_tickets', JSON.stringify(state.tickets));
+  localStorage.setItem('sq_customers', JSON.stringify(state.customers));
+  localStorage.setItem('sq_replies', JSON.stringify(state.replies));
+}
+
+function loadSampleData() {
+  state.customers = [
+    { id: 1, name: 'John Smith', email: 'john@example.com', company: 'Acme Corp' },
+    { id: 2, name: 'Sarah Johnson', email: 'sarah@example.com', company: 'TechStart' },
+    { id: 3, name: 'Mike Wilson', email: 'mike@example.com', company: 'DataFlow' }
+  ];
+  
+  const now = Date.now();
+  state.tickets = [
+    { id: 1, ticket_number: 'TKT-000001', customer_id: 1, subject: 'Cannot login to dashboard', description: 'Getting error 500 when trying to login. Cleared cache and cookies but still happening.', status: 'open', priority: 'high', category: 'Technical', assigned_to: 'Agent Demo', created_at: now - 3600000, sla_response_due: now + 14400000, sla_resolution_due: now + 28800000 },
+    { id: 2, ticket_number: 'TKT-000002', customer_id: 2, subject: 'Billing question about invoice #1234', description: 'I received an invoice but the amount seems incorrect. Can you please check?', status: 'pending', priority: 'medium', category: 'Billing', assigned_to: null, created_at: now - 7200000, sla_response_due: now + 28800000, sla_resolution_due: now + 86400000 },
+    { id: 3, ticket_number: 'TKT-000003', customer_id: 3, subject: 'Feature request: Dark mode', description: 'Would love to have a dark mode option for the dashboard.', status: 'in_progress', priority: 'low', category: 'General', assigned_to: 'Agent Demo', created_at: now - 86400000, first_response_at: now - 80000000, sla_response_due: now + 86400000, sla_resolution_due: now + 259200000 },
+    { id: 4, ticket_number: 'TKT-000004', customer_id: 1, subject: 'URGENT: Production server down', description: 'Our production server is completely down. Need immediate assistance!', status: 'open', priority: 'urgent', category: 'Technical', assigned_to: 'Agent Demo', created_at: now - 1800000, sla_response_due: now + 1800000, sla_resolution_due: now + 14400000 },
+    { id: 5, ticket_number: 'TKT-000005', customer_id: 2, subject: 'How to export data?', description: 'Is there a way to export all my data to CSV?', status: 'resolved', priority: 'low', category: 'General', assigned_to: 'Agent Demo', created_at: now - 172800000, first_response_at: now - 160000000, resolved_at: now - 86400000, sla_response_due: now - 86400000, sla_resolution_due: now }
+  ];
+  
+  state.replies = {
+    3: [
+      { id: 1, agent: 'Agent Demo', content: 'Thanks for the suggestion! We\'re actually working on dark mode right now.', is_internal: false, created_at: now - 80000000 },
+      { id: 2, agent: 'Agent Demo', content: 'Internal note: Check with dev team on ETA', is_internal: true, created_at: now - 75000000 }
+    ],
+    5: [
+      { id: 1, agent: 'Agent Demo', content: 'Yes! Go to Settings > Export and select CSV format.', is_internal: false, created_at: now - 160000000 },
+      { id: 2, agent: null, content: 'Perfect, thank you so much!', is_internal: false, created_at: now - 150000000 }
+    ]
+  };
+  saveData();
+}
+
+function showTab(tab) { state.tab = tab; state.selectedTicket = null; state.filter = 'all'; updateNav(); render(); }
+function updateNav() { document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['dashboard', 'tickets', 'customers'].indexOf(state.tab))); }
+
+function render() {
+  const main = document.getElementById('mainContent');
+  if (state.selectedTicket) { main.innerHTML = renderTicketDetail(); return; }
+  switch (state.tab) {
+    case 'dashboard': main.innerHTML = renderDashboard(); break;
+    case 'tickets': main.innerHTML = renderTickets(); break;
+    case 'customers': main.innerHTML = renderCustomers(); break;
+  }
+}
+
+function getCustomer(id) { return state.customers.find(c => c.id === id); }
+function isSlaBreached(t, type) {
+  if (['resolved', 'closed'].includes(t.status)) return false;
+  const now = Date.now();
+  if (type === 'response') return t.sla_response_due && !t.first_response_at && t.sla_response_due < now;
+  if (type === 'resolution') return t.sla_resolution_due && t.sla_resolution_due < now;
+  return false;
+}
+
+function timeAgo(ts) {
+  const diff = (Date.now() - ts) / 1000;
+  if (diff < 60) return 'just now';
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+function fmt(ts) { return ts ? new Date(ts).toLocaleString() : '-'; }
+
+function renderDashboard() {
+  const open = state.tickets.filter(t => t.status === 'open').length;
+  const inProgress = state.tickets.filter(t => t.status === 'in_progress').length;
+  const today = state.tickets.filter(t => t.resolved_at && t.resolved_at > Date.now() - 86400000).length;
+  const breached = state.tickets.filter(t => isSlaBreached(t, 'response') || isSlaBreached(t, 'resolution')).length;
+  
+  return `
+    <div class="header"><h1 class="title">Dashboard</h1></div>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-label">Open Tickets</div><div class="stat-value" style="color:#3b82f6">${open}</div></div>
+      <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:#8b5cf6">${inProgress}</div></div>
+      <div class="stat-card"><div class="stat-label">Resolved Today</div><div class="stat-value" style="color:#22c55e">${today}</div></div>
+      <div class="stat-card"><div class="stat-label">SLA Breached</div><div class="stat-value" style="color:#ef4444">${breached}</div></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <h3 style="margin-bottom:16px">Recent Tickets</h3>
+        ${state.tickets.slice(0, 5).map(t => `
+          <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid #e2e8f0;cursor:pointer" onclick="selectTicket(${t.id})">
+            <div><strong>${t.ticket_number}</strong> - ${t.subject.slice(0, 30)}<div style="font-size:12px;color:#64748b">${getCustomer(t.customer_id)?.name || 'Unknown'}</div></div>
+            <span class="status-badge" style="background:${STATUS_COLORS[t.status]}22;color:${STATUS_COLORS[t.status]}">${t.status.replace('_', ' ')}</span>
+          </div>
+        `).join('')}
+      </div>
+      <div class="card">
+        <h3 style="margin-bottom:16px">SLA Status</h3>
+        ${state.tickets.filter(t => !['resolved', 'closed'].includes(t.status)).slice(0, 5).map(t => {
+          const respBreached = isSlaBreached(t, 'response');
+          const resBreached = isSlaBreached(t, 'resolution');
+          return `<div style="padding:8px 0;border-bottom:1px solid #e2e8f0"><strong>${t.ticket_number}</strong> ${respBreached || resBreached ? '<span style="color:#ef4444">⚠️ Breached</span>' : '<span style="color:#22c55e">✓ On Track</span>'}</div>`;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+function renderTickets() {
+  const filtered = state.tickets.filter(t => {
+    if (state.filter === 'open') return ['open', 'pending', 'in_progress'].includes(t.status);
+    if (state.filter === 'mine') return t.assigned_to === 'Agent Demo';
+    if (state.filter === 'unassigned') return !t.assigned_to;
+    if (state.filter === 'breached') return isSlaBreached(t, 'response') || isSlaBreached(t, 'resolution');
+    return true;
+  }).filter(t => !state.search || t.subject.toLowerCase().includes(state.search.toLowerCase()) || t.ticket_number.toLowerCase().includes(state.search.toLowerCase()));
+  
+  return `
+    <div class="header">
+      <h1 class="title">Tickets</h1>
+      <div style="display:flex;gap:12px">
+        <input class="search" placeholder="Search..." value="${state.search}" oninput="state.search=this.value;render()">
+        <button class="btn btn-primary" onclick="openTicketModal()">+ New Ticket</button>
+      </div>
+    </div>
+    <div class="filters">
+      ${[['all', 'All'], ['open', 'Open'], ['mine', 'My Tickets'], ['unassigned', 'Unassigned'], ['breached', 'SLA Breached']].map(([k, l]) => `<button class="filter-btn ${state.filter === k ? 'active' : ''}" onclick="state.filter='${k}';render()">${l}</button>`).join('')}
+    </div>
+    <div class="card">
+      <table><thead><tr><th>#</th><th>Subject</th><th>Customer</th><th>Status</th><th>Priority</th><th>Assigned</th><th>SLA</th><th>Created</th></tr></thead>
+      <tbody>${filtered.map(t => `
+        <tr style="cursor:pointer" onclick="selectTicket(${t.id})">
+          <td><strong>${t.ticket_number}</strong></td>
+          <td>${t.subject.slice(0, 40)}</td>
+          <td>${getCustomer(t.customer_id)?.name || '-'}</td>
+          <td><span class="status-badge" style="background:${STATUS_COLORS[t.status]}22;color:${STATUS_COLORS[t.status]}">${t.status.replace('_', ' ')}</span></td>
+          <td><span class="priority-badge" style="background:${PRIORITY_COLORS[t.priority]}22;color:${PRIORITY_COLORS[t.priority]}">${t.priority}</span></td>
+          <td>${t.assigned_to || '<span style="color:#f59e0b">Unassigned</span>'}</td>
+          <td>${isSlaBreached(t, 'response') || isSlaBreached(t, 'resolution') ? '<span style="color:#ef4444">⚠️</span>' : '✓'}</td>
+          <td>${timeAgo(t.created_at)}</td>
+        </tr>
+      `).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function renderTicketDetail() {
+  const t = state.selectedTicket;
+  const c = getCustomer(t.customer_id);
+  const replies = state.replies[t.id] || [];
+  
+  return `
+    <div class="header">
+      <div style="display:flex;align-items:center;gap:16px">
+        <button class="btn btn-sm btn-secondary" onclick="state.selectedTicket=null;render()">← Back</button>
+        <h1 class="title">${t.ticket_number}</h1>
+        <span class="status-badge" style="background:${STATUS_COLORS[t.status]}22;color:${STATUS_COLORS[t.status]}">${t.status.replace('_', ' ')}</span>
+        <span class="priority-badge" style="background:${PRIORITY_COLORS[t.priority]}22;color:${PRIORITY_COLORS[t.priority]}">${t.priority}</span>
+      </div>
+      <div style="display:flex;gap:8px">
+        <select class="select" onchange="updateStatus(${t.id}, this.value)">${STATUSES.map(s => `<option value="${s}" ${t.status === s ? 'selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}</select>
+        <select class="select" onchange="assignTicket(${t.id}, this.value)"><option value="">Unassigned</option><option value="Agent Demo" ${t.assigned_to === 'Agent Demo' ? 'selected' : ''}>Agent Demo</option></select>
+      </div>
+    </div>
+    <div class="grid-detail">
+      <div>
+        <div class="card">
+          <h3 style="margin-bottom:12px">${t.subject}</h3>
+          <p style="color:#64748b;white-space:pre-wrap">${t.description || 'No description'}</p>
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h3 style="margin-bottom:16px">Conversation</h3>
+          ${replies.map(r => `
+            <div class="reply-card ${r.is_internal ? 'internal-reply' : ''}">
+              <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+                <strong>${r.agent || 'Customer'}</strong>
+                <span style="font-size:12px;color:#64748b">${fmt(r.created_at)} ${r.is_internal ? '<span style="background:#fef3c7;padding:2px 6px;border-radius:4px;font-size:10px">Internal</span>' : ''}</span>
+              </div>
+              <p style="white-space:pre-wrap">${r.content}</p>
+            </div>
+          `).join('')}
+          <div style="margin-top:16px">
+            <textarea id="replyContent" placeholder="Type your reply..." style="width:100%;padding:10px;border-radius:8px;border:1px solid #e2e8f0;min-height:100px;margin-bottom:12px;font-family:inherit"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <label style="font-size:13px"><input type="checkbox" id="isInternal"> Internal note</label>
+              <button class="btn btn-primary" onclick="addReply(${t.id})">Send Reply</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h4 style="margin-bottom:12px">Details</h4>
+          <p><strong>Customer:</strong> ${c?.name || '-'}</p>
+          <p><strong>Email:</strong> ${c?.email || '-'}</p>
+          <p><strong>Company:</strong> ${c?.company || '-'}</p>
+          <p><strong>Category:</strong> ${t.category || '-'}</p>
+          <p><strong>Created:</strong> ${fmt(t.created_at)}</p>
+          ${t.first_response_at ? `<p><strong>First Response:</strong> ${fmt(t.first_response_at)}</p>` : ''}
+          ${t.resolved_at ? `<p><strong>Resolved:</strong> ${fmt(t.resolved_at)}</p>` : ''}
+        </div>
+        <div class="card" style="margin-top:16px">
+          <h4 style="margin-bottom:12px">SLA</h4>
+          <p><strong>Response Due:</strong> <span style="color:${isSlaBreached(t, 'response') ? '#ef4444' : '#22c55e'}">${fmt(t.sla_response_due)}</span></p>
+          <p><strong>Resolution Due:</strong> <span style="color:${isSlaBreached(t, 'resolution') ? '#ef4444' : '#22c55e'}">${fmt(t.sla_resolution_due)}</span></p>
+          ${isSlaBreached(t, 'response') || isSlaBreached(t, 'resolution') ? '<p style="color:#ef4444;margin-top:8px">⚠️ SLA Breached</p>' : ''}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderCustomers() {
+  return `
+    <div class="header"><h1 class="title">Customers</h1><button class="btn btn-primary" onclick="openCustomerModal()">+ Add Customer</button></div>
+    <div class="card">
+      <table><thead><tr><th>Name</th><th>Email</th><th>Company</th><th>Tickets</th></tr></thead>
+      <tbody>${state.customers.map(c => `
+        <tr><td><strong>${c.name}</strong></td><td>${c.email}</td><td>${c.company || '-'}</td><td>${state.tickets.filter(t => t.customer_id === c.id).length}</td></tr>
+      `).join('')}</tbody></table>
+    </div>
+  `;
+}
+
+function selectTicket(id) { state.selectedTicket = state.tickets.find(t => t.id === id); render(); }
+
+function updateStatus(id, status) {
+  const t = state.tickets.find(x => x.id === id);
+  t.status = status;
+  if (status === 'resolved') t.resolved_at = Date.now();
+  state.selectedTicket = t;
+  saveData(); render(); toast('Status updated');
+}
+
+function assignTicket(id, agent) {
+  const t = state.tickets.find(x => x.id === id);
+  t.assigned_to = agent || null;
+  state.selectedTicket = t;
+  saveData(); render(); toast('Ticket assigned');
+}
+
+function addReply(ticketId) {
+  const content = document.getElementById('replyContent').value;
+  const isInternal = document.getElementById('isInternal').checked;
+  if (!content.trim()) return;
+  
+  if (!state.replies[ticketId]) state.replies[ticketId] = [];
+  state.replies[ticketId].push({ id: Date.now(), agent: 'Agent Demo', content, is_internal: isInternal, created_at: Date.now() });
+  
+  const t = state.tickets.find(x => x.id === ticketId);
+  if (!t.first_response_at && !isInternal) t.first_response_at = Date.now();
+  
+  saveData(); render(); toast('Reply added');
+}
+
+function openModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+
+function openTicketModal() {
+  openModal('New Ticket', `
+    <form onsubmit="saveTicket(event)">
+      <div class="field"><label>Customer</label><select name="customer_id" required>${state.customers.map(c => `<option value="${c.id}">${c.name} (${c.email})</option>`).join('')}</select></div>
+      <div class="field"><label>Subject</label><input name="subject" required></div>
+      <div class="field"><label>Description</label><textarea name="description"></textarea></div>
+      <div class="row">
+        <div class="field"><label>Priority</label><select name="priority">${PRIORITIES.map(p => `<option value="${p}" ${p === 'medium' ? 'selected' : ''}>${p}</option>`).join('')}</select></div>
+        <div class="field"><label>Category</label><select name="category"><option>General</option><option>Billing</option><option>Technical</option></select></div>
+      </div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Create</button></div>
+    </form>
+  `);
+}
+
+function saveTicket(e) {
+  e.preventDefault();
+  const f = e.target;
+  const now = Date.now();
+  const priority = f.priority.value;
+  const sla = SLA_HOURS[priority];
+  const id = Math.max(0, ...state.tickets.map(t => t.id)) + 1;
+  state.tickets.unshift({
+    id, ticket_number: 'TKT-' + String(id).padStart(6, '0'),
+    customer_id: parseInt(f.customer_id.value), subject: f.subject.value, description: f.description.value,
+    status: 'open', priority, category: f.category.value, assigned_to: null,
+    created_at: now, sla_response_due: now + sla.response * 3600000, sla_resolution_due: now + sla.resolution * 3600000
+  });
+  saveData(); closeModal(); render(); toast('Ticket created');
+}
+
+function openCustomerModal() {
+  openModal('Add Customer', `
+    <form onsubmit="saveCustomer(event)">
+      <div class="field"><label>Name</label><input name="name" required></div>
+      <div class="field"><label>Email</label><input name="email" type="email" required></div>
+      <div class="field"><label>Company</label><input name="company"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function saveCustomer(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.customers.push({ id: Math.max(0, ...state.customers.map(c => c.id)) + 1, name: f.name.value, email: f.email.value, company: f.company.value });
+  saveData(); closeModal(); render(); toast('Customer added');
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
