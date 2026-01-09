@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DutyList - Task Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#8b5cf6;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(139,92,246,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.view{display:none}.view.active{display:block}.board{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.column{background:var(--bg);border-radius:12px;padding:12px;min-height:400px}.column-header{font-weight:600;padding:8px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}.task-card{background:var(--card);border-radius:8px;padding:12px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer}.task-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.1)}.badge{padding:4px 8px;border-radius:12px;font-size:10px;font-weight:600}.badge-high{background:rgba(239,68,68,.15);color:var(--danger)}.badge-medium{background:rgba(245,158,11,.15);color:var(--warning)}.badge-low{background:rgba(34,197,94,.15);color:var(--success)}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:400px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.board{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.board{grid-template-columns:1fr}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">✅</div><span class="logo-text">DutyList</span></div>
+      <div class="nav-item active" onclick="showView('board')">📋 Board</div>
+      <div class="nav-item" onclick="showView('list')">📝 List</div>
+      <div class="nav-item" onclick="showView('calendar')">📅 Calendar</div>
+    </nav>
+    <main class="main">
+      <div id="view-board" class="view active">
+        <div class="header"><h1 class="title">Task Board</h1><button class="btn btn-primary" onclick="openModal()">+ Add Task</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Tasks</div><div class="stat-value" id="stat-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--primary)" id="stat-progress">0</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:var(--success)" id="stat-done">0</div></div>
+          <div class="stat-card"><div class="stat-label">High Priority</div><div class="stat-value" style="color:var(--danger)" id="stat-high">0</div></div>
+        </div>
+        <div class="board" id="board"></div>
+      </div>
+      <div id="view-list" class="view">
+        <div class="header"><h1 class="title">Task List</h1></div>
+        <div style="background:var(--card);border-radius:12px;border:1px solid var(--border)"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg)"><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted)">Task</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted)">Status</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted)">Priority</th><th style="padding:12px;text-align:left;font-size:11px;text-transform:uppercase;color:var(--muted)">Due</th></tr></thead><tbody id="task-list"></tbody></table></div>
+      </div>
+      <div id="view-calendar" class="view">
+        <div class="header"><h1 class="title">Calendar</h1></div>
+        <div style="background:var(--card);border-radius:12px;border:1px solid var(--border);padding:40px;text-align:center"><p style="font-size:48px">📅</p><p style="margin-top:16px;color:var(--muted)">Calendar view with task deadlines</p></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Add Task</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Task Name</label><input type="text" class="form-input" id="task-name" placeholder="Enter task"></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="task-priority"><option value="low">Low</option><option value="medium" selected>Medium</option><option value="high">High</option></select></div><div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input" id="task-due"></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveTask()">Add Task</button></div></div></div>
+  <script>
+    let tasks=[
+      {id:1,name:'Review Q4 report',status:'todo',priority:'high',due:'Jan 5'},
+      {id:2,name:'Update website',status:'doing',priority:'medium',due:'Jan 8'},
+      {id:3,name:'Team meeting prep',status:'doing',priority:'low',due:'Jan 6'},
+      {id:4,name:'Send invoices',status:'review',priority:'high',due:'Jan 4'},
+      {id:5,name:'File taxes',status:'done',priority:'medium',due:'Jan 3'},
+    ];
+    const SK='dutylist_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({tasks}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.tasks)tasks=d.tasks;}}catch(e){}}
+
+    let nextTaskId=6;
+    const columns=[{id:'todo',name:'To Do'},{id:'doing',name:'In Progress'},{id:'review',name:'Review'},{id:'done',name:'Done'}];
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');loadData();render();}
+    
+    function render(){
+      document.getElementById('stat-total').textContent=tasks.length;
+      document.getElementById('stat-progress').textContent=tasks.filter(t=>t.status==='doing').length;
+      document.getElementById('stat-done').textContent=tasks.filter(t=>t.status==='done').length;
+      document.getElementById('stat-high').textContent=tasks.filter(t=>t.priority==='high').length;
+      
+      document.getElementById('board').innerHTML=columns.map(col=>`<div class="column"><div class="column-header">${col.name} <span style="color:var(--muted)">${tasks.filter(t=>t.status===col.id).length}</span></div>${tasks.filter(t=>t.status===col.id).map(t=>`<div class="task-card" onclick="moveTask(${t.id})"><strong>${t.name}</strong><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><span class="badge badge-${t.priority}">${t.priority}</span><small style="color:var(--muted)">${t.due}</small></div></div>`).join('')}</div>`).join('');
+      
+      document.getElementById('task-list').innerHTML=tasks.map(t=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:12px"><strong>${t.name}</strong></td><td style="padding:12px">${t.status}</td><td style="padding:12px"><span class="badge badge-${t.priority}">${t.priority}</span></td><td style="padding:12px">${t.due}</td></tr>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveTask(){const name=document.getElementById('task-name').value;if(!name){alert('Enter task name');return;}tasks.unshift({id:nextTaskId++,name,status:'todo',priority:document.getElementById('task-priority').value,due:document.getElementById('task-due').value||'TBD'});saveData();closeModal();render();document.getElementById('task-name').value='';alert('Task added!');}
+    function moveTask(id){const t=tasks.find(x=>x.id===id);const next={todo:'doing',doing:'review',review:'done',done:'todo'};t.status=next[t.status];saveData();render();}
+    
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

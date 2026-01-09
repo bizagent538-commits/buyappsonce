@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dispatched Pro - Field Service Dispatch</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#0891b2;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#06b6d4);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.pro-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(8,145,178,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-pending{background:rgba(100,116,139,.15);color:var(--muted)}.badge-dispatched{background:rgba(8,145,178,.15);color:var(--primary)}.badge-enroute{background:rgba(245,158,11,.15);color:var(--warning)}.badge-onsite{background:rgba(139,92,246,.15);color:#8b5cf6}.badge-complete{background:rgba(34,197,94,.15);color:var(--success)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.tech-card{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px}.avatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-weight:600;font-size:14px}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🚚</div><span class="logo-text">Dispatched <span class="pro-badge">PRO</span></span></div>
+      <div class="nav-item active" onclick="showView('dispatch')">📍 Dispatch Board</div>
+      <div class="nav-item" onclick="showView('jobs')">📋 All Jobs</div>
+      <div class="nav-item" onclick="showView('techs')">👷 Technicians</div>
+      <div class="nav-item" onclick="showView('customers')">👥 Customers</div>
+      <div class="nav-item" onclick="showView('map')">🗺️ Live Map</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-dispatch" class="view active">
+        <div class="header"><h1 class="title">Dispatch Board</h1><button class="btn btn-primary" onclick="openModal()">+ New Job</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Pending</div><div class="stat-value" style="color:var(--muted)" id="stat-pending">0</div></div>
+          <div class="stat-card"><div class="stat-label">En Route</div><div class="stat-value" style="color:var(--warning)" id="stat-enroute">0</div></div>
+          <div class="stat-card"><div class="stat-label">On Site</div><div class="stat-value" style="color:var(--primary)" id="stat-onsite">0</div></div>
+          <div class="stat-card"><div class="stat-label">Completed Today</div><div class="stat-value" style="color:var(--success)" id="stat-done">0</div></div>
+        </div>
+        <div class="card"><div class="card-header">Active Jobs</div><table class="table"><thead><tr><th>Job</th><th>Customer</th><th>Address</th><th>Tech</th><th>Status</th><th>Actions</th></tr></thead><tbody id="active-jobs"></tbody></table></div>
+      </div>
+      <div id="view-jobs" class="view">
+        <div class="header"><h1 class="title">All Jobs</h1><button class="btn btn-primary" onclick="openModal()">+ New Job</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Job #</th><th>Customer</th><th>Type</th><th>Scheduled</th><th>Tech</th><th>Status</th></tr></thead><tbody id="all-jobs"></tbody></table></div>
+      </div>
+      <div id="view-techs" class="view">
+        <div class="header"><h1 class="title">Technicians</h1></div>
+        <div id="tech-list"></div>
+      </div>
+      <div id="view-customers" class="view">
+        <div class="header"><h1 class="title">Customers</h1><button class="btn btn-primary" onclick="addCustomer()">+ Add Customer</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th>Jobs</th></tr></thead><tbody id="cust-list"></tbody></table></div>
+      </div>
+      <div id="view-map" class="view">
+        <div class="header"><h1 class="title">Live Map</h1></div>
+        <div class="card" style="padding:40px;text-align:center"><p style="font-size:48px">🗺️</p><p style="margin-top:16px;color:var(--muted)">Live GPS tracking map would display here</p><p style="margin-top:8px;color:var(--primary)">3 technicians currently in field</p></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">Jobs Today</div><div class="stat-value">12</div></div><div class="stat-card"><div class="stat-label">Avg Response</div><div class="stat-value">28 min</div></div><div class="stat-card"><div class="stat-label">Completion Rate</div><div class="stat-value" style="color:var(--success)">94%</div></div><div class="stat-card"><div class="stat-label">Revenue Today</div><div class="stat-value" style="color:var(--primary)">$4,280</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">New Job</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Customer</label><select class="form-select" id="job-cust"></select></div><div class="form-group"><label class="form-label">Job Type</label><select class="form-select" id="job-type"><option>Service Call</option><option>Installation</option><option>Repair</option><option>Maintenance</option></select></div><div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="job-addr" placeholder="Service address"></div><div class="form-row"><div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="job-date"></div><div class="form-group"><label class="form-label">Time</label><input type="time" class="form-input" id="job-time" value="09:00"></div></div><div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="job-tech"></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveJob()">Create Job</button></div></div></div>
+  <script>
+    let techs=[{id:1,name:'Mike Johnson',color:'#0891b2',status:'onsite',jobs:2},{id:2,name:'Sarah Chen',color:'#8b5cf6',status:'enroute',jobs:1},{id:3,name:'Tom Wilson',color:'#22c55e',status:'available',jobs:0}];
+    let customers=[{id:1,name:'ABC Company',phone:'555-1234',address:'123 Main St'},{id:2,name:'XYZ Corp',phone:'555-2345',address:'456 Oak Ave'},{id:3,name:'123 Industries',phone:'555-3456',address:'789 Pine Rd'}];
+    const SK='dispatched_pro_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({techs:techs,customers:customers,jobs:jobs}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.techs)techs=d.techs;if(d.customers)customers=d.customers;if(d.jobs)jobs=d.jobs;}}catch(e){}}
+
+    let jobs=[
+      {id:5001,custId:1,type:'Service Call',address:'123 Main St',date:'2026-01-03',time:'09:00',techId:1,status:'onsite'},
+      {id:5002,custId:2,type:'Repair',address:'456 Oak Ave',date:'2026-01-03',time:'11:00',techId:2,status:'enroute'},
+      {id:5003,custId:3,type:'Installation',address:'789 Pine Rd',date:'2026-01-03',time:'14:00',techId:1,status:'dispatched'},
+      {id:5004,custId:1,type:'Maintenance',address:'123 Main St',date:'2026-01-03',time:'16:00',techId:null,status:'pending'},
+    ];
+    let nextJobId=5005;
+    
+    function getCust(id){return customers.find(c=>c.id===id)}
+    function getTech(id){return techs.find(t=>t.id===id)}
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-pending').textContent=jobs.filter(j=>j.status==='pending').length;
+      document.getElementById('stat-enroute').textContent=jobs.filter(j=>j.status==='enroute').length;
+      document.getElementById('stat-onsite').textContent=jobs.filter(j=>j.status==='onsite').length;
+      document.getElementById('stat-done').textContent=jobs.filter(j=>j.status==='complete').length;
+      
+      document.getElementById('active-jobs').innerHTML=jobs.filter(j=>j.status!=='complete').map(j=>`<tr><td><strong>#${j.id}</strong><br><small>${j.type}</small></td><td>${getCust(j.custId)?.name}</td><td>${j.address}</td><td>${getTech(j.techId)?.name||'<em>Unassigned</em>'}</td><td><span class="badge badge-${j.status}">${j.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="advanceJob(${j.id})">${j.status==='pending'?'Dispatch':j.status==='dispatched'?'En Route':j.status==='enroute'?'Arrive':'Complete'}</button></td></tr>`).join('');
+      document.getElementById('all-jobs').innerHTML=jobs.map(j=>`<tr><td>#${j.id}</td><td>${getCust(j.custId)?.name}</td><td>${j.type}</td><td>${j.date} ${j.time}</td><td>${getTech(j.techId)?.name||'-'}</td><td><span class="badge badge-${j.status}">${j.status}</span></td></tr>`).join('');
+      document.getElementById('tech-list').innerHTML=techs.map(t=>`<div class="tech-card"><div class="avatar" style="background:${t.color}">${t.name.split(' ').map(n=>n[0]).join('')}</div><div style="flex:1"><strong>${t.name}</strong><br><small style="color:var(--muted)">${t.jobs} active jobs</small></div><span class="badge badge-${t.status==='available'?'complete':t.status}">${t.status}</span></div>`).join('');
+      document.getElementById('cust-list').innerHTML=customers.map(c=>`<tr><td><strong>${c.name}</strong></td><td>${c.phone}</td><td>${c.address}</td><td>${jobs.filter(j=>j.custId===c.id).length}</td></tr>`).join('');
+      document.getElementById('job-cust').innerHTML=customers.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('job-tech').innerHTML='<option value="">Unassigned</option>'+techs.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');document.getElementById('job-date').value=new Date().toISOString().split('T')[0];}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveJob(){jobs.unshift({id:nextJobId++,custId:parseInt(document.getElementById('job-cust').value),type:document.getElementById('job-type').value,address:document.getElementById('job-addr').value||getCust(parseInt(document.getElementById('job-cust').value))?.address,date:document.getElementById('job-date').value,time:document.getElementById('job-time').value,techId:document.getElementById('job-tech').value?parseInt(document.getElementById('job-tech').value):null,status:'pending'});saveData();closeModal();render();alert('Job created!');}
+    function advanceJob(id){const j=jobs.find(x=>x.id===id);if(j){const next={pending:'dispatched',dispatched:'enroute',enroute:'onsite',onsite:'complete'};j.status=next[j.status];saveData();render();}}
+    function addCustomer(){const name=prompt('Customer name:');if(!name)return;const phone=prompt('Phone:');const address=prompt('Address:');customers.push({id:customers.length+1,name,phone:phone||'',address:address||''});saveData();render();}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

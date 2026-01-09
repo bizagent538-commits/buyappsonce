@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExpenseTrack Pro - Expense Reimbursement Management | BuyAppsOnce</title>
+  <meta name="description" content="Complete expense tracking and reimbursement system for nonprofits, clubs, and small businesses. Approval workflows, mileage tracking, department budgets. One-time purchase.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
+    header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-weight: 800; font-size: 1.25rem; color: #0f172a; text-decoration: none; }
+    .logo span { color: #10b981; }
+    header nav a { margin-left: 1.5rem; color: #64748b; text-decoration: none; font-weight: 500; }
+    header nav a:hover { color: #10b981; }
+    .hero { padding: 4rem 0; background: linear-gradient(135deg, #065f46 0%, #10b981 100%); color: white; }
+    .hero-content { max-width: 800px; margin: 0 auto; text-align: center; }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 span { color: #fcd34d; }
+    .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 2rem; }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 1rem 2rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; font-size: 1rem; }
+    .btn-primary { background: #fcd34d; color: #0f172a; }
+    .btn-primary:hover { background: #fbbf24; transform: translateY(-2px); }
+    .btn-secondary { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; }
+    .btn-secondary:hover { background: white; color: #065f46; }
+    .comparison { background: #0f172a; color: white; padding: 4rem 0; }
+    .comparison h2 { color: white; text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .comparison .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; }
+    .comparison-table { max-width: 700px; margin: 0 auto; }
+    .comparison-row { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #334155; }
+    .comparison-row:last-child { border-bottom: none; }
+    .comparison-row span:first-child { color: #94a3b8; }
+    .comparison-row span:last-child { font-weight: 600; }
+    .comparison-row.highlight { background: #10b981; border-radius: 0.5rem; margin: 1rem 0; }
+    .comparison-row.highlight span { color: white; }
+    .savings { text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(16, 185, 129, 0.2); border-radius: 0.5rem; }
+    .savings .amount { font-size: 2rem; font-weight: 800; color: #10b981; }
+    .section { padding: 4rem 0; }
+    .section h2 { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+    .section .subtitle { text-align: center; color: #64748b; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .feature-card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .feature-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .feature-card p { color: #64748b; }
+    .use-cases { padding: 4rem 0; background: white; }
+    .use-case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center; }
+    .use-case { padding: 1.5rem; }
+    .use-case .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .use-case h4 { font-weight: 600; }
+    .pricing { padding: 4rem 0; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+    .pricing-card { background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: relative; }
+    .pricing-card.featured { border: 3px solid #10b981; transform: scale(1.05); }
+    .pricing-card.featured::before { content: 'MOST POPULAR'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 0.25rem 1rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 700; }
+    .pricing-card h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .pricing-card .price { font-size: 3rem; font-weight: 800; color: #10b981; margin: 1rem 0; }
+    .pricing-card .price span { font-size: 1rem; color: #64748b; font-weight: 400; }
+    .pricing-card .description { color: #64748b; margin-bottom: 1.5rem; }
+    .pricing-card ul { text-align: left; list-style: none; margin-bottom: 2rem; }
+    .pricing-card li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; }
+    .pricing-card li::before { content: '✓'; position: absolute; left: 0; color: #10b981; font-weight: bold; }
+    .pricing-card .btn { width: 100%; }
+    .faq { padding: 4rem 0; background: #f8fafc; }
+    .faq-list { max-width: 800px; margin: 0 auto; }
+    .faq-item { background: white; margin-bottom: 1rem; border-radius: 0.5rem; overflow: hidden; }
+    .faq-question { padding: 1.5rem; font-weight: 600; }
+    .faq-answer { padding: 0 1.5rem 1.5rem; color: #64748b; }
+    .cta { background: linear-gradient(135deg, #065f46 0%, #10b981 100%); color: white; padding: 4rem 0; text-align: center; }
+    .cta h2 { color: white; margin-bottom: 1rem; font-size: 2rem; }
+    .cta p { opacity: 0.9; margin-bottom: 2rem; }
+    footer { background: #0f172a; color: #94a3b8; padding: 2rem 0; text-align: center; }
+    footer a { color: #10b981; text-decoration: none; }
+    @media (max-width: 768px) { .hero h1 { font-size: 2rem; } .pricing-card.featured { transform: none; } header nav { display: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">BuyApps<span>Once</span></a>
+      <nav>
+        <a href="index.html">All Apps</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Expense Reimbursements <span>Without the Hassle</span></h1>
+        <p>Complete expense tracking, approval workflows, mileage reimbursement, and department budgets for nonprofits, clubs, and small businesses.</p>
+        <div class="hero-buttons">
+          <a href="expensetrack-pro.html" class="btn btn-primary">Try Live Demo</a>
+          <a href="#pricing" class="btn btn-secondary">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="comparison">
+    <div class="container">
+      <h2>Stop Paying Monthly Fees</h2>
+      <p class="subtitle">Compare ExpenseTrack Pro to subscription expense software</p>
+      <div class="comparison-table">
+        <div class="comparison-row"><span>Expensify (Team)</span><span>$10/user/mo × 5 = $600/year</span></div>
+        <div class="comparison-row"><span>Zoho Expense</span><span>$5/user/mo × 5 = $300/year</span></div>
+        <div class="comparison-row"><span>SAP Concur</span><span>$8/user/mo × 5 = $480/year</span></div>
+        <div class="comparison-row highlight"><span>ExpenseTrack Pro</span><span>$99 one-time — forever</span></div>
+      </div>
+      <div class="savings">
+        <div class="amount">Save $1,000+ over 3 years</div>
+        <p>No per-user fees. Unlimited users. Your data on your server.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="container">
+      <h2>Everything You Need to Manage Expenses</h2>
+      <p class="subtitle">From receipt submission to reimbursement payment — all in one system.</p>
+      <div class="features-grid">
+        <div class="feature-card"><div class="icon">📝</div><h3>Expense Reports</h3><p>Create reports with multiple line items. Support for expenses, mileage, and per diem.</p></div>
+        <div class="feature-card"><div class="icon">✅</div><h3>Approval Workflow</h3><p>Draft → Submit → Approve → Pay. Three roles: Submitter, Approver, Admin.</p></div>
+        <div class="feature-card"><div class="icon">🚗</div><h3>Mileage Tracking</h3><p>2026 IRS rate ($0.725/mi) with automatic calculation. Historical rate tracking.</p></div>
+        <div class="feature-card"><div class="icon">🍽️</div><h3>Per Diem Support</h3><p>Configurable daily rates. Multi-day entries with automatic calculation.</p></div>
+        <div class="feature-card"><div class="icon">📊</div><h3>Department Budgets</h3><p>Track spending by department. Set budgets with visual progress bars.</p></div>
+        <div class="feature-card"><div class="icon">💰</div><h3>Payment Tracking</h3><p>Mark expenses paid. Record payment method and check numbers.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="use-cases">
+    <div class="container">
+      <h2>Perfect For</h2>
+      <p class="subtitle">Organizations that need expense tracking without enterprise complexity</p>
+      <div class="use-case-grid">
+        <div class="use-case"><div class="icon">🏛️</div><h4>Nonprofits</h4></div>
+        <div class="use-case"><div class="icon">🎯</div><h4>Clubs</h4></div>
+        <div class="use-case"><div class="icon">🏠</div><h4>HOAs</h4></div>
+        <div class="use-case"><div class="icon">⛪</div><h4>Churches</h4></div>
+        <div class="use-case"><div class="icon">🏢</div><h4>Small Biz</h4></div>
+        <div class="use-case"><div class="icon">⚽</div><h4>Sports Leagues</h4></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2>Simple Pricing</h2>
+      <p class="subtitle">One-time purchase. No monthly fees. No per-user charges.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card featured">
+          <h3>Pro (Self-Hosted)</h3>
+          <div class="price">$99 <span>one-time</span></div>
+          <p class="description">Full source code. Host on your own Supabase.</p>
+          <ul>
+            <li>Complete React + Supabase source</li>
+            <li>Unlimited users</li>
+            <li>All features included</li>
+            <li>Database migrations included</li>
+            <li>Setup wizard for easy install</li>
+            <li>Deploy to Vercel/Netlify free</li>
+          </ul>
+          <a href="https://payhip.com/b/9bX4c" class="btn btn-primary">Buy Now — $99</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Pro (We Host It)</h3>
+          <div class="price">$249 <span>/year</span></div>
+          <p class="description">We handle hosting and updates.</p>
+          <ul>
+            <li>Everything in Self-Hosted</li>
+            <li>We set up and maintain</li>
+            <li>Automatic backups</li>
+            <li>Priority support</li>
+            <li>Custom domain available</li>
+            <li>No technical skills needed</li>
+          </ul>
+          <a href="mailto:support@buyappsonce.com?subject=ExpenseTrack Pro Hosted" class="btn btn-secondary" style="background:#f1f5f9;color:#0f172a;">Contact Us</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <div class="faq-item"><div class="faq-question">What do I need to run ExpenseTrack Pro?</div><div class="faq-answer">A free Supabase account and static hosting (Vercel/Netlify free tiers work great). No backend server needed.</div></div>
+        <div class="faq-item"><div class="faq-question">How many users can I have?</div><div class="faq-answer">Unlimited. No per-user fees. Add as many submitters, approvers, and admins as you need.</div></div>
+        <div class="faq-item"><div class="faq-question">Is the mileage rate current?</div><div class="faq-answer">Yes, defaults to 2026 IRS rate ($0.725/mile). Adjustable in Settings anytime.</div></div>
+        <div class="faq-item"><div class="faq-question">How long does setup take?</div><div class="faq-answer">About 15 minutes. Create Supabase project, run SQL schema, deploy, done.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to Simplify Expense Management?</h2>
+      <p>Stop chasing receipts and spreadsheets. Get a real system today.</p>
+      <a href="expensetrack-pro.html" class="btn btn-primary">Try the Demo</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>BuyAppsOnce</strong> — Professional software without subscriptions.</p>
+      <p style="margin-top: 0.5rem;">Questions? <a href="mailto:support@buyappsonce.com">support@buyappsonce.com</a></p>
+      <p style="margin-top: 1rem; font-size: 0.875rem;">© 2026 BuyAppsOnce. All rights reserved.</p>
+    </div>
+  </footer>
+</body>
+</html>

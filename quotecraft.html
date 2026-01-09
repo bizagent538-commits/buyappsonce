@@ -1,0 +1,2352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22QuoteCraft%22%2C%22short_name%22%3A%22QuoteCraft%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%233b82f6%22%7D" />
+  <meta charset="UTF-8" />
+  
+  <!-- PWA Support -->
+  <meta name="theme-color" content="#0284c7" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="QuoteCraft" />
+  
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QuoteCraft - Estimate Builder</title>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <script src="https://unpkg.com/prop-types@15.8.1/prop-types.min.js"></script>
+  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      --bg-primary: #f8fafc;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #f1f5f9;
+      --border: #e2e8f0;
+      --text-primary: #0f172a;
+      --text-secondary: #475569;
+      --text-muted: #64748b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --success: #059669;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --purple: #7c3aed;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0c1929;
+      --bg-secondary: #132337;
+      --bg-tertiary: #1a3148;
+      --bg-card: #132337;
+      --border: #234567;
+      --border-light: #2d5a8a;
+      --text-primary: #e0f2fe;
+      --text-secondary: #bae6fd;
+      --text-muted: #7dd3fc;
+      --accent: #38bdf8;
+      --accent-hover: #7dd3fc;
+      --success: #34d399;
+      --success-bg: #064e3b;
+      --warning: #fbbf24;
+      --warning-bg: #78350f;
+      --danger: #f87171;
+      --danger-bg: #7f1d1d;
+      --info: #a78bfa;
+      --info-bg: #4c1d95;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    #root {
+      min-height: 100vh;
+    }
+
+    input, textarea, select {
+      font-family: inherit;
+      font-size: 0.9375rem;
+    }
+
+    input::placeholder, textarea::placeholder {
+      color: var(--text-muted);
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23636366' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.75rem center;
+      padding-right: 2.5rem !important;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-secondary);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    @media print {
+      body { background: white; }
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from {
+        opacity: 0;
+        transform: scale(0.95) translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 1024px) {
+      header nav { flex-wrap: wrap; gap: 0.25rem; }
+      header nav button { font-size: 0.75rem; padding: 0.375rem 0.5rem; }
+    }
+    @media (max-width: 768px) {
+      header { flex-direction: column; gap: 0.75rem; padding: 0.75rem 1rem; }
+      header > div:first-child { flex-direction: column; gap: 0.75rem; width: 100%; }
+      header nav { width: 100%; justify-content: center; flex-wrap: wrap; }
+      main { padding: 1rem; }
+    }
+    @media (max-width: 480px) {
+      header nav button span:not(:first-child) { display: none; }
+      h1 { font-size: 1rem !important; }
+    }
+
+    /* Accessibility */
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px 16px; z-index: 10000; border-radius: 0 0 8px 0; transition: top 0.2s; }
+    .skip-link:focus { top: 0; }
+    *:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    *:focus:not(:focus-visible) { outline: none; }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="root"></div>
+
+    <script>
+    // Pre-load Recharts fallback
+    if (typeof window.Recharts === "undefined") {
+      window.Recharts = {
+        ResponsiveContainer: function() { return null; },
+        BarChart: function() { return null; }, LineChart: function() { return null; },
+        PieChart: function() { return null; }, AreaChart: function() { return null; },
+        CartesianGrid: function() { return null; }, XAxis: function() { return null; },
+        YAxis: function() { return null; }, Tooltip: function() { return null; },
+        Bar: function() { return null; }, Line: function() { return null; },
+        Pie: function() { return null; }, Area: function() { return null; },
+        Cell: function() { return null; }, Legend: function() { return null; }
+      };
+    }
+  </script>
+
+  <script type="text/babel">
+    // Recharts fallback if library fails to load
+    if (typeof Recharts === "undefined") {
+      window.Recharts = {
+        ResponsiveContainer: ({children}) => <div style={{height: 200, display: "flex", alignItems: "center", justifyContent: "center", color: "#999"}}>Chart loading...</div>,
+        BarChart: () => null, LineChart: () => null, PieChart: () => null, AreaChart: () => null,
+        CartesianGrid: () => null, XAxis: () => null, YAxis: () => null, Tooltip: () => null,
+        Bar: () => null, Line: () => null, Pie: () => null, Area: () => null, Cell: () => null, Legend: () => null
+      };
+    }
+    const { useState, useEffect, useRef } = React;
+
+    // Utility functions
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+    const formatDate = (date) => new Date(date).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    // Storage functions
+    const saveToStorage = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+    const loadFromStorage = (key, defaultValue) => {
+      const stored = localStorage.getItem(key);
+      return stored ? JSON.parse(stored) : defaultValue;
+    };
+
+    // Status configurations
+    const QUOTE_STATUSES = {
+      draft: { label: 'Draft', color: '#636366', bg: '#2a2a2e' },
+      sent: { label: 'Sent', color: '#3b82f6', bg: '#1e3a5f' },
+      accepted: { label: 'Accepted', color: '#22c55e', bg: '#14532d' },
+      declined: { label: 'Declined', color: '#ef4444', bg: '#7f1d1d' },
+      invoiced: { label: 'Invoiced', color: '#8b5cf6', bg: '#4c1d95' },
+    };
+
+    const INVOICE_STATUSES = {
+      draft: { label: 'Draft', color: '#636366', bg: '#2a2a2e' },
+      sent: { label: 'Sent', color: '#3b82f6', bg: '#1e3a5f' },
+      paid: { label: 'Paid', color: '#22c55e', bg: '#14532d' },
+      partial: { label: 'Partial', color: '#f59e0b', bg: '#78350f' },
+      overdue: { label: 'Overdue', color: '#ef4444', bg: '#7f1d1d' },
+    };
+
+    // Create invoice from quote
+    const createInvoiceFromQuote = (quote) => ({
+      id: generateId(),
+      number: `INV-${Date.now().toString().slice(-6)}`,
+      quoteId: quote.id,
+      quoteNumber: quote.number,
+      date: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'draft',
+      client: { ...quote.client },
+      items: quote.items.map(item => ({ ...item, id: generateId() })),
+      taxRate: quote.taxRate,
+      notes: quote.notes,
+      terms: quote.terms,
+      payments: [],
+      amountPaid: 0
+    });
+
+    // Default business info
+    const defaultBusinessInfo = {
+      name: '',
+      address: '',
+      phone: '',
+      email: '',
+      website: '',
+      logo: ''
+    };
+
+    // Default quote
+    const createNewQuote = () => ({
+      id: generateId(),
+      number: `QT-${Date.now().toString().slice(-6)}`,
+      date: new Date().toISOString().split('T')[0],
+      validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      status: 'draft',
+      client: { name: '', company: '', address: '', email: '', phone: '' },
+      items: [{ id: generateId(), description: '', quantity: 1, rate: 0 }],
+      taxRate: 0,
+      notes: '',
+      terms: 'Payment due within 30 days of acceptance.'
+    });
+
+    // Icon components
+    const Icons = {
+      Plus: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+      Trash: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+      Download: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+      Save: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>,
+      File: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>,
+      Settings: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+      List: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>,
+      Copy: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+      Check: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+      Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+      Package: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="16.5" y1="9.4" x2="7.5" y2="4.21"/><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>,
+      Mail: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+      X: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+      ChevronDown: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 12 15 18 9"/></svg>,
+      Edit: () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+      DollarSign: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+      Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      CreditCard: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>,
+      FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
+    };
+
+    // Button component
+    const Button = ({ children, variant = 'primary', size = 'md', onClick, disabled, style, title, ariaLabel }) => {
+      const baseStyle = {
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        fontFamily: 'inherit',
+        fontWeight: 500,
+        border: 'none',
+        borderRadius: '8px',
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'all 0.15s ease',
+        opacity: disabled ? 0.5 : 1,
+      };
+
+      const variants = {
+        primary: { background: 'var(--accent)', color: 'white' },
+        secondary: { background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)' },
+        danger: { background: 'var(--danger)', color: 'white' },
+        ghost: { background: 'transparent', color: 'var(--text-secondary)' },
+        success: { background: 'var(--success)', color: 'white' },
+      };
+
+      const sizes = {
+        sm: { padding: '0.5rem 0.75rem', fontSize: '0.8125rem' },
+        md: { padding: '0.625rem 1rem', fontSize: '0.875rem' },
+        lg: { padding: '0.75rem 1.25rem', fontSize: '0.9375rem' },
+      };
+
+      return (
+        <button 
+          style={{ ...baseStyle, ...variants[variant], ...sizes[size], ...style }}
+          onClick={onClick}
+          disabled={disabled}
+          title={title}
+        >
+          {children}
+        </button>
+      );
+    };
+
+    // Input component
+    const Input = ({ label, value, onChange, type = 'text', placeholder, style, inputStyle }) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', ...style }}>
+        {label && <label style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</label>}
+        <input
+          type={type}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          style={{
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            padding: '0.625rem 0.75rem',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            transition: 'border-color 0.15s ease',
+            ...inputStyle
+          }}
+          onFocus={(e) => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+        />
+      </div>
+    );
+
+    // Textarea component
+    const Textarea = ({ label, value, onChange, placeholder, rows = 3 }) => (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
+        {label && <label style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</label>}
+        <textarea
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder={placeholder}
+          rows={rows}
+          style={{
+            background: 'var(--bg-tertiary)',
+            border: '1px solid var(--border)',
+            borderRadius: '6px',
+            padding: '0.625rem 0.75rem',
+            color: 'var(--text-primary)',
+            outline: 'none',
+            resize: 'vertical',
+            minHeight: '80px',
+          }}
+        />
+      </div>
+    );
+
+    // Status Badge
+    const StatusBadge = ({ status, onClick }) => {
+      const config = QUOTE_STATUSES[status] || QUOTE_STATUSES.draft;
+      return (
+        <span
+          onClick={onClick}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
+            padding: '0.25rem 0.625rem',
+            borderRadius: '9999px',
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            color: config.color,
+            background: config.bg,
+            cursor: onClick ? 'pointer' : 'default',
+            transition: 'transform 0.1s ease',
+          }}
+        >
+          <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: config.color }} />
+          {config.label}
+        </span>
+      );
+    };
+
+    // Modal component
+    const Modal = ({ isOpen, onClose, title, children }) => {
+      if (!isOpen) return null;
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <h3 id="modal-title" style={{ fontSize: '1.125rem', fontWeight: 600 }}>{title}</h3>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem' }}>
+                <Icons.X />
+              </button>
+            </div>
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    // Line Item Row
+    const LineItemRow = ({ item, onUpdate, onDelete, isOnly, templates, onSaveAsTemplate }) => {
+      const [showTemplateMenu, setShowTemplateMenu] = useState(false);
+      
+      const amount = item.quantity * item.rate;
+      
+      return (
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 100px 120px 120px 80px',
+          gap: '0.75rem',
+          alignItems: 'center',
+          padding: '0.75rem',
+          background: 'var(--bg-tertiary)',
+          borderRadius: '8px',
+          marginBottom: '0.5rem',
+          position: 'relative',
+        }}>
+          <div style={{ position: 'relative' }}>
+            <input
+              type="text"
+              value={item.description}
+              onChange={(e) => onUpdate({ ...item, description: e.target.value })}
+              placeholder="Description"
+              style={{
+                width: '100%',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border)',
+                borderRadius: '6px',
+                padding: '0.5rem 0.75rem',
+                color: 'var(--text-primary)',
+                outline: 'none',
+              }}
+            />
+          </div>
+          <input
+            type="number"
+            value={item.quantity}
+            onChange={(e) => onUpdate({ ...item, quantity: parseFloat(e.target.value) || 0 })}
+            min="0"
+            step="0.01"
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              padding: '0.5rem 0.75rem',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              textAlign: 'right',
+            }}
+          />
+          <input
+            type="number"
+            value={item.rate}
+            onChange={(e) => onUpdate({ ...item, rate: parseFloat(e.target.value) || 0 })}
+            min="0"
+            step="0.01"
+            placeholder="0.00"
+            style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              padding: '0.5rem 0.75rem',
+              color: 'var(--text-primary)',
+              outline: 'none',
+              textAlign: 'right',
+            }}
+          />
+          <div style={{ 
+            fontFamily: "'JetBrains Mono', monospace", 
+            fontWeight: 500,
+            textAlign: 'right',
+            color: 'var(--text-primary)',
+          }}>
+            {formatCurrency(amount)}
+          </div>
+          <div style={{ display: 'flex', gap: '0.25rem' }}>
+            <button
+              onClick={() => onSaveAsTemplate(item)}
+              title="Save as template"
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Icons.Save />
+            </button>
+            <button
+              onClick={onDelete}
+              disabled={isOnly}
+              style={{
+                background: 'transparent',
+                border: 'none',
+                color: isOnly ? 'var(--text-muted)' : 'var(--danger)',
+                cursor: isOnly ? 'not-allowed' : 'pointer',
+                padding: '0.5rem',
+                borderRadius: '4px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <Icons.Trash />
+            </button>
+          </div>
+        </div>
+      );
+    };
+
+    // Quote Preview (for PDF)
+    const QuotePreview = React.forwardRef(({ quote, businessInfo }, ref) => {
+      const subtotal = quote.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+      const tax = subtotal * (quote.taxRate / 100);
+      const total = subtotal + tax;
+
+      return (
+        <div ref={ref} style={{
+          background: 'white',
+          color: '#1a1a1a',
+          padding: '3rem',
+          fontFamily: "'DM Sans', sans-serif",
+          maxWidth: '800px',
+          margin: '0 auto',
+        }}>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '2.5rem', borderBottom: '2px solid #e5e5e5', paddingBottom: '1.5rem' }}>
+            <div>
+              <h1 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1a1a1a', margin: 0 }}>
+                {businessInfo.name || 'Your Company'}
+              </h1>
+              {businessInfo.address && <p style={{ color: '#666', margin: '0.25rem 0 0', fontSize: '0.875rem' }}>{businessInfo.address}</p>}
+              {businessInfo.phone && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{businessInfo.phone}</p>}
+              {businessInfo.email && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{businessInfo.email}</p>}
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <div style={{ 
+                fontSize: '2rem', 
+                fontWeight: 700, 
+                color: '#3b82f6',
+                letterSpacing: '-0.02em',
+              }}>
+                QUOTE
+              </div>
+              <p style={{ color: '#666', margin: '0.5rem 0 0', fontSize: '0.875rem' }}>#{quote.number}</p>
+              <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>Date: {formatDate(quote.date)}</p>
+              <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>Valid Until: {formatDate(quote.validUntil)}</p>
+            </div>
+          </div>
+
+          {/* Client Info */}
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Bill To</h3>
+            <p style={{ fontWeight: 600, fontSize: '1rem', margin: 0 }}>{quote.client.name || 'Client Name'}</p>
+            {quote.client.company && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{quote.client.company}</p>}
+            {quote.client.address && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{quote.client.address}</p>}
+            {quote.client.email && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{quote.client.email}</p>}
+            {quote.client.phone && <p style={{ color: '#666', margin: '0.125rem 0 0', fontSize: '0.875rem' }}>{quote.client.phone}</p>}
+          </div>
+
+          {/* Line Items */}
+          <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: '1.5rem' }}>
+            <thead>
+              <tr style={{ borderBottom: '2px solid #e5e5e5' }}>
+                <th style={{ textAlign: 'left', padding: '0.75rem 0', fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Description</th>
+                <th style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', width: '80px' }}>Qty</th>
+                <th style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', width: '100px' }}>Rate</th>
+                <th style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', width: '100px' }}>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              {quote.items.filter(item => item.description || item.rate > 0).map((item, idx) => (
+                <tr key={idx} style={{ borderBottom: '1px solid #eee' }}>
+                  <td style={{ padding: '0.75rem 0', fontSize: '0.9375rem' }}>{item.description}</td>
+                  <td style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.9375rem' }}>{item.quantity}</td>
+                  <td style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.9375rem' }}>{formatCurrency(item.rate)}</td>
+                  <td style={{ textAlign: 'right', padding: '0.75rem 0', fontSize: '0.9375rem', fontWeight: 500 }}>{formatCurrency(item.quantity * item.rate)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* Totals */}
+          <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '2rem' }}>
+            <div style={{ width: '250px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #eee' }}>
+                <span style={{ color: '#666' }}>Subtotal</span>
+                <span style={{ fontWeight: 500 }}>{formatCurrency(subtotal)}</span>
+              </div>
+              {quote.taxRate > 0 && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.5rem 0', borderBottom: '1px solid #eee' }}>
+                  <span style={{ color: '#666' }}>Tax ({quote.taxRate}%)</span>
+                  <span style={{ fontWeight: 500 }}>{formatCurrency(tax)}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', background: '#f5f5f5', margin: '0.5rem -0.75rem 0', paddingLeft: '0.75rem', paddingRight: '0.75rem', borderRadius: '6px' }}>
+                <span style={{ fontWeight: 700, fontSize: '1.125rem' }}>Total</span>
+                <span style={{ fontWeight: 700, fontSize: '1.125rem', color: '#3b82f6' }}>{formatCurrency(total)}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Notes & Terms */}
+          {quote.notes && (
+            <div style={{ marginBottom: '1.5rem' }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Notes</h3>
+              <p style={{ color: '#666', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>{quote.notes}</p>
+            </div>
+          )}
+          {quote.terms && (
+            <div style={{ padding: '1rem', background: '#f9f9f9', borderRadius: '6px', borderLeft: '3px solid #3b82f6' }}>
+              <h3 style={{ fontSize: '0.75rem', fontWeight: 600, color: '#999', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>Terms & Conditions</h3>
+              <p style={{ color: '#666', fontSize: '0.875rem', whiteSpace: 'pre-wrap' }}>{quote.terms}</p>
+            </div>
+          )}
+        </div>
+      );
+    });
+
+    // Client Picker Modal
+    const ClientPickerModal = ({ isOpen, onClose, clients, onSelect, onAddNew }) => {
+      const [search, setSearch] = useState('');
+      const filtered = clients.filter(c => 
+        c.name.toLowerCase().includes(search.toLowerCase()) ||
+        c.company.toLowerCase().includes(search.toLowerCase()) ||
+        c.email.toLowerCase().includes(search.toLowerCase())
+      );
+
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Select Client">
+          <Input 
+            placeholder="Search clients..." 
+            value={search} 
+            onChange={setSearch}
+            style={{ marginBottom: '1rem' }}
+          />
+          <div style={{ maxHeight: '300px', overflow: 'auto', marginBottom: '1rem' }}>
+            {filtered.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>No clients found</p>
+            ) : (
+              filtered.map(client => (
+                <div
+                  key={client.id}
+                  onClick={() => { onSelect(client); onClose(); }}
+                  style={{
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    marginBottom: '0.5rem',
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                    transition: 'border-color 0.15s ease',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+                >
+                  <div style={{ fontWeight: 500 }}>{client.name}</div>
+                  {client.company && <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{client.company}</div>}
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{client.email}</div>
+                </div>
+              ))
+            )}
+          </div>
+          <Button variant="secondary" onClick={onAddNew} style={{ width: '100%' }}>
+            <Icons.Plus /> Add New Client
+          </Button>
+        </Modal>
+      );
+    };
+
+    // Template Picker Modal
+    const TemplatePickerModal = ({ isOpen, onClose, templates, onSelect, onDelete }) => {
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Item Templates">
+          <div style={{ maxHeight: '400px', overflow: 'auto' }}>
+            {templates.length === 0 ? (
+              <p style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
+                No templates yet. Save a line item to create one.
+              </p>
+            ) : (
+              templates.map(template => (
+                <div
+                  key={template.id}
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    padding: '0.75rem',
+                    borderRadius: '8px',
+                    marginBottom: '0.5rem',
+                    background: 'var(--bg-tertiary)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
+                  <div 
+                    style={{ flex: 1, cursor: 'pointer' }}
+                    onClick={() => { onSelect(template); onClose(); }}
+                  >
+                    <div style={{ fontWeight: 500 }}>{template.description}</div>
+                    <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      {formatCurrency(template.rate)} × {template.quantity}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => onDelete(template.id)}
+                    style={{
+                      background: 'transparent',
+                      border: 'none',
+                      color: 'var(--danger)',
+                      cursor: 'pointer',
+                      padding: '0.5rem',
+                    }}
+                  >
+                    <Icons.Trash />
+                  </button>
+                </div>
+              ))
+            )}
+          </div>
+        </Modal>
+      );
+    };
+
+    // Status Picker Modal
+    const StatusPickerModal = ({ isOpen, onClose, currentStatus, onSelect }) => {
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Update Status">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {Object.entries(QUOTE_STATUSES).map(([key, config]) => (
+              <button
+                key={key}
+                onClick={() => { onSelect(key); onClose(); }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.75rem',
+                  padding: '0.875rem 1rem',
+                  borderRadius: '8px',
+                  border: currentStatus === key ? `2px solid ${config.color}` : '1px solid var(--border)',
+                  background: currentStatus === key ? config.bg : 'var(--bg-tertiary)',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease',
+                }}
+              >
+                <span style={{ 
+                  width: '10px', 
+                  height: '10px', 
+                  borderRadius: '50%', 
+                  background: config.color 
+                }} />
+                <span style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{config.label}</span>
+                {currentStatus === key && (
+                  <span style={{ marginLeft: 'auto', color: config.color }}><Icons.Check /></span>
+                )}
+              </button>
+            ))}
+          </div>
+        </Modal>
+      );
+    };
+
+    // Payment Modal
+    const PaymentModal = ({ isOpen, onClose, invoice, onAddPayment }) => {
+      const [amount, setAmount] = useState('');
+      const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
+      const [method, setMethod] = useState('check');
+      const [reference, setReference] = useState('');
+
+      useEffect(() => {
+        if (isOpen && invoice) {
+          const total = invoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + (invoice.taxRate || 0) / 100);
+          const balance = total - (invoice.amountPaid || 0);
+          setAmount(balance.toFixed(2));
+          setDate(new Date().toISOString().split('T')[0]);
+          setMethod('check');
+          setReference('');
+        }
+      }, [isOpen, invoice]);
+
+      const handleSubmit = () => {
+        if (!amount || parseFloat(amount) <= 0) return;
+        onAddPayment(amount, date, method, reference);
+        onClose();
+      };
+
+      if (!invoice) return null;
+
+      const total = invoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + (invoice.taxRate || 0) / 100);
+      const balance = total - (invoice.amountPaid || 0);
+
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="Record Payment">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            {/* Invoice Summary */}
+            <div style={{ background: 'var(--bg-tertiary)', padding: '1rem', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Invoice Total:</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600 }}>{formatCurrency(total)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>Already Paid:</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--success)' }}>{formatCurrency(invoice.amountPaid || 0)}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '1px solid var(--border)', paddingTop: '0.5rem' }}>
+                <span style={{ fontWeight: 600 }}>Balance Due:</span>
+                <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, color: balance > 0 ? 'var(--warning)' : 'var(--success)' }}>{formatCurrency(balance)}</span>
+              </div>
+            </div>
+
+            <Input 
+              label="Payment Amount" 
+              type="number" 
+              value={amount} 
+              onChange={setAmount} 
+              placeholder="0.00"
+              min="0.01"
+              step="0.01"
+            />
+            
+            <Input 
+              label="Payment Date" 
+              type="date" 
+              value={date} 
+              onChange={setDate}
+            />
+            
+            <div>
+              <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Payment Method</label>
+              <select 
+                value={method} 
+                onChange={(e) => setMethod(e.target.value)}
+                style={{ width: '100%', padding: '0.75rem', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.9375rem' }}
+              >
+                <option value="check">Check</option>
+                <option value="cash">Cash</option>
+                <option value="credit_card">Credit Card</option>
+                <option value="bank_transfer">Bank Transfer</option>
+                <option value="paypal">PayPal</option>
+                <option value="other">Other</option>
+              </select>
+            </div>
+            
+            <Input 
+              label="Reference / Check #" 
+              value={reference} 
+              onChange={setReference}
+              placeholder="Optional"
+            />
+
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <Button variant="secondary" onClick={onClose} style={{ flex: 1 }}>Cancel</Button>
+              <Button onClick={handleSubmit} style={{ flex: 1, background: '#22c55e' }} disabled={!amount || parseFloat(amount) <= 0}>
+                <Icons.Check /> Record Payment
+              </Button>
+            </div>
+
+            {/* Payment History */}
+            {invoice.payments && invoice.payments.length > 0 && (
+              <div style={{ marginTop: '1rem', borderTop: '1px solid var(--border)', paddingTop: '1rem' }}>
+                <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-secondary)' }}>Payment History</h4>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {invoice.payments.map(payment => (
+                    <div key={payment.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', padding: '0.5rem', background: 'var(--bg-tertiary)', borderRadius: '6px' }}>
+                      <span>{formatDate(payment.date)} - {payment.method}{payment.reference ? ` #${payment.reference}` : ''}</span>
+                      <span style={{ fontFamily: "'JetBrains Mono', monospace", color: 'var(--success)' }}>{formatCurrency(payment.amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </Modal>
+      );
+    };
+
+    // Add/Edit Client Modal
+    const ClientModal = ({ isOpen, onClose, client, onSave, title }) => {
+      const [form, setForm] = useState(client || { name: '', company: '', address: '', email: '', phone: '' });
+
+      useEffect(() => {
+        setForm(client || { name: '', company: '', address: '', email: '', phone: '' });
+      }, [client]);
+
+      const handleSave = () => {
+        if (!form.name.trim()) return;
+        onSave({ ...form, id: client?.id || generateId() });
+        onClose();
+      };
+
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title={title || 'Add Client'}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <Input label="Name *" value={form.name} onChange={(v) => setForm(p => ({ ...p, name: v }))} placeholder="John Smith" />
+            <Input label="Company" value={form.company} onChange={(v) => setForm(p => ({ ...p, company: v }))} placeholder="Acme Corp" />
+            <Input label="Email" value={form.email} onChange={(v) => setForm(p => ({ ...p, email: v }))} placeholder="john@example.com" />
+            <Input label="Phone" value={form.phone} onChange={(v) => setForm(p => ({ ...p, phone: v }))} placeholder="(555) 123-4567" />
+            <Input label="Address" value={form.address} onChange={(v) => setForm(p => ({ ...p, address: v }))} placeholder="123 Main St, City, ST 12345" />
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <Button variant="secondary" onClick={onClose} style={{ flex: 1 }}>Cancel</Button>
+              <Button onClick={handleSave} style={{ flex: 1 }} disabled={!form.name.trim()}>Save Client</Button>
+            </div>
+          </div>
+        </Modal>
+      );
+    };
+
+    // Main App
+    
+    // Help Modal Component
+    const HelpModal = ({ isOpen, onClose }) => {
+      if (!isOpen) return null;
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '1.5rem', maxWidth: '500px', width: '90%', maxHeight: '80vh', overflow: 'auto', border: '1px solid var(--border)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Help & About</h2>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Professional quotes and estimates with templates and PDF export.
+            </p>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>⌨️ Keyboard Shortcuts</h4>
+              <div style={{ fontSize: '0.875rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.25rem' }}>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>N</span><span>New item</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>Esc</span><span>Close modals</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>D</span><span>Toggle dark mode</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>P</span><span>Print</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>/</span><span>Focus search</span>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>💡 Tips</h4>
+              <ul style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', paddingLeft: '1.25rem' }}>
+                <li key="0">Save line item templates for quick quotes</li><li key="1">Export quotes as PDF to email</li><li key="2">Track quote status (sent/accepted/declined)</li>
+              </ul>
+            </div>
+            
+                <div style={{ marginTop: '1rem' }}>
+                  <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>📥 Import Template</h4>
+                  <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
+                    Download a CSV template with the correct column headers:
+                  </p>
+                  <button 
+                    onClick={() => {
+                      const headers = "Client Name, Company, Email, Phone, Address";
+                      const csv = headers + "\n";
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = 'quotecraft-import-template.csv';
+                      a.click();
+                      URL.revokeObjectURL(url);
+                    }}
+                    style={{ background: 'var(--accent)', color: 'white', border: 'none', padding: '0.5rem 1rem', borderRadius: '6px', cursor: 'pointer', fontSize: '0.875rem' }}
+                  >
+                    Download Template
+                  </button>
+                </div>
+            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+              Press <kbd style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>?</kbd> anytime to open this help
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+const App = () => {
+      
+      const APP_VERSION = '2.0.0';
+
+      const [view, setView] = useState('editor'); // editor, list, invoices, clients, templates, settings
+      const [businessInfo, setBusinessInfo] = useState(() => loadFromStorage('quotecraft_business', defaultBusinessInfo));
+      const [quotes, setQuotes] = useState(() => loadFromStorage('quotecraft_quotes', []));
+      const [invoices, setInvoices] = useState(() => loadFromStorage('quotecraft_invoices', []));
+      const [clients, setClients] = useState(() => loadFromStorage('quotecraft_clients', []));
+      const [templates, setTemplates] = useState(() => loadFromStorage('quotecraft_templates', []));
+      const [currentQuote, setCurrentQuote] = useState(() => {
+        const saved = loadFromStorage('quotecraft_current', null);
+        return saved || createNewQuote();
+      });
+      const [currentInvoice, setCurrentInvoice] = useState(null);
+      const [editMode, setEditMode] = useState('quote'); // 'quote' or 'invoice'
+      const [saveStatus, setSaveStatus] = useState('');
+      const [showClientPicker, setShowClientPicker] = useState(false);
+      const [showTemplatePicker, setShowTemplatePicker] = useState(false);
+      const [showStatusPicker, setShowStatusPicker] = useState(false);
+      const [showClientModal, setShowClientModal] = useState(false);
+      const [showPaymentModal, setShowPaymentModal] = useState(false);
+      const [editingClient, setEditingClient] = useState(null);
+      const [darkMode, setDarkMode] = useState(false);
+      const [showHelp, setShowHelp] = useState(false);
+
+      const [dateFrom, setDateFrom] = useState('');
+      const [dateTo, setDateTo] = useState('');
+      const [datePreset, setDatePreset] = useState('all');
+
+      // Date preset helpers
+      const getDatePresetRange = (preset) => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const formatDateStr = (d) => d.toISOString().split('T')[0];
+        switch (preset) {
+          case 'today': return { from: formatDateStr(today), to: formatDateStr(today) };
+          case 'week': const ws = new Date(today); ws.setDate(today.getDate() - today.getDay()); return { from: formatDateStr(ws), to: formatDateStr(today) };
+          case 'month': return { from: formatDateStr(new Date(today.getFullYear(), today.getMonth(), 1)), to: formatDateStr(today) };
+          case 'quarter': const qm = Math.floor(today.getMonth() / 3) * 3; return { from: formatDateStr(new Date(today.getFullYear(), qm, 1)), to: formatDateStr(today) };
+          case 'year': return { from: formatDateStr(new Date(today.getFullYear(), 0, 1)), to: formatDateStr(today) };
+          case 'last30': const l30 = new Date(today); l30.setDate(today.getDate() - 30); return { from: formatDateStr(l30), to: formatDateStr(today) };
+          case 'last90': const l90 = new Date(today); l90.setDate(today.getDate() - 90); return { from: formatDateStr(l90), to: formatDateStr(today) };
+          default: return { from: '', to: '' };
+        }
+      };
+      const applyDatePreset = (preset) => { setDatePreset(preset); const r = getDatePresetRange(preset); setDateFrom(r.from); setDateTo(r.to); };
+
+      // URL State Management
+      useEffect(() => {
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('view')) setView(params.get('view'));
+        if (params.get('from')) setDateFrom(params.get('from'));
+        if (params.get('to')) setDateTo(params.get('to'));
+      }, []);
+
+      useEffect(() => {
+        const url = new URL(window.location);
+        if (view !== 'dashboard') url.searchParams.set('view', view); else url.searchParams.delete('view');
+        if (dateFrom) url.searchParams.set('from', dateFrom); else url.searchParams.delete('from');
+        if (dateTo) url.searchParams.set('to', dateTo); else url.searchParams.delete('to');
+        window.history.replaceState({}, '', url);
+      }, [view]);
+(() => localStorage.getItem('quotecraft_darkMode') === 'true');
+      // Keyboard shortcuts
+      useEffect(() => {
+        const handleKeyboard = (e) => {
+          // Skip if typing in input
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+          
+          const key = e.key.toLowerCase();
+          
+          // Escape - close modals
+          if (key === 'escape') {
+            setShowClientModal(false);
+            setShowPaymentModal(false);
+          }
+          // N - new quote
+          if (key === 'n' && !e.ctrlKey && !e.metaKey) {
+            e.preventDefault();
+            newQuote();
+            setView('editor');
+          }
+          // D - toggle dark mode  
+          if (key === 'd' && !e.ctrlKey && !e.metaKey) {
+            setDarkMode(prev => !prev);
+          }
+          // P - print
+          if (key === 'p' && !e.ctrlKey && !e.metaKey) {
+            window.print();
+          }
+          // / - focus search
+          if (key === '/') {
+            e.preventDefault();
+            const searchInput = document.querySelector('input[placeholder*="Search"], input[placeholder*="search"]');
+            if (searchInput) searchInput.focus();
+          }
+          // 1-9 - switch views
+          const viewKeys = ["dashboard", "quotes", "clients", "settings"];
+          const num = parseInt(key);
+          if (num >= 1 && num <= viewKeys.length) {
+            setView(viewKeys[num - 1]);
+          }
+        };
+        
+        window.addEventListener('keydown', handleKeyboard);
+        return () => window.removeEventListener('keydown', handleKeyboard);
+      }, []);
+
+
+      
+      
+      
+      // Activity Log
+      const [activityLog, setActivityLog] = useState(() => load('quotecraft_activity', []));
+      
+      const logActivity = (action, entityType, entityName, details = '') => {
+        const entry = {
+          id: generateId(),
+          timestamp: new Date().toISOString(),
+          action,
+          entityType,
+          entityName,
+          details
+        };
+        setActivityLog(prev => {
+          const updated = [entry, ...prev].slice(0, 500);
+          save('quotecraft_activity', updated);
+          return updated;
+        });
+      };
+
+
+      const previewRef = useRef(null);
+
+      // Dark mode
+      useEffect(() => {
+        document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+        localStorage.setItem('quotecraft_darkMode', darkMode);
+      }, [darkMode]);
+      // Reset demo data
+      const resetDemoData = () => {
+        if (confirm('Reset all data to defaults? This cannot be undone.')) {
+          localStorage.removeItem('quotecraft_quotes');
+          localStorage.removeItem('quotecraft_clients');
+          localStorage.removeItem('quotecraft_templates');
+          localStorage.removeItem('quotecraft_current');
+          localStorage.removeItem('quotecraft_business');
+          window.location.reload();
+        }
+      };
+      // Keyboard shortcuts
+      useEffect(() => {
+        const handleKeyDown = (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+          if (e.key === 'n' && !e.metaKey && !e.ctrlKey) {
+            e.preventDefault();
+            newQuote();
+          }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+      }, []);
+
+
+
+      // Auto-save current quote
+      useEffect(() => {
+        const timer = setTimeout(() => {
+          saveToStorage('quotecraft_current', currentQuote);
+        }, 500);
+        return () => clearTimeout(timer);
+      }, [currentQuote]);
+
+      // Save business info
+      useEffect(() => {
+        saveToStorage('quotecraft_business', businessInfo);
+      }, [businessInfo]);
+
+      // Save clients
+      useEffect(() => {
+        saveToStorage('quotecraft_clients', clients);
+      }, [clients]);
+
+      // Save templates
+      useEffect(() => {
+        saveToStorage('quotecraft_templates', templates);
+      }, [templates]);
+      // Backup & Restore
+      const backupAllData = () => {
+        const data = { quotes, clients, templates, businessInfo, settings, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `quotecraft-backup-\${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+      };
+      
+      const restoreAllData = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.quotes) { setQuotes(data.quotes); save('quotes', data.quotes); }
+            if (data.clients) { setClients(data.clients); save('clients', data.clients); }
+            if (data.templates) { setTemplates(data.templates); save('templates', data.templates); }
+            if (data.businessInfo) { setBusinessInfo(data.businessInfo); save('businessInfo', data.businessInfo); }
+            if (data.settings) { setSettings(data.settings); save('settings', data.settings); }
+            alert('Data restored successfully!');
+            window.location.reload();
+          } catch (err) { alert('Invalid backup file'); }
+        };
+        reader.readAsText(file);
+      };
+
+
+      const updateClient = (field, value) => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          client: { ...prev.client, [field]: value }
+        }));
+      };
+
+      const selectClient = (client) => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          client: { ...client }
+        }));
+      };
+
+      const addLineItem = () => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          items: [...prev.items, { id: generateId(), description: '', quantity: 1, rate: 0 }]
+        }));
+      };
+
+      const addFromTemplate = (template) => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          items: [...prev.items, { id: generateId(), description: template.description, quantity: template.quantity, rate: template.rate }]
+        }));
+      };
+
+      const updateLineItem = (id, updated) => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          items: prev.items.map(item => item.id === id ? updated : item)
+        }));
+      };
+
+      const deleteLineItem = (id) => {
+        setCurrentQuote(prev => ({
+          ...prev,
+          items: prev.items.filter(item => item.id !== id)
+        }));
+      };
+
+      const saveItemAsTemplate = (item) => {
+        if (!item.description.trim()) return;
+        const template = {
+          id: generateId(),
+          description: item.description,
+          quantity: item.quantity,
+          rate: item.rate,
+        };
+        setTemplates(prev => [...prev, template]);
+        setSaveStatus('Template saved!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      };
+
+      const deleteTemplate = (id) => {
+        setTemplates(prev => prev.filter(t => t.id !== id));
+      };
+
+      const saveQuote = () => {
+        const existingIndex = quotes.findIndex(q => q.id === currentQuote.id);
+        let updatedQuotes;
+        if (existingIndex >= 0) {
+          updatedQuotes = quotes.map((q, i) => i === existingIndex ? currentQuote : q);
+          logActivity('Updated', 'Quote', currentQuote.number, currentQuote.client.name);
+        } else {
+          updatedQuotes = [...quotes, currentQuote];
+          logActivity('Created', 'Quote', currentQuote.number, currentQuote.client.name);
+        }
+        setQuotes(updatedQuotes);
+        saveToStorage('quotecraft_quotes', updatedQuotes);
+
+        // Also save/update client in address book
+        if (currentQuote.client.name && currentQuote.client.email) {
+          const existingClientIdx = clients.findIndex(c => c.email === currentQuote.client.email);
+          if (existingClientIdx >= 0) {
+            const updatedClients = clients.map((c, i) => i === existingClientIdx ? { ...currentQuote.client, id: c.id } : c);
+            setClients(updatedClients);
+          } else {
+            setClients(prev => [...prev, { ...currentQuote.client, id: generateId() }]);
+          }
+        }
+
+        setSaveStatus('Saved!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      };
+
+      // Invoice functions
+      const convertToInvoice = (quote) => {
+        if (quote.status !== 'accepted') {
+          alert('Only accepted quotes can be converted to invoices.');
+          return;
+        }
+        
+        // Check if already invoiced
+        const existingInvoice = invoices.find(inv => inv.quoteId === quote.id);
+        if (existingInvoice) {
+          if (confirm('This quote already has an invoice. View existing invoice?')) {
+            loadInvoice(existingInvoice);
+          }
+          return;
+        }
+        
+        const invoice = createInvoiceFromQuote(quote);
+        const updatedInvoices = [...invoices, invoice];
+        setInvoices(updatedInvoices);
+        saveToStorage('quotecraft_invoices', updatedInvoices);
+        
+        // Update quote status to invoiced
+        const updatedQuotes = quotes.map(q => q.id === quote.id ? { ...q, status: 'invoiced', invoiceId: invoice.id } : q);
+        setQuotes(updatedQuotes);
+        saveToStorage('quotecraft_quotes', updatedQuotes);
+        
+        logActivity('Created', 'Invoice', invoice.number, `From ${quote.number}`);
+        
+        setCurrentInvoice(invoice);
+        setEditMode('invoice');
+        setView('editor');
+        setSaveStatus('Invoice created!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      };
+
+      const saveInvoice = () => {
+        if (!currentInvoice) return;
+        
+        const existingIndex = invoices.findIndex(inv => inv.id === currentInvoice.id);
+        let updatedInvoices;
+        if (existingIndex >= 0) {
+          updatedInvoices = invoices.map((inv, i) => i === existingIndex ? currentInvoice : inv);
+          logActivity('Updated', 'Invoice', currentInvoice.number, currentInvoice.client.name);
+        } else {
+          updatedInvoices = [...invoices, currentInvoice];
+          logActivity('Created', 'Invoice', currentInvoice.number, currentInvoice.client.name);
+        }
+        setInvoices(updatedInvoices);
+        saveToStorage('quotecraft_invoices', updatedInvoices);
+        setSaveStatus('Invoice saved!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      };
+
+      const loadInvoice = (invoice) => {
+        setCurrentInvoice(invoice);
+        setEditMode('invoice');
+        setView('editor');
+      };
+
+      const addPayment = (amount, date, method, reference) => {
+        if (!currentInvoice) return;
+        
+        const payment = {
+          id: generateId(),
+          amount: parseFloat(amount),
+          date,
+          method,
+          reference
+        };
+        
+        const newAmountPaid = (currentInvoice.amountPaid || 0) + payment.amount;
+        const total = currentInvoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+        const taxAmount = total * (currentInvoice.taxRate / 100);
+        const grandTotal = total + taxAmount;
+        
+        let newStatus = currentInvoice.status;
+        if (newAmountPaid >= grandTotal) {
+          newStatus = 'paid';
+        } else if (newAmountPaid > 0) {
+          newStatus = 'partial';
+        }
+        
+        const updatedInvoice = {
+          ...currentInvoice,
+          payments: [...(currentInvoice.payments || []), payment],
+          amountPaid: newAmountPaid,
+          status: newStatus
+        };
+        
+        setCurrentInvoice(updatedInvoice);
+        
+        const updatedInvoices = invoices.map(inv => inv.id === updatedInvoice.id ? updatedInvoice : inv);
+        setInvoices(updatedInvoices);
+        saveToStorage('quotecraft_invoices', updatedInvoices);
+        
+        logActivity('Payment', 'Invoice', currentInvoice.number, `$${amount} via ${method}`);
+        
+        setShowPaymentModal(false);
+        setSaveStatus('Payment recorded!');
+        setTimeout(() => setSaveStatus(''), 2000);
+      };
+
+      const deleteInvoice = (id) => {
+        const invoice = invoices.find(inv => inv.id === id);
+        if (confirm('Delete this invoice?')) {
+          const updatedInvoices = invoices.filter(inv => inv.id !== id);
+          setInvoices(updatedInvoices);
+          saveToStorage('quotecraft_invoices', updatedInvoices);
+          
+          // Remove invoiced status from quote if linked
+          if (invoice.quoteId) {
+            const updatedQuotes = quotes.map(q => q.id === invoice.quoteId ? { ...q, status: 'accepted', invoiceId: null } : q);
+            setQuotes(updatedQuotes);
+            saveToStorage('quotecraft_quotes', updatedQuotes);
+          }
+          
+          logActivity('Deleted', 'Invoice', invoice.number);
+        }
+      };
+
+      const newQuote = () => {
+        const fresh = createNewQuote();
+        setCurrentQuote(fresh);
+        saveToStorage('quotecraft_current', fresh);
+      };
+
+      const loadQuote = (quote) => {
+        setCurrentQuote(quote);
+        setView('editor');
+      };
+
+      const duplicateQuote = (quote) => {
+        const duplicate = {
+          ...quote,
+          id: generateId(),
+          number: `QT-${Date.now().toString().slice(-6)}`,
+          date: new Date().toISOString().split('T')[0],
+          status: 'draft',
+          items: quote.items.map(item => ({ ...item, id: generateId() }))
+        };
+        setCurrentQuote(duplicate);
+        setView('editor');
+      };
+
+      const deleteQuote = (id) => {
+        const updatedQuotes = quotes.filter(q => q.id !== id);
+        setQuotes(updatedQuotes);
+        saveToStorage('quotecraft_quotes', updatedQuotes);
+      };
+
+      const updateQuoteStatus = (status) => {
+        setCurrentQuote(prev => ({ ...prev, status }));
+      };
+
+      const saveClientToAddressBook = (client) => {
+        const existingIdx = clients.findIndex(c => c.id === client.id);
+        if (existingIdx >= 0) {
+          setClients(prev => prev.map((c, i) => i === existingIdx ? client : c));
+        } else {
+          setClients(prev => [...prev, client]);
+        }
+        setEditingClient(null);
+      };
+
+      const deleteClient = (id) => {
+        setClients(prev => prev.filter(c => c.id !== id));
+      };
+
+      const exportPDF = async () => {
+        const element = previewRef.current;
+        if (!element) return;
+
+        const opt = {
+          margin: 0.5,
+          filename: `${currentQuote.number}.pdf`,
+          image: { type: 'jpeg', quality: 0.98 },
+          html2canvas: { scale: 2 },
+          jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+        };
+
+        await html2pdf().set(opt).from(element).save();
+      };
+
+      const sendEmail = () => {
+        const subtotal = currentQuote.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+        const tax = subtotal * (currentQuote.taxRate / 100);
+        const total = subtotal + tax;
+
+        const subject = encodeURIComponent(`Quote ${currentQuote.number} from ${businessInfo.name || 'Our Company'}`);
+        const body = encodeURIComponent(
+`Hi ${currentQuote.client.name || 'there'},
+
+Please find below the details for Quote #${currentQuote.number}:
+
+${currentQuote.items.filter(i => i.description).map(i => `• ${i.description}: ${formatCurrency(i.quantity * i.rate)}`).join('\n')}
+
+Subtotal: ${formatCurrency(subtotal)}
+${currentQuote.taxRate > 0 ? `Tax (${currentQuote.taxRate}%): ${formatCurrency(tax)}\n` : ''}Total: ${formatCurrency(total)}
+
+Valid until: ${formatDate(currentQuote.validUntil)}
+
+${currentQuote.notes ? `Notes: ${currentQuote.notes}\n` : ''}
+${currentQuote.terms ? `Terms: ${currentQuote.terms}\n` : ''}
+Please let me know if you have any questions.
+
+Best regards,
+${businessInfo.name || 'Your Company'}
+${businessInfo.phone || ''}
+${businessInfo.email || ''}`
+        );
+
+        window.open(`mailto:${currentQuote.client.email}?subject=${subject}&body=${body}`);
+      };
+
+      const subtotal = currentQuote.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0);
+      const tax = subtotal * (currentQuote.taxRate / 100);
+      const total = subtotal + tax;
+
+      return (
+        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+          {/* Header */}
+          <header style={{
+            background: 'var(--bg-secondary)',
+            borderBottom: '1px solid var(--border)',
+            padding: '0.75rem 1.5rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            position: 'sticky',
+            top: 0,
+            zIndex: 100,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+              <h1 style={{ 
+                fontSize: '1.25rem', 
+                fontWeight: 700,
+                background: 'linear-gradient(135deg, #3b82f6, #8b5cf6)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                letterSpacing: '-0.02em',
+              }}>
+                QuoteCraft
+              </h1>
+              <nav role="navigation" aria-label="Main navigation" style={{ display: 'flex', gap: '0.25rem' }}>
+                <Button 
+                  variant={view === 'editor' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('editor')}
+                >
+                  <Icons.File /> Editor
+                </Button>
+                <Button 
+                  variant={view === 'list' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('list')}
+                >
+                  <Icons.List /> Quotes ({quotes.length})
+                </Button>
+                <Button 
+                  variant={view === 'invoices' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('invoices')}
+                >
+                  <Icons.DollarSign /> Invoices ({invoices.length})
+                </Button>
+                <Button 
+                  variant={view === 'clients' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('clients')}
+                >
+                  <Icons.Users /> Clients ({clients.length})
+                </Button>
+                <Button 
+                  variant={view === 'templates' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('templates')}
+                >
+                  <Icons.Package /> Templates ({templates.length})
+                </Button>
+                <Button 
+                  variant={view === 'activity' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('activity')}
+                >
+                  <Icons.Clock /> Activity
+                </Button>
+                <Button 
+                  variant={view === 'settings' ? 'secondary' : 'ghost'} 
+                  size="sm"
+                  onClick={() => setView('settings')}
+                >
+                  <Icons.Settings /> Settings
+                </Button>
+                <button onClick={() => setShowHelp(true)} title="Help" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem' }}>❓</button>
+              <button onClick={() => setDarkMode(!darkMode)} title="Toggle dark mode" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', color: 'var(--text-primary)', fontSize: '1rem', marginLeft: '0.5rem' }}>
+                  {darkMode ? '☀️' : '🌙'}
+                </button>
+                <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', padding: '0.25rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>v{APP_VERSION}</span>
+              </nav>
+            </div>
+            {view === 'editor' && (
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                {saveStatus && (
+                  <span style={{ color: 'var(--success)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                    <Icons.Check /> {saveStatus}
+                  </span>
+                )}
+                {editMode === 'quote' ? (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={newQuote}>
+                      <Icons.Plus /> New
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={saveQuote}>
+                      <Icons.Save /> Save
+                    </Button>
+                    <Button 
+                      variant="secondary" 
+                      size="sm" 
+                      onClick={sendEmail}
+                      disabled={!currentQuote.client.email}
+                      title={currentQuote.client.email ? 'Send via email' : 'Add client email first'}
+                    >
+                      <Icons.Mail /> Email
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={exportPDF}>
+                      <Icons.Download /> Export PDF
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => { setEditMode('quote'); setCurrentInvoice(null); }}>
+                      ← Back to Quotes
+                    </Button>
+                    <Button variant="secondary" size="sm" onClick={saveInvoice}>
+                      <Icons.Save /> Save Invoice
+                    </Button>
+                    <Button variant="success" size="sm" onClick={() => setShowPaymentModal(true)} style={{ background: '#22c55e', color: 'white' }}>
+                      <Icons.CreditCard /> Record Payment
+                    </Button>
+                    <Button variant="primary" size="sm" onClick={() => {
+                      // Export invoice PDF - similar to quote but with Invoice header
+                      if (currentInvoice) {
+                        const tempQuote = { ...currentQuote };
+                        setCurrentQuote({ ...currentInvoice, number: currentInvoice.number, validUntil: currentInvoice.dueDate });
+                        setTimeout(() => {
+                          exportPDF();
+                          setCurrentQuote(tempQuote);
+                        }, 100);
+                      }
+                    }}>
+                      <Icons.Download /> Export PDF
+                    </Button>
+                  </>
+                )}
+              </div>
+            )}
+          </header>
+
+          {/* Main Content */}
+          <main id="main-content" role="main" style={{ flex: 1, padding: '1.5rem', maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+            {view === 'editor' && (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+                {/* Left: Form */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+                  {/* Quote Details */}
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Quote Details</h2>
+                      <StatusBadge status={currentQuote.status} onClick={() => setShowStatusPicker(true)} />
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Input label="Quote Number" value={currentQuote.number} onChange={(v) => setCurrentQuote(p => ({ ...p, number: v }))} />
+                      <Input label="Date" type="date" value={currentQuote.date} onChange={(v) => setCurrentQuote(p => ({ ...p, date: v }))} />
+                      <Input label="Valid Until" type="date" value={currentQuote.validUntil} onChange={(v) => setCurrentQuote(p => ({ ...p, validUntil: v }))} style={{ gridColumn: 'span 2' }} />
+                    </div>
+                  </section>
+
+                  {/* Client Info */}
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Client Information</h2>
+                      <Button variant="ghost" size="sm" onClick={() => setShowClientPicker(true)}>
+                        <Icons.Users /> Select Client
+                      </Button>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Input label="Name" value={currentQuote.client.name} onChange={(v) => updateClient('name', v)} placeholder="John Smith" />
+                      <Input label="Company" value={currentQuote.client.company} onChange={(v) => updateClient('company', v)} placeholder="Acme Corp" />
+                      <Input label="Email" type="email" value={currentQuote.client.email} onChange={(v) => updateClient('email', v)} placeholder="john@example.com" />
+                      <Input label="Phone" value={currentQuote.client.phone} onChange={(v) => updateClient('phone', v)} placeholder="(555) 123-4567" />
+                      <Input label="Address" value={currentQuote.client.address} onChange={(v) => updateClient('address', v)} placeholder="123 Main St, City, ST 12345" style={{ gridColumn: 'span 2' }} />
+                    </div>
+                  </section>
+
+                  {/* Line Items */}
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                      <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Line Items</h2>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button variant="ghost" size="sm" onClick={() => setShowTemplatePicker(true)}>
+                          <Icons.Package /> From Template
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={addLineItem}>
+                          <Icons.Plus /> Add Item
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div style={{ 
+                      display: 'grid', 
+                      gridTemplateColumns: '1fr 100px 120px 120px 80px', 
+                      gap: '0.75rem', 
+                      padding: '0 0.75rem 0.5rem',
+                      fontSize: '0.75rem',
+                      color: 'var(--text-muted)',
+                      fontWeight: 500,
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.05em',
+                    }}>
+                      <span>Description</span>
+                      <span style={{ textAlign: 'right' }}>Qty</span>
+                      <span style={{ textAlign: 'right' }}>Rate</span>
+                      <span style={{ textAlign: 'right' }}>Amount</span>
+                      <span></span>
+                    </div>
+
+                    {currentQuote.items.map(item => (
+                      <LineItemRow
+                        key={item.id}
+                        item={item}
+                        onUpdate={(updated) => updateLineItem(item.id, updated)}
+                        onDelete={() => deleteLineItem(item.id)}
+                        isOnly={currentQuote.items.length === 1}
+                        templates={templates}
+                        onSaveAsTemplate={saveItemAsTemplate}
+                      />
+                    ))}
+
+                    {/* Totals */}
+                    <div style={{ borderTop: '1px solid var(--border)', marginTop: '1rem', paddingTop: '1rem' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <span style={{ color: 'var(--text-secondary)' }}>Subtotal</span>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>{formatCurrency(subtotal)}</span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span style={{ color: 'var(--text-secondary)' }}>Tax</span>
+                          <input
+                            type="number"
+                            value={currentQuote.taxRate}
+                            onChange={(e) => setCurrentQuote(p => ({ ...p, taxRate: parseFloat(e.target.value) || 0 }))}
+                            style={{
+                              width: '60px',
+                              background: 'var(--bg-tertiary)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '4px',
+                              padding: '0.25rem 0.5rem',
+                              color: 'var(--text-primary)',
+                              textAlign: 'right',
+                              fontSize: '0.875rem',
+                            }}
+                          />
+                          <span style={{ color: 'var(--text-muted)' }}>%</span>
+                        </div>
+                        <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 500 }}>{formatCurrency(tax)}</span>
+                      </div>
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'center',
+                        background: 'var(--bg-tertiary)',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '8px',
+                        marginTop: '0.5rem',
+                      }}>
+                        <span style={{ fontWeight: 600, fontSize: '1.125rem' }}>Total</span>
+                        <span style={{ 
+                          fontFamily: "'JetBrains Mono', monospace", 
+                          fontWeight: 700, 
+                          fontSize: '1.25rem',
+                          color: 'var(--accent)',
+                        }}>{formatCurrency(total)}</span>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* Notes & Terms */}
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Notes & Terms</h2>
+                    <Textarea 
+                      label="Notes" 
+                      value={currentQuote.notes} 
+                      onChange={(v) => setCurrentQuote(p => ({ ...p, notes: v }))}
+                      placeholder="Additional notes or details for the client..."
+                    />
+                    <div style={{ marginTop: '1rem' }}>
+                      <Textarea 
+                        label="Terms & Conditions" 
+                        value={currentQuote.terms} 
+                        onChange={(v) => setCurrentQuote(p => ({ ...p, terms: v }))}
+                        placeholder="Payment terms, warranty info, etc."
+                      />
+                    </div>
+                  </section>
+                </div>
+
+                {/* Right: Preview */}
+                <div style={{ position: 'sticky', top: '80px', height: 'fit-content' }}>
+                  <div style={{ 
+                    background: 'var(--bg-secondary)', 
+                    borderRadius: '12px', 
+                    padding: '1rem', 
+                    border: '1px solid var(--border)',
+                    maxHeight: 'calc(100vh - 120px)',
+                    overflow: 'auto',
+                  }}>
+                    <h2 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Preview</h2>
+                    <div style={{ borderRadius: '8px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>
+                      <QuotePreview ref={previewRef} quote={currentQuote} businessInfo={businessInfo} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {view === 'list' && (
+              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Saved Quotes</h2>
+                  <Button onClick={() => { newQuote(); setView('editor'); }}>
+                    <Icons.Plus /> New Quote
+                  </Button>
+                </div>
+
+                {quotes.length === 0 ? (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>No saved quotes yet</p>
+                    <Button onClick={() => { newQuote(); setView('editor'); }}>
+                      <Icons.Plus /> Create Your First Quote
+                    </Button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {quotes.map(quote => {
+                      const quoteTotal = quote.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + (quote.taxRate || 0) / 100);
+                      return (
+                        <div key={quote.id} style={{
+                          background: 'var(--bg-secondary)',
+                          borderRadius: '10px',
+                          padding: '1rem 1.25rem',
+                          border: '1px solid var(--border)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'border-color 0.15s ease',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => loadQuote(quote)}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <StatusBadge status={quote.status || 'draft'} />
+                            <div>
+                              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                                {quote.client.name || 'Unnamed Client'} 
+                                <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.5rem' }}>#{quote.number}</span>
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                {formatDate(quote.date)} • {quote.items.length} item{quote.items.length !== 1 ? 's' : ''}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <span style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: '1.125rem' }}>
+                              {formatCurrency(quoteTotal)}
+                            </span>
+                            <div style={{ display: 'flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
+                              {quote.status === 'accepted' && !quote.invoiceId && (
+                                <Button variant="primary" size="sm" onClick={() => convertToInvoice(quote)} title="Convert to Invoice" style={{ marginRight: '0.5rem' }}>
+                                  <Icons.FileText /> Invoice
+                                </Button>
+                              )}
+                              {quote.status === 'invoiced' && quote.invoiceId && (
+                                <Button variant="secondary" size="sm" onClick={() => {
+                                  const inv = invoices.find(i => i.id === quote.invoiceId);
+                                  if (inv) loadInvoice(inv);
+                                }} title="View Invoice" style={{ marginRight: '0.5rem' }}>
+                                  <Icons.DollarSign /> View Invoice
+                                </Button>
+                              )}
+                              <Button variant="ghost" size="sm" onClick={() => duplicateQuote(quote)} title="Duplicate">
+                                <Icons.Copy />
+                              </Button>
+                              <Button variant="ghost" size="sm" onClick={() => deleteQuote(quote.id)} title="Delete" style={{ color: 'var(--danger)' }}>
+                                <Icons.Trash />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Invoices List */}
+            {view === 'invoices' && (
+              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Invoices</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button variant="secondary" onClick={() => {
+                      const csv = ['Invoice #,Date,Due Date,Client,Status,Total,Paid,Balance\n', ...invoices.map(inv => {
+                        const total = inv.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + (inv.taxRate || 0) / 100);
+                        return `"${inv.number}","${inv.date}","${inv.dueDate}","${inv.client.name}","${inv.status}","${total.toFixed(2)}","${(inv.amountPaid || 0).toFixed(2)}","${(total - (inv.amountPaid || 0)).toFixed(2)}"`;
+                      })].join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const link = document.createElement('a');
+                      link.href = URL.createObjectURL(blob);
+                      link.download = `invoices-${new Date().toISOString().split('T')[0]}.csv`;
+                      link.click();
+                    }}>
+                      <Icons.Download /> Export CSV
+                    </Button>
+                  </div>
+                </div>
+
+                {invoices.length === 0 ? (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <Icons.DollarSign style={{ width: 48, height: 48, opacity: 0.3, marginBottom: '1rem' }} />
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>No invoices yet</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Accept a quote and click "Convert to Invoice" to create one</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {invoices.map(invoice => {
+                      const invoiceTotal = invoice.items.reduce((sum, item) => sum + (item.quantity * item.rate), 0) * (1 + (invoice.taxRate || 0) / 100);
+                      const balance = invoiceTotal - (invoice.amountPaid || 0);
+                      const statusConfig = INVOICE_STATUSES[invoice.status] || INVOICE_STATUSES.draft;
+                      
+                      // Check if overdue
+                      const isOverdue = invoice.status !== 'paid' && new Date(invoice.dueDate) < new Date();
+                      const displayStatus = isOverdue && invoice.status !== 'paid' ? 'overdue' : invoice.status;
+                      const displayConfig = INVOICE_STATUSES[displayStatus];
+                      
+                      return (
+                        <div key={invoice.id} style={{
+                          background: 'var(--bg-secondary)',
+                          borderRadius: '10px',
+                          padding: '1rem 1.25rem',
+                          border: '1px solid var(--border)',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          transition: 'border-color 0.15s ease',
+                          cursor: 'pointer',
+                        }}
+                        onClick={() => loadInvoice(invoice)}
+                        onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--accent)'}
+                        onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <span style={{
+                              padding: '0.25rem 0.75rem',
+                              borderRadius: '6px',
+                              fontSize: '0.75rem',
+                              fontWeight: 600,
+                              background: displayConfig.bg,
+                              color: displayConfig.color,
+                            }}>{displayConfig.label}</span>
+                            <div>
+                              <div style={{ fontWeight: 600, marginBottom: '0.25rem' }}>
+                                {invoice.client.name || 'Unnamed Client'} 
+                                <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.5rem' }}>#{invoice.number}</span>
+                                {invoice.quoteNumber && <span style={{ color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.5rem', fontSize: '0.8rem' }}>(from {invoice.quoteNumber})</span>}
+                              </div>
+                              <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                                Due: {formatDate(invoice.dueDate)} • {invoice.items.length} item{invoice.items.length !== 1 ? 's' : ''}
+                              </div>
+                            </div>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ textAlign: 'right' }}>
+                              <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 600, fontSize: '1.125rem' }}>
+                                {formatCurrency(invoiceTotal)}
+                              </div>
+                              {invoice.amountPaid > 0 && balance > 0 && (
+                                <div style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>
+                                  Balance: {formatCurrency(balance)}
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.25rem' }} onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="sm" onClick={() => deleteInvoice(invoice.id)} title="Delete" style={{ color: 'var(--danger)' }}>
+                                <Icons.Trash />
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                
+                {/* Invoice Summary */}
+                {invoices.length > 0 && (
+                  <div style={{ marginTop: '2rem', padding: '1.5rem', background: 'var(--bg-tertiary)', borderRadius: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Total Invoiced</div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.25rem' }}>
+                        {formatCurrency(invoices.reduce((sum, inv) => sum + inv.items.reduce((s, i) => s + (i.quantity * i.rate), 0) * (1 + (inv.taxRate || 0) / 100), 0))}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Paid</div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.25rem', color: 'var(--success)' }}>
+                        {formatCurrency(invoices.reduce((sum, inv) => sum + (inv.amountPaid || 0), 0))}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Outstanding</div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.25rem', color: 'var(--warning)' }}>
+                        {formatCurrency(invoices.reduce((sum, inv) => {
+                          const total = inv.items.reduce((s, i) => s + (i.quantity * i.rate), 0) * (1 + (inv.taxRate || 0) / 100);
+                          return sum + (total - (inv.amountPaid || 0));
+                        }, 0))}
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'center' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Overdue</div>
+                      <div style={{ fontFamily: "'JetBrains Mono', monospace", fontWeight: 700, fontSize: '1.25rem', color: 'var(--danger)' }}>
+                        {formatCurrency(invoices.filter(inv => inv.status !== 'paid' && new Date(inv.dueDate) < new Date()).reduce((sum, inv) => {
+                          const total = inv.items.reduce((s, i) => s + (i.quantity * i.rate), 0) * (1 + (inv.taxRate || 0) / 100);
+                          return sum + (total - (inv.amountPaid || 0));
+                        }, 0))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {view === 'clients' && (
+              <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Client Address Book</h2>
+                  <Button onClick={() => { setEditingClient(null); setShowClientModal(true); }}>
+                    <Icons.Plus /> Add Client
+                  </Button>
+                </div>
+
+                {clients.length === 0 ? (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '1rem' }}>No clients yet</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>Clients are saved automatically when you save a quote, or add them manually.</p>
+                    <Button onClick={() => { setEditingClient(null); setShowClientModal(true); }}>
+                      <Icons.Plus /> Add First Client
+                    </Button>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                    {clients.map(client => (
+                      <div key={client.id} style={{
+                        background: 'var(--bg-secondary)',
+                        borderRadius: '10px',
+                        padding: '1.25rem',
+                        border: '1px solid var(--border)',
+                      }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+                          <div style={{ fontWeight: 600, fontSize: '1.0625rem' }}>{client.name}</div>
+                          <div style={{ display: 'flex', gap: '0.25rem' }}>
+                            <button
+                              onClick={() => { setEditingClient(client); setShowClientModal(true); }}
+                              style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem' }}
+                            >
+                              <Icons.Edit />
+                            </button>
+                            <button
+                              onClick={() => deleteClient(client.id)}
+                              style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', padding: '0.25rem' }}
+                            >
+                              <Icons.Trash />
+                            </button>
+                          </div>
+                        </div>
+                        {client.company && <div style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', marginBottom: '0.25rem' }}>{client.company}</div>}
+                        {client.email && <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{client.email}</div>}
+                        {client.phone && <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{client.phone}</div>}
+                        {client.address && <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginTop: '0.5rem' }}>{client.address}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {view === 'templates' && (
+              <div style={{ maxWidth: '700px', margin: '0 auto' }}>
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '0.5rem' }}>Item Templates</h2>
+                  <p style={{ color: 'var(--text-secondary)' }}>Save frequently used line items as templates for quick reuse.</p>
+                </div>
+
+                {templates.length === 0 ? (
+                  <div style={{ 
+                    textAlign: 'center', 
+                    padding: '4rem 2rem',
+                    background: 'var(--bg-secondary)',
+                    borderRadius: '12px',
+                    border: '1px solid var(--border)',
+                  }}>
+                    <p style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }}>No templates yet</p>
+                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Click the save icon on any line item to create a template.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {templates.map(template => (
+                      <div key={template.id} style={{
+                        background: 'var(--bg-secondary)',
+                        borderRadius: '10px',
+                        padding: '1rem 1.25rem',
+                        border: '1px solid var(--border)',
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                      }}>
+                        <div>
+                          <div style={{ fontWeight: 500, marginBottom: '0.25rem' }}>{template.description}</div>
+                          <div style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                            {formatCurrency(template.rate)} × {template.quantity} = {formatCurrency(template.rate * template.quantity)}
+                          </div>
+                        </div>
+                        <div style={{ display: 'flex', gap: '0.5rem' }}>
+                          <Button variant="secondary" size="sm" onClick={() => { addFromTemplate(template); setView('editor'); }}>
+                            Use
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => deleteTemplate(template.id)} style={{ color: 'var(--danger)' }}>
+                            <Icons.Trash />
+                          </Button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            
+            {/* Activity Log View */}
+            {view === 'activity' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Activity Log</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <Button variant="secondary" size="sm" onClick={() => {
+                      const csv = ['Timestamp,Action,Type,Name,Details', ...activityLog.map(a => 
+                        `"${new Date(a.timestamp).toLocaleString()}","${a.action}","${a.entityType}","${a.entityName}","${a.details || ''}"`
+                      )].join('\n');
+                      const blob = new Blob([csv], { type: 'text/csv' });
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `activity-log-${new Date().toISOString().split('T')[0]}.csv`;
+                      link.click();
+                    }}><Icons.Download /> Export CSV</Button>
+                    {activityLog.length > 0 && (
+                      <Button variant="danger" size="sm" onClick={() => {
+                        if (confirm('Clear activity log?')) {
+                          setActivityLog([]);
+                          save('quotecraft_activity', []);
+                        }
+                      }}>Clear</Button>
+                    )}
+                  </div>
+                </div>
+                {activityLog.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    <p>No activity recorded yet</p>
+                  </div>
+                ) : (
+                  <div style={{ background: 'var(--bg-card)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                      <thead>
+                        <tr style={{ background: 'var(--bg-tertiary)' }}>
+                          <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Time</th>
+                          <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Action</th>
+                          <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Type</th>
+                          <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Name</th>
+                          <th style={{ textAlign: 'left', padding: '0.75rem 1rem', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)' }}>Details</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {activityLog.slice(0, 100).map((entry) => (
+                          <tr key={entry.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                              {new Date(entry.timestamp).toLocaleDateString()} {new Date(entry.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem' }}>
+                              <span style={{ padding: '0.25rem 0.5rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 600,
+                                background: entry.action === 'Created' ? 'rgba(34,197,94,0.1)' : entry.action === 'Deleted' ? 'rgba(239,68,68,0.1)' : 'rgba(245,158,11,0.1)',
+                                color: entry.action === 'Created' ? 'var(--success)' : entry.action === 'Deleted' ? 'var(--danger)' : 'var(--warning)'
+                              }}>{entry.action}</span>
+                            </td>
+                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem' }}>{entry.entityType}</td>
+                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', fontWeight: 500 }}>{entry.entityName}</td>
+                            <td style={{ padding: '0.75rem 1rem', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{entry.details}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
+{view === 'settings' && (
+              <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Business Settings</h2>
+
+
+                <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+                  <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem', fontSize: '0.9375rem' }}>
+                    This information appears on all your quotes.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                    <Input label="Business Name" value={businessInfo.name} onChange={(v) => setBusinessInfo(p => ({ ...p, name: v }))} placeholder="Your Company Name" />
+                    <Input label="Address" value={businessInfo.address} onChange={(v) => setBusinessInfo(p => ({ ...p, address: v }))} placeholder="123 Main St, City, ST 12345" />
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                      <Input label="Phone" value={businessInfo.phone} onChange={(v) => setBusinessInfo(p => ({ ...p, phone: v }))} placeholder="(555) 123-4567" />
+                      <Input label="Email" value={businessInfo.email} onChange={(v) => setBusinessInfo(p => ({ ...p, email: v }))} placeholder="hello@company.com" />
+                    </div>
+                    <Input label="Website" value={businessInfo.website} onChange={(v) => setBusinessInfo(p => ({ ...p, website: v }))} placeholder="www.company.com" />
+                  </div>
+                </section>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginTop: '1.5rem' }}>
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem' }}>Data Management</h3>
+                    <Button variant="danger" size="sm" onClick={resetDemoData}>Reset Demo Data</Button>
+                  </section>
+                  <section style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <h3 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem' }}>Keyboard Shortcuts</h3>
+                    <div style={{ fontSize: '0.8125rem', display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>New Quote</span><kbd style={{ background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px', fontFamily: 'monospace' }}>n</kbd></div>
+                  </section>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Modals */}
+          <ClientPickerModal
+            isOpen={showClientPicker}
+            onClose={() => setShowClientPicker(false)}
+            clients={clients}
+            onSelect={selectClient}
+            onAddNew={() => { setShowClientPicker(false); setEditingClient(null); setShowClientModal(true); }}
+          />
+
+          <TemplatePickerModal
+            isOpen={showTemplatePicker}
+            onClose={() => setShowTemplatePicker(false)}
+            templates={templates}
+            onSelect={addFromTemplate}
+            onDelete={deleteTemplate}
+          />
+
+          <StatusPickerModal
+            isOpen={showStatusPicker}
+            onClose={() => setShowStatusPicker(false)}
+            currentStatus={currentQuote.status}
+            onSelect={updateQuoteStatus}
+          />
+
+          <ClientModal
+            isOpen={showClientModal}
+            onClose={() => { setShowClientModal(false); setEditingClient(null); }}
+            client={editingClient}
+            onSave={(client) => {
+              saveClientToAddressBook(client);
+              setShowClientModal(false);
+            }}
+            title={editingClient ? 'Edit Client' : 'Add Client'}
+          />
+
+          <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+            invoice={currentInvoice}
+            onAddPayment={addPayment}
+          />
+          
+          {/* Demo Mode Watermark */}
+
+          <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+          <footer style={{ textAlign: 'center', padding: '1rem', borderTop: '1px solid var(--border)', marginTop: '2rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+            {businessInfo.name || 'QuoteCraft'} • v2.0.1
+          <p style="margin-top:1rem;font-size:.8rem;text-align:center;color:#64748b">© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+
+    // Service Worker for offline support
+    if ('serviceWorker' in navigator) {
+      const sw = `const C='quotecraft-v1';self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(clients.claim()));self.addEventListener('fetch',e=>e.respondWith(caches.match(e.request).then(r=>r||fetch(e.request).catch(()=>caches.match('/')))));`;
+      navigator.serviceWorker.register(URL.createObjectURL(new Blob([sw],{type:'application/javascript'})),{scope:'/'}).catch(()=>{});
+    }
+  </script>
+</body>
+</html>

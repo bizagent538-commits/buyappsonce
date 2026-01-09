@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExpenseTrack Pro - Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+
+    // Sample Data
+    const initialDepartments = [
+      { id: '1', name: 'Operations', budget_amount: 5000, budget_period: 'monthly', is_active: true },
+      { id: '2', name: 'Events', budget_amount: 10000, budget_period: 'quarterly', is_active: true },
+      { id: '3', name: 'Kitchen', budget_amount: 3000, budget_period: 'monthly', is_active: true },
+      { id: '4', name: 'Grounds', budget_amount: 2500, budget_period: 'monthly', is_active: true },
+      { id: '5', name: 'Administration', budget_amount: 2000, budget_period: 'monthly', is_active: true }
+    ];
+
+    const initialCategories = [
+      { id: '1', name: 'Supplies', description: 'Office and general supplies', requires_receipt: true, max_amount: 500, is_active: true },
+      { id: '2', name: 'Food & Beverage', description: 'Food, drinks, catering', requires_receipt: true, max_amount: null, is_active: true },
+      { id: '3', name: 'Equipment', description: 'Tools, equipment, machinery', requires_receipt: true, max_amount: 1000, is_active: true },
+      { id: '4', name: 'Travel', description: 'Transportation, lodging', requires_receipt: true, max_amount: null, is_active: true },
+      { id: '5', name: 'Mileage', description: 'Personal vehicle reimbursement', requires_receipt: false, max_amount: null, is_active: true },
+      { id: '6', name: 'Per Diem', description: 'Daily meal allowance', requires_receipt: false, max_amount: null, is_active: true },
+      { id: '7', name: 'Maintenance', description: 'Repairs and maintenance', requires_receipt: true, max_amount: null, is_active: true }
+    ];
+
+    const initialUsers = [
+      { id: '1', first_name: 'Admin', last_name: 'User', email: 'admin@org.com', phone: '(555) 100-0001', department_id: '5', role: 'admin', is_active: true },
+      { id: '2', first_name: 'Sarah', last_name: 'Johnson', email: 'sarah@org.com', phone: '(555) 100-0002', department_id: '1', role: 'approver', is_active: true },
+      { id: '3', first_name: 'Mike', last_name: 'Chen', email: 'mike@org.com', phone: '(555) 100-0003', department_id: '2', role: 'submitter', is_active: true },
+      { id: '4', first_name: 'Emily', last_name: 'Davis', email: 'emily@org.com', phone: '(555) 100-0004', department_id: '3', role: 'submitter', is_active: true },
+      { id: '5', first_name: 'James', last_name: 'Wilson', email: 'james@org.com', phone: '(555) 100-0005', department_id: '4', role: 'submitter', is_active: true }
+    ];
+
+    const today = new Date();
+    const formatDateISO = (d) => d.toISOString().split('T')[0];
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+
+    const initialReports = [
+      { id: '1', title: 'Conference Travel - March', description: 'Annual industry conference in Chicago', submitter_id: '3', submitter_name: 'Mike Chen', submitter_email: 'mike@org.com', department_id: '2', department_name: 'Events', status: 'submitted', total_amount: 1247.50, item_count: 4, created_at: addDays(today, -5).toISOString(), submitted_at: addDays(today, -4).toISOString(), notes: '' },
+      { id: '2', title: 'Kitchen Supplies - Weekly', description: 'Regular kitchen restocking', submitter_id: '4', submitter_name: 'Emily Davis', submitter_email: 'emily@org.com', department_id: '3', department_name: 'Kitchen', status: 'approved', total_amount: 342.18, item_count: 6, created_at: addDays(today, -7).toISOString(), submitted_at: addDays(today, -6).toISOString(), approved_at: addDays(today, -5).toISOString(), approved_by: '2', approver_name: 'Sarah Johnson', notes: '' },
+      { id: '3', title: 'Grounds Equipment Repair', description: 'Lawn mower maintenance', submitter_id: '5', submitter_name: 'James Wilson', submitter_email: 'james@org.com', department_id: '4', department_name: 'Grounds', status: 'paid', total_amount: 189.00, item_count: 2, created_at: addDays(today, -14).toISOString(), submitted_at: addDays(today, -13).toISOString(), approved_at: addDays(today, -12).toISOString(), paid_at: addDays(today, -10).toISOString(), payment_method: 'check', payment_reference: '4521', paid_by: 'Admin User', notes: '' },
+      { id: '4', title: 'Office Supplies', description: 'Printer paper, pens, folders', submitter_id: '3', submitter_name: 'Mike Chen', submitter_email: 'mike@org.com', department_id: '1', department_name: 'Operations', status: 'draft', total_amount: 87.43, item_count: 3, created_at: addDays(today, -1).toISOString(), notes: '' },
+      { id: '5', title: 'Volunteer Appreciation Dinner', description: 'Catering for volunteer event', submitter_id: '4', submitter_name: 'Emily Davis', submitter_email: 'emily@org.com', department_id: '2', department_name: 'Events', status: 'rejected', total_amount: 2500.00, item_count: 1, created_at: addDays(today, -10).toISOString(), submitted_at: addDays(today, -9).toISOString(), rejection_reason: 'Exceeds budget. Please get additional quotes and resubmit.', notes: '' },
+      { id: '6', title: 'Monthly Mileage - March', description: 'Site visits and errands', submitter_id: '5', submitter_name: 'James Wilson', submitter_email: 'james@org.com', department_id: '4', department_name: 'Grounds', status: 'submitted', total_amount: 181.25, item_count: 1, created_at: addDays(today, -2).toISOString(), submitted_at: addDays(today, -1).toISOString(), notes: '' }
+    ];
+
+    const initialItems = {
+      '1': [
+        { id: '1a', description: 'Flight to Chicago', expense_date: formatDateISO(addDays(today, -20)), category_id: '4', category_name: 'Travel', amount: 425.00, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '1b', description: 'Hotel - 3 nights', expense_date: formatDateISO(addDays(today, -18)), category_id: '4', category_name: 'Travel', amount: 547.50, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '1c', description: 'Conference registration', expense_date: formatDateISO(addDays(today, -30)), category_id: '4', category_name: 'Travel', amount: 200.00, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '1d', description: 'Meals - 3 days', expense_date: formatDateISO(addDays(today, -17)), category_id: '6', category_name: 'Per Diem', amount: 0, quantity: 1, is_mileage: false, is_per_diem: true, per_diem_days: 3, per_diem_rate: 25.00, payment_method: 'personal_card' }
+      ],
+      '2': [
+        { id: '2a', description: 'Paper towels (bulk)', expense_date: formatDateISO(addDays(today, -7)), category_id: '1', category_name: 'Supplies', amount: 45.99, quantity: 2, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '2b', description: 'Dish soap', expense_date: formatDateISO(addDays(today, -7)), category_id: '1', category_name: 'Supplies', amount: 12.50, quantity: 4, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '2c', description: 'Aluminum foil', expense_date: formatDateISO(addDays(today, -7)), category_id: '1', category_name: 'Supplies', amount: 8.99, quantity: 3, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '2d', description: 'Cooking oil', expense_date: formatDateISO(addDays(today, -7)), category_id: '2', category_name: 'Food & Beverage', amount: 24.99, quantity: 2, is_mileage: false, is_per_diem: false, payment_method: 'personal_cash' },
+        { id: '2e', description: 'Spices assortment', expense_date: formatDateISO(addDays(today, -7)), category_id: '2', category_name: 'Food & Beverage', amount: 34.75, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_cash' },
+        { id: '2f', description: 'Plastic wrap', expense_date: formatDateISO(addDays(today, -7)), category_id: '1', category_name: 'Supplies', amount: 6.99, quantity: 2, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' }
+      ],
+      '3': [
+        { id: '3a', description: 'Blade sharpening', expense_date: formatDateISO(addDays(today, -14)), category_id: '7', category_name: 'Maintenance', amount: 45.00, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' },
+        { id: '3b', description: 'Oil change and tune-up', expense_date: formatDateISO(addDays(today, -14)), category_id: '7', category_name: 'Maintenance', amount: 144.00, quantity: 1, is_mileage: false, is_per_diem: false, payment_method: 'personal_card' }
+      ],
+      '6': [
+        { id: '6a', description: 'Site visits and supply runs', expense_date: formatDateISO(addDays(today, -2)), category_id: '5', category_name: 'Mileage', amount: 0, quantity: 1, is_mileage: true, mileage_miles: 250, mileage_rate: 0.725, is_per_diem: false }
+      ]
+    };
+
+    const initialComments = {
+      '1': [
+        { id: 'c1', comment: 'Expense report submitted for approval', is_system: true, created_at: addDays(today, -4).toISOString() }
+      ],
+      '2': [
+        { id: 'c2', comment: 'Expense report submitted for approval', is_system: true, created_at: addDays(today, -6).toISOString() },
+        { id: 'c3', comment: 'Approved by Sarah Johnson', is_system: true, created_at: addDays(today, -5).toISOString() },
+        { id: 'c4', user_name: 'Sarah Johnson', comment: 'Looks good, approved!', is_system: false, created_at: addDays(today, -5).toISOString() }
+      ],
+      '5': [
+        { id: 'c5', comment: 'Expense report submitted for approval', is_system: true, created_at: addDays(today, -9).toISOString() },
+        { id: 'c6', comment: 'Rejected: Exceeds budget. Please get additional quotes and resubmit.', is_system: true, created_at: addDays(today, -8).toISOString() }
+      ]
+    };
+
+    const settings = {
+      organization_name: 'Demo Organization',
+      current_mileage_rate: '0.67',
+      default_per_diem_rate: '75.00',
+      require_receipt_over: '25.00'
+    };
+
+    // Helpers
+    const formatCurrency = (amount) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount || 0);
+    const formatDate = (dateStr) => dateStr ? new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const formatDateTime = (dateStr) => dateStr ? new Date(dateStr).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+
+    const statusLabels = { draft: 'Draft', submitted: 'Submitted', pending_approval: 'Pending', approved: 'Approved', rejected: 'Rejected', paid: 'Paid', cancelled: 'Cancelled' };
+    const statusBadges = { draft: 'bg-gray-100 text-gray-800', submitted: 'bg-yellow-100 text-yellow-800', pending_approval: 'bg-yellow-100 text-yellow-800', approved: 'bg-blue-100 text-blue-800', rejected: 'bg-red-100 text-red-800', paid: 'bg-green-100 text-green-800', cancelled: 'bg-gray-100 text-gray-600' };
+
+    // Modal Component
+    function Modal({ title, onClose, children }) {
+      return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-3 sm:p-4 border-b flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-base sm:text-lg font-semibold">{title}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl p-2 min-h-[44px] min-w-[44px] flex items-center justify-center">&times;</button>
+            </div>
+            <div className="p-3 sm:p-4">{children}</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Main App
+    function App() {
+      const [view, setView] = useState('dashboard');
+      const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+      const [reports, setReports] = useState(initialReports);
+      const [items, setItems] = useState(initialItems);
+      const [comments, setComments] = useState(initialComments);
+      const [selectedReport, setSelectedReport] = useState(null);
+      const [showRejectModal, setShowRejectModal] = useState(false);
+      const [showPaymentModal, setShowPaymentModal] = useState(false);
+      const [rejectReason, setRejectReason] = useState('');
+      const [paymentData, setPaymentData] = useState({ method: 'check', reference: '' });
+
+      // localStorage persistence
+      useEffect(() => {
+        const saved = localStorage.getItem('expensetrack_data');
+        if (saved) {
+          const d = JSON.parse(saved);
+          if (d.reports) setReports(d.reports);
+          if (d.items) setItems(d.items);
+          if (d.comments) setComments(d.comments);
+        }
+      }, []);
+      useEffect(() => {
+        localStorage.setItem('expensetrack_data', JSON.stringify({ reports, items, comments }));
+      }, [reports, items, comments]);
+
+      const currentUser = initialUsers[0]; // Admin user
+
+      const navigateTo = (newView, report = null) => {
+        setView(newView);
+        setSelectedReport(report);
+        setMobileMenuOpen(false);
+      };
+
+      const updateReportStatus = (id, status, extra = {}) => {
+        setReports(prev => prev.map(r => r.id === id ? { ...r, status, ...extra } : r));
+        const msg = status === 'approved' ? `Approved by ${currentUser.first_name} ${currentUser.last_name}` :
+                    status === 'rejected' ? `Rejected: ${extra.rejection_reason}` :
+                    status === 'paid' ? `Marked as paid via ${extra.payment_method}` :
+                    `Status changed to ${status}`;
+        addComment(id, msg, true);
+      };
+
+      const addComment = (reportId, comment, isSystem = false) => {
+        setComments(prev => ({
+          ...prev,
+          [reportId]: [...(prev[reportId] || []), {
+            id: Date.now().toString(),
+            comment,
+            is_system: isSystem,
+            user_name: isSystem ? null : `${currentUser.first_name} ${currentUser.last_name}`,
+            created_at: new Date().toISOString()
+          }]
+        }));
+      };
+
+      const stats = useMemo(() => {
+        const pending = reports.filter(r => r.status === 'submitted' || r.status === 'pending_approval');
+        const approved = reports.filter(r => r.status === 'approved');
+        return {
+          pendingCount: pending.length,
+          pendingAmount: pending.reduce((sum, r) => sum + parseFloat(r.total_amount), 0),
+          approvedCount: approved.length,
+          approvedAmount: approved.reduce((sum, r) => sum + parseFloat(r.total_amount), 0),
+          totalReports: reports.length,
+          totalAmount: reports.reduce((sum, r) => sum + parseFloat(r.total_amount), 0)
+        };
+      }, [reports]);
+
+      const navItems = [
+        { key: 'dashboard', label: 'Dashboard', icon: '📊' },
+        { key: 'expenses', label: 'Expenses', icon: '💳' },
+        { key: 'reports', label: 'Reports', icon: '📈' },
+        { key: 'users', label: 'Users', icon: '👥' }
+      ];
+
+      // Dashboard View
+      const DashboardView = () => {
+        const pendingApproval = reports.filter(r => r.status === 'submitted' || r.status === 'pending_approval');
+        const awaitingPayment = reports.filter(r => r.status === 'approved');
+
+        return (
+          <div className="space-y-4 sm:space-y-6">
+            {/* Quick Actions */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button onClick={() => alert('New expense form would open')} className="flex-1 sm:flex-none bg-emerald-600 text-white px-6 py-3 rounded-xl hover:bg-emerald-700 active:bg-emerald-800 font-medium flex items-center justify-center gap-2 min-h-[48px] shadow-sm">
+                <span className="text-xl">+</span> New Expense Report
+              </button>
+              <button onClick={() => navigateTo('expenses')} className="flex-1 sm:flex-none bg-white text-gray-700 px-6 py-3 rounded-xl hover:bg-gray-50 active:bg-gray-100 font-medium border min-h-[48px] shadow-sm">
+                View All Expenses
+              </button>
+            </div>
+
+            {/* Stats */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{stats.pendingCount}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Pending Approval</div>
+                <div className="text-yellow-600 font-medium text-sm mt-1">{formatCurrency(stats.pendingAmount)}</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.approvedCount}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Awaiting Payment</div>
+                <div className="text-blue-600 font-medium text-sm mt-1">{formatCurrency(stats.approvedAmount)}</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-600">{stats.totalReports}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Total Reports</div>
+                <div className="text-emerald-600 font-medium text-sm mt-1">{formatCurrency(stats.totalAmount)}</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-purple-600">{initialUsers.filter(u => u.is_active).length}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Active Users</div>
+              </div>
+            </div>
+
+            {/* Pending Approval */}
+            {pendingApproval.length > 0 && (
+              <div className="bg-white rounded-xl shadow">
+                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="text-yellow-500">⏳</span> Pending Your Approval
+                  </h2>
+                  <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-sm font-medium">{pendingApproval.length}</span>
+                </div>
+                <div className="divide-y">
+                  {pendingApproval.map(report => (
+                    <div key={report.id} onClick={() => navigateTo('detail', report)} className="p-3 sm:p-4 hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 flex-1">
+                          <div className="font-medium text-gray-800 truncate">{report.title}</div>
+                          <div className="text-sm text-gray-500">{report.submitter_name} • {formatDate(report.submitted_at)}</div>
+                          {report.department_name && <div className="text-xs text-gray-400 mt-1">{report.department_name}</div>}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className="font-bold text-gray-800">{formatCurrency(report.total_amount)}</div>
+                          <div className="text-xs text-gray-500">{report.item_count} item{report.item_count !== 1 ? 's' : ''}</div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Awaiting Payment */}
+            {awaitingPayment.length > 0 && (
+              <div className="bg-white rounded-xl shadow">
+                <div className="px-4 sm:px-5 py-3 sm:py-4 border-b flex items-center justify-between">
+                  <h2 className="font-semibold text-gray-800 flex items-center gap-2">
+                    <span className="text-blue-500">💵</span> Ready for Payment
+                  </h2>
+                  <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded-full text-sm font-medium">{awaitingPayment.length}</span>
+                </div>
+                <div className="divide-y">
+                  {awaitingPayment.map(report => (
+                    <div key={report.id} onClick={() => navigateTo('detail', report)} className="p-3 sm:p-4 hover:bg-gray-50 active:bg-gray-100 cursor-pointer">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <div className="font-medium text-gray-800 truncate">{report.submitter_name}</div>
+                          <div className="text-sm text-gray-500 truncate">{report.title}</div>
+                        </div>
+                        <div className="font-bold text-blue-600 flex-shrink-0">{formatCurrency(report.total_amount)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Department Budgets */}
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h2 className="font-semibold text-gray-800 mb-4">Spending by Department</h2>
+              <div className="space-y-3">
+                {initialDepartments.map(dept => {
+                  const deptReports = reports.filter(r => r.department_id === dept.id && !['cancelled', 'rejected'].includes(r.status));
+                  const spent = deptReports.reduce((sum, r) => sum + parseFloat(r.total_amount), 0);
+                  const budget = parseFloat(dept.budget_amount);
+                  const percentage = budget > 0 ? Math.min((spent / budget) * 100, 100) : 0;
+                  return (
+                    <div key={dept.id}>
+                      <div className="flex items-center justify-between text-sm mb-1">
+                        <span className="font-medium text-gray-700">{dept.name}</span>
+                        <span className="text-gray-500">{formatCurrency(spent)} / {formatCurrency(budget)}</span>
+                      </div>
+                      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all ${percentage >= 90 ? 'bg-red-500' : percentage >= 75 ? 'bg-yellow-500' : 'bg-emerald-500'}`} style={{ width: `${percentage}%` }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Expenses List View
+      const ExpensesView = () => {
+        const [search, setSearch] = useState('');
+        const [filterStatus, setFilterStatus] = useState('all');
+
+        const filtered = reports.filter(r => {
+          const matchesSearch = !search || r.title.toLowerCase().includes(search.toLowerCase()) || r.submitter_name.toLowerCase().includes(search.toLowerCase());
+          const matchesStatus = filterStatus === 'all' || r.status === filterStatus;
+          return matchesSearch && matchesStatus;
+        });
+
+        return (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Expense Reports</h2>
+                <button onClick={() => alert('New expense form would open')} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:bg-emerald-800 flex items-center justify-center gap-2 min-h-[44px]">
+                  <span className="text-xl">+</span> New Expense
+                </button>
+              </div>
+              <div className="mt-3">
+                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search..." className="w-full border rounded-lg px-3 py-2 min-h-[44px]" />
+              </div>
+              <div className="flex flex-wrap gap-2 mt-3">
+                <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="border rounded-lg px-3 py-2 text-sm min-h-[44px] flex-1 sm:flex-none">
+                  <option value="all">All Status</option>
+                  {Object.entries(statusLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="bg-emerald-50 rounded-xl p-3 flex justify-between items-center">
+              <span className="text-emerald-800 font-medium">{filtered.length} reports</span>
+              <span className="text-emerald-800 font-bold">Total: {formatCurrency(filtered.reduce((s, r) => s + parseFloat(r.total_amount), 0))}</span>
+            </div>
+
+            <div className="space-y-3">
+              {filtered.map(report => (
+                <div key={report.id} className="bg-white rounded-xl shadow overflow-hidden">
+                  <div onClick={() => navigateTo('detail', report)} className="p-3 sm:p-4 cursor-pointer hover:bg-gray-50 active:bg-gray-100">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <h3 className="font-semibold text-gray-800 text-sm sm:text-base">{report.title}</h3>
+                          <span className={`px-2 py-0.5 rounded-full text-xs ${statusBadges[report.status]}`}>{statusLabels[report.status]}</span>
+                        </div>
+                        <div className="text-sm text-gray-500 mt-1">{report.submitter_name} • {report.department_name}</div>
+                        <div className="text-xs text-gray-400 mt-1">Created {formatDate(report.created_at)}</div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-lg font-bold text-gray-800">{formatCurrency(report.total_amount)}</div>
+                        <div className="text-xs text-gray-500">{report.item_count} items</div>
+                      </div>
+                    </div>
+                    {report.status === 'rejected' && report.rejection_reason && (
+                      <div className="mt-3 pt-3 border-t text-sm text-red-600 bg-red-50 p-2 rounded">
+                        <strong>Rejected:</strong> {report.rejection_reason}
+                      </div>
+                    )}
+                    {report.status === 'paid' && (
+                      <div className="mt-3 pt-3 border-t text-sm text-green-600">
+                        ✓ Paid {formatDate(report.paid_at)} via {report.payment_method} {report.payment_reference && `(${report.payment_reference})`}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      };
+
+      // Detail View
+      const DetailView = () => {
+        if (!selectedReport) return null;
+        const reportItems = items[selectedReport.id] || [];
+        const reportComments = comments[selectedReport.id] || [];
+
+        const canApprove = (selectedReport.status === 'submitted' || selectedReport.status === 'pending_approval');
+        const canPay = selectedReport.status === 'approved';
+
+        const getItemAmount = (item) => {
+          if (item.is_mileage) return (parseFloat(item.mileage_miles) || 0) * (parseFloat(item.mileage_rate) || 0);
+          if (item.is_per_diem) return (parseInt(item.per_diem_days) || 0) * (parseFloat(item.per_diem_rate) || 0);
+          return (parseFloat(item.amount) || 0) * (parseInt(item.quantity) || 1);
+        };
+
+        return (
+          <div className="space-y-4">
+            {/* Header */}
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div className="min-w-0 flex-1">
+                  <button onClick={() => navigateTo('expenses')} className="text-emerald-600 hover:text-emerald-800 text-sm mb-2 min-h-[44px] flex items-center">← Back to List</button>
+                  <h2 className="text-lg sm:text-xl font-semibold text-gray-800">{selectedReport.title}</h2>
+                  <div className="flex flex-wrap items-center gap-2 mt-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${statusBadges[selectedReport.status]}`}>{statusLabels[selectedReport.status]}</span>
+                    {selectedReport.department_name && <span className="text-gray-500 text-sm">• {selectedReport.department_name}</span>}
+                  </div>
+                </div>
+                <div className="text-right flex-shrink-0">
+                  <div className="text-2xl font-bold text-emerald-600">{formatCurrency(selectedReport.total_amount)}</div>
+                  <div className="text-sm text-gray-500">{selectedReport.item_count} items</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Rejection Alert */}
+            {selectedReport.status === 'rejected' && selectedReport.rejection_reason && (
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="font-medium text-red-800 mb-1">Rejection Reason</div>
+                <div className="text-red-700">{selectedReport.rejection_reason}</div>
+              </div>
+            )}
+
+            {/* Payment Info */}
+            {selectedReport.status === 'paid' && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                <div className="font-medium text-green-800 mb-1">Payment Information</div>
+                <div className="text-green-700">
+                  Paid {formatDate(selectedReport.paid_at)} via {selectedReport.payment_method}
+                  {selectedReport.payment_reference && ` • Ref: ${selectedReport.payment_reference}`}
+                  {selectedReport.paid_by && ` • By: ${selectedReport.paid_by}`}
+                </div>
+              </div>
+            )}
+
+            {/* Report Info */}
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 border-b pb-2 mb-4">Report Details</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <div className="text-gray-500">Submitted By</div>
+                  <div className="font-medium">{selectedReport.submitter_name}</div>
+                  <div className="text-gray-500">{selectedReport.submitter_email}</div>
+                </div>
+                <div>
+                  <div className="text-gray-500">Created</div>
+                  <div className="font-medium">{formatDate(selectedReport.created_at)}</div>
+                </div>
+                {selectedReport.submitted_at && (
+                  <div>
+                    <div className="text-gray-500">Submitted</div>
+                    <div className="font-medium">{formatDate(selectedReport.submitted_at)}</div>
+                  </div>
+                )}
+                {selectedReport.approved_at && (
+                  <div>
+                    <div className="text-gray-500">Approved</div>
+                    <div className="font-medium">{formatDate(selectedReport.approved_at)}</div>
+                    {selectedReport.approver_name && <div className="text-gray-500">By: {selectedReport.approver_name}</div>}
+                  </div>
+                )}
+              </div>
+              {selectedReport.description && (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="text-gray-500 text-sm mb-1">Description</div>
+                  <div className="text-gray-700">{selectedReport.description}</div>
+                </div>
+              )}
+            </div>
+
+            {/* Expense Items */}
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 border-b pb-2 mb-4">Expense Items</h3>
+              <div className="space-y-3">
+                {reportItems.map(item => (
+                  <div key={item.id} className="border rounded-lg p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="font-medium text-gray-800">{item.description}</div>
+                        <div className="text-sm text-gray-500 mt-1">
+                          {formatDate(item.expense_date)} • {item.category_name}
+                        </div>
+                        {item.is_mileage && <div className="text-sm text-gray-500">🚗 {item.mileage_miles} miles @ {formatCurrency(item.mileage_rate)}/mi</div>}
+                        {item.is_per_diem && <div className="text-sm text-gray-500">🍽️ {item.per_diem_days} days @ {formatCurrency(item.per_diem_rate)}/day</div>}
+                        {!item.is_mileage && !item.is_per_diem && item.quantity > 1 && <div className="text-sm text-gray-500">{item.quantity} × {formatCurrency(item.amount)}</div>}
+                      </div>
+                      <div className="font-bold text-gray-800">{formatCurrency(getItemAmount(item))}</div>
+                    </div>
+                  </div>
+                ))}
+                <div className="border-t pt-4 mt-4 flex items-center justify-between">
+                  <span className="text-lg font-medium text-gray-700">Total</span>
+                  <span className="text-2xl font-bold text-emerald-600">{formatCurrency(selectedReport.total_amount)}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Comments */}
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 border-b pb-2 mb-4">Activity & Comments</h3>
+              <div className="space-y-3 mb-4">
+                {reportComments.length === 0 ? (
+                  <div className="text-gray-500 text-sm">No comments yet</div>
+                ) : (
+                  reportComments.map(c => (
+                    <div key={c.id} className={`p-3 rounded-lg ${c.is_system ? 'bg-gray-50' : 'bg-blue-50'}`}>
+                      <div className="text-sm">
+                        {c.is_system ? (
+                          <span className="text-gray-600 italic">🔄 {c.comment}</span>
+                        ) : (
+                          <>
+                            <span className="font-medium text-gray-800">{c.user_name}</span>
+                            <span className="text-gray-500 ml-2">{formatDateTime(c.created_at)}</span>
+                            <div className="text-gray-700 mt-1">{c.comment}</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+              <div className="flex gap-2">
+                <input type="text" placeholder="Add a comment..." className="flex-1 border rounded-lg px-3 py-2 min-h-[44px]" onKeyPress={(e) => { if (e.key === 'Enter' && e.target.value) { addComment(selectedReport.id, e.target.value); e.target.value = ''; }}} />
+                <button className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 min-h-[44px]">Send</button>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 border-b pb-2 mb-4">Actions</h3>
+              <div className="flex flex-wrap gap-2 sm:gap-3">
+                {canApprove && (
+                  <>
+                    <button onClick={() => { updateReportStatus(selectedReport.id, 'approved', { approved_at: new Date().toISOString(), approved_by: currentUser.id, approver_name: `${currentUser.first_name} ${currentUser.last_name}` }); navigateTo('expenses'); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 active:bg-green-800 min-h-[44px]">✓ Approve</button>
+                    <button onClick={() => setShowRejectModal(true)} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 active:bg-red-800 min-h-[44px]">✕ Reject</button>
+                  </>
+                )}
+                {canPay && (
+                  <button onClick={() => setShowPaymentModal(true)} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 min-h-[44px]">💵 Mark as Paid</button>
+                )}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Reports View
+      const ReportsView = () => {
+        const byStatus = {};
+        const byDepartment = {};
+        reports.forEach(r => {
+          byStatus[r.status] = byStatus[r.status] || { count: 0, amount: 0 };
+          byStatus[r.status].count++;
+          byStatus[r.status].amount += parseFloat(r.total_amount);
+          const dept = r.department_name || 'Unassigned';
+          byDepartment[dept] = byDepartment[dept] || { count: 0, amount: 0 };
+          byDepartment[dept].count++;
+          byDepartment[dept].amount += parseFloat(r.total_amount);
+        });
+
+        const statusColors = { draft: 'bg-gray-400', submitted: 'bg-yellow-400', pending_approval: 'bg-yellow-400', approved: 'bg-blue-400', rejected: 'bg-red-400', paid: 'bg-green-400', cancelled: 'bg-gray-300' };
+        const maxAmount = Math.max(...Object.values(byStatus).map(d => d.amount), 1);
+
+        return (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Reports & Analytics</h2>
+            </div>
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-gray-800">{reports.length}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Total Reports</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-emerald-600">{formatCurrency(stats.totalAmount)}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Total Amount</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-green-600">{formatCurrency(reports.filter(r => r.status === 'paid').reduce((s, r) => s + parseFloat(r.total_amount), 0))}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Paid Out</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+                <div className="text-2xl sm:text-3xl font-bold text-yellow-600">{formatCurrency(stats.pendingAmount + stats.approvedAmount)}</div>
+                <div className="text-gray-500 text-xs sm:text-sm">Pending/Approved</div>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 mb-4">Breakdown by Status</h3>
+              <div className="space-y-3">
+                {Object.entries(byStatus).sort((a, b) => b[1].amount - a[1].amount).map(([status, data]) => (
+                  <div key={status}>
+                    <div className="flex items-center justify-between text-sm mb-1">
+                      <span className="font-medium text-gray-700">{statusLabels[status]}</span>
+                      <span className="text-gray-600">{data.count} reports • {formatCurrency(data.amount)}</span>
+                    </div>
+                    <div className="h-4 bg-gray-100 rounded-full overflow-hidden">
+                      <div className={`h-full rounded-full ${statusColors[status]}`} style={{ width: `${(data.amount / maxAmount) * 100}%` }} />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <h3 className="font-medium text-gray-700 mb-4">Department Summary</h3>
+              <div className="space-y-3">
+                {Object.entries(byDepartment).sort((a, b) => b[1].amount - a[1].amount).map(([dept, data]) => (
+                  <div key={dept} className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50">
+                    <span className="text-gray-800">{dept}</span>
+                    <div className="text-right">
+                      <div className="font-medium text-gray-800">{formatCurrency(data.amount)}</div>
+                      <div className="text-xs text-gray-500">{data.count} reports</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Users View
+      const UsersView = () => (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Users</h2>
+              <button onClick={() => alert('Add user form would open')} className="bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 active:bg-emerald-800 flex items-center justify-center gap-2 min-h-[44px]">
+                <span className="text-xl">+</span> Add User
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-gray-600">{initialUsers.filter(u => u.role === 'submitter').length}</div>
+              <div className="text-xs sm:text-sm text-gray-500">Submitters</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-blue-600">{initialUsers.filter(u => u.role === 'approver').length}</div>
+              <div className="text-xs sm:text-sm text-gray-500">Approvers</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+              <div className="text-xl sm:text-2xl font-bold text-purple-600">{initialUsers.filter(u => u.role === 'admin').length}</div>
+              <div className="text-xs sm:text-sm text-gray-500">Admins</div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {initialUsers.map(user => (
+              <div key={user.id} className="bg-white rounded-xl shadow p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-medium text-gray-800">{user.first_name} {user.last_name}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs ${user.role === 'admin' ? 'bg-purple-100 text-purple-800' : user.role === 'approver' ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                        {user.role.charAt(0).toUpperCase() + user.role.slice(1)}
+                      </span>
+                    </div>
+                    <a href={`mailto:${user.email}`} className="text-sm text-emerald-600 break-all">{user.email}</a>
+                    {user.phone && <div className="text-sm text-gray-500">{user.phone}</div>}
+                    <div className="text-xs text-gray-400 mt-1">Department: {initialDepartments.find(d => d.id === user.department_id)?.name || 'None'}</div>
+                  </div>
+                  <button className="text-emerald-600 hover:text-emerald-800 px-3 py-2 min-h-[44px]">Edit</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+      return (
+        <div className="min-h-screen bg-gray-100">
+          {/* Header */}
+          <header className="bg-emerald-600 text-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
+              <div className="flex items-center justify-between">
+                <h1 className="text-xl sm:text-2xl font-bold">ExpenseTrack</h1>
+                <nav className="hidden md:flex gap-1 lg:gap-2">
+                  {navItems.map(item => (
+                    <button key={item.key} onClick={() => navigateTo(item.key)} className={`px-3 lg:px-4 py-2 rounded-lg transition text-sm lg:text-base min-h-[44px] ${view === item.key ? 'bg-emerald-700' : 'hover:bg-emerald-500 active:bg-emerald-700'}`}>
+                      <span className="lg:hidden">{item.icon}</span>
+                      <span className="hidden lg:inline">{item.label}</span>
+                    </button>
+                  ))}
+                </nav>
+                <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="md:hidden p-2 rounded-lg hover:bg-emerald-500 min-h-[44px] min-w-[44px] flex items-center justify-center">
+                  <span className="text-2xl">{mobileMenuOpen ? '✕' : '☰'}</span>
+                </button>
+              </div>
+              {mobileMenuOpen && (
+                <nav className="md:hidden mt-3 pt-3 border-t border-emerald-500 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {navItems.map(item => (
+                    <button key={item.key} onClick={() => navigateTo(item.key)} className={`px-3 py-3 rounded-lg transition text-sm text-center ${view === item.key ? 'bg-emerald-700' : 'hover:bg-emerald-500 active:bg-emerald-700'}`}>
+                      <div className="text-xl mb-1">{item.icon}</div>
+                      <div>{item.label}</div>
+                    </button>
+                  ))}
+                </nav>
+              )}
+              <div className="hidden md:block text-sm text-emerald-200 mt-1">
+                Logged in as: {currentUser.first_name} {currentUser.last_name} ({currentUser.role})
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            {view === 'dashboard' && <DashboardView />}
+            {view === 'expenses' && <ExpensesView />}
+            {view === 'detail' && <DetailView />}
+            {view === 'reports' && <ReportsView />}
+            {view === 'users' && <UsersView />}
+          </main>
+
+          {/* Reject Modal */}
+          {showRejectModal && (
+            <Modal title="Reject Expense Report" onClose={() => { setShowRejectModal(false); setRejectReason(''); }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Reason for Rejection *</label>
+                  <textarea value={rejectReason} onChange={(e) => setRejectReason(e.target.value)} rows={3} className="w-full border rounded-lg px-3 py-2" placeholder="Explain why this report is being rejected..." />
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => { if (rejectReason) { updateReportStatus(selectedReport.id, 'rejected', { rejection_reason: rejectReason }); setShowRejectModal(false); setRejectReason(''); navigateTo('expenses'); } else { alert('Please provide a reason'); }}} className="flex-1 bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 min-h-[44px]">Reject</button>
+                  <button onClick={() => { setShowRejectModal(false); setRejectReason(''); }} className="px-4 py-2 border rounded-lg hover:bg-gray-50 min-h-[44px]">Cancel</button>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {/* Payment Modal */}
+          {showPaymentModal && (
+            <Modal title="Mark as Paid" onClose={() => { setShowPaymentModal(false); setPaymentData({ method: 'check', reference: '' }); }}>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                  <select value={paymentData.method} onChange={(e) => setPaymentData({ ...paymentData, method: e.target.value })} className="w-full border rounded-lg px-3 py-2 min-h-[44px]">
+                    <option value="check">Check</option>
+                    <option value="direct_deposit">Direct Deposit</option>
+                    <option value="cash">Cash</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Reference # (Check # / Transaction ID)</label>
+                  <input type="text" value={paymentData.reference} onChange={(e) => setPaymentData({ ...paymentData, reference: e.target.value })} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" placeholder="Optional" />
+                </div>
+                <div className="bg-emerald-50 p-3 rounded-lg">
+                  <div className="text-sm text-emerald-800">Amount: <strong>{formatCurrency(selectedReport?.total_amount)}</strong></div>
+                  <div className="text-sm text-emerald-800">Payee: <strong>{selectedReport?.submitter_name}</strong></div>
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => { updateReportStatus(selectedReport.id, 'paid', { paid_at: new Date().toISOString(), payment_method: paymentData.method, payment_reference: paymentData.reference, paid_by: `${currentUser.first_name} ${currentUser.last_name}` }); setShowPaymentModal(false); setPaymentData({ method: 'check', reference: '' }); navigateTo('expenses'); }} className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 min-h-[44px]">Confirm Payment</button>
+                  <button onClick={() => { setShowPaymentModal(false); setPaymentData({ method: 'check', reference: '' }); }} className="px-4 py-2 border rounded-lg hover:bg-gray-50 min-h-[44px]">Cancel</button>
+                </div>
+              </div>
+            </Modal>
+          )}
+
+          {/* Demo Badge */}
+          <div className="fixed bottom-4 right-4 bg-amber-100 text-amber-800 px-3 py-2 rounded-lg shadow-lg text-xs sm:text-sm">
+            Demo Mode - Data resets on refresh
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

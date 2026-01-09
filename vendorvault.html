@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VendorVault - Vendor Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#4f46e5;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#6366f1);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(79,70,229,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-active{background:rgba(34,197,94,.15);color:var(--success)}.badge-pending{background:rgba(245,158,11,.15);color:var(--warning)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🏪</div><span class="logo-text">VendorVault</span></div>
+      <div class="nav-item active" onclick="showView('vendors')">🏪 Vendors</div>
+      <div class="nav-item" onclick="showView('contracts')">📄 Contracts</div>
+      <div class="nav-item" onclick="showView('documents')">📁 Documents</div>
+      <div class="nav-item" onclick="showView('spend')">💰 Spend</div>
+    </nav>
+    <main class="main">
+      <div id="view-vendors" class="view active">
+        <div class="header"><h1 class="title">Vendors</h1><button class="btn btn-primary" onclick="openModal()">+ Add Vendor</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Vendors</div><div class="stat-value" id="stat-vendors">0</div></div>
+          <div class="stat-card"><div class="stat-label">Active Contracts</div><div class="stat-value" style="color:var(--success)" id="stat-contracts">0</div></div>
+          <div class="stat-card"><div class="stat-label">YTD Spend</div><div class="stat-value" style="color:var(--primary)">$142K</div></div>
+          <div class="stat-card"><div class="stat-label">Pending Renewal</div><div class="stat-value" style="color:var(--warning)">3</div></div>
+        </div>
+        <div class="card"><table class="table"><thead><tr><th>Vendor</th><th>Category</th><th>Contact</th><th>Contract Status</th><th>Actions</th></tr></thead><tbody id="vendor-list"></tbody></table></div>
+      </div>
+      <div id="view-contracts" class="view">
+        <div class="header"><h1 class="title">Contracts</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Vendor</th><th>Contract</th><th>Start</th><th>End</th><th>Value</th><th>Status</th></tr></thead><tbody id="contract-list"></tbody></table></div>
+      </div>
+      <div id="view-documents" class="view">
+        <div class="header"><h1 class="title">Documents</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Document</th><th>Vendor</th><th>Type</th><th>Uploaded</th></tr></thead><tbody id="doc-list"></tbody></table></div>
+      </div>
+      <div id="view-spend" class="view">
+        <div class="header"><h1 class="title">Spend Analysis</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value">$28,400</div></div><div class="stat-card"><div class="stat-label">Last Month</div><div class="stat-value">$32,100</div></div><div class="stat-card"><div class="stat-label">Top Vendor</div><div class="stat-value">Tech Co</div></div><div class="stat-card"><div class="stat-label">Categories</div><div class="stat-value">8</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Add Vendor</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Vendor Name</label><input type="text" class="form-input" id="v-name" placeholder="ABC Company"></div><div class="form-group"><label class="form-label">Category</label><select class="form-select" id="v-cat"><option>Technology</option><option>Office Supplies</option><option>Services</option><option>Equipment</option></select></div><div class="form-group"><label class="form-label">Contact Email</label><input type="email" class="form-input" id="v-email" placeholder="contact@vendor.com"></div><div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="v-phone" placeholder="555-1234"></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveVendor()">Add Vendor</button></div></div></div>
+  <script>
+    let vendors=[{id:1,name:'Tech Solutions Inc',cat:'Technology',email:'sales@techsol.com',phone:'555-1234',status:'active'},{id:2,name:'Office Plus',cat:'Office Supplies',email:'orders@officeplus.com',phone:'555-2345',status:'active'},{id:3,name:'Consulting Group',cat:'Services',email:'info@consultgrp.com',phone:'555-3456',status:'pending'}];
+    let contracts=[{vendor:'Tech Solutions Inc',name:'IT Support',start:'2025-01-01',end:'2026-12-31',value:'$48,000',status:'active'},{vendor:'Office Plus',name:'Supply Agreement',start:'2025-06-01',end:'2026-05-31',value:'$12,000',status:'active'}];
+    let docs=[{name:'W-9 Form',vendor:'Tech Solutions Inc',type:'Tax',date:'2025-01-15'},{name:'Insurance Cert',vendor:'Consulting Group',type:'Insurance',date:'2025-02-01'}];
+    const SK='vendorvault_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({vendors:vendors,contracts:contracts,docs:docs}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.vendors)vendors=d.vendors;if(d.contracts)contracts=d.contracts;if(d.docs)docs=d.docs;}}catch(e){}}
+
+    let nextVendorId=4;
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-vendors').textContent=vendors.length;
+      document.getElementById('stat-contracts').textContent=contracts.filter(c=>c.status==='active').length;
+      document.getElementById('vendor-list').innerHTML=vendors.map(v=>`<tr><td><strong>${v.name}</strong></td><td>${v.cat}</td><td>${v.email}</td><td><span class="badge badge-${v.status}">${v.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="viewVendor(${v.id})">View</button></td></tr>`).join('');
+      document.getElementById('contract-list').innerHTML=contracts.map(c=>`<tr><td>${c.vendor}</td><td>${c.name}</td><td>${c.start}</td><td>${c.end}</td><td>${c.value}</td><td><span class="badge badge-${c.status}">${c.status}</span></td></tr>`).join('');
+      document.getElementById('doc-list').innerHTML=docs.map(d=>`<tr><td>${d.name}</td><td>${d.vendor}</td><td>${d.type}</td><td>${d.date}</td></tr>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveVendor(){const name=document.getElementById('v-name').value;if(!name){alert('Enter vendor name');return;}vendors.push({id:nextVendorId++,name,cat:document.getElementById('v-cat').value,email:document.getElementById('v-email').value,phone:document.getElementById('v-phone').value,status:'pending'});closeModal();saveData();render();document.getElementById('v-name').value='';document.getElementById('v-email').value='';document.getElementById('v-phone').value='';alert('Vendor added!');}
+    function viewVendor(id){const v=vendors.find(x=>x.id===id);if(!v)return;const vendorContracts=contracts.filter(c=>c.vendor===v.name);const vendorDocs=docs.filter(d=>d.vendor===v.name);alert(`${v.name}\n\nCategory: ${v.cat}\nEmail: ${v.email||'-'}\nPhone: ${v.phone||'-'}\nStatus: ${v.status}\n\nContracts: ${vendorContracts.length}\nDocuments: ${vendorDocs.length}`);}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

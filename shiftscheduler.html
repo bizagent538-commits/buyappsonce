@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftScheduler Pro - Employee Scheduling</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#6366f1;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#818cf8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.pro-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(99,102,241,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}.view{display:none}.view.active{display:block}.schedule-grid{display:grid;grid-template-columns:120px repeat(7,1fr);font-size:13px}.schedule-header{background:var(--bg);padding:10px;text-align:center;font-weight:600;border-bottom:1px solid var(--border)}.schedule-emp{padding:10px;background:var(--bg);border-right:1px solid var(--border);border-bottom:1px solid var(--border);font-weight:500}.schedule-cell{padding:8px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);min-height:60px;cursor:pointer}.schedule-cell:hover{background:rgba(99,102,241,.05)}.shift{background:rgba(99,102,241,.15);color:var(--primary);padding:4px 8px;border-radius:4px;font-size:11px;margin-bottom:4px}.shift.off{background:rgba(100,116,139,.1);color:var(--muted)}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:400px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.swap-card{background:var(--bg);border-radius:8px;padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}@media(max-width:1024px){.schedule-grid{font-size:11px}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">📅</div><span class="logo-text">ShiftScheduler <span class="pro-badge">PRO</span></span></div>
+      <div class="nav-item active" onclick="showView('schedule')">📅 Schedule</div>
+      <div class="nav-item" onclick="showView('employees')">👥 Employees</div>
+      <div class="nav-item" onclick="showView('swaps')">🔄 Swap Requests</div>
+      <div class="nav-item" onclick="showView('timesheets')">⏱️ Timesheets</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-schedule" class="view active">
+        <div class="header"><h1 class="title">Weekly Schedule</h1><div><button class="btn btn-secondary" onclick="prevWeek()">← Prev</button> <span style="margin:0 10px;font-weight:600">Jan 5 - 11, 2026</span> <button class="btn btn-secondary" onclick="nextWeek()">Next →</button> <button class="btn btn-primary" style="margin-left:16px" onclick="openModal()">+ Add Shift</button></div></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Scheduled Hours</div><div class="stat-value" id="stat-hours">0</div></div>
+          <div class="stat-card"><div class="stat-label">Labor Cost</div><div class="stat-value" style="color:var(--primary)" id="stat-cost">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Open Shifts</div><div class="stat-value" style="color:var(--warning)" id="stat-open">0</div></div>
+          <div class="stat-card"><div class="stat-label">Swap Requests</div><div class="stat-value" style="color:var(--danger)" id="stat-swaps">0</div></div>
+        </div>
+        <div class="card"><div class="schedule-grid" id="schedule-grid"></div></div>
+      </div>
+      <div id="view-employees" class="view">
+        <div class="header"><h1 class="title">Employees</h1><button class="btn btn-primary" onclick="addEmployee()">+ Add Employee</button></div>
+        <div class="card"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg)"><th style="padding:12px;text-align:left">Name</th><th style="padding:12px;text-align:left">Role</th><th style="padding:12px;text-align:left">Hourly Rate</th><th style="padding:12px;text-align:left">Hours This Week</th></tr></thead><tbody id="emp-list"></tbody></table></div>
+      </div>
+      <div id="view-swaps" class="view">
+        <div class="header"><h1 class="title">Swap Requests</h1></div>
+        <div id="swap-list"></div>
+      </div>
+      <div id="view-timesheets" class="view">
+        <div class="header"><h1 class="title">Timesheets</h1></div>
+        <div class="card"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg)"><th style="padding:12px;text-align:left">Employee</th><th style="padding:12px;text-align:left">Date</th><th style="padding:12px;text-align:left">Clock In</th><th style="padding:12px;text-align:left">Clock Out</th><th style="padding:12px;text-align:left">Hours</th></tr></thead><tbody id="timesheet-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">Weekly Labor Cost</div><div class="stat-value" style="color:var(--primary)">$4,280</div></div><div class="stat-card"><div class="stat-label">Overtime Hours</div><div class="stat-value" style="color:var(--warning)">12</div></div><div class="stat-card"><div class="stat-label">Coverage Rate</div><div class="stat-value" style="color:var(--success)">98%</div></div><div class="stat-card"><div class="stat-label">Avg Hours/Employee</div><div class="stat-value">32</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Add Shift</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Employee</label><select class="form-select" id="shift-emp"></select></div><div class="form-group"><label class="form-label">Day</label><select class="form-select" id="shift-day"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div><div class="form-row"><div class="form-group"><label class="form-label">Start</label><input type="time" class="form-input" id="shift-start" value="09:00"></div><div class="form-group"><label class="form-label">End</label><input type="time" class="form-input" id="shift-end" value="17:00"></div></div><div class="form-group"><label><input type="checkbox" id="shift-notify"> Send SMS notification</label></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveShift()">Add Shift</button></div></div></div>
+  <script>
+    const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    let employees=[{id:1,name:'Mike Johnson',role:'Manager',rate:25},{id:2,name:'Sarah Williams',role:'Server',rate:18},{id:3,name:'Tom Chen',role:'Server',rate:18},{id:4,name:'Lisa Park',role:'Cook',rate:22}];
+    let shifts=[
+      {empId:1,day:0,start:'09:00',end:'17:00'},{empId:1,day:1,start:'09:00',end:'17:00'},{empId:1,day:2,start:'09:00',end:'17:00'},{empId:1,day:3,start:'09:00',end:'17:00'},{empId:1,day:4,start:'09:00',end:'17:00'},
+      {empId:2,day:0,start:'11:00',end:'19:00'},{empId:2,day:2,start:'11:00',end:'19:00'},{empId:2,day:4,start:'11:00',end:'19:00'},{empId:2,day:5,start:'10:00',end:'18:00'},
+      {empId:3,day:1,start:'16:00',end:'22:00'},{empId:3,day:3,start:'16:00',end:'22:00'},{empId:3,day:5,start:'16:00',end:'22:00'},{empId:3,day:6,start:'12:00',end:'20:00'},
+      {empId:4,day:0,start:'08:00',end:'16:00'},{empId:4,day:1,start:'08:00',end:'16:00'},{empId:4,day:2,start:'08:00',end:'16:00'},{empId:4,day:3,start:'08:00',end:'16:00'},{empId:4,day:4,start:'08:00',end:'16:00'}
+    ];
+    let swapRequests=[{id:1,fromId:2,toId:3,day:2,status:'pending'},{id:2,fromId:3,toId:2,day:5,status:'pending'}];
+    let timesheets=[{empId:1,date:'2026-01-03',in:'09:02',out:'17:05',hours:8},{empId:4,date:'2026-01-03',in:'07:58',out:'16:01',hours:8}];
+    let weekOffset=0;const SK='shiftscheduler_pro_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({employees:employees,shifts:shifts,swapRequests:swapRequests,timesheets:timesheets}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.employees)employees=d.employees;if(d.shifts)shifts=d.shifts;if(d.swapRequests)swapRequests=d.swapRequests;if(d.timesheets)timesheets=d.timesheets;}}catch(e){}}
+
+    
+    function getEmp(id){return employees.find(e=>e.id===id)}
+    function calcHours(start,end){const[sh,sm]=start.split(':').map(Number);const[eh,em]=end.split(':').map(Number);return(eh*60+em-sh*60-sm)/60;}
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      let totalHours=0,totalCost=0;
+      shifts.forEach(s=>{const h=calcHours(s.start,s.end);totalHours+=h;totalCost+=h*getEmp(s.empId).rate;});
+      document.getElementById('stat-hours').textContent=Math.round(totalHours);
+      document.getElementById('stat-cost').textContent='$'+totalCost.toLocaleString();
+      document.getElementById('stat-open').textContent='2';
+      document.getElementById('stat-swaps').textContent=swapRequests.filter(s=>s.status==='pending').length;
+      
+      let html='<div class="schedule-header"></div>';
+      days.forEach((d,i)=>html+=`<div class="schedule-header">${d} ${5+i}</div>`);
+      employees.forEach(e=>{
+        html+=`<div class="schedule-emp">${e.name}</div>`;
+        days.forEach((d,di)=>{
+          const dayShifts=shifts.filter(s=>s.empId===e.id&&s.day===di);
+          html+=`<div class="schedule-cell" onclick="editShift(${e.id},${di})">`;
+          dayShifts.forEach(s=>html+=`<div class="shift">${s.start}-${s.end}</div>`);
+          if(!dayShifts.length)html+=`<div class="shift off">Off</div>`;
+          html+=`</div>`;
+        });
+      });
+      document.getElementById('schedule-grid').innerHTML=html;
+      
+      document.getElementById('emp-list').innerHTML=employees.map(e=>{const hrs=shifts.filter(s=>s.empId===e.id).reduce((sum,s)=>sum+calcHours(s.start,s.end),0);return `<tr style="border-bottom:1px solid var(--border)"><td style="padding:12px"><strong>${e.name}</strong></td><td style="padding:12px">${e.role}</td><td style="padding:12px">$${e.rate}/hr</td><td style="padding:12px">${hrs}h</td></tr>`;}).join('');
+      
+      document.getElementById('swap-list').innerHTML=swapRequests.map(s=>`<div class="swap-card"><div><strong>${getEmp(s.fromId)?.name}</strong> wants to swap ${days[s.day]} with <strong>${getEmp(s.toId)?.name}</strong></div><div><button class="btn btn-sm btn-primary" onclick="approveSwap(${s.id})">Approve</button> <button class="btn btn-sm btn-secondary" onclick="denySwap(${s.id})">Deny</button></div></div>`).join('')||'<p style="color:var(--muted);padding:20px">No pending swap requests</p>';
+      
+      document.getElementById('timesheet-list').innerHTML=timesheets.map(t=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:12px">${getEmp(t.empId)?.name}</td><td style="padding:12px">${t.date}</td><td style="padding:12px">${t.in}</td><td style="padding:12px">${t.out}</td><td style="padding:12px">${t.hours}h</td></tr>`).join('');
+      
+      document.getElementById('shift-emp').innerHTML=employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveShift(){shifts.push({empId:parseInt(document.getElementById('shift-emp').value),day:document.getElementById('shift-day').selectedIndex,start:document.getElementById('shift-start').value,end:document.getElementById('shift-end').value});saveData();closeModal();render();if(document.getElementById('shift-notify').checked)alert('SMS notification sent!');else alert('Shift added!');}
+    function editShift(empId,day){const shift=shifts.find(s=>s.empId===empId&&s.day===day);if(!shift)return;const start=prompt('Start time:',shift.start);if(!start)return;const end=prompt('End time:',shift.end);shift.start=start;shift.end=end;saveData();render();}
+    function approveSwap(id){const s=swapRequests.find(x=>x.id===id);if(s){s.status='approved';saveData();render();}}
+    function denySwap(id){swapRequests=swapRequests.filter(x=>x.id!==id);saveData();render();}
+    function addEmployee(){const name=prompt('Employee name:');if(!name)return;const role=prompt('Role:');employees.push({id:employees.length+1,name,role:role||'Staff'});saveData();render();}
+    function prevWeek(){weekOffset--;render();}
+    function nextWeek(){weekOffset++;render();}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

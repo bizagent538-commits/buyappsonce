@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BidForge - Construction Estimating</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#d97706;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#f59e0b);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(217,119,6,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-success{background:var(--success);color:white}.btn-danger{background:var(--danger);color:white}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.card-body{padding:20px}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-draft{background:rgba(100,116,139,.15);color:var(--muted)}.badge-sent{background:rgba(59,130,246,.15);color:#3b82f6}.badge-won{background:rgba(34,197,94,.15);color:var(--success)}.badge-lost{background:rgba(239,68,68,.15);color:var(--danger)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:600px;max-height:90vh;overflow-y:auto}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}.line-item{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:8px;align-items:center}.line-item input{padding:8px}.template-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px}.detail-box{background:var(--bg);padding:16px;border-radius:8px;margin-bottom:16px}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}.stats{grid-template-columns:repeat(2,1fr)}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🏗️</div><span class="logo-text">BidForge</span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('estimates')">📋 Estimates</div>
+      <div class="nav-item" onclick="showView('templates')">📄 Templates</div>
+      <div class="nav-item" onclick="showView('clients')">👥 Clients</div>
+      <div class="nav-item" onclick="showView('materials')">🧱 Materials</div>
+      <div class="nav-item" onclick="showView('settings')">⚙️ Settings</div>
+    </nav>
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Dashboard</h1><button class="btn btn-primary" onclick="openEstimateModal()">+ New Estimate</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Active Estimates</div><div class="stat-value" id="stat-active">0</div></div>
+          <div class="stat-card"><div class="stat-label">Total Value</div><div class="stat-value" style="color:var(--primary)" id="stat-value">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Win Rate</div><div class="stat-value" style="color:var(--success)" id="stat-rate">0%</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Estimate</div><div class="stat-value" id="stat-avg">$0</div></div>
+        </div>
+        <div class="card"><div class="card-header">Recent Estimates</div><table class="table"><thead><tr><th>#</th><th>Client</th><th>Project</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead><tbody id="recent-est"></tbody></table></div>
+      </div>
+      <div id="view-estimates" class="view">
+        <div class="header"><h1 class="title">All Estimates</h1><button class="btn btn-primary" onclick="openEstimateModal()">+ New Estimate</button></div>
+        <div class="card"><table class="table"><thead><tr><th>#</th><th>Client</th><th>Project</th><th>Created</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-est"></tbody></table></div>
+      </div>
+      <div id="view-templates" class="view">
+        <div class="header"><h1 class="title">Templates</h1><button class="btn btn-primary" onclick="openTemplateModal()">+ New Template</button></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px" id="template-list"></div>
+      </div>
+      <div id="view-clients" class="view">
+        <div class="header"><h1 class="title">Clients</h1><button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Client</th><th>Contact</th><th>Email</th><th>Estimates</th><th>Actions</th></tr></thead><tbody id="client-list"></tbody></table></div>
+      </div>
+      <div id="view-materials" class="view">
+        <div class="header"><h1 class="title">Materials</h1><button class="btn btn-primary" onclick="openMaterialModal()">+ Add Material</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Material</th><th>Unit</th><th>Cost</th><th>Markup</th><th>Price</th><th>Actions</th></tr></thead><tbody id="material-list"></tbody></table></div>
+      </div>
+      <div id="view-settings" class="view">
+        <div class="header"><h1 class="title">Settings</h1></div>
+        <div class="card card-body">
+          <h3 style="margin-bottom:16px">Data Management</h3>
+          <button class="btn btn-secondary" onclick="exportData()">📤 Export</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('import-file').click()" style="margin-left:8px">📥 Import</button>
+          <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)">
+          <button class="btn btn-danger" onclick="clearData()" style="margin-left:8px">🗑️ Clear All</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="modal-estimate"><div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="est-title">New Estimate</h2><button class="close-btn" onclick="closeModal('estimate')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Client</label><select class="form-select" id="est-client"></select></div>
+    <div class="form-group"><label class="form-label">Project Name</label><input type="text" class="form-input" id="est-project"></div>
+    <div class="form-group"><label class="form-label">Line Items</label><div id="line-items"></div><button class="btn btn-sm btn-secondary" onclick="addLine()" style="margin-top:8px">+ Add Line</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Labor Hours</label><input type="number" class="form-input" id="est-hours" value="0" onchange="calcTotal()"></div>
+      <div class="form-group"><label class="form-label">Rate ($/hr)</label><input type="number" class="form-input" id="est-rate" value="75" onchange="calcTotal()"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Markup %</label><input type="number" class="form-input" id="est-markup" value="20" onchange="calcTotal()"></div>
+    <div class="detail-box">
+      <div style="display:flex;justify-content:space-between"><span>Materials:</span><span id="calc-mat">$0</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Labor:</span><span id="calc-lab">$0</span></div>
+      <div style="display:flex;justify-content:space-between"><span>Markup:</span><span id="calc-mark">$0</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:700;margin-top:8px;padding-top:8px;border-top:1px solid var(--border)"><span>Total:</span><span id="calc-total">$0</span></div>
+    </div>
+    <div style="display:flex;gap:12px"><button class="btn btn-secondary" onclick="closeModal('estimate')">Cancel</button><button class="btn btn-primary" onclick="saveEstimate()">Save</button></div>
+  </div></div>
+
+  <div class="modal-overlay" id="modal-view"><div class="modal">
+    <div class="modal-header"><h2 class="modal-title">Estimate Details</h2><button class="close-btn" onclick="closeModal('view')">&times;</button></div>
+    <div id="view-content"></div>
+    <div style="display:flex;gap:8px;margin-top:20px" id="view-actions"></div>
+  </div></div>
+
+  <div class="modal-overlay" id="modal-client"><div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="client-title">Add Client</h2><button class="close-btn" onclick="closeModal('client')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="client-name"></div>
+    <div class="form-group"><label class="form-label">Contact</label><input type="text" class="form-input" id="client-contact"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="client-email"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="client-phone"></div>
+    </div>
+    <div style="display:flex;gap:12px"><button class="btn btn-secondary" onclick="closeModal('client')">Cancel</button><button class="btn btn-primary" onclick="saveClient()">Save</button></div>
+  </div></div>
+
+  <div class="modal-overlay" id="modal-template"><div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="tpl-title">New Template</h2><button class="close-btn" onclick="closeModal('template')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Template Name</label><input type="text" class="form-input" id="tpl-name"></div>
+    <div class="form-group"><label class="form-label">Default Items</label><div id="tpl-items"></div><button class="btn btn-sm btn-secondary" onclick="addTplItem()" style="margin-top:8px">+ Add Item</button></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Default Hours</label><input type="number" class="form-input" id="tpl-hours" value="0"></div>
+      <div class="form-group"><label class="form-label">Default Markup %</label><input type="number" class="form-input" id="tpl-markup" value="20"></div>
+    </div>
+    <div style="display:flex;gap:12px"><button class="btn btn-secondary" onclick="closeModal('template')">Cancel</button><button class="btn btn-primary" onclick="saveTemplate()">Save</button></div>
+  </div></div>
+
+  <div class="modal-overlay" id="modal-material"><div class="modal">
+    <div class="modal-header"><h2 class="modal-title" id="mat-title">Add Material</h2><button class="close-btn" onclick="closeModal('material')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Material Name</label><input type="text" class="form-input" id="mat-name"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Unit</label><input type="text" class="form-input" id="mat-unit" placeholder="sqft, gallon, etc"></div>
+      <div class="form-group"><label class="form-label">Cost</label><input type="number" step="0.01" class="form-input" id="mat-cost"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Markup %</label><input type="number" class="form-input" id="mat-markup" value="25"></div>
+    <div style="display:flex;gap:12px"><button class="btn btn-secondary" onclick="closeModal('material')">Cancel</button><button class="btn btn-primary" onclick="saveMaterial()">Save</button></div>
+  </div></div>
+
+  <script>
+    let clients=[{id:1,name:'Smith Residence',contact:'John Smith',email:'john@email.com',phone:'555-1234'},{id:2,name:'ABC Company',contact:'Jane Doe',email:'jane@abc.com',phone:'555-5678'},{id:3,name:'Johnson Family',contact:'Mike Johnson',email:'mike@email.com',phone:'555-9012'}];
+    let estimates=[{id:2001,clientId:1,project:'Kitchen Renovation',date:'2026-01-02',value:28500,status:'sent',items:[{d:'Cabinets',q:12,u:450},{d:'Countertops',q:30,u:85}],hours:40,rate:75,markup:20},{id:2002,clientId:2,project:'Office Buildout',date:'2025-12-28',value:45000,status:'won',items:[{d:'Drywall',q:200,u:15},{d:'Electrical',q:1,u:8000}],hours:80,rate:75,markup:15},{id:2003,clientId:3,project:'Deck Addition',date:'2025-12-20',value:12800,status:'draft',items:[{d:'Lumber',q:500,u:6},{d:'Hardware',q:1,u:800}],hours:24,rate:75,markup:20}];
+    let templates=[{id:1,name:'Kitchen Remodel',items:['Cabinets','Countertops','Flooring','Appliances'],hours:40,markup:20},{id:2,name:'Bathroom',items:['Tile','Vanity','Fixtures'],hours:24,markup:20},{id:3,name:'Deck/Patio',items:['Lumber','Hardware','Railing'],hours:20,markup:20}];
+    let materials=[{id:1,name:'Lumber (2x4)',unit:'board',cost:4.50,markup:25},{id:2,name:'Drywall',unit:'sheet',cost:12,markup:20},{id:3,name:'Paint',unit:'gallon',cost:35,markup:30},{id:4,name:'Tile',unit:'sqft',cost:8,markup:25}];
+    let nextId={est:2004,client:4,tpl:4,mat:5};
+    let editing={est:null,client:null,tpl:null,mat:null};
+    const SK='bidforge_data';
+    
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({clients,estimates,templates,materials,nextId}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.clients)clients=d.clients;if(d.estimates)estimates=d.estimates;if(d.templates)templates=d.templates;if(d.materials)materials=d.materials;if(d.nextId)nextId=d.nextId;}}catch(e){}}
+    function getClient(id){return clients.find(c=>c.id===id)}
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    function openModal(id){document.getElementById('modal-'+id).classList.add('show');}
+    function closeModal(id){document.getElementById('modal-'+id).classList.remove('show');}
+    
+    function render(){
+      const active=estimates.filter(e=>e.status==='draft'||e.status==='sent').length;
+      const total=estimates.reduce((s,e)=>s+e.value,0);
+      const won=estimates.filter(e=>e.status==='won').length;
+      const decided=estimates.filter(e=>e.status==='won'||e.status==='lost').length;
+      document.getElementById('stat-active').textContent=active;
+      document.getElementById('stat-value').textContent='$'+total.toLocaleString();
+      document.getElementById('stat-rate').textContent=decided?Math.round(won/decided*100)+'%':'0%';
+      document.getElementById('stat-avg').textContent=estimates.length?'$'+Math.round(total/estimates.length).toLocaleString():'$0';
+      
+      document.getElementById('recent-est').innerHTML=estimates.slice(0,5).map(e=>`<tr><td>#${e.id}</td><td>${getClient(e.clientId)?.name||'-'}</td><td>${e.project}</td><td>$${e.value.toLocaleString()}</td><td><span class="badge badge-${e.status}">${e.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="viewEst(${e.id})">View</button> ${e.status==='draft'?`<button class="btn btn-sm btn-primary" onclick="sendEst(${e.id})">Send</button>`:''}</td></tr>`).join('');
+      document.getElementById('all-est').innerHTML=estimates.map(e=>`<tr><td>#${e.id}</td><td>${getClient(e.clientId)?.name||'-'}</td><td>${e.project}</td><td>${e.date}</td><td>$${e.value.toLocaleString()}</td><td><span class="badge badge-${e.status}">${e.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="viewEst(${e.id})">View</button> <button class="btn btn-sm btn-secondary" onclick="editEst(${e.id})">Edit</button></td></tr>`).join('');
+      document.getElementById('template-list').innerHTML=templates.map(t=>`<div class="template-card"><h3>📄 ${t.name}</h3><p style="color:var(--muted);margin:8px 0">${t.items.length} items • ${t.hours}hrs</p><button class="btn btn-sm btn-primary" onclick="useTemplate(${t.id})">Use</button> <button class="btn btn-sm btn-secondary" onclick="editTpl(${t.id})">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteTpl(${t.id})">Delete</button></div>`).join('');
+      document.getElementById('client-list').innerHTML=clients.map(c=>{const n=estimates.filter(e=>e.clientId===c.id).length;return `<tr><td><strong>${c.name}</strong></td><td>${c.contact}</td><td>${c.email||'-'}</td><td>${n}</td><td><button class="btn btn-sm btn-secondary" onclick="editClient(${c.id})">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteClient(${c.id})">Delete</button></td></tr>`;}).join('');
+      document.getElementById('material-list').innerHTML=materials.map(m=>`<tr><td>${m.name}</td><td>${m.unit}</td><td>$${m.cost.toFixed(2)}</td><td>${m.markup}%</td><td>$${(m.cost*(1+m.markup/100)).toFixed(2)}</td><td><button class="btn btn-sm btn-secondary" onclick="editMat(${m.id})">Edit</button> <button class="btn btn-sm btn-danger" onclick="deleteMat(${m.id})">Delete</button></td></tr>`).join('');
+      document.getElementById('est-client').innerHTML=clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    
+    function addLine(d='',q=1,u=''){const div=document.createElement('div');div.className='line-item';div.innerHTML=`<input type="text" class="form-input" placeholder="Description" value="${d}"><input type="number" class="form-input" value="${q}" onchange="calcTotal()"><input type="number" class="form-input" placeholder="Unit $" value="${u}" onchange="calcTotal()"><input type="text" class="form-input" readonly><button class="btn btn-sm btn-secondary" onclick="this.parentElement.remove();calcTotal()">×</button>`;document.getElementById('line-items').appendChild(div);calcTotal();}
+    function calcTotal(){let mat=0;document.querySelectorAll('#line-items .line-item').forEach(r=>{const i=r.querySelectorAll('input');const t=(parseFloat(i[1].value)||0)*(parseFloat(i[2].value)||0);i[3].value=t?'$'+t.toFixed(2):'';mat+=t;});const lab=(parseFloat(document.getElementById('est-hours').value)||0)*(parseFloat(document.getElementById('est-rate').value)||0);const mrk=(mat+lab)*(parseFloat(document.getElementById('est-markup').value)||0)/100;document.getElementById('calc-mat').textContent='$'+mat.toLocaleString();document.getElementById('calc-lab').textContent='$'+lab.toLocaleString();document.getElementById('calc-mark').textContent='$'+Math.round(mrk).toLocaleString();document.getElementById('calc-total').textContent='$'+Math.round(mat+lab+mrk).toLocaleString();}
+    
+    function openEstimateModal(){editing.est=null;document.getElementById('est-title').textContent='New Estimate';document.getElementById('est-project').value='';document.getElementById('est-hours').value='0';document.getElementById('est-rate').value='75';document.getElementById('est-markup').value='20';document.getElementById('line-items').innerHTML='';addLine();openModal('estimate');}
+    function editEst(id){const e=estimates.find(x=>x.id===id);if(!e)return;editing.est=id;document.getElementById('est-title').textContent='Edit Estimate #'+id;document.getElementById('est-client').value=e.clientId;document.getElementById('est-project').value=e.project;document.getElementById('est-hours').value=e.hours||0;document.getElementById('est-rate').value=e.rate||75;document.getElementById('est-markup').value=e.markup||20;document.getElementById('line-items').innerHTML='';(e.items||[]).forEach(i=>addLine(i.d,i.q,i.u));if(!e.items?.length)addLine();calcTotal();openModal('estimate');}
+    function saveEstimate(){const p=document.getElementById('est-project').value;if(!p){alert('Enter project name');return;}const items=[];document.querySelectorAll('#line-items .line-item').forEach(r=>{const i=r.querySelectorAll('input');if(i[0].value)items.push({d:i[0].value,q:parseFloat(i[1].value)||0,u:parseFloat(i[2].value)||0});});const val=parseInt(document.getElementById('calc-total').textContent.replace(/[$,]/g,''))||0;const data={clientId:parseInt(document.getElementById('est-client').value),project:p,date:new Date().toISOString().split('T')[0],value:val,status:'draft',items,hours:parseFloat(document.getElementById('est-hours').value)||0,rate:parseFloat(document.getElementById('est-rate').value)||75,markup:parseFloat(document.getElementById('est-markup').value)||0};if(editing.est){const idx=estimates.findIndex(e=>e.id===editing.est);if(idx>=0)estimates[idx]={...estimates[idx],...data};}else{estimates.unshift({id:nextId.est++,...data});}closeModal('estimate');saveData();render();}
+    function viewEst(id){const e=estimates.find(x=>x.id===id);if(!e)return;const c=getClient(e.clientId);document.getElementById('view-content').innerHTML=`<div class="detail-box"><strong>Estimate #${e.id}</strong> - ${e.project}<br><span class="badge badge-${e.status}">${e.status}</span></div><div class="detail-box"><strong>Client:</strong> ${c?.name||'-'}<br><strong>Date:</strong> ${e.date}</div><table class="table"><thead><tr><th>Item</th><th>Qty</th><th>Unit $</th><th>Total</th></tr></thead><tbody>${(e.items||[]).map(i=>`<tr><td>${i.d}</td><td>${i.q}</td><td>$${i.u}</td><td>$${(i.q*i.u).toLocaleString()}</td></tr>`).join('')}</tbody></table><div class="detail-box" style="margin-top:16px"><div>Labor: ${e.hours}hrs × $${e.rate} = $${(e.hours*e.rate).toLocaleString()}</div><div>Markup: ${e.markup}%</div><div style="font-weight:700;margin-top:8px">Total: $${e.value.toLocaleString()}</div></div>`;document.getElementById('view-actions').innerHTML=`<button class="btn btn-secondary" onclick="closeModal('view')">Close</button><button class="btn btn-primary" onclick="closeModal('view');editEst(${id})">Edit</button>${e.status==='draft'?`<button class="btn btn-success" onclick="closeModal('view');sendEst(${id})">Send</button>`:''}<button class="btn btn-danger" onclick="closeModal('view');deleteEst(${id})">Delete</button>`;openModal('view');}
+    function sendEst(id){const e=estimates.find(x=>x.id===id);if(e){e.status='sent';saveData();render();alert('Estimate sent!');}}
+    function deleteEst(id){if(!confirm('Delete estimate?'))return;estimates=estimates.filter(e=>e.id!==id);saveData();render();}
+    function useTemplate(id){const t=templates.find(x=>x.id===id);if(!t)return;editing.est=null;document.getElementById('est-title').textContent='New Estimate (from '+t.name+')';document.getElementById('est-project').value='';document.getElementById('est-hours').value=t.hours;document.getElementById('est-rate').value='75';document.getElementById('est-markup').value=t.markup;document.getElementById('line-items').innerHTML='';t.items.forEach(i=>addLine(i,1,''));calcTotal();openModal('estimate');}
+    
+    function openClientModal(){editing.client=null;document.getElementById('client-title').textContent='Add Client';document.getElementById('client-name').value='';document.getElementById('client-contact').value='';document.getElementById('client-email').value='';document.getElementById('client-phone').value='';openModal('client');}
+    function editClient(id){const c=clients.find(x=>x.id===id);if(!c)return;editing.client=id;document.getElementById('client-title').textContent='Edit Client';document.getElementById('client-name').value=c.name;document.getElementById('client-contact').value=c.contact;document.getElementById('client-email').value=c.email||'';document.getElementById('client-phone').value=c.phone||'';openModal('client');}
+    function saveClient(){const n=document.getElementById('client-name').value;if(!n){alert('Enter client name');return;}const data={name:n,contact:document.getElementById('client-contact').value,email:document.getElementById('client-email').value,phone:document.getElementById('client-phone').value};if(editing.client){const idx=clients.findIndex(c=>c.id===editing.client);if(idx>=0)clients[idx]={...clients[idx],...data};}else{clients.push({id:nextId.client++,...data});}closeModal('client');saveData();render();}
+    function deleteClient(id){if(estimates.some(e=>e.clientId===id)){alert('Cannot delete client with estimates');return;}if(!confirm('Delete client?'))return;clients=clients.filter(c=>c.id!==id);saveData();render();}
+    
+    function openTemplateModal(){editing.tpl=null;document.getElementById('tpl-title').textContent='New Template';document.getElementById('tpl-name').value='';document.getElementById('tpl-hours').value='0';document.getElementById('tpl-markup').value='20';document.getElementById('tpl-items').innerHTML='';addTplItem();openModal('template');}
+    function addTplItem(v=''){const div=document.createElement('div');div.style.cssText='display:flex;gap:8px;margin-bottom:8px';div.innerHTML=`<input type="text" class="form-input" value="${v}" style="flex:1"><button class="btn btn-sm btn-secondary" onclick="this.parentElement.remove()">×</button>`;document.getElementById('tpl-items').appendChild(div);}
+    function editTpl(id){const t=templates.find(x=>x.id===id);if(!t)return;editing.tpl=id;document.getElementById('tpl-title').textContent='Edit Template';document.getElementById('tpl-name').value=t.name;document.getElementById('tpl-hours').value=t.hours;document.getElementById('tpl-markup').value=t.markup;document.getElementById('tpl-items').innerHTML='';t.items.forEach(i=>addTplItem(i));openModal('template');}
+    function saveTemplate(){const n=document.getElementById('tpl-name').value;if(!n){alert('Enter template name');return;}const items=[];document.querySelectorAll('#tpl-items input').forEach(i=>{if(i.value)items.push(i.value);});const data={name:n,items,hours:parseFloat(document.getElementById('tpl-hours').value)||0,markup:parseFloat(document.getElementById('tpl-markup').value)||20};if(editing.tpl){const idx=templates.findIndex(t=>t.id===editing.tpl);if(idx>=0)templates[idx]={...templates[idx],...data};}else{templates.push({id:nextId.tpl++,...data});}closeModal('template');saveData();render();}
+    function deleteTpl(id){if(!confirm('Delete template?'))return;templates=templates.filter(t=>t.id!==id);saveData();render();}
+    
+    function openMaterialModal(){editing.mat=null;document.getElementById('mat-title').textContent='Add Material';document.getElementById('mat-name').value='';document.getElementById('mat-unit').value='';document.getElementById('mat-cost').value='';document.getElementById('mat-markup').value='25';openModal('material');}
+    function editMat(id){const m=materials.find(x=>x.id===id);if(!m)return;editing.mat=id;document.getElementById('mat-title').textContent='Edit Material';document.getElementById('mat-name').value=m.name;document.getElementById('mat-unit').value=m.unit;document.getElementById('mat-cost').value=m.cost;document.getElementById('mat-markup').value=m.markup;openModal('material');}
+    function saveMaterial(){const n=document.getElementById('mat-name').value;if(!n){alert('Enter material name');return;}const data={name:n,unit:document.getElementById('mat-unit').value,cost:parseFloat(document.getElementById('mat-cost').value)||0,markup:parseFloat(document.getElementById('mat-markup').value)||25};if(editing.mat){const idx=materials.findIndex(m=>m.id===editing.mat);if(idx>=0)materials[idx]={...materials[idx],...data};}else{materials.push({id:nextId.mat++,...data});}closeModal('material');saveData();render();}
+    function deleteMat(id){if(!confirm('Delete material?'))return;materials=materials.filter(m=>m.id!==id);saveData();render();}
+    
+    function exportData(){const d=JSON.stringify({clients,estimates,templates,materials},null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='bidforge-backup.json';a.click();}
+    function importData(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=function(ev){try{const d=JSON.parse(ev.target.result);if(d.clients)clients=d.clients;if(d.estimates)estimates=d.estimates;if(d.templates)templates=d.templates;if(d.materials)materials=d.materials;saveData();render();alert('Imported!');}catch(err){alert('Invalid file');}};r.readAsText(f);e.target.value='';}
+    function clearData(){if(!confirm('Delete ALL data?'))return;clients=[];estimates=[];templates=[];materials=[];saveData();render();}
+    
+    loadData();render();
+  </script>
+  <footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce.</p></footer>
+</body>
+</html>

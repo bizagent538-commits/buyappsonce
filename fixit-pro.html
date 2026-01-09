@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FixIt Pro - Handyman Job Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#ef4444;--success:#22c55e;--warning:#f59e0b;--blue:#3b82f6;--purple:#8b5cf6}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh;overflow-y:auto}
+    .logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#dc2626);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+    .logo-text{font-weight:700;font-size:18px}
+    .pro-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px;transition:all 0.2s}
+    .nav-item:hover,.nav-item.active{background:rgba(239,68,68,.1);color:var(--primary)}
+    .main{flex:1;margin-left:220px;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .title{font-size:22px;font-weight:700}
+    .btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px;transition:all 0.2s}
+    .btn-primary{background:var(--primary);color:white}
+    .btn-secondary{background:white;border:1px solid var(--border);color:var(--text)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-success{background:var(--success);color:white}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+    .stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}
+    .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+    .stat-value{font-size:24px;font-weight:700}
+    .card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+    .card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}
+    .table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}
+    .table tr:hover{background:var(--bg)}
+    .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge-scheduled{background:rgba(59,130,246,.15);color:var(--blue)}
+    .badge-progress{background:rgba(245,158,11,.15);color:var(--warning)}
+    .badge-completed{background:rgba(34,197,94,.15);color:var(--success)}
+    .badge-invoiced{background:rgba(139,92,246,.15);color:var(--purple)}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal-overlay.show{display:flex}
+    .modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-title{font-size:18px;font-weight:700}
+    .close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+    .form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}
+    .form-textarea{min-height:60px;resize:vertical}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .view{display:none}.view.active{display:block}
+    .schedule-item{display:flex;gap:12px;padding:12px;background:var(--bg);border-radius:8px;margin-bottom:8px}
+    .schedule-time{font-weight:600;font-size:13px;color:var(--primary);min-width:70px}
+    .tabs{display:flex;gap:8px;margin-bottom:16px}
+    .tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+    @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🛠️</div><span class="logo-text">FixIt <span class="pro-badge">PRO</span></span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('jobs')">📋 Jobs</div>
+      <div class="nav-item" onclick="showView('customers')">👥 Customers</div>
+      <div class="nav-item" onclick="showView('invoices')">📄 Invoices</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <!-- Dashboard -->
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Dashboard</h1><button class="btn btn-primary" onclick="openModal('job')">+ New Job</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" style="color:var(--primary)" id="stat-active">0</div></div>
+          <div class="stat-card"><div class="stat-label">This Week</div><div class="stat-value" style="color:var(--success)" id="stat-revenue">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Pending Invoices</div><div class="stat-value" style="color:var(--warning)" id="stat-pending">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" id="stat-completed">0</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+          <div class="card">
+            <div class="card-header"><span>Recent Jobs</span></div>
+            <table class="table"><thead><tr><th>Job</th><th>Customer</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="recent-jobs"></tbody></table>
+          </div>
+          <div class="card">
+            <div class="card-header"><span>Today's Schedule</span></div>
+            <div style="padding:16px" id="today-schedule"></div>
+          </div>
+        </div>
+      </div>
+      <!-- Jobs -->
+      <div id="view-jobs" class="view">
+        <div class="header"><h1 class="title">Jobs</h1><button class="btn btn-primary" onclick="openModal('job')">+ New Job</button></div>
+        <div class="tabs">
+          <div class="tab active" onclick="filterJobs('all')">All</div>
+          <div class="tab" onclick="filterJobs('scheduled')">Scheduled</div>
+          <div class="tab" onclick="filterJobs('progress')">In Progress</div>
+          <div class="tab" onclick="filterJobs('completed')">Completed</div>
+        </div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Job</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-jobs"></tbody></table>
+        </div>
+      </div>
+      <!-- Customers -->
+      <div id="view-customers" class="view">
+        <div class="header"><h1 class="title">Customers</h1><button class="btn btn-primary" onclick="openModal('customer')">+ Add Customer</button></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Name</th><th>Phone</th><th>Address</th><th>Jobs</th><th>Total</th><th>Actions</th></tr></thead><tbody id="all-customers"></tbody></table>
+        </div>
+      </div>
+      <!-- Invoices -->
+      <div id="view-invoices" class="view">
+        <div class="header"><h1 class="title">Invoices</h1></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>#</th><th>Customer</th><th>Job</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-invoices"></tbody></table>
+        </div>
+      </div>
+      <!-- Reports -->
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Revenue (YTD)</div><div class="stat-value" style="color:var(--success)">$24,850</div></div>
+          <div class="stat-card"><div class="stat-label">Jobs Completed</div><div class="stat-value">156</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Job Value</div><div class="stat-value">$287</div></div>
+          <div class="stat-card"><div class="stat-label">Repeat Customers</div><div class="stat-value">68%</div></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- Job Modal -->
+  <div class="modal-overlay" id="job-modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">New Job</h2><button class="close-btn" onclick="closeModal('job')">&times;</button></div>
+      <div class="form-group"><label class="form-label">Job Title</label><input type="text" class="form-input" id="job-title" placeholder="e.g., Bathroom Faucet Repair"></div>
+      <div class="form-group"><label class="form-label">Customer</label><select class="form-select" id="job-customer"></select></div>
+      <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="job-address" placeholder="Job site address"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="job-date"></div>
+        <div class="form-group"><label class="form-label">Time</label><input type="time" class="form-input" id="job-time" value="09:00"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Est. Hours</label><input type="number" class="form-input" id="job-hours" value="2"></div>
+        <div class="form-group"><label class="form-label">Hourly Rate</label><input type="number" class="form-input" id="job-rate" value="75"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Materials</label><input type="number" class="form-input" id="job-materials" placeholder="0" value="0"></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('job')">Cancel</button><button class="btn btn-primary" onclick="saveJob()">Create Job</button></div>
+    </div>
+  </div>
+  <!-- Customer Modal -->
+  <div class="modal-overlay" id="customer-modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">Add Customer</h2><button class="close-btn" onclick="closeModal('customer')">&times;</button></div>
+      <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="cust-name" placeholder="John Smith"></div>
+      <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" id="cust-phone" placeholder="(555) 123-4567"></div>
+      <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="cust-email" placeholder="john@email.com"></div>
+      <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="cust-address" placeholder="123 Main St"></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('customer')">Cancel</button><button class="btn btn-primary" onclick="saveCustomer()">Add Customer</button></div>
+    </div>
+  </div>
+  <script>
+    // Data
+    let customers = [
+      {id:1,name:'Johnson',phone:'(555) 123-4567',email:'johnson@email.com',address:'123 Oak St',jobs:3,total:485},
+      {id:2,name:'Williams',phone:'(555) 234-5678',email:'williams@email.com',address:'456 Pine Ave',jobs:2,total:890},
+      {id:3,name:'Garcia',phone:'(555) 345-6789',email:'garcia@email.com',address:'789 Elm Rd',jobs:1,total:225},
+    ];
+    let jobs = [
+      {id:1,title:'Bathroom Faucet Repair',customerId:1,address:'123 Oak St',date:'2026-01-03',time:'09:00',hours:2,rate:75,materials:35,status:'progress'},
+      {id:2,title:'Deck Board Replacement',customerId:2,address:'456 Pine Ave',date:'2026-01-04',time:'10:00',hours:6,rate:75,materials:200,status:'scheduled'},
+      {id:3,title:'Ceiling Fan Install',customerId:3,address:'789 Elm Rd',date:'2026-01-02',time:'14:00',hours:2,rate:75,materials:75,status:'completed'},
+      {id:4,title:'Door Lock Replacement',customerId:1,address:'123 Oak St',date:'2026-01-01',time:'11:00',hours:1,rate:75,materials:45,status:'invoiced'},
+    ];
+    let invoices = [
+      {id:1001,jobId:4,customerId:1,amount:120,status:'paid'},
+    ];
+    const SK='fixit_pro_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({customers,jobs,invoices}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.customers)customers=d.customers;if(d.jobs)jobs=d.jobs;if(d.invoices)invoices=d.invoices;}}catch(e){}}
+
+    let nextJobId=5,nextCustId=4,nextInvId=1002;
+    
+    function getCustomer(id){return customers.find(c=>c.id===id)}
+    function getJob(id){return jobs.find(j=>j.id===id)}
+    function calcJobTotal(j){return (j.hours*j.rate)+j.materials}
+    
+    // Views
+    function showView(view){
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+      document.getElementById('view-'+view).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      event.target.classList.add('active');
+      loadData();
+    render();
+    }
+    
+    // Render
+    function render(){
+      renderDashboard();
+      renderJobs();
+      renderCustomers();
+      renderInvoices();
+      renderCustomerSelect();
+    }
+    
+    function renderDashboard(){
+      const active=jobs.filter(j=>j.status==='progress'||j.status==='scheduled').length;
+      const completed=jobs.filter(j=>j.status==='completed'||j.status==='invoiced').length;
+      const weekRevenue=jobs.filter(j=>j.status==='completed'||j.status==='invoiced').reduce((s,j)=>s+calcJobTotal(j),0);
+      const pending=jobs.filter(j=>j.status==='completed').reduce((s,j)=>s+calcJobTotal(j),0);
+      document.getElementById('stat-active').textContent=active;
+      document.getElementById('stat-completed').textContent=completed;
+      document.getElementById('stat-revenue').textContent='$'+weekRevenue.toLocaleString();
+      document.getElementById('stat-pending').textContent='$'+pending.toLocaleString();
+      
+      const recent=document.getElementById('recent-jobs');
+      recent.innerHTML=jobs.slice(0,5).map(j=>{
+        const c=getCustomer(j.customerId);
+        return `<tr>
+          <td><strong>${j.title}</strong><br><small style="color:var(--muted)">${j.address}</small></td>
+          <td>${c?c.name:'-'}</td>
+          <td>$${calcJobTotal(j)}</td>
+          <td><span class="badge badge-${j.status}">${j.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editJob(${j.id})">Edit</button> ${j.status==='completed'?`<button class="btn btn-sm btn-success" onclick="createInvoice(${j.id})">Invoice</button>`:''}</td>
+        </tr>`;
+      }).join('');
+      
+      const schedule=document.getElementById('today-schedule');
+      const today=new Date().toISOString().split('T')[0];
+      const todayJobs=jobs.filter(j=>j.date===today||j.date==='2026-01-03');
+      schedule.innerHTML=todayJobs.length?todayJobs.map(j=>`<div class="schedule-item"><div class="schedule-time">${j.time}</div><div><strong>${j.title}</strong><br><small style="color:var(--muted)">${j.address}</small></div></div>`).join(''):'<p style="color:var(--muted)">No jobs scheduled today</p>';
+    }
+    
+    function renderJobs(filter='all'){
+      const filtered=filter==='all'?jobs:jobs.filter(j=>j.status===filter);
+      document.getElementById('all-jobs').innerHTML=filtered.map(j=>{
+        const c=getCustomer(j.customerId);
+        return `<tr>
+          <td><strong>${j.title}</strong><br><small style="color:var(--muted)">${j.address}</small></td>
+          <td>${c?c.name:'-'}</td>
+          <td>${j.date}</td>
+          <td>$${calcJobTotal(j)}</td>
+          <td><span class="badge badge-${j.status}">${j.status}</span></td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editJob(${j.id})">Edit</button>
+            ${j.status==='scheduled'?`<button class="btn btn-sm btn-primary" onclick="startJob(${j.id})">Start</button>`:''}
+            ${j.status==='progress'?`<button class="btn btn-sm btn-success" onclick="completeJob(${j.id})">Complete</button>`:''}
+            ${j.status==='completed'?`<button class="btn btn-sm btn-success" onclick="createInvoice(${j.id})">Invoice</button>`:''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function filterJobs(filter){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderJobs(filter);
+    }
+    
+    function renderCustomers(){
+      document.getElementById('all-customers').innerHTML=customers.map(c=>`<tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.phone}</td>
+        <td>${c.address}</td>
+        <td>${c.jobs}</td>
+        <td>$${c.total}</td>
+        <td><button class="btn btn-sm btn-secondary" onclick="editCustomer(${c.id})">Edit</button></td>
+      </tr>`).join('');
+    }
+    
+    function renderInvoices(){
+      document.getElementById('all-invoices').innerHTML=invoices.map(inv=>{
+        const j=getJob(inv.jobId);
+        const c=getCustomer(inv.customerId);
+        return `<tr>
+          <td>#${inv.id}</td>
+          <td>${c?c.name:'-'}</td>
+          <td>${j?j.title:'-'}</td>
+          <td>$${inv.amount}</td>
+          <td><span class="badge badge-${inv.status==='paid'?'completed':'progress'}">${inv.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="viewInvoice(${inv.id})">View</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function renderCustomerSelect(){
+      const sel=document.getElementById('job-customer');
+      sel.innerHTML='<option value="">Select customer...</option>'+customers.map(c=>`<option value="${c.id}">${c.name} - ${c.address}</option>`).join('');
+    }
+    
+    // Actions
+    function startJob(id){const j=jobs.find(x=>x.id===id);if(j){j.status='progress';saveData();render();alert('Job started!');}}
+    function completeJob(id){const j=jobs.find(x=>x.id===id);if(j){j.status='completed';saveData();render();alert('Job completed! Ready to invoice.');}}
+    function createInvoice(id){
+      const j=jobs.find(x=>x.id===id);
+      if(j){
+        invoices.push({id:nextInvId++,jobId:j.id,customerId:j.customerId,amount:calcJobTotal(j),status:'unpaid'});
+        j.status='invoiced';saveData();
+        render();
+        alert('Invoice #'+(nextInvId-1)+' created for $'+calcJobTotal(j));
+      }
+    }
+    function editJob(id){const j=jobs.find(x=>x.id===id);if(!j)return;const title=prompt('Job title:',j.title);if(!title)return;const address=prompt('Address:',j.address);j.title=title;j.address=address;saveData();render();}
+    function editCustomer(id){const c=customers.find(x=>x.id===id);if(!c)return;const name=prompt('Customer name:',c.name);if(!name)return;const phone=prompt('Phone:',c.phone);const email=prompt('Email:',c.email);c.name=name;c.phone=phone;c.email=email;saveData();render();}
+    function viewInvoice(id){const inv=invoices.find(x=>x.id===id);if(!inv)return;const j=jobs.find(x=>x.id===inv.jobId);const c=customers.find(x=>x.id===inv.customerId);const invoiceText=`INVOICE #${inv.id}\n\nCustomer: ${c?.name||'Unknown'}\nJob: ${j?.title||'Unknown'}\n\nAmount: $${inv.amount?.toFixed(2)||'0.00'}\nStatus: ${inv.status}\n\nThank you for your business!`;const blob=new Blob([invoiceText],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`invoice-${inv.id}.txt`;a.click();}
+    
+    // Modals
+    function openModal(type){
+      document.getElementById(type+'-modal').classList.add('show');
+      if(type==='job')document.getElementById('job-date').value=new Date().toISOString().split('T')[0];
+    }
+    function closeModal(type){document.getElementById(type+'-modal').classList.remove('show');}
+    
+    function saveJob(){
+      const title=document.getElementById('job-title').value;
+      const custId=parseInt(document.getElementById('job-customer').value);
+      const address=document.getElementById('job-address').value;
+      if(!title||!custId){alert('Please fill in job title and select customer');return;}
+      jobs.unshift({
+        id:nextJobId++,
+        title,
+        customerId:custId,
+        address:address||getCustomer(custId).address,
+        date:document.getElementById('job-date').value,
+        time:document.getElementById('job-time').value,
+        hours:parseInt(document.getElementById('job-hours').value)||2,
+        rate:parseInt(document.getElementById('job-rate').value)||75,
+        materials:parseInt(document.getElementById('job-materials').value)||0,
+        status:'scheduled'
+      });
+      closeModal('job');
+      render();
+      document.getElementById('job-title').value='';
+      document.getElementById('job-address').value='';
+      alert('Job created!');
+    }
+    
+    function saveCustomer(){
+      const name=document.getElementById('cust-name').value;
+      const phone=document.getElementById('cust-phone').value;
+      if(!name){alert('Please enter customer name');return;}
+      customers.push({
+        id:nextCustId++,
+        name,
+        phone:phone||'',
+        email:document.getElementById('cust-email').value||'',
+        address:document.getElementById('cust-address').value||'',
+        jobs:0,
+        total:0
+      });
+      closeModal('customer');
+      render();
+      document.getElementById('cust-name').value='';
+      document.getElementById('cust-phone').value='';
+      document.getElementById('cust-email').value='';
+      document.getElementById('cust-address').value='';
+      alert('Customer added!');
+    }
+    
+    // Init
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

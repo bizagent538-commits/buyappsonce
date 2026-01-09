@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VaultDocs - Document Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#0ea5e9;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#38bdf8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(14,165,233,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.view{display:none}.view.active{display:block}.folder-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:16px}.folder{background:var(--bg);border-radius:12px;padding:20px;text-align:center;cursor:pointer}.folder:hover{background:rgba(14,165,233,.1)}.folder-icon{font-size:40px;margin-bottom:8px}.doc-icon{font-size:24px}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.folder-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">📁</div><span class="logo-text">VaultDocs</span></div>
+      <div class="nav-item active" onclick="showView('files')">📁 All Files</div>
+      <div class="nav-item" onclick="showView('recent')">🕐 Recent</div>
+      <div class="nav-item" onclick="showView('shared')">👥 Shared</div>
+      <div class="nav-item" onclick="showView('trash')">🗑️ Trash</div>
+    </nav>
+    <main class="main">
+      <div id="view-files" class="view active">
+        <div class="header"><h1 class="title">All Files</h1><button class="btn btn-primary" onclick="uploadFile()">+ Upload</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Files</div><div class="stat-value" id="stat-files">0</div></div>
+          <div class="stat-card"><div class="stat-label">Storage Used</div><div class="stat-value" style="color:var(--primary)">2.4 GB</div></div>
+          <div class="stat-card"><div class="stat-label">Shared</div><div class="stat-value" id="stat-shared">0</div></div>
+          <div class="stat-card"><div class="stat-label">Folders</div><div class="stat-value">5</div></div>
+        </div>
+        <div class="card"><div class="card-header">Folders</div><div class="folder-grid" id="folder-grid"></div></div>
+        <div class="card"><div class="card-header">Files</div><table class="table"><thead><tr><th>Name</th><th>Size</th><th>Modified</th><th>Actions</th></tr></thead><tbody id="file-list"></tbody></table></div>
+      </div>
+      <div id="view-recent" class="view">
+        <div class="header"><h1 class="title">Recent Files</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Size</th><th>Modified</th></tr></thead><tbody id="recent-list"></tbody></table></div>
+      </div>
+      <div id="view-shared" class="view">
+        <div class="header"><h1 class="title">Shared With Me</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Owner</th><th>Shared</th></tr></thead><tbody id="shared-list"></tbody></table></div>
+      </div>
+      <div id="view-trash" class="view">
+        <div class="header"><h1 class="title">Trash</h1><button class="btn btn-secondary" onclick="emptyTrash()">Empty Trash</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Deleted</th><th>Actions</th></tr></thead><tbody id="trash-list"></tbody></table></div>
+      </div>
+    </main>
+  </div>
+  <script>
+    let folders=[{name:'Contracts',icon:'📄',count:12},{name:'Invoices',icon:'💰',count:24},{name:'HR Documents',icon:'👥',count:8},{name:'Marketing',icon:'📢',count:15},{name:'Reports',icon:'📊',count:6}];
+    let files=[{name:'Q4 Report.pdf',size:'2.4 MB',modified:'Jan 3, 2026',type:'pdf'},{name:'Budget 2026.xlsx',size:'156 KB',modified:'Jan 2, 2026',type:'xlsx'},{name:'Proposal.docx',size:'89 KB',modified:'Jan 1, 2026',type:'docx'},{name:'Logo.png',size:'340 KB',modified:'Dec 28, 2025',type:'png'}];
+    let shared=[{name:'Project Plan.pdf',owner:'Alice M.',shared:'Dec 15, 2025'},{name:'Team Photo.jpg',owner:'Bob K.',shared:'Dec 10, 2025'}];
+    let trash=[{name:'Old Report.pdf',deleted:'Dec 20, 2025'}];
+    let currentFolder=null;const SK='vaultdocs_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({folders:folders,files:files,shared:shared,trash:trash}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.folders)folders=d.folders;if(d.files)files=d.files;if(d.shared)shared=d.shared;if(d.trash)trash=d.trash;}}catch(e){}}
+
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-files').textContent=files.length;
+      document.getElementById('stat-shared').textContent=shared.length;
+      document.getElementById('folder-grid').innerHTML=folders.map(f=>`<div class="folder" onclick="openFolder('${f.name}')"><div class="folder-icon">${f.icon}</div><strong>${f.name}</strong><br><small style="color:var(--muted)">${f.count} files</small></div>`).join('');
+      document.getElementById('file-list').innerHTML=files.map(f=>`<tr><td><span class="doc-icon">${f.type==='pdf'?'📕':f.type==='xlsx'?'📗':f.type==='docx'?'📘':'🖼️'}</span> ${f.name}</td><td>${f.size}</td><td>${f.modified}</td><td><button class="btn btn-sm btn-secondary" onclick="downloadFile('${f.name}')">Download</button> <button class="btn btn-sm btn-secondary" onclick="shareFile('${f.name}')">Share</button></td></tr>`).join('');
+      document.getElementById('recent-list').innerHTML=files.slice(0,3).map(f=>`<tr><td><span class="doc-icon">${f.type==='pdf'?'📕':'📘'}</span> ${f.name}</td><td>${f.size}</td><td>${f.modified}</td></tr>`).join('');
+      document.getElementById('shared-list').innerHTML=shared.map(s=>`<tr><td>${s.name}</td><td>${s.owner}</td><td>${s.shared}</td></tr>`).join('');
+      document.getElementById('trash-list').innerHTML=trash.map(t=>`<tr><td>${t.name}</td><td>${t.deleted}</td><td><button class="btn btn-sm btn-secondary" onclick="restoreFile('${t.name}')">Restore</button></td></tr>`).join('');
+    }
+    
+    function uploadFile(){const name=prompt('File name (e.g., report.pdf):');if(!name)return;const type=name.split('.').pop()||'pdf';files.unshift({name,type,size:Math.floor(Math.random()*900+100)+'KB',modified:new Date().toISOString().split('T')[0]});folders.find(f=>f.name==='Documents').count++;saveData();render();}
+    function openFolder(name){const folder=folders.find(f=>f.name===name);if(!folder)return;const folderFiles=files.filter(f=>f.folder===name||!f.folder);alert(`${folder.icon} ${name}\n\n${folderFiles.length} files in this folder\n\n${folderFiles.map(f=>f.name).join('\n')||'(showing all files)'}`);currentFolder=name;render();}
+    function downloadFile(name){const file=files.find(f=>f.name===name);if(file){const content=`This is a simulated download of: ${name}\n\nIn a real app, this would download the actual file from your server.`;const blob=new Blob([content],{type:'text/plain'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;a.click();}}
+    function shareFile(name){const email=prompt(`Share "${name}" with (email address):`);if(!email)return;shared.push({name,owner:'You',shared:email});saveData();render();}
+    function restoreFile(name){trash=trash.filter(t=>t.name!==name);saveData();render();alert('File restored');}
+    function emptyTrash(){trash=[];saveData();render();alert('Trash emptied');}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MaintenancePro Plus - CMMS Software</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:16px}.plus-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(37,99,235,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-open{background:rgba(239,68,68,.15);color:var(--danger)}.badge-progress{background:rgba(245,158,11,.15);color:var(--warning)}.badge-complete{background:rgba(34,197,94,.15);color:var(--success)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🔧</div><span class="logo-text">MaintenancePro <span class="plus-badge">PLUS</span></span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('workorders')">📋 Work Orders</div>
+      <div class="nav-item" onclick="showView('pm')">🔄 PM Schedule</div>
+      <div class="nav-item" onclick="showView('assets')">🏭 Assets</div>
+      <div class="nav-item" onclick="showView('parts')">📦 Parts</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Maintenance Dashboard</h1><button class="btn btn-primary" onclick="openModal()">+ New Work Order</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Open Work Orders</div><div class="stat-value" style="color:var(--danger)" id="stat-open">0</div></div>
+          <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:var(--warning)" id="stat-prog">0</div></div>
+          <div class="stat-card"><div class="stat-label">Completed Today</div><div class="stat-value" style="color:var(--success)" id="stat-done">0</div></div>
+          <div class="stat-card"><div class="stat-label">PM Due This Week</div><div class="stat-value" style="color:var(--primary)" id="stat-pm">0</div></div>
+        </div>
+        <div class="card"><div class="card-header"><span>Open Work Orders</span></div><table class="table"><thead><tr><th>#</th><th>Asset</th><th>Issue</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="open-wo"></tbody></table></div>
+      </div>
+      <div id="view-workorders" class="view">
+        <div class="header"><h1 class="title">All Work Orders</h1><button class="btn btn-primary" onclick="openModal()">+ New Work Order</button></div>
+        <div class="card"><table class="table"><thead><tr><th>#</th><th>Asset</th><th>Issue</th><th>Assigned</th><th>Priority</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-wo"></tbody></table></div>
+      </div>
+      <div id="view-pm" class="view">
+        <div class="header"><h1 class="title">Preventive Maintenance</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Asset</th><th>PM Task</th><th>Frequency</th><th>Last Done</th><th>Next Due</th><th>Actions</th></tr></thead><tbody id="pm-schedule"></tbody></table></div>
+      </div>
+      <div id="view-assets" class="view">
+        <div class="header"><h1 class="title">Assets</h1><button class="btn btn-primary" onclick="addAsset()">+ Add Asset</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Asset</th><th>Location</th><th>Status</th><th>Last Maintenance</th></tr></thead><tbody id="asset-list"></tbody></table></div>
+      </div>
+      <div id="view-parts" class="view">
+        <div class="header"><h1 class="title">Parts Inventory</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Part</th><th>Part #</th><th>In Stock</th><th>Min Level</th><th>Status</th></tr></thead><tbody id="parts-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">MTTR</div><div class="stat-value">4.2 hrs</div></div><div class="stat-card"><div class="stat-label">PM Compliance</div><div class="stat-value" style="color:var(--success)">94%</div></div><div class="stat-card"><div class="stat-label">YTD Costs</div><div class="stat-value">$28,400</div></div><div class="stat-card"><div class="stat-label">Work Orders YTD</div><div class="stat-value">347</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">New Work Order</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Asset</label><select class="form-select" id="wo-asset"></select></div><div class="form-group"><label class="form-label">Issue</label><input type="text" class="form-input" id="wo-issue" placeholder="Describe the issue"></div><div class="form-group"><label class="form-label">Priority</label><select class="form-select" id="wo-priority"><option>Low</option><option selected>Medium</option><option>High</option><option>Critical</option></select></div><div class="form-group"><label class="form-label">Assign To</label><select class="form-select" id="wo-assign"><option>Mike K.</option><option>John S.</option><option>Unassigned</option></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveWO()">Create Work Order</button></div></div></div>
+  <script>
+    let assets=[{id:1,name:'HVAC Unit 1',location:'Building A',status:'operational'},{id:2,name:'Conveyor Belt 3',location:'Warehouse',status:'operational'},{id:3,name:'Compressor 2',location:'Plant Floor',status:'needs-repair'}];
+    let workOrders=[{id:1001,assetId:1,issue:'Not cooling properly',priority:'High',status:'open',assigned:'Mike K.'},{id:1002,assetId:3,issue:'Making noise',priority:'Critical',status:'progress',assigned:'John S.'},{id:1003,assetId:2,issue:'Belt slipping',priority:'Medium',status:'open',assigned:''}];
+    let pmSchedule=[{assetId:1,task:'Filter replacement',freq:'Monthly',last:'2025-12-15',next:'2026-01-15'},{assetId:2,task:'Lubrication',freq:'Weekly',last:'2026-01-01',next:'2026-01-08'},{assetId:3,task:'Oil change',freq:'Quarterly',last:'2025-10-01',next:'2026-01-01'}];
+    let parts=[{name:'Air Filter',partNo:'AF-1234',stock:12,min:5},{name:'Belt',partNo:'BT-5678',stock:3,min:5},{name:'Lubricant',partNo:'LB-9012',stock:8,min:4}];
+    let nextWO=1004;
+    
+    function getAsset(id){return assets.find(a=>a.id===id)}
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      const open=workOrders.filter(w=>w.status==='open').length;
+      const prog=workOrders.filter(w=>w.status==='progress').length;
+      document.getElementById('stat-open').textContent=open;
+      document.getElementById('stat-prog').textContent=prog;
+      document.getElementById('stat-done').textContent=workOrders.filter(w=>w.status==='complete').length;
+      document.getElementById('stat-pm').textContent=pmSchedule.length;
+      
+      document.getElementById('open-wo').innerHTML=workOrders.filter(w=>w.status!=='complete').map(w=>`<tr><td>#${w.id}</td><td>${getAsset(w.assetId)?.name}</td><td>${w.issue}</td><td>${w.priority}</td><td><span class="badge badge-${w.status}">${w.status}</span></td><td><button class="btn btn-sm btn-primary" onclick="updateWO(${w.id})">${w.status==='open'?'Start':'Complete'}</button></td></tr>`).join('');
+      document.getElementById('all-wo').innerHTML=workOrders.map(w=>`<tr><td>#${w.id}</td><td>${getAsset(w.assetId)?.name}</td><td>${w.issue}</td><td>${w.assigned||'-'}</td><td>${w.priority}</td><td><span class="badge badge-${w.status}">${w.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="editWO(${w.id})">Edit</button></td></tr>`).join('');
+      document.getElementById('pm-schedule').innerHTML=pmSchedule.map(p=>`<tr><td>${getAsset(p.assetId)?.name}</td><td>${p.task}</td><td>${p.freq}</td><td>${p.last}</td><td>${p.next}</td><td><button class="btn btn-sm btn-primary" onclick="completePM(${p.assetId})">Complete</button></td></tr>`).join('');
+      document.getElementById('asset-list').innerHTML=assets.map(a=>`<tr><td><strong>${a.name}</strong></td><td>${a.location}</td><td><span class="badge badge-${a.status==='operational'?'complete':'open'}">${a.status}</span></td><td>Dec 15, 2025</td></tr>`).join('');
+      document.getElementById('parts-list').innerHTML=parts.map(p=>`<tr><td>${p.name}</td><td>${p.partNo}</td><td>${p.stock}</td><td>${p.min}</td><td><span class="badge badge-${p.stock>=p.min?'complete':'open'}">${p.stock>=p.min?'OK':'Low'}</span></td></tr>`).join('');
+      document.getElementById('wo-asset').innerHTML=assets.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveWO(){const issue=document.getElementById('wo-issue').value;if(!issue){alert('Enter issue description');return;}workOrders.unshift({id:nextWO++,assetId:parseInt(document.getElementById('wo-asset').value),issue,priority:document.getElementById('wo-priority').value,status:'open',assigned:document.getElementById('wo-assign').value});closeModal();render();alert('Work order created!');}
+    function updateWO(id){const w=workOrders.find(x=>x.id===id);if(w){w.status=w.status==='open'?'progress':'complete';render();alert('Work order updated!');}}
+    function editWO(id){alert('Edit WO #'+id+' (Demo)');}
+    function completePM(assetId){alert('PM completed for asset #'+assetId);}
+    function addAsset(){alert('Add asset (Demo)');}
+    
+    render();
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='maintenancepro_plus_data';
+  const vars=['assets,workOrders,pmSchedule,parts'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='maintenancepro_plus-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

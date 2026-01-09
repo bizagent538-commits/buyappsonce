@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22AssetTrack%22%2C%22short_name%22%3A%22AssetTrack%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%233b82f6%22%7D" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AssetTrack - Equipment & Inventory Management</title>
+  <meta name="theme-color" content="#f97316" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="AssetTrack" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #fffbf5; --bg-secondary: #ffffff; --bg-tertiary: #fef3e2; --bg-card: #ffffff;
+      --border: #fed7aa; --text-primary: #431407; --text-secondary: #9a3412; --text-muted: #c2410c;
+      --accent: #f97316; --accent-hover: #ea580c;
+      --success: #16a34a; --success-bg: #dcfce7; --warning: #ca8a04; --warning-bg: #fef9c3;
+      --danger: #dc2626; --danger-bg: #fee2e2; --info: #0284c7; --info-bg: #e0f2fe;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #1c1410; --bg-secondary: #2a1f1a; --bg-tertiary: #3d2d24; --bg-card: #2a1f1a;
+      --border: #5c4033; --text-primary: #fef3e2; --text-secondary: #fdba74; --text-muted: #fb923c;
+      --accent: #fb923c; --accent-hover: #fdba74;
+      --success: #4ade80; --success-bg: #14532d; --warning: #facc15; --warning-bg: #713f12;
+      --danger: #f87171; --danger-bg: #7f1d1d; --info: #38bdf8; --info-bg: #0c4a6e;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+    .btn { padding: 0.5rem 1rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-success { background: var(--success); color: white; }
+    .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+    .input { width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 0.875rem; }
+    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1); }
+    .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-info { background: var(--info-bg); color: var(--info); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; color: var(--text-secondary); font-size: 0.8125rem; text-transform: uppercase; }
+    .tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border); }
+    .tab { padding: 0.75rem 1.25rem; cursor: pointer; font-weight: 500; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s; }
+    .tab:hover { color: var(--accent); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+    @media print { .no-print { display: none !important; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+    const APP_VERSION = '2.0.0';
+    const STORAGE_PREFIX = 'assettrack_';
+    
+    const genId = () => Math.random().toString(36).substr(2, 9);
+    const save = (key, data) => localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(data));
+    const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + key)) || fallback; } catch { return fallback; } };
+    const fmtDate = d => d ? new Date(d).toLocaleDateString() : '-';
+    const today = () => new Date().toISOString().split('T')[0];
+    
+    const EQUIPMENT_CATEGORIES = [
+      { id: 'tools', name: 'Tools', icon: '🔧' },
+      { id: 'electronics', name: 'Electronics', icon: '💻' },
+      { id: 'vehicles', name: 'Vehicles', icon: '🚗' },
+      { id: 'furniture', name: 'Furniture', icon: '🪑' },
+      { id: 'safety', name: 'Safety Gear', icon: '🦺' },
+      { id: 'av', name: 'A/V Equipment', icon: '🎥' },
+      { id: 'kitchen', name: 'Kitchen', icon: '🍳' },
+      { id: 'other', name: 'Other', icon: '📦' }
+    ];
+    
+    const INVENTORY_CATEGORIES = [
+      { id: 'supplies', name: 'Office Supplies', icon: '📎' },
+      { id: 'cleaning', name: 'Cleaning', icon: '🧹' },
+      { id: 'parts', name: 'Parts', icon: '⚙️' },
+      { id: 'consumables', name: 'Consumables', icon: '🧴' },
+      { id: 'materials', name: 'Materials', icon: '🪵' },
+      { id: 'food', name: 'Food & Beverage', icon: '🍕' },
+      { id: 'other', name: 'Other', icon: '📦' }
+    ];
+    
+    const CONDITIONS = ['Excellent', 'Good', 'Fair', 'Poor', 'Out of Service'];
+
+    const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
+      if (!isOpen) return null;
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={onClose}>
+          <div className="card" style={{ maxWidth: width, width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{title}</h2>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    const HelpModal = ({ isOpen, onClose }) => {
+      if (!isOpen) return null;
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="AssetTrack Help">
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+            Combined equipment checkout and inventory tracking for complete asset management.
+          </p>
+          <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>🔧 Equipment</h4>
+          <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Track items checked out to people with due dates and condition tracking.</p>
+          <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>📦 Inventory</h4>
+          <p style={{ fontSize: '0.875rem', marginBottom: '1rem', color: 'var(--text-secondary)' }}>Track stock levels with low-stock alerts and reorder points.</p>
+          <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>⌨️ Shortcuts</h4>
+          <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}><code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>N</code> New • <code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>D</code> Dark mode • <code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>?</code> Help</p>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn btn-sm btn-primary" onClick={() => {
+              const csv = "Name,Category,Serial Number,Location,Condition\n";
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+              a.download = 'equipment-template.csv'; a.click();
+            }}>Equipment Template</button>
+            <button className="btn btn-sm btn-secondary" onClick={() => {
+              const csv = "Name,SKU,Category,Quantity,Min Stock,Location,Cost\n";
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+              a.download = 'inventory-template.csv'; a.click();
+            }}>Inventory Template</button>
+          </div>
+        </Modal>
+      );
+    };
+
+    const App = () => {
+      const [mode, setMode] = useState('equipment'); // equipment or inventory
+      const [view, setView] = useState('list');
+      const [darkMode, setDarkMode] = useState(() => load('darkMode', false));
+      const [showHelp, setShowHelp] = useState(false);
+      const [settings, setSettings] = useState(() => load('settings', { lowStockThreshold: 10, orgName: '' }));
+      
+      // Equipment
+      const [equipment, setEquipment] = useState(() => load('equipment', []));
+      const [checkouts, setCheckouts] = useState(() => load('checkouts', []));
+      const [showEquipModal, setShowEquipModal] = useState(false);
+      const [editingEquip, setEditingEquip] = useState(null);
+      const [showCheckoutModal, setShowCheckoutModal] = useState(false);
+      const [checkoutItem, setCheckoutItem] = useState(null);
+      
+      // Inventory
+      const [inventory, setInventory] = useState(() => load('inventory', []));
+      const [showInvModal, setShowInvModal] = useState(false);
+      const [editingInv, setEditingInv] = useState(null);
+      const [showAdjustModal, setShowAdjustModal] = useState(false);
+      const [adjustItem, setAdjustItem] = useState(null);
+      
+      // Activity
+      const [activity, setActivity] = useState(() => load('activity', []));
+      
+      const logActivity = (action, details) => {
+        const entry = { id: genId(), action, details, timestamp: new Date().toISOString() };
+        const updated = [entry, ...activity].slice(0, 500);
+        setActivity(updated);
+        save('activity', updated);
+      };
+      
+      useEffect(() => { document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light'); save('darkMode', darkMode); }, [darkMode]);
+      useEffect(() => { save('equipment', equipment); }, [equipment]);
+      useEffect(() => { save('checkouts', checkouts); }, [checkouts]);
+      useEffect(() => { save('inventory', inventory); }, [inventory]);
+      useEffect(() => { save('settings', settings); }, [settings]);
+      
+      useEffect(() => {
+        const handleKey = e => {
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+          if (e.key === '?') { e.preventDefault(); setShowHelp(true); }
+          if (e.key === 'd' || e.key === 'D') setDarkMode(d => !d);
+          if (e.key === 'n' || e.key === 'N') {
+            if (mode === 'equipment') { setEditingEquip(null); setShowEquipModal(true); }
+            else { setEditingInv(null); setShowInvModal(true); }
+          }
+          if (e.key === 'Escape') { setShowEquipModal(false); setShowInvModal(false); setShowHelp(false); setShowCheckoutModal(false); setShowAdjustModal(false); }
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+      }, [mode]);
+      
+      // Stats
+      const checkedOut = equipment.filter(e => e.checkedOutTo).length;
+      const overdueItems = equipment.filter(e => e.dueDate && new Date(e.dueDate) < new Date()).length;
+      const lowStockItems = inventory.filter(i => i.quantity <= (i.minStock || settings.lowStockThreshold)).length;
+      const totalValue = inventory.reduce((sum, i) => sum + (i.quantity * (i.cost || 0)), 0);
+      
+      // Equipment handlers
+      const saveEquipment = (item) => {
+        if (editingEquip) {
+          setEquipment(equipment.map(e => e.id === item.id ? item : e));
+          logActivity('Updated equipment', item.name);
+        } else {
+          const newItem = { ...item, id: genId(), createdAt: new Date().toISOString() };
+          setEquipment([...equipment, newItem]);
+          logActivity('Added equipment', item.name);
+        }
+        setShowEquipModal(false);
+        setEditingEquip(null);
+      };
+      
+      const checkoutEquipment = (itemId, person, dueDate) => {
+        setEquipment(equipment.map(e => e.id === itemId ? { ...e, checkedOutTo: person, checkedOutAt: new Date().toISOString(), dueDate } : e));
+        const item = equipment.find(e => e.id === itemId);
+        logActivity('Checked out', `${item?.name} to ${person}`);
+        setShowCheckoutModal(false);
+      };
+      
+      const checkinEquipment = (itemId) => {
+        const item = equipment.find(e => e.id === itemId);
+        setEquipment(equipment.map(e => e.id === itemId ? { ...e, checkedOutTo: null, checkedOutAt: null, dueDate: null } : e));
+        logActivity('Checked in', item?.name);
+      };
+      
+      const deleteEquipment = (id) => {
+        const item = equipment.find(e => e.id === id);
+        if (confirm('Delete this equipment?')) {
+          setEquipment(equipment.filter(e => e.id !== id));
+          logActivity('Deleted equipment', item?.name);
+        }
+      };
+      
+      // Inventory handlers
+      const saveInventory = (item) => {
+        if (editingInv) {
+          setInventory(inventory.map(i => i.id === item.id ? item : i));
+          logActivity('Updated inventory', item.name);
+        } else {
+          const newItem = { ...item, id: genId(), createdAt: new Date().toISOString() };
+          setInventory([...inventory, newItem]);
+          logActivity('Added inventory', item.name);
+        }
+        setShowInvModal(false);
+        setEditingInv(null);
+      };
+      
+      const adjustStock = (itemId, adjustment, reason) => {
+        const item = inventory.find(i => i.id === itemId);
+        const newQty = Math.max(0, item.quantity + adjustment);
+        setInventory(inventory.map(i => i.id === itemId ? { ...i, quantity: newQty } : i));
+        logActivity(`Stock ${adjustment > 0 ? 'added' : 'removed'}`, `${Math.abs(adjustment)} × ${item?.name} (${reason})`);
+        setShowAdjustModal(false);
+      };
+      
+      const deleteInventory = (id) => {
+        const item = inventory.find(i => i.id === id);
+        if (confirm('Delete this item?')) {
+          setInventory(inventory.filter(i => i.id !== id));
+          logActivity('Deleted inventory', item?.name);
+        }
+      };
+      
+      // Export
+      const exportCSV = (type) => {
+        let csv = '';
+        if (type === 'equipment') {
+          csv = 'Name,Category,Serial Number,Location,Condition,Checked Out To,Due Date\n';
+          equipment.forEach(e => {
+            csv += `"${e.name}","${e.category}","${e.serialNumber || ''}","${e.location || ''}","${e.condition || ''}","${e.checkedOutTo || ''}","${e.dueDate || ''}"\n`;
+          });
+        } else {
+          csv = 'Name,SKU,Category,Quantity,Min Stock,Location,Cost,Value\n';
+          inventory.forEach(i => {
+            csv += `"${i.name}","${i.sku || ''}","${i.category}","${i.quantity}","${i.minStock || ''}","${i.location || ''}","${i.cost || 0}","${i.quantity * (i.cost || 0)}"\n`;
+          });
+        }
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${type}-export-${today()}.csv`;
+        a.click();
+      };
+      
+      const backup = () => {
+        const data = { equipment, checkouts, inventory, settings, activity, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+        a.download = `assettrack-backup-${today()}.json`; a.click();
+      };
+      
+      const restore = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.equipment) { setEquipment(data.equipment); save('equipment', data.equipment); }
+            if (data.inventory) { setInventory(data.inventory); save('inventory', data.inventory); }
+            if (data.settings) { setSettings(data.settings); save('settings', data.settings); }
+            if (data.activity) { setActivity(data.activity); save('activity', data.activity); }
+            alert('Data restored!');
+          } catch { alert('Invalid backup file'); }
+        };
+        reader.readAsText(file);
+      };
+
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <header className="no-print" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '0.75rem 1.5rem', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  📦 AssetTrack
+                </h1>
+                <div className="tabs" style={{ marginBottom: 0, border: 'none' }}>
+                  <div className={`tab ${mode === 'equipment' ? 'active' : ''}`} onClick={() => setMode('equipment')}>🔧 Equipment</div>
+                  <div className={`tab ${mode === 'inventory' ? 'active' : ''}`} onClick={() => setMode('inventory')}>📦 Inventory</div>
+                  <div className={`tab ${view === 'activity' ? 'active' : ''}`} onClick={() => setView(view === 'activity' ? 'list' : 'activity')}>📋 Activity</div>
+                  <div className={`tab ${view === 'settings' ? 'active' : ''}`} onClick={() => setView(view === 'settings' ? 'list' : 'settings')}>⚙️ Settings</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button onClick={() => setShowHelp(true)} className="btn btn-sm btn-secondary">❓</button>
+                <button onClick={() => setDarkMode(!darkMode)} className="btn btn-sm btn-secondary">{darkMode ? '☀️' : '🌙'}</button>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>v{APP_VERSION}</span>
+              </div>
+            </div>
+          </header>
+          
+          <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '1.5rem' }}>
+            {/* Stats */}
+            {view === 'list' && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                <div className="card" style={{ borderLeft: '4px solid var(--accent)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Equipment</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 700 }}>{equipment.length}</div>
+                </div>
+                <div className="card" style={{ borderLeft: '4px solid var(--info)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Checked Out</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--info)' }}>{checkedOut}</div>
+                </div>
+                <div className="card" style={{ borderLeft: '4px solid var(--danger)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Overdue</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--danger)' }}>{overdueItems}</div>
+                </div>
+                <div className="card" style={{ borderLeft: '4px solid var(--warning)' }}>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Low Stock Items</div>
+                  <div style={{ fontSize: '1.75rem', fontWeight: 700, color: 'var(--warning)' }}>{lowStockItems}</div>
+                </div>
+              </div>
+            )}
+            
+            {view === 'list' && mode === 'equipment' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>🔧 Equipment</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => exportCSV('equipment')}>Export CSV</button>
+                    <button className="btn btn-primary" onClick={() => { setEditingEquip(null); setShowEquipModal(true); }}>+ Add Equipment</button>
+                  </div>
+                </div>
+                <div className="card">
+                  <table>
+                    <thead>
+                      <tr><th>Name</th><th>Category</th><th>Location</th><th>Status</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {equipment.map(e => (
+                        <tr key={e.id}>
+                          <td>
+                            <div style={{ fontWeight: 500 }}>{e.name}</div>
+                            {e.serialNumber && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SN: {e.serialNumber}</div>}
+                          </td>
+                          <td>{EQUIPMENT_CATEGORIES.find(c => c.id === e.category)?.icon} {EQUIPMENT_CATEGORIES.find(c => c.id === e.category)?.name}</td>
+                          <td>{e.location || '-'}</td>
+                          <td>
+                            {e.checkedOutTo ? (
+                              <div>
+                                <span className="badge badge-info">Checked out</span>
+                                <div style={{ fontSize: '0.75rem', marginTop: '0.25rem' }}>to {e.checkedOutTo}</div>
+                                {e.dueDate && new Date(e.dueDate) < new Date() && <span className="badge badge-danger" style={{ marginTop: '0.25rem' }}>Overdue</span>}
+                              </div>
+                            ) : (
+                              <span className="badge badge-success">Available</span>
+                            )}
+                          </td>
+                          <td>
+                            {e.checkedOutTo ? (
+                              <button className="btn btn-sm btn-success" onClick={() => checkinEquipment(e.id)}>Check In</button>
+                            ) : (
+                              <button className="btn btn-sm btn-primary" onClick={() => { setCheckoutItem(e); setShowCheckoutModal(true); }}>Check Out</button>
+                            )}
+                            <button className="btn btn-sm btn-secondary" style={{ marginLeft: '0.25rem' }} onClick={() => { setEditingEquip(e); setShowEquipModal(true); }}>Edit</button>
+                            <button className="btn btn-sm btn-danger" style={{ marginLeft: '0.25rem' }} onClick={() => deleteEquipment(e.id)}>×</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {equipment.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No equipment yet. Click "Add Equipment" to start tracking.</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'list' && mode === 'inventory' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>📦 Inventory</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => exportCSV('inventory')}>Export CSV</button>
+                    <button className="btn btn-primary" onClick={() => { setEditingInv(null); setShowInvModal(true); }}>+ Add Item</button>
+                  </div>
+                </div>
+                <div className="card">
+                  <table>
+                    <thead>
+                      <tr><th>Name</th><th>Category</th><th>Quantity</th><th>Location</th><th>Actions</th></tr>
+                    </thead>
+                    <tbody>
+                      {inventory.map(i => {
+                        const isLow = i.quantity <= (i.minStock || settings.lowStockThreshold);
+                        return (
+                          <tr key={i.id}>
+                            <td>
+                              <div style={{ fontWeight: 500 }}>{i.name}</div>
+                              {i.sku && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>SKU: {i.sku}</div>}
+                            </td>
+                            <td>{INVENTORY_CATEGORIES.find(c => c.id === i.category)?.icon} {INVENTORY_CATEGORIES.find(c => c.id === i.category)?.name}</td>
+                            <td>
+                              <span style={{ fontWeight: 600, color: isLow ? 'var(--danger)' : 'inherit' }}>{i.quantity}</span>
+                              {i.minStock && <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}> / min {i.minStock}</span>}
+                              {isLow && <span className="badge badge-danger" style={{ marginLeft: '0.5rem' }}>Low</span>}
+                            </td>
+                            <td>{i.location || '-'}</td>
+                            <td>
+                              <button className="btn btn-sm btn-primary" onClick={() => { setAdjustItem(i); setShowAdjustModal(true); }}>Adjust</button>
+                              <button className="btn btn-sm btn-secondary" style={{ marginLeft: '0.25rem' }} onClick={() => { setEditingInv(i); setShowInvModal(true); }}>Edit</button>
+                              <button className="btn btn-sm btn-danger" style={{ marginLeft: '0.25rem' }} onClick={() => deleteInventory(i.id)}>×</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {inventory.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No inventory items yet. Click "Add Item" to start tracking.</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'activity' && (
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>📋 Activity Log</h2>
+                <div className="card">
+                  {activity.slice(0, 50).map(a => (
+                    <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
+                      <div><span style={{ fontWeight: 500 }}>{a.action}</span> {a.details && <span style={{ color: 'var(--text-muted)' }}>— {a.details}</span>}</div>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(a.timestamp).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {activity.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No activity yet</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'settings' && (
+              <div>
+                <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1rem' }}>⚙️ Settings</h2>
+                <div className="card" style={{ maxWidth: '500px' }}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Organization Name</label>
+                    <input className="input" value={settings.orgName} onChange={e => setSettings({ ...settings, orgName: e.target.value })} />
+                  </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Default Low Stock Threshold</label>
+                    <input className="input" type="number" value={settings.lowStockThreshold} onChange={e => setSettings({ ...settings, lowStockThreshold: parseInt(e.target.value) || 10 })} />
+                  </div>
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary" onClick={backup}>Backup</button>
+                    <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>Restore<input type="file" accept=".json" onChange={restore} style={{ display: 'none' }} /></label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+          
+          {/* Equipment Modal */}
+          <Modal isOpen={showEquipModal} onClose={() => setShowEquipModal(false)} title={editingEquip ? 'Edit Equipment' : 'Add Equipment'}>
+            <EquipmentForm item={editingEquip} onSave={saveEquipment} onCancel={() => setShowEquipModal(false)} />
+          </Modal>
+          
+          {/* Checkout Modal */}
+          <Modal isOpen={showCheckoutModal} onClose={() => setShowCheckoutModal(false)} title={`Check Out: ${checkoutItem?.name}`}>
+            <CheckoutForm item={checkoutItem} onCheckout={checkoutEquipment} onCancel={() => setShowCheckoutModal(false)} />
+          </Modal>
+          
+          {/* Inventory Modal */}
+          <Modal isOpen={showInvModal} onClose={() => setShowInvModal(false)} title={editingInv ? 'Edit Item' : 'Add Item'}>
+            <InventoryForm item={editingInv} onSave={saveInventory} onCancel={() => setShowInvModal(false)} />
+          </Modal>
+          
+          {/* Adjust Modal */}
+          <Modal isOpen={showAdjustModal} onClose={() => setShowAdjustModal(false)} title={`Adjust: ${adjustItem?.name}`}>
+            <AdjustForm item={adjustItem} onAdjust={adjustStock} onCancel={() => setShowAdjustModal(false)} />
+          </Modal>
+          
+          <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+        </div>
+      );
+    };
+    
+    const EquipmentForm = ({ item, onSave, onCancel }) => {
+      const [form, setForm] = useState(item || { name: '', category: 'tools', serialNumber: '', location: '', condition: 'Good', notes: '' });
+      return (
+        <div>
+          <div style={{ marginBottom: '1rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Name *</label><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Category</label><select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{EQUIPMENT_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</select></div>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Condition</label><select className="input" value={form.condition} onChange={e => setForm({ ...form, condition: e.target.value })}>{CONDITIONS.map(c => <option key={c} value={c}>{c}</option>)}</select></div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Serial Number</label><input className="input" value={form.serialNumber} onChange={e => setForm({ ...form, serialNumber: e.target.value })} /></div>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Location</label><input className="input" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Notes</label><textarea className="input" rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} /></div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}><button className="btn btn-secondary" onClick={onCancel}>Cancel</button><button className="btn btn-primary" onClick={() => form.name && onSave(form)}>Save</button></div>
+        </div>
+      );
+    };
+    
+    const CheckoutForm = ({ item, onCheckout, onCancel }) => {
+      const [person, setPerson] = useState('');
+      const [dueDate, setDueDate] = useState('');
+      return (
+        <div>
+          <div style={{ marginBottom: '1rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Checked Out To *</label><input className="input" value={person} onChange={e => setPerson(e.target.value)} placeholder="Name of person" required /></div>
+          <div style={{ marginBottom: '1.5rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Due Date</label><input className="input" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} /></div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}><button className="btn btn-secondary" onClick={onCancel}>Cancel</button><button className="btn btn-primary" onClick={() => person && onCheckout(item.id, person, dueDate)}>Check Out</button></div>
+        </div>
+      );
+    };
+    
+    const InventoryForm = ({ item, onSave, onCancel }) => {
+      const [form, setForm] = useState(item || { name: '', sku: '', category: 'supplies', quantity: 0, minStock: 10, location: '', cost: 0, notes: '' });
+      return (
+        <div>
+          <div style={{ marginBottom: '1rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Name *</label><input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} required /></div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>SKU</label><input className="input" value={form.sku} onChange={e => setForm({ ...form, sku: e.target.value })} /></div>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Category</label><select className="input" value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{INVENTORY_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</select></div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Quantity</label><input className="input" type="number" value={form.quantity} onChange={e => setForm({ ...form, quantity: parseInt(e.target.value) || 0 })} /></div>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Min Stock</label><input className="input" type="number" value={form.minStock} onChange={e => setForm({ ...form, minStock: parseInt(e.target.value) || 0 })} /></div>
+            <div><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Unit Cost</label><input className="input" type="number" step="0.01" value={form.cost} onChange={e => setForm({ ...form, cost: parseFloat(e.target.value) || 0 })} /></div>
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Location</label><input className="input" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} /></div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}><button className="btn btn-secondary" onClick={onCancel}>Cancel</button><button className="btn btn-primary" onClick={() => form.name && onSave(form)}>Save</button></div>
+        </div>
+      );
+    };
+    
+    const AdjustForm = ({ item, onAdjust, onCancel }) => {
+      const [amount, setAmount] = useState(1);
+      const [type, setType] = useState('add');
+      const [reason, setReason] = useState('');
+      return (
+        <div>
+          <p style={{ marginBottom: '1rem', color: 'var(--text-secondary)' }}>Current quantity: <strong>{item?.quantity}</strong></p>
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            <button className={`btn ${type === 'add' ? 'btn-success' : 'btn-secondary'}`} onClick={() => setType('add')}>+ Add</button>
+            <button className={`btn ${type === 'remove' ? 'btn-danger' : 'btn-secondary'}`} onClick={() => setType('remove')}>- Remove</button>
+          </div>
+          <div style={{ marginBottom: '1rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Amount</label><input className="input" type="number" min="1" value={amount} onChange={e => setAmount(parseInt(e.target.value) || 1)} /></div>
+          <div style={{ marginBottom: '1.5rem' }}><label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Reason</label><input className="input" value={reason} onChange={e => setReason(e.target.value)} placeholder="e.g., Restocked, Used, Damaged" /></div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}><button className="btn btn-secondary" onClick={onCancel}>Cancel</button><button className="btn btn-primary" onClick={() => onAdjust(item.id, type === 'add' ? amount : -amount, reason)}>{type === 'add' ? 'Add' : 'Remove'} Stock</button></div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

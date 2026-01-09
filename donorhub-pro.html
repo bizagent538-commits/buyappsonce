@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DonorHub Pro - Advanced Donation Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#059669;--success:#22c55e;--warning:#f59e0b;--purple:#8b5cf6}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh;overflow-y:auto}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.pro-badge{background:var(--purple);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}.nav-section{font-size:10px;text-transform:uppercase;color:var(--muted);margin:16px 0 8px;padding-left:14px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(5,150,105,.1);color:var(--primary)}.nav-item.pro{color:var(--purple)}.nav-item.pro:hover,.nav-item.pro.active{background:rgba(139,92,246,.1);color:var(--purple)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-purple{background:var(--purple);color:white}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.view{display:none}.view.active{display:block}.segment-tag{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:500}.segment-major{background:#dcfce7;color:#166534}.segment-mid{background:#dbeafe;color:#1e40af}.segment-new{background:#fef3c7;color:#92400e}.segment-lapsed{background:#fee2e2;color:#991b1b}.recurring-badge{background:#f3e8ff;color:#7c3aed;padding:2px 6px;border-radius:4px;font-size:11px}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-textarea{min-height:80px;resize:vertical}.chart-placeholder{background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:8px;padding:40px;text-align:center;color:var(--primary)}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">💚</div><span class="logo-text">DonorHub</span><span class="pro-badge">PRO</span></div>
+      <div class="nav-section">Core</div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('donors')">👥 Donors</div>
+      <div class="nav-item" onclick="showView('donations')">💰 Donations</div>
+      <div class="nav-item" onclick="showView('campaigns')">🎯 Campaigns</div>
+      <div class="nav-section">Pro Features</div>
+      <div class="nav-item pro" onclick="showView('recurring')">🔄 Recurring</div>
+      <div class="nav-item pro" onclick="showView('segments')">🏷️ Segments</div>
+      <div class="nav-item pro" onclick="showView('pledges')">📝 Pledges</div>
+      <div class="nav-item pro" onclick="showView('grants')">🏦 Grants</div>
+      <div class="nav-item pro" onclick="showView('reports')">📈 Reports</div>
+      <div class="nav-item pro" onclick="showView('email')">✉️ Email</div>
+    </nav>
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Dashboard</h1><button class="btn btn-primary" onclick="openModal('donation')">+ Record Donation</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">YTD Donations</div><div class="stat-value" style="color:var(--primary)">$47,250</div></div>
+          <div class="stat-card"><div class="stat-label">Total Donors</div><div class="stat-value">156</div></div>
+          <div class="stat-card"><div class="stat-label">Monthly Recurring</div><div class="stat-value" style="color:var(--purple)">$2,450</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Donation</div><div class="stat-value">$303</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px">
+          <div class="card"><div class="card-header">Recent Donations</div><table class="table"><thead><tr><th>Date</th><th>Donor</th><th>Amount</th><th>Type</th></tr></thead><tbody><tr><td>Jan 5</td><td>John Smith</td><td>$500</td><td><span class="recurring-badge">🔄 Monthly</span></td></tr><tr><td>Jan 4</td><td>Mary Johnson</td><td>$1,000</td><td>One-time</td></tr><tr><td>Jan 3</td><td>ABC Foundation</td><td>$5,000</td><td>Grant</td></tr><tr><td>Jan 2</td><td>Bob Williams</td><td>$250</td><td>One-time</td></tr></tbody></table></div>
+          <div class="card"><div class="card-header">Donor Segments</div><div style="padding:16px"><div style="display:flex;justify-content:space-between;margin-bottom:12px"><span>Major Donors</span><strong>12</strong></div><div style="display:flex;justify-content:space-between;margin-bottom:12px"><span>Mid-Level</span><strong>34</strong></div><div style="display:flex;justify-content:space-between;margin-bottom:12px"><span>New Donors</span><strong>28</strong></div><div style="display:flex;justify-content:space-between"><span>Lapsed</span><strong style="color:var(--warning)">15</strong></div></div></div>
+        </div>
+      </div>
+      
+      <div id="view-donors" class="view">
+        <div class="header"><h1 class="title">Donors</h1><button class="btn btn-primary" onclick="openModal('donor')">+ Add Donor</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Segment</th><th>Total Given</th><th>Recurring</th></tr></thead><tbody>
+          <tr><td>John Smith</td><td>john@email.com</td><td><span class="segment-tag segment-major">Major</span></td><td>$12,500</td><td><span class="recurring-badge">$500/mo</span></td></tr>
+          <tr><td>Mary Johnson</td><td>mary@email.com</td><td><span class="segment-tag segment-major">Major</span></td><td>$8,000</td><td>—</td></tr>
+          <tr><td>Bob Williams</td><td>bob@email.com</td><td><span class="segment-tag segment-mid">Mid-Level</span></td><td>$2,750</td><td><span class="recurring-badge">$100/mo</span></td></tr>
+          <tr><td>Sarah Davis</td><td>sarah@email.com</td><td><span class="segment-tag segment-new">New</span></td><td>$250</td><td>—</td></tr>
+          <tr><td>Tom Anderson</td><td>tom@email.com</td><td><span class="segment-tag segment-lapsed">Lapsed</span></td><td>$1,500</td><td>—</td></tr>
+        </tbody></table></div>
+      </div>
+      
+      <div id="view-donations" class="view">
+        <div class="header"><h1 class="title">All Donations</h1><div><button class="btn btn-secondary" style="margin-right:8px">Export CSV</button><button class="btn btn-primary" onclick="openModal('donation')">+ Record</button></div></div>
+        <div class="card"><table class="table"><thead><tr><th>Date</th><th>Donor</th><th>Amount</th><th>Campaign</th><th>Type</th><th>Receipt</th></tr></thead><tbody>
+          <tr><td>Jan 5, 2026</td><td>John Smith</td><td>$500</td><td>General Fund</td><td><span class="recurring-badge">🔄 Monthly</span></td><td><button class="btn btn-sm btn-secondary">Generate</button></td></tr>
+          <tr><td>Jan 4, 2026</td><td>Mary Johnson</td><td>$1,000</td><td>Building Fund</td><td>One-time</td><td><button class="btn btn-sm btn-secondary">Generate</button></td></tr>
+          <tr><td>Jan 3, 2026</td><td>ABC Foundation</td><td>$5,000</td><td>Scholarship</td><td>Grant</td><td><button class="btn btn-sm btn-secondary">Generate</button></td></tr>
+        </tbody></table></div>
+      </div>
+      
+      <div id="view-campaigns" class="view">
+        <div class="header"><h1 class="title">Campaigns</h1><button class="btn btn-primary">+ New Campaign</button></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:8px">General Fund</h3><div style="display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:8px"><span>$32,500 raised</span><span>Goal: $50,000</span></div><div style="background:var(--border);border-radius:4px;height:8px"><div style="background:var(--primary);width:65%;height:100%;border-radius:4px"></div></div></div>
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:8px">Building Fund</h3><div style="display:flex;justify-content:space-between;color:var(--muted);font-size:14px;margin-bottom:8px"><span>$45,000 raised</span><span>Goal: $100,000</span></div><div style="background:var(--border);border-radius:4px;height:8px"><div style="background:var(--primary);width:45%;height:100%;border-radius:4px"></div></div></div>
+        </div>
+      </div>
+      
+      <div id="view-recurring" class="view">
+        <div class="header"><h1 class="title">🔄 Recurring Donations</h1><button class="btn btn-purple">+ New Recurring</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Monthly Revenue</div><div class="stat-value" style="color:var(--purple)">$2,450</div></div>
+          <div class="stat-card"><div class="stat-label">Active Recurring</div><div class="stat-value">18</div></div>
+          <div class="stat-card"><div class="stat-label">Avg Monthly</div><div class="stat-value">$136</div></div>
+          <div class="stat-card"><div class="stat-label">Annual Value</div><div class="stat-value">$29,400</div></div>
+        </div>
+        <div class="card"><div class="card-header">Active Recurring Donors</div><table class="table"><thead><tr><th>Donor</th><th>Amount</th><th>Frequency</th><th>Started</th><th>Next Charge</th><th>Status</th></tr></thead><tbody>
+          <tr><td>John Smith</td><td>$500</td><td>Monthly</td><td>Jan 2024</td><td>Feb 5, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+          <tr><td>Bob Williams</td><td>$100</td><td>Monthly</td><td>Mar 2024</td><td>Feb 3, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+          <tr><td>Lisa Chen</td><td>$250</td><td>Monthly</td><td>Jun 2024</td><td>Feb 15, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+          <tr><td>Mike Brown</td><td>$50</td><td>Monthly</td><td>Sep 2025</td><td>Feb 1, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+        </tbody></table></div>
+      </div>
+      
+      <div id="view-segments" class="view">
+        <div class="header"><h1 class="title">🏷️ Donor Segments</h1><button class="btn btn-purple">+ Create Segment</button></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+          <div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3><span class="segment-tag segment-major">Major Donors</span></h3><span style="font-size:24px;font-weight:700">12</span></div><p style="color:var(--muted);font-size:14px">Donors who have given $5,000+ lifetime</p><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px"><strong>$89,500</strong> total contributed</div></div>
+          <div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3><span class="segment-tag segment-mid">Mid-Level</span></h3><span style="font-size:24px;font-weight:700">34</span></div><p style="color:var(--muted);font-size:14px">Donors who have given $1,000-$4,999</p><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px"><strong>$42,300</strong> total contributed</div></div>
+          <div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3><span class="segment-tag segment-new">New Donors</span></h3><span style="font-size:24px;font-weight:700">28</span></div><p style="color:var(--muted);font-size:14px">First donation in last 90 days</p><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px"><strong>$8,750</strong> total contributed</div></div>
+          <div class="card" style="padding:20px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><h3><span class="segment-tag segment-lapsed">Lapsed Donors</span></h3><span style="font-size:24px;font-weight:700">15</span></div><p style="color:var(--muted);font-size:14px">No donation in 12+ months</p><div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:14px"><button class="btn btn-sm btn-purple">Send Re-engagement</button></div></div>
+        </div>
+      </div>
+      
+      <div id="view-pledges" class="view">
+        <div class="header"><h1 class="title">📝 Pledges</h1><button class="btn btn-purple">+ New Pledge</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Pledged</div><div class="stat-value" style="color:var(--purple)">$75,000</div></div>
+          <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value" style="color:var(--success)">$45,000</div></div>
+          <div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value">$30,000</div></div>
+          <div class="stat-card"><div class="stat-label">Collection Rate</div><div class="stat-value">60%</div></div>
+        </div>
+        <div class="card"><div class="card-header">Active Pledges</div><table class="table"><thead><tr><th>Donor</th><th>Pledge Amount</th><th>Collected</th><th>Remaining</th><th>Due Date</th><th>Status</th></tr></thead><tbody>
+          <tr><td>Mary Johnson</td><td>$25,000</td><td>$15,000</td><td>$10,000</td><td>Dec 2026</td><td><span style="color:var(--success)">On Track</span></td></tr>
+          <tr><td>ABC Corp</td><td>$50,000</td><td>$30,000</td><td>$20,000</td><td>Jun 2027</td><td><span style="color:var(--success)">On Track</span></td></tr>
+        </tbody></table></div>
+      </div>
+      
+      <div id="view-grants" class="view">
+        <div class="header"><h1 class="title">🏦 Grants</h1><button class="btn btn-purple">+ Add Grant</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Active Grants</div><div class="stat-value">4</div></div>
+          <div class="stat-card"><div class="stat-label">Total Awarded</div><div class="stat-value" style="color:var(--purple)">$125,000</div></div>
+          <div class="stat-card"><div class="stat-label">Pending Apps</div><div class="stat-value">2</div></div>
+          <div class="stat-card"><div class="stat-label">Reports Due</div><div class="stat-value" style="color:var(--warning)">1</div></div>
+        </div>
+        <div class="card"><div class="card-header">Grant Tracking</div><table class="table"><thead><tr><th>Funder</th><th>Program</th><th>Amount</th><th>Period</th><th>Report Due</th><th>Status</th></tr></thead><tbody>
+          <tr><td>ABC Foundation</td><td>Youth Programs</td><td>$50,000</td><td>2026</td><td>Mar 31, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+          <tr><td>Community Fund</td><td>General Operating</td><td>$25,000</td><td>2026</td><td>Jun 30, 2026</td><td><span style="color:var(--success)">● Active</span></td></tr>
+          <tr><td>XYZ Trust</td><td>Capital Campaign</td><td>$50,000</td><td>2025-2026</td><td>Jan 15, 2026</td><td><span style="color:var(--warning)">● Due Soon</span></td></tr>
+        </tbody></table></div>
+      </div>
+      
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">📈 Advanced Reports</h1><button class="btn btn-secondary">Export All</button></div>
+        <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px">
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:16px">Giving Trends</h3><div class="chart-placeholder">📊 Monthly donation chart<br><small style="color:var(--muted)">Shows YoY comparison</small></div></div>
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:16px">Donor Retention</h3><div class="chart-placeholder">📈 Retention rate by year<br><small style="color:var(--muted)">Track donor loyalty</small></div></div>
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:16px">LYBUNT Report</h3><p style="color:var(--muted);font-size:14px;margin-bottom:12px">Last Year But Unfortunately Not This Year</p><div style="background:var(--bg);padding:12px;border-radius:8px"><strong>23 donors</strong> gave last year but not yet this year<br><small style="color:var(--muted)">$18,500 potential recovery</small></div></div>
+          <div class="card" style="padding:20px"><h3 style="margin-bottom:16px">SYBUNT Report</h3><p style="color:var(--muted);font-size:14px;margin-bottom:12px">Some Year But Unfortunately Not This Year</p><div style="background:var(--bg);padding:12px;border-radius:8px"><strong>45 donors</strong> in database haven't given this year<br><small style="color:var(--muted)">$32,000 potential recovery</small></div></div>
+        </div>
+      </div>
+      
+      <div id="view-email" class="view">
+        <div class="header"><h1 class="title">✉️ Email Integration</h1><button class="btn btn-purple">+ New Campaign</button></div>
+        <div class="card" style="padding:20px;margin-bottom:16px"><h3 style="margin-bottom:12px">Quick Actions</h3><div style="display:flex;gap:12px;flex-wrap:wrap"><button class="btn btn-secondary">📧 Thank You (Auto)</button><button class="btn btn-secondary">🎂 Birthday Greetings</button><button class="btn btn-secondary">📅 Year-End Appeal</button><button class="btn btn-secondary">🔄 Recurring Reminder</button></div></div>
+        <div class="card"><div class="card-header">Recent Email Campaigns</div><table class="table"><thead><tr><th>Campaign</th><th>Sent</th><th>Recipients</th><th>Open Rate</th><th>Donations</th></tr></thead><tbody>
+          <tr><td>Year-End Appeal 2025</td><td>Dec 15, 2025</td><td>142</td><td>45%</td><td>$8,500 (12 gifts)</td></tr>
+          <tr><td>Monthly Newsletter - Dec</td><td>Dec 1, 2025</td><td>156</td><td>38%</td><td>$1,200 (4 gifts)</td></tr>
+          <tr><td>Giving Tuesday</td><td>Nov 28, 2025</td><td>156</td><td>52%</td><td>$4,200 (18 gifts)</td></tr>
+        </tbody></table></div>
+      </div>
+    </main>
+  </div>
+  
+  <div class="modal-overlay" id="modal-donation"><div class="modal"><div class="modal-header"><h2 class="modal-title">Record Donation</h2><button class="close-btn" onclick="closeModal('donation')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Donor</label><select class="form-select"><option>John Smith</option><option>Mary Johnson</option><option>Bob Williams</option><option>+ Add New Donor</option></select></div>
+    <div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" placeholder="0.00"></div>
+    <div class="form-group"><label class="form-label">Type</label><select class="form-select"><option>One-time</option><option>Recurring - Monthly</option><option>Recurring - Quarterly</option><option>Recurring - Annual</option><option>Pledge Payment</option><option>Grant</option></select></div>
+    <div class="form-group"><label class="form-label">Campaign</label><select class="form-select"><option>General Fund</option><option>Building Fund</option><option>Scholarship Fund</option></select></div>
+    <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('donation')">Cancel</button><button class="btn btn-primary" onclick="closeModal('donation')">Record Donation</button></div>
+  </div></div>
+  
+  <div class="modal-overlay" id="modal-donor"><div class="modal"><div class="modal-header"><h2 class="modal-title">Add Donor</h2><button class="close-btn" onclick="closeModal('donor')">&times;</button></div>
+    <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" placeholder="Full name"></div>
+    <div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" placeholder="email@example.com"></div>
+    <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" placeholder="(555) 123-4567"></div>
+    <div class="form-group"><label class="form-label">Address</label><textarea class="form-textarea" placeholder="Street address, City, State ZIP"></textarea></div>
+    <div class="form-group"><label class="form-label">Initial Segment</label><select class="form-select"><option>New Donor</option><option>Mid-Level</option><option>Major Donor</option></select></div>
+    <div class="form-group"><label class="form-label">Notes</label><textarea class="form-textarea" placeholder="Any notes about this donor..."></textarea></div>
+    <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('donor')">Cancel</button><button class="btn btn-primary" onclick="closeModal('donor')">Add Donor</button></div>
+  </div></div>
+  
+  <script>
+    function showView(view) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      event.target.classList.add('active');
+    }
+    function openModal(type) {
+      document.getElementById('modal-' + type).classList.add('show');
+    }
+    function closeModal(type) {
+      document.getElementById('modal-' + type).classList.remove('show');
+    }
+  </script>
+</body>
+</html>

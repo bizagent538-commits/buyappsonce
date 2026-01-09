@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookIt - Simple Appointment Scheduling</title>
+  <meta name="theme-color" content="#3b82f6">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #f8fafc;
+      --bg-card: #ffffff;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // Storage helpers
+    const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+    const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
+    const genId = () => Date.now().toString(36) + Math.random().toString(36).substr(2);
+
+    // Sample data
+    const defaultSettings = {
+      businessName: 'Your Business',
+      email: 'hello@example.com',
+      phone: '(555) 123-4567',
+      slotDuration: 30,
+      bufferTime: 0,
+      advanceBooking: 14,
+    };
+
+    const defaultAvailability = [
+      { day: 0, enabled: false, start: '09:00', end: '17:00' },
+      { day: 1, enabled: true, start: '09:00', end: '17:00' },
+      { day: 2, enabled: true, start: '09:00', end: '17:00' },
+      { day: 3, enabled: true, start: '09:00', end: '17:00' },
+      { day: 4, enabled: true, start: '09:00', end: '17:00' },
+      { day: 5, enabled: true, start: '09:00', end: '17:00' },
+      { day: 6, enabled: false, start: '09:00', end: '17:00' },
+    ];
+
+    const defaultServices = [
+      { id: '1', name: 'Consultation', duration: 30, price: 50, color: '#3b82f6' },
+      { id: '2', name: 'Follow-up', duration: 15, price: 25, color: '#10b981' },
+      { id: '3', name: 'Extended Session', duration: 60, price: 100, color: '#8b5cf6' },
+    ];
+
+    const sampleAppointments = [
+      { id: '1', serviceId: '1', clientName: 'John Smith', clientEmail: 'john@email.com', clientPhone: '(555) 111-2222', date: getDateStr(1), time: '10:00', status: 'confirmed', notes: '' },
+      { id: '2', serviceId: '2', clientName: 'Sarah Johnson', clientEmail: 'sarah@email.com', clientPhone: '(555) 333-4444', date: getDateStr(2), time: '14:00', status: 'confirmed', notes: 'Returning client' },
+      { id: '3', serviceId: '3', clientName: 'Mike Davis', clientEmail: 'mike@email.com', clientPhone: '(555) 555-6666', date: getDateStr(3), time: '11:00', status: 'pending', notes: '' },
+    ];
+
+    function getDateStr(offset) {
+      const d = new Date();
+      d.setDate(d.getDate() + offset);
+      return d.toISOString().split('T')[0];
+    }
+
+    // Format helpers
+    const formatDate = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+    const formatTime = (t) => { const [h, m] = t.split(':'); const hr = parseInt(h); return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`; };
+    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    // Modal Component
+    const Modal = ({ isOpen, onClose, title, children }) => {
+      if (!isOpen) return null;
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={onClose}>
+          <div style={{ background: 'white', borderRadius: '12px', width: '100%', maxWidth: '500px', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '1.125rem', fontWeight: 600 }}>{title}</h3>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>{children}</div>
+          </div>
+        </div>
+      );
+    };
+
+    // Button Component
+    const Button = ({ children, variant = 'primary', onClick, disabled, style }) => {
+      const variants = {
+        primary: { background: 'var(--accent)', color: 'white', border: 'none' },
+        secondary: { background: 'var(--bg)', color: 'var(--text)', border: '1px solid var(--border)' },
+        danger: { background: 'var(--danger)', color: 'white', border: 'none' },
+      };
+      return (
+        <button onClick={onClick} disabled={disabled} style={{
+          padding: '0.625rem 1rem', borderRadius: '8px', fontWeight: 500, cursor: disabled ? 'not-allowed' : 'pointer',
+          opacity: disabled ? 0.5 : 1, fontSize: '0.875rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+          ...variants[variant], ...style
+        }}>{children}</button>
+      );
+    };
+
+    // Main App
+    function BookIt() {
+      const [view, setView] = useState('calendar');
+      const [settings, setSettings] = useState(() => load('bookit_settings', defaultSettings));
+      const [services, setServices] = useState(() => load('bookit_services', defaultServices));
+      const [availability, setAvailability] = useState(() => load('bookit_availability', defaultAvailability));
+      const [appointments, setAppointments] = useState(() => load('bookit_appointments', sampleAppointments));
+      const [showHelp, setShowHelp] = useState(false);
+      const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+      const [showAppointmentModal, setShowAppointmentModal] = useState(false);
+      const [showServiceModal, setShowServiceModal] = useState(false);
+      const [editingAppointment, setEditingAppointment] = useState(null);
+      const [editingService, setEditingService] = useState(null);
+
+      // Auto-save
+      useEffect(() => { save('bookit_settings', settings); }, [settings]);
+      useEffect(() => { save('bookit_services', services); }, [services]);
+      useEffect(() => { save('bookit_availability', availability); }, [availability]);
+      useEffect(() => { save('bookit_appointments', appointments); }, [appointments]);
+
+      // Stats
+      const today = new Date().toISOString().split('T')[0];
+      const todayAppts = appointments.filter(a => a.date === today);
+      const upcomingAppts = appointments.filter(a => a.date >= today).sort((a, b) => a.date.localeCompare(b.date) || a.time.localeCompare(b.time));
+      const pendingAppts = appointments.filter(a => a.status === 'pending');
+
+      // Calendar generation
+      const getWeekDates = () => {
+        const start = new Date(selectedDate);
+        start.setDate(start.getDate() - start.getDay());
+        return Array.from({ length: 7 }, (_, i) => {
+          const d = new Date(start);
+          d.setDate(d.getDate() + i);
+          return d.toISOString().split('T')[0];
+        });
+      };
+
+      const weekDates = getWeekDates();
+
+      const getAppointmentsForDate = (date) => appointments.filter(a => a.date === date).sort((a, b) => a.time.localeCompare(b.time));
+
+      const getServiceById = (id) => services.find(s => s.id === id);
+
+      const saveAppointment = (appt) => {
+        if (appt.id) {
+          setAppointments(prev => prev.map(a => a.id === appt.id ? appt : a));
+        } else {
+          setAppointments(prev => [...prev, { ...appt, id: genId() }]);
+        }
+        setShowAppointmentModal(false);
+        setEditingAppointment(null);
+      };
+
+      const deleteAppointment = (id) => {
+        if (confirm('Delete this appointment?')) {
+          setAppointments(prev => prev.filter(a => a.id !== id));
+        }
+      };
+
+      const saveService = (svc) => {
+        if (svc.id) {
+          setServices(prev => prev.map(s => s.id === svc.id ? svc : s));
+        } else {
+          setServices(prev => [...prev, { ...svc, id: genId() }]);
+        }
+        setShowServiceModal(false);
+        setEditingService(null);
+      };
+
+      const deleteService = (id) => {
+        if (confirm('Delete this service?')) {
+          setServices(prev => prev.filter(s => s.id !== id));
+        }
+      };
+
+      // Appointment Form
+      const AppointmentForm = () => {
+        const [form, setForm] = useState(editingAppointment || {
+          serviceId: services[0]?.id || '',
+          clientName: '',
+          clientEmail: '',
+          clientPhone: '',
+          date: selectedDate,
+          time: '09:00',
+          status: 'confirmed',
+          notes: '',
+        });
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Service</label>
+              <select value={form.serviceId} onChange={e => setForm({ ...form, serviceId: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                {services.map(s => <option key={s.id} value={s.id}>{s.name} ({s.duration} min - ${s.price})</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Client Name</label>
+              <input type="text" value={form.clientName} onChange={e => setForm({ ...form, clientName: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Email</label>
+                <input type="email" value={form.clientEmail} onChange={e => setForm({ ...form, clientEmail: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Phone</label>
+                <input type="tel" value={form.clientPhone} onChange={e => setForm({ ...form, clientPhone: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Date</label>
+                <input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Time</label>
+                <input type="time" value={form.time} onChange={e => setForm({ ...form, time: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Status</label>
+              <select value={form.status} onChange={e => setForm({ ...form, status: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }}>
+                <option value="pending">Pending</option>
+                <option value="confirmed">Confirmed</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Notes</label>
+              <textarea value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} rows={3} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px', resize: 'vertical' }} />
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <Button variant="secondary" onClick={() => { setShowAppointmentModal(false); setEditingAppointment(null); }} style={{ flex: 1 }}>Cancel</Button>
+              <Button onClick={() => saveAppointment({ ...form, id: editingAppointment?.id })} style={{ flex: 1 }} disabled={!form.clientName || !form.serviceId}>Save</Button>
+            </div>
+          </div>
+        );
+      };
+
+      // Service Form
+      const ServiceForm = () => {
+        const [form, setForm] = useState(editingService || { name: '', duration: 30, price: 50, color: '#3b82f6' });
+        const colors = ['#3b82f6', '#10b981', '#8b5cf6', '#f59e0b', '#ef4444', '#06b6d4', '#ec4899'];
+
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Service Name</label>
+              <input type="text" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Duration (min)</label>
+                <input type="number" value={form.duration} onChange={e => setForm({ ...form, duration: parseInt(e.target.value) || 0 })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Price ($)</label>
+                <input type="number" value={form.price} onChange={e => setForm({ ...form, price: parseInt(e.target.value) || 0 })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+              </div>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem' }}>Color</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {colors.map(c => (
+                  <button key={c} onClick={() => setForm({ ...form, color: c })} style={{
+                    width: '32px', height: '32px', borderRadius: '50%', background: c, border: form.color === c ? '3px solid var(--text)' : '2px solid transparent', cursor: 'pointer'
+                  }} />
+                ))}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <Button variant="secondary" onClick={() => { setShowServiceModal(false); setEditingService(null); }} style={{ flex: 1 }}>Cancel</Button>
+              <Button onClick={() => saveService({ ...form, id: editingService?.id })} style={{ flex: 1 }} disabled={!form.name}>Save</Button>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          {/* Header */}
+          <header style={{ background: 'white', borderBottom: '1px solid var(--border)', padding: '1rem 1.5rem', position: 'sticky', top: 0, zIndex: 50 }}>
+            <div style={{ maxWidth: '1200px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, color: 'var(--accent)' }}>📅 BookIt</h1>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{settings.businessName}</p>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                {['calendar', 'services', 'availability', 'settings'].map(v => (
+                  <button key={v} onClick={() => setView(v)} style={{
+                    padding: '0.5rem 1rem', borderRadius: '8px', border: 'none', cursor: 'pointer',
+                    background: view === v ? 'var(--accent)' : 'var(--bg)', color: view === v ? 'white' : 'var(--text)', fontWeight: 500, fontSize: '0.875rem', textTransform: 'capitalize'
+                  }}>{v}</button>
+                ))}
+              </div>
+            </div>
+          </header>
+
+          <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '1.5rem' }}>
+            {/* Calendar View */}
+            {view === 'calendar' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <button onClick={() => { const d = new Date(selectedDate); d.setDate(d.getDate() - 7); setSelectedDate(d.toISOString().split('T')[0]); }} style={{ padding: '0.5rem 1rem', border: '1px solid var(--border)', borderRadius: '8px', background: 'white', cursor: 'pointer' }}>← Prev</button>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{new Date(selectedDate).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h2>
+                    <button onClick={() => { const d = new Date(selectedDate); d.setDate(d.getDate() + 7); setSelectedDate(d.toISOString().split('T')[0]); }} style={{ padding: '0.5rem 1rem', border: '1px solid var(--border)', borderRadius: '8px', background: 'white', cursor: 'pointer' }}>Next →</button>
+                    <button onClick={() => setSelectedDate(today)} style={{ padding: '0.5rem 1rem', border: '1px solid var(--border)', borderRadius: '8px', background: 'white', cursor: 'pointer' }}>Today</button>
+                  </div>
+                  <Button onClick={() => { setEditingAppointment(null); setShowAppointmentModal(true); }}>+ New Appointment</Button>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+                  <div style={{ background: 'white', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{todayAppts.length}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Today's Appointments</div>
+                  </div>
+                  <div style={{ background: 'white', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{upcomingAppts.length}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Upcoming</div>
+                  </div>
+                  <div style={{ background: 'white', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--warning)' }}>{pendingAppts.length}</div>
+                    <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>Pending Confirmation</div>
+                  </div>
+                </div>
+
+                {/* Week View */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '0.5rem' }}>
+                  {weekDates.map(date => {
+                    const dayAppts = getAppointmentsForDate(date);
+                    const isToday = date === today;
+                    const dayOfWeek = new Date(date + 'T00:00:00').getDay();
+                    const dayAvail = availability[dayOfWeek];
+
+                    return (
+                      <div key={date} style={{ background: 'white', borderRadius: '12px', border: isToday ? '2px solid var(--accent)' : '1px solid var(--border)', overflow: 'hidden' }}>
+                        <div style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', background: isToday ? 'var(--accent)' : 'var(--bg)', color: isToday ? 'white' : 'var(--text)' }}>
+                          <div style={{ fontSize: '0.75rem', fontWeight: 500 }}>{dayNames[dayOfWeek]}</div>
+                          <div style={{ fontSize: '1.25rem', fontWeight: 700 }}>{new Date(date + 'T00:00:00').getDate()}</div>
+                        </div>
+                        <div style={{ padding: '0.5rem', minHeight: '150px' }}>
+                          {!dayAvail.enabled ? (
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>Closed</div>
+                          ) : dayAppts.length === 0 ? (
+                            <div style={{ color: 'var(--text-muted)', fontSize: '0.75rem', textAlign: 'center', padding: '1rem' }}>No appointments</div>
+                          ) : (
+                            dayAppts.map(appt => {
+                              const service = getServiceById(appt.serviceId);
+                              return (
+                                <div key={appt.id} onClick={() => { setEditingAppointment(appt); setShowAppointmentModal(true); }} style={{
+                                  background: service?.color || 'var(--accent)', color: 'white', borderRadius: '6px', padding: '0.5rem', marginBottom: '0.25rem', cursor: 'pointer', fontSize: '0.75rem'
+                                }}>
+                                  <div style={{ fontWeight: 600 }}>{formatTime(appt.time)}</div>
+                                  <div style={{ opacity: 0.9 }}>{appt.clientName}</div>
+                                </div>
+                              );
+                            })
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Services View */}
+            {view === 'services' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>Services</h2>
+                  <Button onClick={() => { setEditingService(null); setShowServiceModal(true); }}>+ Add Service</Button>
+                </div>
+                <div style={{ display: 'grid', gap: '1rem' }}>
+                  {services.map(svc => (
+                    <div key={svc.id} style={{ background: 'white', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                        <div style={{ width: '12px', height: '40px', borderRadius: '4px', background: svc.color }} />
+                        <div>
+                          <div style={{ fontWeight: 600 }}>{svc.name}</div>
+                          <div style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{svc.duration} min • ${svc.price}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        <Button variant="secondary" onClick={() => { setEditingService(svc); setShowServiceModal(true); }}>Edit</Button>
+                        <Button variant="danger" onClick={() => deleteService(svc.id)}>Delete</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Availability View */}
+            {view === 'availability' && (
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Availability</h2>
+                <div style={{ background: 'white', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+                  {availability.map((day, idx) => (
+                    <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '1rem 1.25rem', borderBottom: idx < 6 ? '1px solid var(--border)' : 'none' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', width: '140px' }}>
+                        <input type="checkbox" checked={day.enabled} onChange={e => setAvailability(prev => prev.map((d, i) => i === idx ? { ...d, enabled: e.target.checked } : d))} />
+                        <span style={{ fontWeight: 500 }}>{dayNames[idx]}</span>
+                      </label>
+                      {day.enabled && (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <input type="time" value={day.start} onChange={e => setAvailability(prev => prev.map((d, i) => i === idx ? { ...d, start: e.target.value } : d))} style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '6px' }} />
+                          <span>to</span>
+                          <input type="time" value={day.end} onChange={e => setAvailability(prev => prev.map((d, i) => i === idx ? { ...d, end: e.target.value } : d))} style={{ padding: '0.5rem', border: '1px solid var(--border)', borderRadius: '6px' }} />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Settings View */}
+            {view === 'settings' && (
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>Settings</h2>
+                <div style={{ background: 'white', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: '1rem', maxWidth: '500px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Business Name</label>
+                    <input type="text" value={settings.businessName} onChange={e => setSettings({ ...settings, businessName: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Email</label>
+                    <input type="email" value={settings.email} onChange={e => setSettings({ ...settings, email: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.25rem' }}>Phone</label>
+                    <input type="tel" value={settings.phone} onChange={e => setSettings({ ...settings, phone: e.target.value })} style={{ width: '100%', padding: '0.625rem', border: '1px solid var(--border)', borderRadius: '8px' }} />
+                  </div>
+                  <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: '0.5rem' }}>
+                    <Button variant="danger" onClick={() => { if (confirm('Clear all data?')) { localStorage.clear(); window.location.reload(); } }}>Reset All Data</Button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* Modals */}
+          <Modal isOpen={showAppointmentModal} onClose={() => { setShowAppointmentModal(false); setEditingAppointment(null); }} title={editingAppointment ? 'Edit Appointment' : 'New Appointment'}>
+            <AppointmentForm />
+          </Modal>
+
+          <Modal isOpen={showServiceModal} onClose={() => { setShowServiceModal(false); setEditingService(null); }} title={editingService ? 'Edit Service' : 'New Service'}>
+            <ServiceForm />
+          </Modal>
+
+          <footer style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+            BookIt v1.0 • BuyAppsOnce
+          <p style="margin-top:1rem;font-size:.8rem;text-align:center;color:#64748b">© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<BookIt />);
+  </script>
+</body>
+</html>

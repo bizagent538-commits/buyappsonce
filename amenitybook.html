@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AmenityBook - Facility Reservations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#0d9488;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#14b8a6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(13,148,136,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.amenity-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:16px}.amenity-card{border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all 0.2s}.amenity-card:hover{border-color:var(--primary);background:rgba(13,148,136,.05)}.amenity-icon{font-size:32px;margin-bottom:8px}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:400px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-confirmed{background:rgba(34,197,94,.15);color:var(--success)}.badge-pending{background:rgba(245,158,11,.15);color:var(--warning)}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.amenity-grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🏊</div><span class="logo-text">AmenityBook</span></div>
+      <div class="nav-item active" onclick="showView('book')">📅 Book</div>
+      <div class="nav-item" onclick="showView('reservations')">📋 Reservations</div>
+      <div class="nav-item" onclick="showView('amenities')">🏢 Amenities</div>
+      <div class="nav-item" onclick="showView('calendar')">📆 Calendar</div>
+    </nav>
+    <main class="main">
+      <div id="view-book" class="view active">
+        <div class="header"><h1 class="title">Book an Amenity</h1></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Available Now</div><div class="stat-value" style="color:var(--success)">4</div></div>
+          <div class="stat-card"><div class="stat-label">Your Reservations</div><div class="stat-value" id="stat-res">0</div></div>
+          <div class="stat-card"><div class="stat-label">Total Amenities</div><div class="stat-value">6</div></div>
+          <div class="stat-card"><div class="stat-label">Peak Hours</div><div class="stat-value">2-6 PM</div></div>
+        </div>
+        <div class="card"><div class="card-header">Select an Amenity</div><div class="amenity-grid" id="amenity-grid"></div></div>
+      </div>
+      <div id="view-reservations" class="view">
+        <div class="header"><h1 class="title">My Reservations</h1></div>
+        <div class="card"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg)"><th style="padding:12px;text-align:left">Amenity</th><th style="padding:12px;text-align:left">Date</th><th style="padding:12px;text-align:left">Time</th><th style="padding:12px;text-align:left">Status</th><th style="padding:12px;text-align:left">Actions</th></tr></thead><tbody id="res-list"></tbody></table></div>
+      </div>
+      <div id="view-amenities" class="view">
+        <div class="header"><h1 class="title">All Amenities</h1></div>
+        <div class="card"><table style="width:100%;border-collapse:collapse"><thead><tr style="background:var(--bg)"><th style="padding:12px;text-align:left">Amenity</th><th style="padding:12px;text-align:left">Capacity</th><th style="padding:12px;text-align:left">Hours</th><th style="padding:12px;text-align:left">Status</th></tr></thead><tbody id="amenity-list"></tbody></table></div>
+      </div>
+      <div id="view-calendar" class="view">
+        <div class="header"><h1 class="title">Availability Calendar</h1></div>
+        <div class="card" style="padding:40px;text-align:center"><p style="font-size:48px">📅</p><p style="margin-top:16px;color:var(--muted)">Calendar view shows availability across all amenities</p></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Book <span id="modal-amenity"></span></h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="book-date"></div><div class="form-group"><label class="form-label">Time</label><select class="form-select" id="book-time"><option>9:00 AM - 10:00 AM</option><option>10:00 AM - 11:00 AM</option><option>11:00 AM - 12:00 PM</option><option>1:00 PM - 2:00 PM</option><option>2:00 PM - 3:00 PM</option><option>3:00 PM - 4:00 PM</option></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="confirmBooking()">Book Now</button></div></div></div>
+  <script>
+    let amenities=[{id:1,name:'Pool',icon:'🏊',capacity:20,hours:'6AM-10PM',status:'available'},{id:2,name:'Tennis Court',icon:'🎾',capacity:4,hours:'7AM-9PM',status:'available'},{id:3,name:'Clubhouse',icon:'🏠',capacity:50,hours:'9AM-11PM',status:'available'},{id:4,name:'Gym',icon:'🏋️',capacity:15,hours:'5AM-11PM',status:'available'},{id:5,name:'BBQ Area',icon:'🍖',capacity:30,hours:'10AM-8PM',status:'booked'},{id:6,name:'Meeting Room',icon:'💼',capacity:12,hours:'8AM-6PM',status:'available'}];
+    let reservations=[{id:1,amenityId:1,date:'2026-01-08',time:'2:00 PM - 3:00 PM',status:'confirmed'},{id:2,amenityId:3,date:'2026-01-10',time:'6:00 PM - 9:00 PM',status:'pending'}];
+    let selectedAmenity=null;
+    
+    function getAmenity(id){return amenities.find(a=>a.id===id)}
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-res').textContent=reservations.length;
+      document.getElementById('amenity-grid').innerHTML=amenities.map(a=>`<div class="amenity-card" onclick="bookAmenity(${a.id})"><div class="amenity-icon">${a.icon}</div><h3>${a.name}</h3><p style="color:var(--muted);font-size:13px;margin-top:4px">Capacity: ${a.capacity}</p></div>`).join('');
+      document.getElementById('res-list').innerHTML=reservations.map(r=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:12px"><strong>${getAmenity(r.amenityId)?.name}</strong></td><td style="padding:12px">${r.date}</td><td style="padding:12px">${r.time}</td><td style="padding:12px"><span class="badge badge-${r.status}">${r.status}</span></td><td style="padding:12px"><button class="btn btn-sm btn-secondary" onclick="cancelRes(${r.id})">Cancel</button></td></tr>`).join('');
+      document.getElementById('amenity-list').innerHTML=amenities.map(a=>`<tr style="border-bottom:1px solid var(--border)"><td style="padding:12px"><strong>${a.icon} ${a.name}</strong></td><td style="padding:12px">${a.capacity}</td><td style="padding:12px">${a.hours}</td><td style="padding:12px"><span class="badge badge-${a.status==='available'?'confirmed':'pending'}">${a.status}</span></td></tr>`).join('');
+    }
+    
+    function bookAmenity(id){selectedAmenity=id;document.getElementById('modal-amenity').textContent=getAmenity(id)?.name;document.getElementById('book-date').value=new Date().toISOString().split('T')[0];document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function confirmBooking(){reservations.push({id:reservations.length+1,amenityId:selectedAmenity,date:document.getElementById('book-date').value,time:document.getElementById('book-time').value,status:'confirmed'});closeModal();render();alert('Booking confirmed!');}
+    function cancelRes(id){reservations=reservations.filter(r=>r.id!==id);render();alert('Reservation cancelled');}
+    
+    render();
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='amenitybook_data';
+  const vars=['amenities,reservations'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='amenitybook-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

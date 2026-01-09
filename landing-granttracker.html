@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrantTracker Pro - Grant Management for Nonprofits | BuyAppsOnce</title>
+  <meta name="description" content="Track grant opportunities, deadlines, applications, and reporting requirements. Built for nonprofits. One-time purchase, no monthly fees.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.6; }
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+    header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1rem 0; position: sticky; top: 0; z-index: 100; }
+    header .container { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-weight: 800; font-size: 1.25rem; color: #0f172a; text-decoration: none; }
+    .logo span { color: #059669; }
+    header nav a { margin-left: 1.5rem; color: #64748b; text-decoration: none; font-weight: 500; }
+    header nav a:hover { color: #059669; }
+    .hero { padding: 4rem 0; background: linear-gradient(135deg, #064e3b 0%, #059669 100%); color: white; }
+    .hero-content { max-width: 800px; margin: 0 auto; text-align: center; }
+    .hero h1 { font-size: 2.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; }
+    .hero h1 span { color: #fcd34d; }
+    .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 2rem; }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+    .btn { display: inline-block; padding: 1rem 2rem; border-radius: 0.5rem; font-weight: 600; text-decoration: none; transition: all 0.2s; cursor: pointer; border: none; font-size: 1rem; }
+    .btn-primary { background: #fcd34d; color: #0f172a; }
+    .btn-primary:hover { background: #fbbf24; transform: translateY(-2px); }
+    .btn-secondary { background: rgba(255,255,255,0.2); color: white; border: 2px solid white; }
+    .btn-secondary:hover { background: white; color: #064e3b; }
+    .comparison { background: #0f172a; color: white; padding: 4rem 0; }
+    .comparison h2 { color: white; text-align: center; font-size: 2rem; font-weight: 700; margin-bottom: 1rem; }
+    .comparison .subtitle { text-align: center; color: #94a3b8; margin-bottom: 2rem; }
+    .comparison-table { max-width: 700px; margin: 0 auto; }
+    .comparison-row { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #334155; }
+    .comparison-row:last-child { border-bottom: none; }
+    .comparison-row span:first-child { color: #94a3b8; }
+    .comparison-row span:last-child { font-weight: 600; }
+    .comparison-row.highlight { background: #059669; border-radius: 0.5rem; margin: 1rem 0; }
+    .comparison-row.highlight span { color: white; }
+    .savings { text-align: center; margin-top: 2rem; padding: 1.5rem; background: rgba(5, 150, 105, 0.2); border-radius: 0.5rem; }
+    .savings .amount { font-size: 2rem; font-weight: 800; color: #10b981; }
+    .section { padding: 4rem 0; }
+    .section h2 { font-size: 2rem; font-weight: 700; text-align: center; margin-bottom: 1rem; }
+    .section .subtitle { text-align: center; color: #64748b; margin-bottom: 3rem; max-width: 600px; margin-left: auto; margin-right: auto; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 2rem; }
+    .feature-card { background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .feature-card .icon { font-size: 2.5rem; margin-bottom: 1rem; }
+    .feature-card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .feature-card p { color: #64748b; }
+    .use-cases { padding: 4rem 0; background: white; }
+    .use-case-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1.5rem; text-align: center; }
+    .use-case { padding: 1.5rem; }
+    .use-case .icon { font-size: 3rem; margin-bottom: 0.5rem; }
+    .use-case h4 { font-weight: 600; }
+    .pricing { padding: 4rem 0; }
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem; max-width: 1000px; margin: 0 auto; }
+    .pricing-card { background: white; border-radius: 1rem; padding: 2rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; position: relative; }
+    .pricing-card.featured { border: 3px solid #059669; transform: scale(1.05); }
+    .pricing-card.featured::before { content: 'BEST VALUE'; position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #059669; color: white; padding: 0.25rem 1rem; border-radius: 1rem; font-size: 0.75rem; font-weight: 700; }
+    .pricing-card h3 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .pricing-card .price { font-size: 3rem; font-weight: 800; color: #059669; margin: 1rem 0; }
+    .pricing-card .price span { font-size: 1rem; color: #64748b; font-weight: 400; }
+    .pricing-card .description { color: #64748b; margin-bottom: 1.5rem; }
+    .pricing-card ul { text-align: left; list-style: none; margin-bottom: 2rem; }
+    .pricing-card li { padding: 0.5rem 0; padding-left: 1.5rem; position: relative; }
+    .pricing-card li::before { content: '✓'; position: absolute; left: 0; color: #059669; font-weight: bold; }
+    .pricing-card .btn { width: 100%; background: #059669; }
+    .pricing-card .btn:hover { background: #047857; }
+    .faq { padding: 4rem 0; background: #f8fafc; }
+    .faq-list { max-width: 800px; margin: 0 auto; }
+    .faq-item { background: white; margin-bottom: 1rem; border-radius: 0.5rem; overflow: hidden; }
+    .faq-question { padding: 1.5rem; font-weight: 600; }
+    .faq-answer { padding: 0 1.5rem 1.5rem; color: #64748b; }
+    .cta { background: linear-gradient(135deg, #064e3b 0%, #059669 100%); color: white; padding: 4rem 0; text-align: center; }
+    .cta h2 { color: white; margin-bottom: 1rem; font-size: 2rem; }
+    .cta p { opacity: 0.9; margin-bottom: 2rem; }
+    footer { background: #0f172a; color: #94a3b8; padding: 2rem 0; text-align: center; }
+    footer a { color: #10b981; text-decoration: none; }
+    @media (max-width: 768px) { .hero h1 { font-size: 2rem; } .pricing-card.featured { transform: none; } header nav { display: none; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="index.html" class="logo">BuyApps<span>Once</span></a>
+      <nav>
+        <a href="index.html">All Apps</a>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>Never Miss a <span>Grant Deadline</span> Again</h1>
+        <p>Track opportunities, manage applications, monitor reporting requirements. Built for nonprofits who can't afford enterprise grant software.</p>
+        <div class="hero-buttons">
+          <a href="granttracker-pro.html" class="btn btn-primary">Try Live Demo</a>
+          <a href="#pricing" class="btn btn-secondary">View Pricing</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="comparison">
+    <div class="container">
+      <h2>Stop Paying Enterprise Prices</h2>
+      <p class="subtitle">Compare GrantTracker Pro to subscription grant management software</p>
+      <div class="comparison-table">
+        <div class="comparison-row"><span>Submittable</span><span>$400 - $1,000+/month</span></div>
+        <div class="comparison-row"><span>Foundant GLM</span><span>$500+/month</span></div>
+        <div class="comparison-row"><span>Fluxx</span><span>$800+/month</span></div>
+        <div class="comparison-row"><span>SmartSimple</span><span>Custom pricing ($$$$)</span></div>
+        <div class="comparison-row highlight"><span>GrantTracker Pro</span><span>$149 one-time — forever</span></div>
+      </div>
+      <div class="savings">
+        <div class="amount">Save $5,000+ per year</div>
+        <p>One missed grant deadline costs more than this app. Protect your funding pipeline.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="container">
+      <h2>Everything You Need to Manage Grants</h2>
+      <p class="subtitle">From discovery to reporting — track your entire grant lifecycle.</p>
+      <div class="features-grid">
+        <div class="feature-card"><div class="icon">🎯</div><h3>Opportunity Tracking</h3><p>Maintain a database of grant opportunities with deadlines, amounts, and eligibility requirements.</p></div>
+        <div class="feature-card"><div class="icon">📅</div><h3>Deadline Alerts</h3><p>Never miss an application or reporting deadline. Dashboard shows what's due when.</p></div>
+        <div class="feature-card"><div class="icon">🏛️</div><h3>Funder Database</h3><p>Track foundations, government agencies, and corporate funders. Store contacts and history.</p></div>
+        <div class="feature-card"><div class="icon">📝</div><h3>Application Pipeline</h3><p>Track applications through stages: Researching → Writing → Submitted → Awarded/Declined.</p></div>
+        <div class="feature-card"><div class="icon">💰</div><h3>Award Management</h3><p>Track awarded grants, disbursement schedules, and spending against budget.</p></div>
+        <div class="feature-card"><div class="icon">📊</div><h3>Reporting Tracker</h3><p>Never miss a progress report. Track requirements and due dates for each active grant.</p></div>
+        <div class="feature-card"><div class="icon">📁</div><h3>Document Storage</h3><p>Attach proposals, budgets, reports, and correspondence to each grant record.</p></div>
+        <div class="feature-card"><div class="icon">📈</div><h3>Dashboard & Reports</h3><p>See your pipeline at a glance. Export reports for board meetings and planning.</p></div>
+        <div class="feature-card"><div class="icon">👥</div><h3>Team Collaboration</h3><p>Multiple users with role-based access. Assign grants to team members.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="use-cases">
+    <div class="container">
+      <h2>Built For</h2>
+      <p class="subtitle">Organizations that rely on grant funding</p>
+      <div class="use-case-grid">
+        <div class="use-case"><div class="icon">🏛️</div><h4>Nonprofits</h4></div>
+        <div class="use-case"><div class="icon">🏫</div><h4>Schools</h4></div>
+        <div class="use-case"><div class="icon">⛪</div><h4>Churches</h4></div>
+        <div class="use-case"><div class="icon">🏥</div><h4>Health Orgs</h4></div>
+        <div class="use-case"><div class="icon">🎭</div><h4>Arts Groups</h4></div>
+        <div class="use-case"><div class="icon">🌱</div><h4>Environmental</h4></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="container">
+      <h2>Simple Pricing</h2>
+      <p class="subtitle">One-time purchase. No monthly fees. No per-user charges.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card featured">
+          <h3>Pro (Self-Hosted)</h3>
+          <div class="price">$149 <span>one-time</span></div>
+          <p class="description">Full source code. Host on your own Supabase.</p>
+          <ul>
+            <li>Complete React + Supabase source</li>
+            <li>Unlimited users</li>
+            <li>Unlimited grants</li>
+            <li>All features included</li>
+            <li>Database migrations included</li>
+            <li>Deploy to Vercel/Netlify free</li>
+          </ul>
+          <a href="https://payhip.com/b/O3PmK" class="btn btn-primary">Buy Now — $149</a>
+        </div>
+        <div class="pricing-card">
+          <h3>Pro (We Host It)</h3>
+          <div class="price">$299 <span>/year</span></div>
+          <p class="description">We handle hosting and updates.</p>
+          <ul>
+            <li>Everything in Self-Hosted</li>
+            <li>We set up and maintain</li>
+            <li>Automatic backups</li>
+            <li>Priority support</li>
+            <li>Custom domain available</li>
+            <li>No technical skills needed</li>
+          </ul>
+          <a href="https://payhip.com/b/GRjld" class="btn btn-secondary" style="background:#f1f5f9;color:#0f172a;">Get Hosted — $299/yr</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="container">
+      <h2>Frequently Asked Questions</h2>
+      <div class="faq-list">
+        <div class="faq-item"><div class="faq-question">How is this different from a spreadsheet?</div><div class="faq-answer">GrantTracker gives you deadline alerts, a visual pipeline, document storage, reporting tracking, and multi-user access. Spreadsheets can't remind you when a report is due.</div></div>
+        <div class="faq-item"><div class="faq-question">Can multiple people use it?</div><div class="faq-answer">Yes! Unlimited users with role-based access. Assign grants to specific team members and track who's responsible for what.</div></div>
+        <div class="faq-item"><div class="faq-question">Does it integrate with grant databases?</div><div class="faq-answer">You manually add opportunities you're interested in. This keeps your pipeline focused on realistic targets, not every grant that exists.</div></div>
+        <div class="faq-item"><div class="faq-question">What if I'm not technical?</div><div class="faq-answer">Choose the hosted option and we set everything up for you. Just log in and start tracking grants.</div></div>
+        <div class="faq-item"><div class="faq-question">Can I import existing grant data?</div><div class="faq-answer">Yes, CSV import is included. Move your spreadsheet data in minutes.</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta">
+    <div class="container">
+      <h2>Protect Your Funding Pipeline</h2>
+      <p>One missed deadline can cost thousands. Get organized for $149.</p>
+      <a href="granttracker-pro.html" class="btn btn-primary">Try the Demo</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p><strong>BuyAppsOnce</strong> — Professional software without subscriptions.</p>
+      <p style="margin-top: 0.5rem;">Questions? <a href="/cdn-cgi/l/email-protection#fe8d8b8e8e918c8abe9c8b879f8e8e8d91909d9bd09d9193"><span class="__cf_email__" data-cfemail="81f2f4f1

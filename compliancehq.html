@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22ComplianceHQ%22%2C%22short_name%22%3A%22ComplianceHQ%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%233b82f6%22%7D" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ComplianceHQ - Certification & Safety Management</title>
+  <meta name="theme-color" content="#7c3aed" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="ComplianceHQ" />
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-tertiary: #f1f5f9; --bg-card: #ffffff;
+      --border: #e2e8f0; --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #64748b;
+      --accent: #7c3aed; --accent-hover: #6d28d9;
+      --success: #059669; --success-bg: #d1fae5; --warning: #d97706; --warning-bg: #fef3c7;
+      --danger: #dc2626; --danger-bg: #fee2e2; --info: #2563eb; --info-bg: #dbeafe;
+    }
+    [data-theme="dark"] {
+      --bg-primary: #0f0a19; --bg-secondary: #1a1025; --bg-tertiary: #251536; --bg-card: #1a1025;
+      --border: #3d2a5c; --text-primary: #f3e8ff; --text-secondary: #d8b4fe; --text-muted: #a78bfa;
+      --accent: #a78bfa; --accent-hover: #c4b5fd;
+      --success: #34d399; --success-bg: #064e3b; --warning: #fbbf24; --warning-bg: #78350f;
+      --danger: #f87171; --danger-bg: #7f1d1d; --info: #38bdf8; --info-bg: #0c4a6e;
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary); min-height: 100vh; }
+    .btn { padding: 0.5rem 1rem; border-radius: 8px; font-weight: 500; cursor: pointer; transition: all 0.2s; border: none; font-size: 0.875rem; display: inline-flex; align-items: center; gap: 0.5rem; }
+    .btn-primary { background: var(--accent); color: white; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-secondary { background: var(--bg-tertiary); color: var(--text-primary); border: 1px solid var(--border); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.8125rem; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 1.25rem; }
+    .input { width: 100%; padding: 0.625rem 0.875rem; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 0.875rem; }
+    .input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+    .badge { padding: 0.25rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; font-weight: 500; }
+    .badge-success { background: var(--success-bg); color: var(--success); }
+    .badge-warning { background: var(--warning-bg); color: var(--warning); }
+    .badge-danger { background: var(--danger-bg); color: var(--danger); }
+    .badge-info { background: var(--info-bg); color: var(--info); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { font-weight: 600; color: var(--text-secondary); font-size: 0.8125rem; text-transform: uppercase; }
+    @media print { .no-print { display: none !important; } body { background: white; } .card { border: none; box-shadow: none; } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+    const APP_VERSION = '2.0.0';
+    const STORAGE_PREFIX = 'compliancehq_';
+    
+    // Utilities
+    const genId = () => Math.random().toString(36).substr(2, 9);
+    const save = (key, data) => localStorage.setItem(STORAGE_PREFIX + key, JSON.stringify(data));
+    const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(STORAGE_PREFIX + key)) || fallback; } catch { return fallback; } };
+    const fmtDate = d => d ? new Date(d).toLocaleDateString() : '-';
+    const today = () => new Date().toISOString().split('T')[0];
+    const daysUntil = d => Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24));
+    
+    // Cert Types
+    const CERT_TYPES = [
+      { id: 'license', name: 'License', icon: '📜' },
+      { id: 'certification', name: 'Certification', icon: '🎓' },
+      { id: 'training', name: 'Training', icon: '📚' },
+      { id: 'medical', name: 'Medical', icon: '🏥' },
+      { id: 'insurance', name: 'Insurance', icon: '🛡️' },
+      { id: 'permit', name: 'Permit', icon: '📋' },
+      { id: 'inspection', name: 'Inspection', icon: '🔍' },
+      { id: 'other', name: 'Other', icon: '📎' }
+    ];
+    
+    // Incident Types
+    const INCIDENT_TYPES = [
+      { id: 'injury', name: 'Injury', icon: '🤕', color: '#ef4444' },
+      { id: 'illness', name: 'Illness', icon: '🤒', color: '#f97316' },
+      { id: 'near_miss', name: 'Near Miss', icon: '⚠️', color: '#eab308' },
+      { id: 'property', name: 'Property Damage', icon: '🏚️', color: '#3b82f6' },
+      { id: 'environmental', name: 'Environmental', icon: '🌿', color: '#22c55e' },
+      { id: 'security', name: 'Security', icon: '🔒', color: '#8b5cf6' }
+    ];
+    
+    const SEVERITY = [
+      { id: 'minor', name: 'Minor', color: '#22c55e' },
+      { id: 'moderate', name: 'Moderate', color: '#eab308' },
+      { id: 'serious', name: 'Serious', color: '#f97316' },
+      { id: 'critical', name: 'Critical', color: '#ef4444' }
+    ];
+
+    // Components
+    const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
+      if (!isOpen) return null;
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={onClose}>
+          <div className="card" style={{ maxWidth: width, width: '100%', maxHeight: '90vh', overflow: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>{title}</h2>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            {children}
+          </div>
+        </div>
+      );
+    };
+
+    const HelpModal = ({ isOpen, onClose }) => {
+      if (!isOpen) return null;
+      return (
+        <Modal isOpen={isOpen} onClose={onClose} title="ComplianceHQ Help">
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+            Combined certification tracking and safety incident management for complete compliance oversight.
+          </p>
+          <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>⌨️ Shortcuts</h4>
+          <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}><code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>N</code> New • <code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>D</code> Dark mode • <code style={{ background: 'var(--bg-tertiary)', padding: '2px 6px', borderRadius: '4px' }}>?</code> Help</p>
+          <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>💡 Features</h4>
+          <ul style={{ fontSize: '0.875rem', paddingLeft: '1.25rem', color: 'var(--text-secondary)' }}>
+            <li>Track certifications with expiration alerts</li>
+            <li>Log safety incidents with OSHA categories</li>
+            <li>Generate compliance and safety reports</li>
+            <li>Export data as CSV for audits</li>
+          </ul>
+          <div style={{ marginTop: '1rem' }}>
+            <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>📥 Import Templates</h4>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button className="btn btn-sm btn-primary" onClick={() => {
+                const csv = "Name,Holder,Type,Issuer,Cert Number,Issued Date,Expires Date\n";
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                a.download = 'certifications-template.csv'; a.click();
+              }}>Certifications</button>
+              <button className="btn btn-sm btn-secondary" onClick={() => {
+                const csv = "Date,Title,Type,Severity,Location,Description\n";
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+                a.download = 'incidents-template.csv'; a.click();
+              }}>Incidents</button>
+            </div>
+          </div>
+        </Modal>
+      );
+    };
+
+    const App = () => {
+      const [view, setView] = useState('dashboard');
+      const [darkMode, setDarkMode] = useState(() => load('darkMode', false));
+      const [showHelp, setShowHelp] = useState(false);
+      const [settings, setSettings] = useState(() => load('settings', { alertDays: 30, companyName: '' }));
+      
+      // Certifications
+      const [certs, setCerts] = useState(() => load('certs', []));
+      const [showCertModal, setShowCertModal] = useState(false);
+      const [editingCert, setEditingCert] = useState(null);
+      
+      // Incidents
+      const [incidents, setIncidents] = useState(() => load('incidents', []));
+      const [showIncidentModal, setShowIncidentModal] = useState(false);
+      const [editingIncident, setEditingIncident] = useState(null);
+      
+      // Activity log
+      const [activity, setActivity] = useState(() => load('activity', []));
+      
+      const logActivity = (action, details) => {
+        const entry = { id: genId(), action, details, timestamp: new Date().toISOString() };
+        const updated = [entry, ...activity].slice(0, 500);
+        setActivity(updated);
+        save('activity', updated);
+      };
+      
+      useEffect(() => { document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light'); save('darkMode', darkMode); }, [darkMode]);
+      useEffect(() => { save('certs', certs); }, [certs]);
+      useEffect(() => { save('incidents', incidents); }, [incidents]);
+      useEffect(() => { save('settings', settings); }, [settings]);
+      
+      useEffect(() => {
+        const handleKey = e => {
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) return;
+          if (e.key === '?') { e.preventDefault(); setShowHelp(true); }
+          if (e.key === 'd' || e.key === 'D') setDarkMode(d => !d);
+          if (e.key === 'n' || e.key === 'N') {
+            if (view === 'certs') { setEditingCert(null); setShowCertModal(true); }
+            if (view === 'incidents') { setEditingIncident(null); setShowIncidentModal(true); }
+          }
+          if (e.key === 'Escape') { setShowCertModal(false); setShowIncidentModal(false); setShowHelp(false); }
+        };
+        window.addEventListener('keydown', handleKey);
+        return () => window.removeEventListener('keydown', handleKey);
+      }, [view]);
+      
+      // Stats
+      const expiredCerts = certs.filter(c => daysUntil(c.expiresAt) < 0).length;
+      const expiringCerts = certs.filter(c => { const d = daysUntil(c.expiresAt); return d >= 0 && d <= settings.alertDays; }).length;
+      const validCerts = certs.filter(c => daysUntil(c.expiresAt) > settings.alertDays).length;
+      const recentIncidents = incidents.filter(i => daysUntil(i.date) > -30).length;
+      const criticalIncidents = incidents.filter(i => i.severity === 'critical' || i.severity === 'serious').length;
+      
+      // Cert handlers
+      const saveCert = (cert) => {
+        if (editingCert) {
+          setCerts(certs.map(c => c.id === cert.id ? cert : c));
+          logActivity('Updated certification', cert.name);
+        } else {
+          const newCert = { ...cert, id: genId(), createdAt: new Date().toISOString() };
+          setCerts([...certs, newCert]);
+          logActivity('Added certification', cert.name);
+        }
+        setShowCertModal(false);
+        setEditingCert(null);
+      };
+      
+      const deleteCert = (id) => {
+        const cert = certs.find(c => c.id === id);
+        if (confirm('Delete this certification?')) {
+          setCerts(certs.filter(c => c.id !== id));
+          logActivity('Deleted certification', cert?.name);
+        }
+      };
+      
+      // Incident handlers
+      const saveIncident = (incident) => {
+        if (editingIncident) {
+          setIncidents(incidents.map(i => i.id === incident.id ? incident : i));
+          logActivity('Updated incident', incident.title);
+        } else {
+          const newIncident = { ...incident, id: genId(), createdAt: new Date().toISOString() };
+          setIncidents([...incidents, newIncident]);
+          logActivity('Logged incident', incident.title);
+        }
+        setShowIncidentModal(false);
+        setEditingIncident(null);
+      };
+      
+      const deleteIncident = (id) => {
+        const incident = incidents.find(i => i.id === id);
+        if (confirm('Delete this incident?')) {
+          setIncidents(incidents.filter(i => i.id !== id));
+          logActivity('Deleted incident', incident?.title);
+        }
+      };
+      
+      // Export
+      const exportCSV = (type) => {
+        let csv = '';
+        if (type === 'certs') {
+          csv = 'Name,Holder,Type,Issuer,Cert Number,Issued,Expires,Status\n';
+          certs.forEach(c => {
+            const d = daysUntil(c.expiresAt);
+            const status = d < 0 ? 'Expired' : d <= settings.alertDays ? 'Expiring' : 'Valid';
+            csv += `"${c.name}","${c.holder || ''}","${c.type}","${c.issuer || ''}","${c.certNumber || ''}","${c.issuedAt || ''}","${c.expiresAt}","${status}"\n`;
+          });
+        } else {
+          csv = 'Date,Title,Type,Severity,Location,Description,Status\n';
+          incidents.forEach(i => {
+            csv += `"${i.date}","${i.title}","${i.type}","${i.severity}","${i.location || ''}","${(i.description || '').replace(/"/g, '""')}","${i.status || 'open'}"\n`;
+          });
+        }
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${type}-export-${today()}.csv`;
+        a.click();
+      };
+      
+      // Backup/Restore
+      const backup = () => {
+        const data = { certs, incidents, settings, activity, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `compliancehq-backup-${today()}.json`;
+        a.click();
+      };
+      
+      const restore = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.certs) { setCerts(data.certs); save('certs', data.certs); }
+            if (data.incidents) { setIncidents(data.incidents); save('incidents', data.incidents); }
+            if (data.settings) { setSettings(data.settings); save('settings', data.settings); }
+            if (data.activity) { setActivity(data.activity); save('activity', data.activity); }
+            alert('Data restored successfully!');
+          } catch { alert('Invalid backup file'); }
+        };
+        reader.readAsText(file);
+      };
+
+      return (
+        <div style={{ minHeight: '100vh' }}>
+          <header className="no-print" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '0.75rem 1.5rem', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ maxWidth: '1400px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '2rem' }}>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--accent)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  🛡️ ComplianceHQ
+                </h1>
+                <nav style={{ display: 'flex', gap: '0.25rem' }}>
+                  {['dashboard', 'certs', 'incidents', 'reports', 'activity', 'settings'].map(v => (
+                    <button key={v} className={`btn btn-sm ${view === v ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setView(v)}>
+                      {v === 'dashboard' && '📊'} {v === 'certs' && '📜'} {v === 'incidents' && '⚠️'} {v === 'reports' && '📈'} {v === 'activity' && '📋'} {v === 'settings' && '⚙️'} {v.charAt(0).toUpperCase() + v.slice(1)}
+                    </button>
+                  ))}
+                </nav>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <button onClick={() => setShowHelp(true)} className="btn btn-sm btn-secondary">❓</button>
+                <button onClick={() => setDarkMode(!darkMode)} className="btn btn-sm btn-secondary">{darkMode ? '☀️' : '🌙'}</button>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>v{APP_VERSION}</span>
+              </div>
+            </div>
+          </header>
+          
+          <main style={{ maxWidth: '1400px', margin: '0 auto', padding: '1.5rem' }}>
+            {view === 'dashboard' && (
+              <div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+                  <div className="card" style={{ borderLeft: '4px solid var(--danger)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Expired Certs</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--danger)' }}>{expiredCerts}</div>
+                  </div>
+                  <div className="card" style={{ borderLeft: '4px solid var(--warning)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Expiring Soon</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--warning)' }}>{expiringCerts}</div>
+                  </div>
+                  <div className="card" style={{ borderLeft: '4px solid var(--success)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Valid Certs</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{validCerts}</div>
+                  </div>
+                  <div className="card" style={{ borderLeft: '4px solid var(--info)' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Recent Incidents (30d)</div>
+                    <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--info)' }}>{recentIncidents}</div>
+                  </div>
+                </div>
+                
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div className="card">
+                    <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>⚠️ Attention Required</h3>
+                    {certs.filter(c => daysUntil(c.expiresAt) <= settings.alertDays).slice(0, 5).map(c => (
+                      <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
+                        <div>
+                          <div style={{ fontWeight: 500 }}>{c.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.holder}</div>
+                        </div>
+                        <span className={`badge ${daysUntil(c.expiresAt) < 0 ? 'badge-danger' : 'badge-warning'}`}>
+                          {daysUntil(c.expiresAt) < 0 ? 'Expired' : `${daysUntil(c.expiresAt)}d left`}
+                        </span>
+                      </div>
+                    ))}
+                    {certs.filter(c => daysUntil(c.expiresAt) <= settings.alertDays).length === 0 && (
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>All certifications are current ✓</p>
+                    )}
+                  </div>
+                  
+                  <div className="card">
+                    <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>🔥 Recent Incidents</h3>
+                    {incidents.slice(0, 5).map(i => (
+                      <div key={i.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
+                        <div>
+                          <div style={{ fontWeight: 500 }}>{i.title}</div>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{fmtDate(i.date)}</div>
+                        </div>
+                        <span className={`badge ${i.severity === 'critical' ? 'badge-danger' : i.severity === 'serious' ? 'badge-warning' : 'badge-info'}`}>
+                          {i.severity}
+                        </span>
+                      </div>
+                    ))}
+                    {incidents.length === 0 && (
+                      <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>No incidents recorded</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {view === 'certs' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>📜 Certifications</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => exportCSV('certs')}>Export CSV</button>
+                    <button className="btn btn-primary" onClick={() => { setEditingCert(null); setShowCertModal(true); }}>+ Add Certification</button>
+                  </div>
+                </div>
+                <div className="card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Holder</th>
+                        <th>Type</th>
+                        <th>Expires</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {certs.map(c => {
+                        const d = daysUntil(c.expiresAt);
+                        const status = d < 0 ? 'expired' : d <= settings.alertDays ? 'expiring' : 'valid';
+                        return (
+                          <tr key={c.id}>
+                            <td style={{ fontWeight: 500 }}>{c.name}</td>
+                            <td>{c.holder || '-'}</td>
+                            <td>{CERT_TYPES.find(t => t.id === c.type)?.icon} {CERT_TYPES.find(t => t.id === c.type)?.name}</td>
+                            <td>{fmtDate(c.expiresAt)}</td>
+                            <td>
+                              <span className={`badge badge-${status === 'expired' ? 'danger' : status === 'expiring' ? 'warning' : 'success'}`}>
+                                {status === 'expired' ? 'Expired' : status === 'expiring' ? `${d}d left` : 'Valid'}
+                              </span>
+                            </td>
+                            <td>
+                              <button className="btn btn-sm btn-secondary" onClick={() => { setEditingCert(c); setShowCertModal(true); }}>Edit</button>
+                              <button className="btn btn-sm btn-danger" style={{ marginLeft: '0.25rem' }} onClick={() => deleteCert(c.id)}>Delete</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {certs.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No certifications yet. Click "Add Certification" to get started.</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'incidents' && (
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                  <h2 style={{ fontSize: '1.5rem', fontWeight: 700 }}>⚠️ Safety Incidents</h2>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary btn-sm" onClick={() => exportCSV('incidents')}>Export CSV</button>
+                    <button className="btn btn-primary" onClick={() => { setEditingIncident(null); setShowIncidentModal(true); }}>+ Log Incident</button>
+                  </div>
+                </div>
+                <div className="card">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Title</th>
+                        <th>Type</th>
+                        <th>Severity</th>
+                        <th>Location</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {incidents.map(i => {
+                        const type = INCIDENT_TYPES.find(t => t.id === i.type);
+                        const sev = SEVERITY.find(s => s.id === i.severity);
+                        return (
+                          <tr key={i.id}>
+                            <td>{fmtDate(i.date)}</td>
+                            <td style={{ fontWeight: 500 }}>{i.title}</td>
+                            <td>{type?.icon} {type?.name}</td>
+                            <td><span style={{ color: sev?.color, fontWeight: 500 }}>{sev?.name}</span></td>
+                            <td>{i.location || '-'}</td>
+                            <td>
+                              <button className="btn btn-sm btn-secondary" onClick={() => { setEditingIncident(i); setShowIncidentModal(true); }}>Edit</button>
+                              <button className="btn btn-sm btn-danger" style={{ marginLeft: '0.25rem' }} onClick={() => deleteIncident(i.id)}>Delete</button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                  {incidents.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No incidents logged. Click "Log Incident" to report one.</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'reports' && (
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>📈 Compliance Reports</h2>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1.5rem' }}>
+                  <div className="card">
+                    <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Certification Status</h3>
+                    <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem' }}>
+                      <div style={{ flex: 1, textAlign: 'center', padding: '1rem', background: 'var(--success-bg)', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{validCerts}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--success)' }}>Valid</div>
+                      </div>
+                      <div style={{ flex: 1, textAlign: 'center', padding: '1rem', background: 'var(--warning-bg)', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--warning)' }}>{expiringCerts}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>Expiring</div>
+                      </div>
+                      <div style={{ flex: 1, textAlign: 'center', padding: '1rem', background: 'var(--danger-bg)', borderRadius: '8px' }}>
+                        <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--danger)' }}>{expiredCerts}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--danger)' }}>Expired</div>
+                      </div>
+                    </div>
+                    <button className="btn btn-secondary btn-sm" onClick={() => window.print()}>Print Report</button>
+                  </div>
+                  <div className="card">
+                    <h3 style={{ fontWeight: 600, marginBottom: '1rem' }}>Incidents by Severity</h3>
+                    {SEVERITY.map(s => {
+                      const count = incidents.filter(i => i.severity === s.id).length;
+                      return (
+                        <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
+                          <span style={{ color: s.color, fontWeight: 500 }}>{s.name}</span>
+                          <span style={{ fontWeight: 700 }}>{count}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {view === 'activity' && (
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>📋 Activity Log</h2>
+                <div className="card">
+                  {activity.slice(0, 50).map(a => (
+                    <div key={a.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
+                      <div>
+                        <span style={{ fontWeight: 500 }}>{a.action}</span>
+                        {a.details && <span style={{ color: 'var(--text-muted)' }}> — {a.details}</span>}
+                      </div>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{new Date(a.timestamp).toLocaleString()}</span>
+                    </div>
+                  ))}
+                  {activity.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>No activity yet</p>}
+                </div>
+              </div>
+            )}
+            
+            {view === 'settings' && (
+              <div>
+                <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: '1.5rem' }}>⚙️ Settings</h2>
+                <div className="card" style={{ maxWidth: '600px' }}>
+                  <div style={{ marginBottom: '1rem' }}>
+                    <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.5rem' }}>Company Name</label>
+                    <input className="input" value={settings.companyName} onChange={e => setSettings({ ...settings, companyName: e.target.value })} placeholder="Your Company" />
+                  </div>
+                  <div style={{ marginBottom: '1.5rem' }}>
+                    <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.5rem' }}>Alert Days Before Expiration</label>
+                    <input className="input" type="number" value={settings.alertDays} onChange={e => setSettings({ ...settings, alertDays: parseInt(e.target.value) || 30 })} />
+                  </div>
+                  <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '1.5rem 0' }} />
+                  <h4 style={{ fontWeight: 600, marginBottom: '1rem' }}>Data Management</h4>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-secondary" onClick={backup}>Backup Data</button>
+                    <label className="btn btn-secondary" style={{ cursor: 'pointer' }}>
+                      Restore Data
+                      <input type="file" accept=".json" onChange={restore} style={{ display: 'none' }} />
+                    </label>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+          
+          {/* Cert Modal */}
+          <Modal isOpen={showCertModal} onClose={() => setShowCertModal(false)} title={editingCert ? 'Edit Certification' : 'Add Certification'}>
+            <CertForm cert={editingCert} onSave={saveCert} onCancel={() => setShowCertModal(false)} />
+          </Modal>
+          
+          {/* Incident Modal */}
+          <Modal isOpen={showIncidentModal} onClose={() => setShowIncidentModal(false)} title={editingIncident ? 'Edit Incident' : 'Log Incident'}>
+            <IncidentForm incident={editingIncident} onSave={saveIncident} onCancel={() => setShowIncidentModal(false)} />
+          </Modal>
+          
+          <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+        </div>
+      );
+    };
+    
+    const CertForm = ({ cert, onSave, onCancel }) => {
+      const [form, setForm] = useState(cert || { name: '', holder: '', type: 'license', issuer: '', certNumber: '', issuedAt: '', expiresAt: '', notes: '' });
+      return (
+        <div>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Name *</label>
+            <input className="input" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g., OSHA 30-Hour" required />
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Holder</label>
+            <input className="input" value={form.holder} onChange={e => setForm({ ...form, holder: e.target.value })} placeholder="Person or company name" />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Type</label>
+              <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                {CERT_TYPES.map(t => <option key={t.id} value={t.id}>{t.icon} {t.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Issuer</label>
+              <input className="input" value={form.issuer} onChange={e => setForm({ ...form, issuer: e.target.value })} placeholder="Issuing organization" />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Issued Date</label>
+              <input className="input" type="date" value={form.issuedAt} onChange={e => setForm({ ...form, issuedAt: e.target.value })} />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Expiration Date *</label>
+              <input className="input" type="date" value={form.expiresAt} onChange={e => setForm({ ...form, expiresAt: e.target.value })} required />
+            </div>
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Notes</label>
+            <textarea className="input" rows={3} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Additional notes..." />
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+            <button className="btn btn-primary" onClick={() => form.name && form.expiresAt && onSave(form)}>Save</button>
+          </div>
+        </div>
+      );
+    };
+    
+    const IncidentForm = ({ incident, onSave, onCancel }) => {
+      const [form, setForm] = useState(incident || { title: '', date: today(), type: 'near_miss', severity: 'minor', location: '', description: '', reportedBy: '', status: 'open' });
+      return (
+        <div>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Title *</label>
+            <input className="input" value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Brief description" required />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Date *</label>
+              <input className="input" type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} required />
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Location</label>
+              <input className="input" value={form.location} onChange={e => setForm({ ...form, location: e.target.value })} placeholder="Where it occurred" />
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Type</label>
+              <select className="input" value={form.type} onChange={e => setForm({ ...form, type: e.target.value })}>
+                {INCIDENT_TYPES.map(t => <option key={t.id} value={t.id}>{t.icon} {t.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Severity</label>
+              <select className="input" value={form.severity} onChange={e => setForm({ ...form, severity: e.target.value })}>
+                {SEVERITY.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+              </select>
+            </div>
+          </div>
+          <div style={{ marginBottom: '1rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Description</label>
+            <textarea className="input" rows={4} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Detailed description of what happened..." />
+          </div>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <label style={{ display: 'block', fontWeight: 500, marginBottom: '0.25rem' }}>Reported By</label>
+            <input className="input" value={form.reportedBy} onChange={e => setForm({ ...form, reportedBy: e.target.value })} placeholder="Name of reporter" />
+          </div>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <button className="btn btn-secondary" onClick={onCancel}>Cancel</button>
+            <button className="btn btn-primary" onClick={() => form.title && form.date && onSave(form)}>Save</button>
+          </div>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

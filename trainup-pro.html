@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrainUp Pro - Employee Training & LMS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#f97316;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#ea580c);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.pro-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(249,115,22,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-complete{background:rgba(34,197,94,.15);color:var(--success)}.badge-progress{background:rgba(249,115,22,.15);color:var(--primary)}.badge-overdue{background:rgba(239,68,68,.15);color:var(--danger)}.badge-pending{background:rgba(100,116,139,.15);color:var(--muted)}.view{display:none}.view.active{display:block}.progress-bar{width:100%;height:8px;background:var(--border);border-radius:4px;overflow:hidden}.progress-fill{height:100%;background:var(--primary);border-radius:4px}.course-card{border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🎓</div><span class="logo-text">TrainUp <span class="pro-badge">PRO</span></span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('courses')">📚 Courses</div>
+      <div class="nav-item" onclick="showView('employees')">👥 Employees</div>
+      <div class="nav-item" onclick="showView('assignments')">📋 Assignments</div>
+      <div class="nav-item" onclick="showView('certificates')">🏆 Certificates</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Training Dashboard</h1><button class="btn btn-primary" onclick="openModal()">+ Assign Training</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Active Courses</div><div class="stat-value" id="stat-courses">0</div></div>
+          <div class="stat-card"><div class="stat-label">Completion Rate</div><div class="stat-value" style="color:var(--success)" id="stat-rate">0%</div></div>
+          <div class="stat-card"><div class="stat-label">Overdue</div><div class="stat-value" style="color:var(--danger)" id="stat-overdue">0</div></div>
+          <div class="stat-card"><div class="stat-label">Certificates Issued</div><div class="stat-value" style="color:var(--primary)" id="stat-certs">0</div></div>
+        </div>
+        <div class="card"><div class="card-header"><span>Overdue Training</span></div><table class="table"><thead><tr><th>Employee</th><th>Course</th><th>Due Date</th><th>Actions</th></tr></thead><tbody id="overdue-list"></tbody></table></div>
+        <div class="card"><div class="card-header"><span>Recent Activity</span></div><table class="table"><thead><tr><th>Employee</th><th>Course</th><th>Status</th><th>Progress</th></tr></thead><tbody id="recent-activity"></tbody></table></div>
+      </div>
+      <div id="view-courses" class="view">
+        <div class="header"><h1 class="title">Course Library</h1><button class="btn btn-primary" onclick="addCourse()">+ Add Course</button></div>
+        <div id="course-list"></div>
+      </div>
+      <div id="view-employees" class="view">
+        <div class="header"><h1 class="title">Employees</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Department</th><th>Assigned</th><th>Completed</th><th>Compliance</th></tr></thead><tbody id="emp-list"></tbody></table></div>
+      </div>
+      <div id="view-assignments" class="view">
+        <div class="header"><h1 class="title">Training Assignments</h1><button class="btn btn-primary" onclick="openModal()">+ Assign Training</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Employee</th><th>Course</th><th>Assigned</th><th>Due</th><th>Status</th><th>Actions</th></tr></thead><tbody id="assign-list"></tbody></table></div>
+      </div>
+      <div id="view-certificates" class="view">
+        <div class="header"><h1 class="title">Certificates</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Employee</th><th>Course</th><th>Completed</th><th>Certificate</th></tr></thead><tbody id="cert-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Training Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">Total Training Hours</div><div class="stat-value">342</div></div><div class="stat-card"><div class="stat-label">Avg Completion Time</div><div class="stat-value">4.2 hrs</div></div><div class="stat-card"><div class="stat-label">Pass Rate</div><div class="stat-value" style="color:var(--success)">94%</div></div><div class="stat-card"><div class="stat-label">Active Learners</div><div class="stat-value">28</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">Assign Training</h2><button class="close-btn" onclick="closeModal()">&times;</button></div>
+      <div class="form-group"><label class="form-label">Employee</label><select class="form-select" id="assign-emp"></select></div>
+      <div class="form-group"><label class="form-label">Course</label><select class="form-select" id="assign-course"></select></div>
+      <div class="form-group"><label class="form-label">Due Date</label><input type="date" class="form-input" id="assign-due"></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveAssignment()">Assign</button></div>
+    </div>
+  </div>
+  <script>
+    let employees=[{id:1,name:'John Smith',dept:'Operations'},{id:2,name:'Sarah Johnson',dept:'Sales'},{id:3,name:'Mike Chen',dept:'Field'},{id:4,name:'Lisa Wong',dept:'Admin'}];
+    let courses=[{id:1,name:'Safety Fundamentals',duration:'2 hrs',required:true},{id:2,name:'Workplace Harassment',duration:'1 hr',required:true},{id:3,name:'Equipment Operation',duration:'4 hrs',required:false},{id:4,name:'Customer Service',duration:'1.5 hrs',required:false}];
+    let assignments=[
+      {id:1,empId:1,courseId:1,assigned:'2025-12-01',due:'2025-12-31',status:'complete',progress:100},
+      {id:2,empId:1,courseId:2,assigned:'2025-12-15',due:'2026-01-15',status:'progress',progress:60},
+      {id:3,empId:2,courseId:1,assigned:'2025-12-01',due:'2025-12-20',status:'overdue',progress:30},
+      {id:4,empId:3,courseId:3,assigned:'2025-12-10',due:'2026-01-10',status:'progress',progress:80},
+      {id:5,empId:4,courseId:4,assigned:'2025-12-20',due:'2026-01-20',status:'pending',progress:0},
+    ];
+    let nextAssignId=6;
+    
+    function getEmp(id){return employees.find(e=>e.id===id)}
+    function getCourse(id){return courses.find(c=>c.id===id)}
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      const complete=assignments.filter(a=>a.status==='complete').length;
+      const overdue=assignments.filter(a=>a.status==='overdue').length;
+      document.getElementById('stat-courses').textContent=courses.length;
+      document.getElementById('stat-rate').textContent=Math.round(complete/assignments.length*100)+'%';
+      document.getElementById('stat-overdue').textContent=overdue;
+      document.getElementById('stat-certs').textContent=complete;
+      
+      document.getElementById('overdue-list').innerHTML=assignments.filter(a=>a.status==='overdue').map(a=>`<tr><td>${getEmp(a.empId)?.name}</td><td>${getCourse(a.courseId)?.name}</td><td style="color:var(--danger)">${a.due}</td><td><button class="btn btn-sm btn-primary" onclick="sendReminder(${a.id})">Send Reminder</button></td></tr>`).join('')||'<tr><td colspan="4" style="text-align:center;color:var(--muted)">No overdue training</td></tr>';
+      
+      document.getElementById('recent-activity').innerHTML=assignments.slice(0,5).map(a=>`<tr><td>${getEmp(a.empId)?.name}</td><td>${getCourse(a.courseId)?.name}</td><td><span class="badge badge-${a.status}">${a.status}</span></td><td><div class="progress-bar"><div class="progress-fill" style="width:${a.progress}%"></div></div></td></tr>`).join('');
+      
+      document.getElementById('course-list').innerHTML=courses.map(c=>`<div class="course-card"><div style="display:flex;justify-content:space-between;align-items:center"><div><strong>${c.name}</strong> ${c.required?'<span class="badge badge-overdue">Required</span>':''}<br><small style="color:var(--muted)">${c.duration}</small></div><button class="btn btn-sm btn-secondary" onclick="editCourse(${c.id})">Edit</button></div></div>`).join('');
+      
+      document.getElementById('emp-list').innerHTML=employees.map(e=>{const ass=assignments.filter(a=>a.empId===e.id);const comp=ass.filter(a=>a.status==='complete').length;return `<tr><td><strong>${e.name}</strong></td><td>${e.dept}</td><td>${ass.length}</td><td>${comp}</td><td><span class="badge badge-${comp===ass.length?'complete':comp>0?'progress':'pending'}">${ass.length?Math.round(comp/ass.length*100):0}%</span></td></tr>`;}).join('');
+      
+      document.getElementById('assign-list').innerHTML=assignments.map(a=>`<tr><td>${getEmp(a.empId)?.name}</td><td>${getCourse(a.courseId)?.name}</td><td>${a.assigned}</td><td>${a.due}</td><td><span class="badge badge-${a.status}">${a.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="viewProgress(${a.id})">View</button></td></tr>`).join('');
+      
+      document.getElementById('cert-list').innerHTML=assignments.filter(a=>a.status==='complete').map(a=>`<tr><td>${getEmp(a.empId)?.name}</td><td>${getCourse(a.courseId)?.name}</td><td>${a.due}</td><td><button class="btn btn-sm btn-primary" onclick="downloadCert(${a.id})">Download</button></td></tr>`).join('');
+      
+      document.getElementById('assign-emp').innerHTML=employees.map(e=>`<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('assign-course').innerHTML=courses.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');const d=new Date();d.setDate(d.getDate()+30);document.getElementById('assign-due').value=d.toISOString().split('T')[0];}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveAssignment(){assignments.unshift({id:nextAssignId++,empId:parseInt(document.getElementById('assign-emp').value),courseId:parseInt(document.getElementById('assign-course').value),assigned:new Date().toISOString().split('T')[0],due:document.getElementById('assign-due').value,status:'pending',progress:0});closeModal();render();alert('Training assigned!');}
+    function sendReminder(id){alert('Reminder sent for assignment #'+id);}
+    function editCourse(id){alert('Edit course #'+id+' (Demo)');}
+    function viewProgress(id){alert('View progress for assignment #'+id+' (Demo)');}
+    function downloadCert(id){alert('Certificate downloaded! (Demo)');}
+    function addCourse(){alert('Add course (Demo)');}
+    
+    render();
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='trainup_pro_data';
+  const vars=['employees,courses,assignments'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='trainup_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

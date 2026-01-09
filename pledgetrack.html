@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PledgeTrack - Pledge & Commitment Tracking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#6366f1;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#818cf8);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(99,102,241,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.progress-bar{background:var(--border);height:8px;border-radius:4px;overflow:hidden}.progress-fill{background:var(--primary);height:100%}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🎯</div><span class="logo-text">PledgeTrack</span></div>
+      <div class="nav-item active" onclick="showView('pledges')">📋 Pledges</div>
+      <div class="nav-item" onclick="showView('payments')">💰 Payments</div>
+      <div class="nav-item" onclick="showView('campaigns')">🎯 Campaigns</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-pledges" class="view active">
+        <div class="header"><h1 class="title">Pledges</h1><button class="btn btn-primary" onclick="openModal()">+ New Pledge</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Pledged</div><div class="stat-value" style="color:var(--primary)" id="stat-pledged">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Collected</div><div class="stat-value" style="color:var(--success)" id="stat-collected">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value" style="color:var(--warning)" id="stat-outstanding">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Fulfillment</div><div class="stat-value" id="stat-rate">0%</div></div>
+        </div>
+        <div class="card"><table class="table"><thead><tr><th>Donor</th><th>Campaign</th><th>Pledged</th><th>Paid</th><th>Progress</th><th>Actions</th></tr></thead><tbody id="pledge-list"></tbody></table></div>
+      </div>
+      <div id="view-payments" class="view">
+        <div class="header"><h1 class="title">Pledge Payments</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Date</th><th>Donor</th><th>Pledge</th><th>Amount</th></tr></thead><tbody id="payment-list"></tbody></table></div>
+      </div>
+      <div id="view-campaigns" class="view">
+        <div class="header"><h1 class="title">Campaigns</h1></div>
+        <div id="campaign-list"></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">Avg Pledge</div><div class="stat-value">$2,500</div></div><div class="stat-card"><div class="stat-label">Active Pledges</div><div class="stat-value">24</div></div><div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value">18</div></div><div class="stat-card"><div class="stat-label">On Track</div><div class="stat-value" style="color:var(--success)">87%</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">New Pledge</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Donor Name</label><input type="text" class="form-input" id="pledge-donor" placeholder="John Smith"></div><div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="pledge-amount" placeholder="0.00"></div><div class="form-group"><label class="form-label">Campaign</label><select class="form-select" id="pledge-campaign"><option>Capital Campaign</option><option>Annual Fund</option><option>Scholarship Fund</option></select></div><div class="form-group"><label class="form-label">Schedule</label><select class="form-select" id="pledge-schedule"><option>One-time</option><option>Monthly</option><option>Quarterly</option><option>Annually</option></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="savePledge()">Create Pledge</button></div></div></div>
+  <script>
+    let pledges=[{id:1,donor:'John Smith',campaign:'Capital Campaign',amount:10000,paid:6000},{id:2,donor:'Mary Johnson',campaign:'Annual Fund',amount:2400,paid:1200},{id:3,donor:'Bob Williams',campaign:'Scholarship Fund',amount:5000,paid:5000}];
+    let payments=[{date:'2026-01-02',donor:'John Smith',pledge:'Capital Campaign',amount:1000},{date:'2025-12-01',donor:'Mary Johnson',pledge:'Annual Fund',amount:200},{date:'2025-12-01',donor:'John Smith',pledge:'Capital Campaign',amount:1000}];
+    let campaigns=[{name:'Capital Campaign',goal:500000,pledged:350000,collected:210000},{name:'Annual Fund',goal:100000,pledged:75000,collected:52000},{name:'Scholarship Fund',goal:50000,pledged:32000,collected:28000}];
+    const SK='pledgetrack_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({pledges:pledges,payments:payments,campaigns:campaigns}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.pledges)pledges=d.pledges;if(d.payments)payments=d.payments;if(d.campaigns)campaigns=d.campaigns;}}catch(e){}}
+
+    let nextPledgeId=4;
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      const pledged=pledges.reduce((s,p)=>s+p.amount,0);
+      const collected=pledges.reduce((s,p)=>s+p.paid,0);
+      document.getElementById('stat-pledged').textContent='$'+pledged.toLocaleString();
+      document.getElementById('stat-collected').textContent='$'+collected.toLocaleString();
+      document.getElementById('stat-outstanding').textContent='$'+(pledged-collected).toLocaleString();
+      document.getElementById('stat-rate').textContent=Math.round(collected/pledged*100)+'%';
+      document.getElementById('pledge-list').innerHTML=pledges.map(p=>`<tr><td><strong>${p.donor}</strong></td><td>${p.campaign}</td><td>$${p.amount.toLocaleString()}</td><td>$${p.paid.toLocaleString()}</td><td style="width:150px"><div class="progress-bar"><div class="progress-fill" style="width:${p.paid/p.amount*100}%"></div></div></td><td><button class="btn btn-sm btn-primary" onclick="recordPayment(${p.id})">Payment</button></td></tr>`).join('');
+      document.getElementById('payment-list').innerHTML=payments.map(p=>`<tr><td>${p.date}</td><td>${p.donor}</td><td>${p.pledge}</td><td>$${p.amount}</td></tr>`).join('');
+      document.getElementById('campaign-list').innerHTML=campaigns.map(c=>`<div class="card" style="padding:20px;margin-bottom:16px"><h3>${c.name}</h3><div style="display:flex;justify-content:space-between;margin-top:12px"><span>Pledged: $${c.pledged.toLocaleString()}</span><span>Collected: $${c.collected.toLocaleString()}</span><span>Goal: $${c.goal.toLocaleString()}</span></div><div class="progress-bar" style="margin-top:12px"><div class="progress-fill" style="width:${c.collected/c.goal*100}%"></div></div></div>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function savePledge(){const donor=document.getElementById('pledge-donor').value;const amount=parseFloat(document.getElementById('pledge-amount').value);if(!donor||!amount){alert('Enter donor and amount');return;}pledges.unshift({id:nextPledgeId++,donor,campaign:document.getElementById('pledge-campaign').value,amount,paid:0});closeModal();saveData();render();document.getElementById('pledge-donor').value='';document.getElementById('pledge-amount').value='';alert('Pledge created!');}
+    function recordPayment(id){const p=pledges.find(x=>x.id===id);const amt=prompt('Payment amount:','500');if(amt){p.paid+=parseFloat(amt);payments.unshift({date:new Date().toISOString().split('T')[0],donor:p.donor,pledge:p.campaign,amount:parseFloat(amt)});saveData();render();}}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

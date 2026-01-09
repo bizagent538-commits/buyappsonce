@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VolunteerHub Pro - Demo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+
+    // Sample Data
+    const initialCategories = [
+      { id: '1', name: 'Kitchen', color: '#ef4444' },
+      { id: '2', name: 'Events', color: '#f59e0b' },
+      { id: '3', name: 'Grounds', color: '#22c55e' },
+      { id: '4', name: 'Office', color: '#3b82f6' },
+      { id: '5', name: 'Outreach', color: '#8b5cf6' }
+    ];
+
+    const initialVolunteers = [
+      { id: '1', first_name: 'Sarah', last_name: 'Johnson', email: 'sarah.j@email.com', phone: '(555) 123-4567', is_active: true, notes: 'Prefers morning shifts' },
+      { id: '2', first_name: 'Mike', last_name: 'Chen', email: 'mike.chen@email.com', phone: '(555) 234-5678', is_active: true, notes: '' },
+      { id: '3', first_name: 'Emily', last_name: 'Davis', email: 'emily.d@email.com', phone: '(555) 345-6789', is_active: true, notes: 'Has food handler certification' },
+      { id: '4', first_name: 'James', last_name: 'Wilson', email: 'jwilson@email.com', phone: '(555) 456-7890', is_active: true, notes: '' },
+      { id: '5', first_name: 'Lisa', last_name: 'Martinez', email: 'lisa.m@email.com', phone: '(555) 567-8901', is_active: true, notes: 'Available weekends only' },
+      { id: '6', first_name: 'Robert', last_name: 'Brown', email: 'rbrown@email.com', phone: '(555) 678-9012', is_active: false, notes: 'Moved out of area' }
+    ];
+
+    const today = new Date();
+    const formatDateISO = (d) => d.toISOString().split('T')[0];
+    const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+
+    const initialOpportunities = [
+      { id: '1', title: 'Fish Fry Kitchen Help', description: 'Help prepare and serve food for our weekly fish fry dinner.', category_id: '1', location: 'Main Kitchen', date: formatDateISO(addDays(today, 2)), start_time: '16:00', end_time: '20:00', slots_needed: 6, contact_name: 'Chef Bob', contact_email: 'bob@club.org', contact_phone: '(555) 111-2222', status: 'open', notes: '' },
+      { id: '2', title: 'Spring Cleanup Day', description: 'Annual grounds cleanup - raking, mulching, and general maintenance.', category_id: '3', location: 'Club Grounds', date: formatDateISO(addDays(today, 5)), start_time: '09:00', end_time: '14:00', slots_needed: 12, contact_name: 'Tom Green', contact_email: 'tom@club.org', contact_phone: '', status: 'open', notes: 'Bring gloves if you have them' },
+      { id: '3', title: 'Charity Golf Tournament Check-In', description: 'Help with registration and check-in for our annual charity tournament.', category_id: '2', location: 'Clubhouse Entrance', date: formatDateISO(addDays(today, 8)), start_time: '07:00', end_time: '10:00', slots_needed: 4, contact_name: 'Janet Lee', contact_email: 'janet@club.org', contact_phone: '(555) 333-4444', status: 'open', notes: '' },
+      { id: '4', title: 'Newsletter Mailing', description: 'Fold, stuff, and label quarterly newsletter for mailing.', category_id: '4', location: 'Office', date: formatDateISO(addDays(today, 3)), start_time: '10:00', end_time: '12:00', slots_needed: 3, contact_name: 'Mary Smith', contact_email: 'mary@club.org', contact_phone: '', status: 'open', notes: '' },
+      { id: '5', title: 'Community Outreach Booth', description: 'Staff our booth at the community fair to share info about our programs.', category_id: '5', location: 'Town Green', date: formatDateISO(addDays(today, 12)), start_time: '11:00', end_time: '16:00', slots_needed: 4, contact_name: 'Pat Johnson', contact_email: 'pat@club.org', contact_phone: '(555) 555-6666', status: 'open', notes: '' },
+      { id: '6', title: 'Kids Fishing Derby', description: 'Help run our annual youth fishing event - bait stations, weigh-ins, prizes.', category_id: '2', location: 'Lake Shore', date: formatDateISO(addDays(today, 15)), start_time: '08:00', end_time: '13:00', slots_needed: 8, contact_name: 'Dave Fisher', contact_email: 'dave@club.org', contact_phone: '(555) 777-8888', status: 'open', notes: '' },
+      { id: '7', title: 'Weekly Kitchen Prep', description: 'Prep ingredients for the week - chopping, portioning, organizing.', category_id: '1', location: 'Main Kitchen', date: formatDateISO(addDays(today, -3)), start_time: '09:00', end_time: '12:00', slots_needed: 2, contact_name: 'Chef Bob', contact_email: 'bob@club.org', contact_phone: '', status: 'completed', notes: '' }
+    ];
+
+    const initialSignups = [
+      { id: '1', opportunity_id: '1', volunteer_id: '1', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '2', opportunity_id: '1', volunteer_id: '3', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '3', opportunity_id: '1', volunteer_id: '4', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '4', opportunity_id: '2', volunteer_id: '2', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '5', opportunity_id: '2', volunteer_id: '5', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '6', opportunity_id: '3', volunteer_id: '1', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '7', opportunity_id: '4', volunteer_id: '4', status: 'confirmed', signed_up_at: new Date().toISOString() },
+      { id: '8', opportunity_id: '7', volunteer_id: '3', status: 'completed', signed_up_at: new Date().toISOString() },
+      { id: '9', opportunity_id: '7', volunteer_id: '2', status: 'completed', signed_up_at: new Date().toISOString() }
+    ];
+
+    // Modal Component
+    function Modal({ title, children, onClose }) {
+      return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+            <div className="p-3 sm:p-4 border-b flex items-center justify-between sticky top-0 bg-white">
+              <h2 className="text-base sm:text-lg font-semibold">{title}</h2>
+              <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center">&times;</button>
+            </div>
+            <div className="p-3 sm:p-4">{children}</div>
+          </div>
+        </div>
+      );
+    }
+
+    // Main App
+    function App() {
+      const [view, setView] = useState('dashboard');
+      const [categories, setCategories] = useState(initialCategories);
+      const [volunteers, setVolunteers] = useState(initialVolunteers);
+      const [opportunities, setOpportunities] = useState(initialOpportunities);
+      const [signups, setSignups] = useState(initialSignups);
+      
+      const [filterDate, setFilterDate] = useState('upcoming');
+      const [filterStatus, setFilterStatus] = useState('open');
+      const [filterCategory, setFilterCategory] = useState('all');
+      
+      const [showOppForm, setShowOppForm] = useState(false);
+      const [showVolForm, setShowVolForm] = useState(false);
+      const [showSignupModal, setShowSignupModal] = useState(false);
+      const [selectedOpp, setSelectedOpp] = useState(null);
+      const [editingOpp, setEditingOpp] = useState(null);
+      const [editingVol, setEditingVol] = useState(null);
+      // localStorage persistence
+      useEffect(() => {
+        const saved = localStorage.getItem('volunteerhub_data');
+        if (saved) {
+          const d = JSON.parse(saved);
+          if (d.volunteers) setVolunteers(d.volunteers);
+          if (d.opportunities) setOpportunities(d.opportunities);
+          if (d.signups) setSignups(d.signups);
+        }
+      }, []);
+      useEffect(() => {
+        localStorage.setItem('volunteerhub_data', JSON.stringify({ volunteers, opportunities, signups }));
+      }, [volunteers, opportunities, signups]);
+      const [expandedOpp, setExpandedOpp] = useState(null);
+
+      // Enrich opportunities with category info and counts
+      const enrichedOpportunities = useMemo(() => {
+        return opportunities.map(opp => {
+          const cat = categories.find(c => c.id === opp.category_id);
+          const oppSignups = signups.filter(s => s.opportunity_id === opp.id && s.status === 'confirmed');
+          return {
+            ...opp,
+            category_name: cat?.name || '',
+            category_color: cat?.color || '#6b7280',
+            confirmed_count: oppSignups.length,
+            slots_remaining: opp.slots_needed - oppSignups.length
+          };
+        });
+      }, [opportunities, categories, signups]);
+
+      // Filter opportunities
+      const filteredOpportunities = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        return enrichedOpportunities.filter(opp => {
+          if (filterCategory !== 'all' && opp.category_id !== filterCategory) return false;
+          if (filterStatus !== 'all' && opp.status !== filterStatus) return false;
+          
+          const oppDate = new Date(opp.date);
+          if (filterDate === 'upcoming' && oppDate < today) return false;
+          if (filterDate === 'past' && oppDate >= today) return false;
+          if (filterDate === 'today' && oppDate.toDateString() !== today.toDateString()) return false;
+          if (filterDate === 'week') {
+            const weekFromNow = new Date(today);
+            weekFromNow.setDate(weekFromNow.getDate() + 7);
+            if (oppDate < today || oppDate > weekFromNow) return false;
+          }
+          return true;
+        }).sort((a, b) => new Date(a.date) - new Date(b.date));
+      }, [enrichedOpportunities, filterDate, filterStatus, filterCategory]);
+
+      const formatDate = (dateStr) => new Date(dateStr).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+      const formatTime = (timeStr) => {
+        if (!timeStr) return '';
+        const [h, m] = timeStr.split(':');
+        const hour = parseInt(h);
+        return `${hour % 12 || 12}:${m} ${hour >= 12 ? 'PM' : 'AM'}`;
+      };
+
+      // Stats
+      const stats = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const upcoming = enrichedOpportunities.filter(o => new Date(o.date) >= today && o.status === 'open');
+        return {
+          upcomingCount: upcoming.length,
+          openSlots: upcoming.reduce((sum, o) => sum + Math.max(0, o.slots_remaining), 0),
+          activeVolunteers: volunteers.filter(v => v.is_active).length,
+          totalSignups: signups.filter(s => s.status === 'confirmed').length
+        };
+      }, [enrichedOpportunities, volunteers, signups]);
+
+      // CRUD Operations
+      const saveOpportunity = (data) => {
+        if (editingOpp) {
+          setOpportunities(prev => prev.map(o => o.id === editingOpp.id ? { ...o, ...data } : o));
+        } else {
+          setOpportunities(prev => [...prev, { ...data, id: Date.now().toString(), status: 'open' }]);
+        }
+        setShowOppForm(false);
+        setEditingOpp(null);
+      };
+
+      const deleteOpportunity = (id) => {
+        if (!confirm('Delete this opportunity?')) return;
+        setOpportunities(prev => prev.filter(o => o.id !== id));
+        setSignups(prev => prev.filter(s => s.opportunity_id !== id));
+      };
+
+      const updateOppStatus = (id, status) => {
+        setOpportunities(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+      };
+
+      const saveVolunteer = (data) => {
+        if (editingVol) {
+          setVolunteers(prev => prev.map(v => v.id === editingVol.id ? { ...v, ...data } : v));
+        } else {
+          setVolunteers(prev => [...prev, { ...data, id: Date.now().toString() }]);
+        }
+        setShowVolForm(false);
+        setEditingVol(null);
+      };
+
+      const deleteVolunteer = (id) => {
+        if (!confirm('Delete this volunteer?')) return;
+        setVolunteers(prev => prev.filter(v => v.id !== id));
+        setSignups(prev => prev.filter(s => s.volunteer_id !== id));
+      };
+
+      const addSignup = (oppId, volId) => {
+        const exists = signups.find(s => s.opportunity_id === oppId && s.volunteer_id === volId);
+        if (exists) {
+          alert('Already signed up!');
+          return;
+        }
+        setSignups(prev => [...prev, {
+          id: Date.now().toString(),
+          opportunity_id: oppId,
+          volunteer_id: volId,
+          status: 'confirmed',
+          signed_up_at: new Date().toISOString()
+        }]);
+        setShowSignupModal(false);
+        setSelectedOpp(null);
+      };
+
+      const removeSignup = (signupId) => {
+        setSignups(prev => prev.filter(s => s.id !== signupId));
+      };
+
+      const getOppSignups = (oppId) => signups.filter(s => s.opportunity_id === oppId);
+      const getVolSignups = (volId) => signups.filter(s => s.volunteer_id === volId);
+
+      // Dashboard View
+      const DashboardView = () => (
+        <div className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <div className="text-2xl sm:text-3xl font-bold text-indigo-600">{stats.upcomingCount}</div>
+              <div className="text-gray-500 text-xs sm:text-sm">Upcoming Opportunities</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <div className="text-2xl sm:text-3xl font-bold text-green-600">{stats.openSlots}</div>
+              <div className="text-gray-500 text-xs sm:text-sm">Open Volunteer Slots</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <div className="text-2xl sm:text-3xl font-bold text-blue-600">{stats.activeVolunteers}</div>
+              <div className="text-gray-500 text-xs sm:text-sm">Active Volunteers</div>
+            </div>
+            <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+              <div className="text-2xl sm:text-3xl font-bold text-purple-600">{stats.totalSignups}</div>
+              <div className="text-gray-500 text-xs sm:text-sm">Total Signups</div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+            <div className="bg-white rounded-xl shadow">
+              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b flex items-center justify-between">
+                <h2 className="font-semibold text-gray-800 text-sm sm:text-base">Upcoming Opportunities</h2>
+                <button onClick={() => setView('opportunities')} className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 min-h-[44px] flex items-center">View All →</button>
+              </div>
+              <div className="divide-y">
+                {enrichedOpportunities.filter(o => new Date(o.date) >= new Date() && o.status === 'open').slice(0, 5).map(opp => (
+                  <div key={opp.id} className="p-3 sm:p-4 hover:bg-gray-50 active:bg-gray-100">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-gray-800 text-sm sm:text-base truncate">{opp.title}</div>
+                        <div className="text-xs sm:text-sm text-gray-500">{formatDate(opp.date)}{opp.start_time && ` at ${formatTime(opp.start_time)}`}</div>
+                      </div>
+                      <div className="text-right flex-shrink-0">
+                        {opp.category_name && <span className="inline-block px-2 py-1 rounded-full text-xs text-white mb-1" style={{backgroundColor: opp.category_color}}>{opp.category_name}</span>}
+                        <div className={`text-xs sm:text-sm font-medium ${opp.slots_remaining <= 0 ? 'text-red-600' : opp.slots_remaining <= 2 ? 'text-amber-600' : 'text-green-600'}`}>
+                          {opp.slots_remaining <= 0 ? 'Filled' : `${opp.slots_remaining} slots left`}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow">
+              <div className="px-4 sm:px-5 py-3 sm:py-4 border-b flex items-center justify-between">
+                <h2 className="font-semibold text-gray-800 text-sm sm:text-base">Recent Signups</h2>
+                <button onClick={() => setView('volunteers')} className="text-xs sm:text-sm text-indigo-600 hover:text-indigo-800 min-h-[44px] flex items-center">View Volunteers →</button>
+              </div>
+              <div className="divide-y">
+                {signups.filter(s => s.status === 'confirmed').slice(0, 8).map(signup => {
+                  const vol = volunteers.find(v => v.id === signup.volunteer_id);
+                  const opp = opportunities.find(o => o.id === signup.opportunity_id);
+                  return (
+                    <div key={signup.id} className="p-3 sm:p-4 hover:bg-gray-50 active:bg-gray-100">
+                      <div className="flex items-center justify-between">
+                        <div className="min-w-0">
+                          <div className="font-medium text-gray-800 text-sm sm:text-base">{vol?.first_name} {vol?.last_name}</div>
+                          <div className="text-xs sm:text-sm text-gray-500 truncate">signed up for {opp?.title}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl shadow p-4 sm:p-5">
+            <h2 className="font-semibold text-gray-800 mb-3 sm:mb-4 text-sm sm:text-base">Opportunities by Category</h2>
+            <div className="flex flex-wrap gap-2 sm:gap-3">
+              {categories.map(cat => {
+                const count = enrichedOpportunities.filter(o => o.category_id === cat.id && o.status === 'open').length;
+                return (
+                  <div key={cat.id} className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-lg text-sm" style={{backgroundColor: cat.color + '20'}}>
+                    <div className="w-3 h-3 rounded-full flex-shrink-0" style={{backgroundColor: cat.color}} />
+                    <span className="font-medium">{cat.name}</span>
+                    <span className="text-gray-500">({count})</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      );
+
+      // Opportunities View
+      const OpportunitiesView = () => (
+        <div className="space-y-4">
+          <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Volunteer Opportunities</h2>
+              <button onClick={() => { setEditingOpp(null); setShowOppForm(true); }} className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 flex items-center justify-center gap-2 min-h-[44px] text-sm sm:text-base">
+                <span className="text-xl">+</span> Add Opportunity
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2 sm:gap-3 mt-3 sm:mt-4">
+              <select value={filterDate} onChange={(e) => setFilterDate(e.target.value)} className="border rounded-lg px-3 py-2 text-sm min-h-[44px] flex-1 sm:flex-none">
+                <option value="upcoming">Upcoming</option>
+                <option value="today">Today</option>
+                <option value="week">This Week</option>
+                <option value="past">Past</option>
+                <option value="all">All Dates</option>
+              </select>
+              <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} className="border rounded-lg px-3 py-2 text-sm min-h-[44px] flex-1 sm:flex-none">
+                <option value="open">Open</option>
+                <option value="filled">Filled</option>
+                <option value="completed">Completed</option>
+                <option value="cancelled">Cancelled</option>
+                <option value="all">All Status</option>
+              </select>
+              <select value={filterCategory} onChange={(e) => setFilterCategory(e.target.value)} className="border rounded-lg px-3 py-2 text-sm min-h-[44px] flex-1 sm:flex-none">
+                <option value="all">All Categories</option>
+                {categories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {filteredOpportunities.length === 0 ? (
+            <div className="bg-white rounded-xl shadow p-8 text-center text-gray-500">No opportunities match your filters</div>
+          ) : (
+            <div className="space-y-3">
+              {filteredOpportunities.map(opp => {
+                const oppSignups = getOppSignups(opp.id);
+                const confirmedSignups = oppSignups.filter(s => s.status === 'confirmed');
+                const isExpanded = expandedOpp === opp.id;
+
+                return (
+                  <div key={opp.id} className="bg-white rounded-xl shadow overflow-hidden">
+                    <div className="p-3 sm:p-4 cursor-pointer hover:bg-gray-50 active:bg-gray-100" onClick={() => setExpandedOpp(isExpanded ? null : opp.id)}>
+                      <div className="flex items-start justify-between gap-3 sm:gap-4">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
+                            <h3 className="font-semibold text-gray-800 text-sm sm:text-base">{opp.title}</h3>
+                            {opp.category_name && <span className="px-2 py-0.5 rounded-full text-xs text-white" style={{backgroundColor: opp.category_color}}>{opp.category_name}</span>}
+                            <span className={`px-2 py-0.5 rounded-full text-xs ${opp.status === 'open' ? 'bg-green-100 text-green-800' : opp.status === 'filled' ? 'bg-blue-100 text-blue-800' : opp.status === 'completed' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'}`}>{opp.status}</span>
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-600">📅 {formatDate(opp.date)}{opp.start_time && <span className="hidden sm:inline"> • 🕐 {formatTime(opp.start_time)}{opp.end_time ? ` - ${formatTime(opp.end_time)}` : ''}</span>}</div>
+                          {opp.start_time && <div className="text-xs text-gray-600 sm:hidden">🕐 {formatTime(opp.start_time)}{opp.end_time ? ` - ${formatTime(opp.end_time)}` : ''}</div>}
+                          {opp.location && <div className="text-xs sm:text-sm text-gray-600 truncate">📍 {opp.location}</div>}
+                        </div>
+                        <div className="text-right flex-shrink-0">
+                          <div className={`text-base sm:text-lg font-bold ${opp.slots_remaining <= 0 ? 'text-red-600' : opp.slots_remaining <= 2 ? 'text-amber-600' : 'text-green-600'}`}>{confirmedSignups.length}/{opp.slots_needed}</div>
+                          <div className="text-xs text-gray-500">volunteers</div>
+                          <div className={`mt-2 transition-transform text-gray-400 ${isExpanded ? 'rotate-180' : ''}`}>▼</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <div className="border-t bg-gray-50 p-3 sm:p-4">
+                        {opp.description && <p className="text-gray-600 mb-4 text-sm">{opp.description}</p>}
+                        
+                        {(opp.contact_name || opp.contact_email) && (
+                          <div className="mb-4 p-3 bg-white rounded-lg">
+                            <div className="text-sm font-medium text-gray-700 mb-1">Contact</div>
+                            <div className="text-sm text-gray-600">
+                              {opp.contact_name && <div>{opp.contact_name}</div>}
+                              {opp.contact_email && <a href={`mailto:${opp.contact_email}`} className="text-indigo-600 break-all">{opp.contact_email}</a>}
+                              {opp.contact_phone && <div><a href={`tel:${opp.contact_phone}`} className="text-indigo-600">{opp.contact_phone}</a></div>}
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="mb-4">
+                          <div className="flex items-center justify-between mb-2 gap-2">
+                            <span className="text-sm font-medium text-gray-700">Signed Up ({confirmedSignups.length})</span>
+                            {opp.status === 'open' && opp.slots_remaining > 0 && (
+                              <button onClick={(e) => { e.stopPropagation(); setSelectedOpp(opp); setShowSignupModal(true); }} className="text-sm bg-green-600 text-white px-3 py-2 rounded hover:bg-green-700 active:bg-green-800 min-h-[44px]">+ Add Volunteer</button>
+                            )}
+                          </div>
+                          {oppSignups.length === 0 ? (
+                            <div className="text-sm text-gray-500 italic">No signups yet</div>
+                          ) : (
+                            <div className="space-y-2">
+                              {oppSignups.map(signup => {
+                                const vol = volunteers.find(v => v.id === signup.volunteer_id);
+                                return (
+                                  <div key={signup.id} className={`flex items-center justify-between p-2 sm:p-3 rounded gap-2 ${signup.status === 'cancelled' ? 'bg-red-50' : 'bg-white'}`}>
+                                    <div className={`min-w-0 ${signup.status === 'cancelled' ? 'line-through text-gray-400' : ''}`}>
+                                      <span className="text-sm">{vol?.first_name} {vol?.last_name}</span>
+                                      {vol?.phone && <span className="text-xs text-gray-500 ml-2 hidden sm:inline">{vol.phone}</span>}
+                                    </div>
+                                    <button onClick={(e) => { e.stopPropagation(); removeSignup(signup.id); }} className="text-xs text-red-600 hover:text-red-800 active:text-red-900 p-2 -m-2 min-w-[44px] min-h-[44px] flex items-center justify-center">Remove</button>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-3 border-t">
+                          <button onClick={(e) => { e.stopPropagation(); setEditingOpp(opp); setShowOppForm(true); }} className="px-3 py-2 text-sm bg-gray-100 text-gray-700 rounded hover:bg-gray-200 active:bg-gray-300 min-h-[44px]">Edit</button>
+                          {opp.status === 'open' && (
+                            <>
+                              <button onClick={(e) => { e.stopPropagation(); updateOppStatus(opp.id, 'completed'); }} className="px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 active:bg-green-300 min-h-[44px]">Complete</button>
+                              <button onClick={(e) => { e.stopPropagation(); updateOppStatus(opp.id, 'cancelled'); }} className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 active:bg-red-300 min-h-[44px]">Cancel</button>
+                            </>
+                          )}
+                          {opp.status !== 'open' && <button onClick={(e) => { e.stopPropagation(); updateOppStatus(opp.id, 'open'); }} className="px-3 py-2 text-sm bg-green-100 text-green-700 rounded hover:bg-green-200 active:bg-green-300 min-h-[44px]">Reopen</button>}
+                          <button onClick={(e) => { e.stopPropagation(); deleteOpportunity(opp.id); }} className="px-3 py-2 text-sm bg-red-100 text-red-700 rounded hover:bg-red-200 active:bg-red-300 min-h-[44px]">Delete</button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      );
+
+      // Volunteers View
+      const VolunteersView = () => {
+        const [search, setSearch] = useState('');
+        const [showImportModal, setShowImportModal] = useState(false);
+        const [importData, setImportData] = useState([]);
+        const [importError, setImportError] = useState('');
+        const fileInputRef = React.useRef(null);
+
+        const filtered = volunteers.filter(v => {
+          if (!search) return true;
+          const term = search.toLowerCase();
+          return v.first_name.toLowerCase().includes(term) || v.last_name.toLowerCase().includes(term) || v.email.toLowerCase().includes(term);
+        });
+
+        const handleFileSelect = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          setImportError('');
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const data = new Uint8Array(evt.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const sheetName = workbook.SheetNames[0];
+              const worksheet = workbook.Sheets[sheetName];
+              const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+              if (jsonData.length === 0) { setImportError('No data found in file'); return; }
+              const get = (row, keys) => {
+                for (const key of keys) {
+                  const found = Object.keys(row).find(k => k.toLowerCase().replace(/[_\s]/g, '') === key.toLowerCase().replace(/[_\s]/g, ''));
+                  if (found && row[found]) return String(row[found]).trim();
+                }
+                return '';
+              };
+              const existingEmails = new Set(volunteers.map(v => v.email.toLowerCase()));
+              const seenEmails = new Set();
+              const mapped = jsonData.map((row, idx) => {
+                const r = {
+                  _row: idx + 2,
+                  first_name: get(row, ['first_name', 'firstname', 'first', 'fname']),
+                  last_name: get(row, ['last_name', 'lastname', 'last', 'lname', 'surname']),
+                  email: get(row, ['email', 'emailaddress', 'e-mail']),
+                  phone: get(row, ['phone', 'phonenumber', 'telephone', 'tel', 'mobile', 'cell']),
+                  notes: get(row, ['notes', 'note', 'comments', 'comment']),
+                  is_active: true, _valid: true, _error: ''
+                };
+                if (!r.first_name || !r.last_name) { r._valid = false; r._error = 'Missing name'; }
+                else if (!r.email) { r._valid = false; r._error = 'Missing email'; }
+                else if (existingEmails.has(r.email.toLowerCase())) { r._valid = false; r._error = 'Email exists'; }
+                else if (seenEmails.has(r.email.toLowerCase())) { r._valid = false; r._error = 'Duplicate in file'; }
+                else { seenEmails.add(r.email.toLowerCase()); }
+                return r;
+              });
+              setImportData(mapped);
+              setShowImportModal(true);
+            } catch (err) { setImportError('Error reading file: ' + err.message); }
+          };
+          reader.readAsArrayBuffer(file);
+          e.target.value = '';
+        };
+
+        const handleImport = () => {
+          const validRows = importData.filter(r => r._valid);
+          if (validRows.length === 0) { alert('No valid rows to import'); return; }
+          const toImport = validRows.map(({ _row, _valid, _error, ...rest }) => ({ ...rest, id: Date.now().toString() + Math.random().toString(36).substr(2, 9) }));
+          setVolunteers(prev => [...prev, ...toImport]);
+          setShowImportModal(false);
+          setImportData([]);
+          alert(`Imported ${toImport.length} volunteers`);
+        };
+
+        return (
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow p-3 sm:p-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800">Volunteers</h2>
+                <div className="flex gap-2">
+                  <input type="file" ref={fileInputRef} onChange={handleFileSelect} accept=".xlsx,.xls,.csv" className="hidden" />
+                  <button onClick={() => fileInputRef.current?.click()} className="bg-green-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-green-700 active:bg-green-800 flex items-center gap-2 min-h-[44px] text-sm sm:text-base flex-1 sm:flex-none justify-center">
+                    <span>↑</span> <span className="hidden sm:inline">Import</span> Excel
+                  </button>
+                  <button onClick={() => { setEditingVol(null); setShowVolForm(true); }} className="bg-indigo-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 flex items-center gap-2 min-h-[44px] text-sm sm:text-base flex-1 sm:flex-none justify-center">
+                    <span className="text-xl">+</span> <span className="hidden sm:inline">Add</span> Volunteer
+                  </button>
+                </div>
+              </div>
+              {importError && <div className="mt-3 p-3 bg-red-50 text-red-700 rounded-lg text-sm">{importError}</div>}
+              <div className="mt-3 sm:mt-4">
+                <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name or email..." className="w-full border rounded-lg px-3 py-2 min-h-[44px]" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 sm:gap-4">
+              <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+                <div className="text-xl sm:text-2xl font-bold text-green-600">{volunteers.filter(v => v.is_active).length}</div>
+                <div className="text-xs sm:text-sm text-gray-500">Active</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+                <div className="text-xl sm:text-2xl font-bold text-blue-600">{signups.filter(s => s.status === 'confirmed').length}</div>
+                <div className="text-xs sm:text-sm text-gray-500">Signups</div>
+              </div>
+              <div className="bg-white rounded-xl shadow p-3 sm:p-4 text-center">
+                <div className="text-xl sm:text-2xl font-bold text-purple-600">{signups.filter(s => s.status === 'completed').length}</div>
+                <div className="text-xs sm:text-sm text-gray-500">Completed</div>
+              </div>
+            </div>
+
+            {/* Card view for mobile/tablet, table for larger screens */}
+            <div className="block lg:hidden space-y-3">
+              {filtered.map(vol => {
+                const volSignups = getVolSignups(vol.id);
+                const confirmed = volSignups.filter(s => s.status === 'confirmed').length;
+                return (
+                  <div key={vol.id} className={`bg-white rounded-xl shadow p-4 ${!vol.is_active ? 'opacity-50' : ''}`}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="font-medium text-gray-800">{vol.first_name} {vol.last_name}</div>
+                        <a href={`mailto:${vol.email}`} className="text-sm text-indigo-600 break-all">{vol.email}</a>
+                        {vol.phone && <div className="text-sm text-gray-500"><a href={`tel:${vol.phone}`}>{vol.phone}</a></div>}
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span className={`px-2 py-1 rounded-full text-xs ${vol.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{vol.is_active ? 'Active' : 'Inactive'}</span>
+                        <span className="text-sm text-green-600 font-medium">{confirmed} signups</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 mt-3 pt-3 border-t">
+                      <button onClick={() => { setEditingVol(vol); setShowVolForm(true); }} className="flex-1 text-indigo-600 hover:bg-indigo-50 active:bg-indigo-100 py-2 rounded text-sm min-h-[44px]">Edit</button>
+                      <button onClick={() => deleteVolunteer(vol.id)} className="flex-1 text-red-600 hover:bg-red-50 active:bg-red-100 py-2 rounded text-sm min-h-[44px]">Delete</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Table view for desktop */}
+            <div className="hidden lg:block bg-white rounded-xl shadow overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50 border-b">
+                    <tr>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Name</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Email</th>
+                      <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">Phone</th>
+                      <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">Signups</th>
+                      <th className="text-center px-4 py-3 text-sm font-medium text-gray-600">Status</th>
+                      <th className="text-right px-4 py-3 text-sm font-medium text-gray-600">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y">
+                    {filtered.map(vol => {
+                      const volSignups = getVolSignups(vol.id);
+                      const confirmed = volSignups.filter(s => s.status === 'confirmed').length;
+                      return (
+                        <tr key={vol.id} className={`hover:bg-gray-50 ${!vol.is_active ? 'opacity-50' : ''}`}>
+                          <td className="px-4 py-3 font-medium text-gray-800">{vol.first_name} {vol.last_name}</td>
+                          <td className="px-4 py-3 text-indigo-600">{vol.email}</td>
+                          <td className="px-4 py-3 text-gray-600">{vol.phone || '-'}</td>
+                          <td className="px-4 py-3 text-center text-green-600 font-medium">{confirmed}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`px-2 py-1 rounded-full text-xs ${vol.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}`}>{vol.is_active ? 'Active' : 'Inactive'}</span>
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            <button onClick={() => { setEditingVol(vol); setShowVolForm(true); }} className="text-indigo-600 hover:text-indigo-800 text-sm mr-3 p-2 -m-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center">Edit</button>
+                            <button onClick={() => deleteVolunteer(vol.id)} className="text-red-600 hover:text-red-800 text-sm p-2 -m-2 min-h-[44px] min-w-[44px] inline-flex items-center justify-center">Delete</button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Import Modal */}
+            {showImportModal && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+                  <div className="p-5 border-b flex items-center justify-between">
+                    <div>
+                      <h2 className="text-xl font-semibold">Import Volunteers</h2>
+                      <p className="text-sm text-gray-500 mt-1">{importData.filter(r => r._valid).length} of {importData.length} rows ready to import</p>
+                    </div>
+                    <button onClick={() => { setShowImportModal(false); setImportData([]); }} className="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                  </div>
+                  <div className="p-4 bg-gray-50 border-b">
+                    <div className="text-sm text-gray-600"><strong>Expected columns:</strong> first_name, last_name, email, phone (optional), notes (optional)</div>
+                  </div>
+                  <div className="flex-1 overflow-auto p-4">
+                    <table className="w-full text-sm">
+                      <thead className="bg-gray-100 sticky top-0">
+                        <tr>
+                          <th className="px-3 py-2 text-left">Row</th>
+                          <th className="px-3 py-2 text-left">First Name</th>
+                          <th className="px-3 py-2 text-left">Last Name</th>
+                          <th className="px-3 py-2 text-left">Email</th>
+                          <th className="px-3 py-2 text-left">Phone</th>
+                          <th className="px-3 py-2 text-left">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y">
+                        {importData.map((row, idx) => (
+                          <tr key={idx} className={row._valid ? '' : 'bg-red-50'}>
+                            <td className="px-3 py-2 text-gray-500">{row._row}</td>
+                            <td className="px-3 py-2">{row.first_name || <span className="text-red-400">—</span>}</td>
+                            <td className="px-3 py-2">{row.last_name || <span className="text-red-400">—</span>}</td>
+                            <td className="px-3 py-2">{row.email || <span className="text-red-400">—</span>}</td>
+                            <td className="px-3 py-2 text-gray-500">{row.phone || '—'}</td>
+                            <td className="px-3 py-2">{row._valid ? <span className="text-green-600">✓ Ready</span> : <span className="text-red-600">{row._error}</span>}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="p-4 border-t flex items-center justify-between">
+                    <div className="text-sm text-gray-500">
+                      <span className="text-green-600 font-medium">{importData.filter(r => r._valid).length}</span> valid, <span className="text-red-600 font-medium">{importData.filter(r => !r._valid).length}</span> with errors
+                    </div>
+                    <div className="flex gap-3">
+                      <button onClick={() => { setShowImportModal(false); setImportData([]); }} className="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                      <button onClick={handleImport} disabled={importData.filter(r => r._valid).length === 0} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed">
+                        Import {importData.filter(r => r._valid).length} Volunteers
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      };
+
+      // Opportunity Form Modal
+      const OpportunityFormModal = () => {
+        const [form, setForm] = useState(editingOpp || {
+          title: '', description: '', category_id: '', location: '', date: '', start_time: '', end_time: '', slots_needed: 1, contact_name: '', contact_email: '', contact_phone: '', notes: ''
+        });
+
+        return (
+          <Modal title={editingOpp ? 'Edit Opportunity' : 'New Opportunity'} onClose={() => { setShowOppForm(false); setEditingOpp(null); }}>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                <input type="text" value={form.title} onChange={(e) => setForm({...form, title: e.target.value})} className="w-full border rounded-lg px-3 py-2" placeholder="e.g., Kitchen Help - Fish Fry" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                <select value={form.category_id} onChange={(e) => setForm({...form, category_id: e.target.value})} className="w-full border rounded-lg px-3 py-2">
+                  <option value="">-- Select --</option>
+                  {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                </select>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date *</label>
+                  <input type="date" value={form.date} onChange={(e) => setForm({...form, date: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                  <input type="time" value={form.start_time} onChange={(e) => setForm({...form, start_time: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                  <input type="time" value={form.end_time} onChange={(e) => setForm({...form, end_time: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <input type="text" value={form.location} onChange={(e) => setForm({...form, location: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" placeholder="e.g., Main Kitchen" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Volunteers Needed *</label>
+                  <input type="number" value={form.slots_needed} onChange={(e) => setForm({...form, slots_needed: parseInt(e.target.value) || 1})} min="1" className="w-full border rounded-lg px-3 py-2 min-h-[44px]" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea value={form.description} onChange={(e) => setForm({...form, description: e.target.value})} rows={2} className="w-full border rounded-lg px-3 py-2" placeholder="Details about this opportunity..." />
+              </div>
+              <div className="border-t pt-4">
+                <h3 className="font-medium text-gray-700 mb-3">Contact Person</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <input type="text" value={form.contact_name} onChange={(e) => setForm({...form, contact_name: e.target.value})} placeholder="Name" className="border rounded-lg px-3 py-2 min-h-[44px]" />
+                  <input type="email" value={form.contact_email} onChange={(e) => setForm({...form, contact_email: e.target.value})} placeholder="Email" className="border rounded-lg px-3 py-2 min-h-[44px]" />
+                  <input type="tel" value={form.contact_phone} onChange={(e) => setForm({...form, contact_phone: e.target.value})} placeholder="Phone" className="border rounded-lg px-3 py-2 min-h-[44px]" />
+                </div>
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                <button onClick={() => { if (form.title && form.date) saveOpportunity(form); else alert('Title and date required'); }} className="flex-1 bg-indigo-600 text-white py-3 sm:py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 font-medium min-h-[44px]">{editingOpp ? 'Update' : 'Create'}</button>
+                <button onClick={() => { setShowOppForm(false); setEditingOpp(null); }} className="px-6 py-3 sm:py-2 border rounded-lg hover:bg-gray-50 active:bg-gray-100 min-h-[44px]">Cancel</button>
+              </div>
+            </div>
+          </Modal>
+        );
+      };
+
+      // Volunteer Form Modal
+      const VolunteerFormModal = () => {
+        const [form, setForm] = useState(editingVol || { first_name: '', last_name: '', email: '', phone: '', notes: '', is_active: true });
+
+        return (
+          <Modal title={editingVol ? 'Edit Volunteer' : 'Add Volunteer'} onClose={() => { setShowVolForm(false); setEditingVol(null); }}>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                  <input type="text" value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" required />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                  <input type="text" value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" required />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <input type="email" value={form.email} onChange={(e) => setForm({...form, email: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" required />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                <input type="tel" value={form.phone} onChange={(e) => setForm({...form, phone: e.target.value})} className="w-full border rounded-lg px-3 py-2 min-h-[44px]" placeholder="(555) 123-4567" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                <textarea value={form.notes} onChange={(e) => setForm({...form, notes: e.target.value})} rows={2} className="w-full border rounded-lg px-3 py-2" placeholder="Any notes about this volunteer..." />
+              </div>
+              <label className="flex items-center gap-3 py-2">
+                <input type="checkbox" checked={form.is_active} onChange={(e) => setForm({...form, is_active: e.target.checked})} className="rounded w-5 h-5" />
+                <span className="text-sm text-gray-700">Active volunteer</span>
+              </label>
+              <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t">
+                <button onClick={() => { if (form.first_name && form.last_name && form.email) saveVolunteer(form); else alert('Name and email required'); }} className="flex-1 bg-indigo-600 text-white py-3 sm:py-2 rounded-lg hover:bg-indigo-700 active:bg-indigo-800 font-medium min-h-[44px]">{editingVol ? 'Update' : 'Add'}</button>
+                <button onClick={() => { setShowVolForm(false); setEditingVol(null); }} className="px-6 py-3 sm:py-2 border rounded-lg hover:bg-gray-50 active:bg-gray-100 min-h-[44px]">Cancel</button>
+              </div>
+            </div>
+          </Modal>
+        );
+      };
+
+      // Signup Modal
+      const SignupModalComponent = () => {
+        const [search, setSearch] = useState('');
+        const existingIds = new Set(signups.filter(s => s.opportunity_id === selectedOpp.id && s.status === 'confirmed').map(s => s.volunteer_id));
+        const available = volunteers.filter(v => v.is_active && !existingIds.has(v.id) && (!search || v.first_name.toLowerCase().includes(search.toLowerCase()) || v.last_name.toLowerCase().includes(search.toLowerCase())));
+
+        return (
+          <Modal title="Sign Up Volunteer" onClose={() => { setShowSignupModal(false); setSelectedOpp(null); }}>
+            <div className="mb-4">
+              <div className="text-sm text-gray-600 mb-2">📅 {formatDate(selectedOpp.date)} • {selectedOpp.title}</div>
+              <div className={`text-sm font-medium ${selectedOpp.slots_remaining <= 0 ? 'text-red-600' : 'text-green-600'}`}>{selectedOpp.slots_remaining} slots remaining</div>
+            </div>
+            <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search volunteers..." className="w-full border rounded-lg px-3 py-2 mb-4 min-h-[44px]" />
+            <div className="max-h-64 sm:max-h-80 overflow-y-auto space-y-2">
+              {available.length === 0 ? (
+                <div className="text-center text-gray-500 py-4">No available volunteers</div>
+              ) : (
+                available.map(vol => (
+                  <div key={vol.id} className="flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50 active:bg-gray-100 gap-3">
+                    <div className="min-w-0 flex-1">
+                      <div className="font-medium">{vol.first_name} {vol.last_name}</div>
+                      <div className="text-sm text-gray-500 truncate">{vol.email}</div>
+                    </div>
+                    <button onClick={() => addSignup(selectedOpp.id, vol.id)} className="px-4 py-2 bg-green-600 text-white text-sm rounded hover:bg-green-700 active:bg-green-800 min-h-[44px] flex-shrink-0">Sign Up</button>
+                  </div>
+                ))
+              )}
+            </div>
+          </Modal>
+        );
+      };
+
+      return (
+        <div className="min-h-screen bg-gray-100">
+          <header className="bg-indigo-600 text-white shadow-lg">
+            <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <h1 className="text-xl sm:text-2xl font-bold">VolunteerHub</h1>
+                <nav className="flex gap-1 sm:gap-2 overflow-x-auto pb-1 sm:pb-0 -mx-1 px-1">
+                  <button onClick={() => setView('dashboard')} className={`px-3 sm:px-4 py-2 rounded-lg transition text-sm sm:text-base whitespace-nowrap min-h-[44px] ${view === 'dashboard' ? 'bg-indigo-700' : 'hover:bg-indigo-500 active:bg-indigo-700'}`}>Dashboard</button>
+                  <button onClick={() => setView('opportunities')} className={`px-3 sm:px-4 py-2 rounded-lg transition text-sm sm:text-base whitespace-nowrap min-h-[44px] ${view === 'opportunities' ? 'bg-indigo-700' : 'hover:bg-indigo-500 active:bg-indigo-700'}`}>Opportunities</button>
+                  <button onClick={() => setView('volunteers')} className={`px-3 sm:px-4 py-2 rounded-lg transition text-sm sm:text-base whitespace-nowrap min-h-[44px] ${view === 'volunteers' ? 'bg-indigo-700' : 'hover:bg-indigo-500 active:bg-indigo-700'}`}>Volunteers</button>
+                </nav>
+              </div>
+            </div>
+          </header>
+
+          <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
+            {view === 'dashboard' && <DashboardView />}
+            {view === 'opportunities' && <OpportunitiesView />}
+            {view === 'volunteers' && <VolunteersView />}
+          </main>
+
+          {showOppForm && <OpportunityFormModal />}
+          {showVolForm && <VolunteerFormModal />}
+          {showSignupModal && selectedOpp && <SignupModalComponent />}
+
+          <div className="fixed bottom-4 right-4 bg-amber-100 text-amber-800 px-3 py-2 rounded-lg shadow-lg text-xs sm:text-sm">
+            Demo Mode - Data resets on refresh
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>

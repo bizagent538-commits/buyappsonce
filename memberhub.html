@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MemberHub - Membership Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#7c3aed;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#8b5cf6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(124,58,237,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-active{background:rgba(34,197,94,.15);color:var(--success)}.badge-expiring{background:rgba(245,158,11,.15);color:var(--warning)}.badge-expired{background:rgba(239,68,68,.15);color:var(--danger)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">👥</div><span class="logo-text">MemberHub</span></div>
+      <div class="nav-item active" onclick="showView('members')">👥 Members</div>
+      <div class="nav-item" onclick="showView('plans')">📋 Plans</div>
+      <div class="nav-item" onclick="showView('payments')">💰 Payments</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-members" class="view active">
+        <div class="header"><h1 class="title">Members</h1><button class="btn btn-primary" onclick="openModal()">+ Add Member</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Members</div><div class="stat-value" id="stat-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">Active</div><div class="stat-value" style="color:var(--success)" id="stat-active">0</div></div>
+          <div class="stat-card"><div class="stat-label">Expiring Soon</div><div class="stat-value" style="color:var(--warning)" id="stat-expiring">0</div></div>
+          <div class="stat-card"><div class="stat-label">Monthly Revenue</div><div class="stat-value" style="color:var(--primary)">$4,850</div></div>
+        </div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Email</th><th>Plan</th><th>Joined</th><th>Expires</th><th>Status</th><th>Actions</th></tr></thead><tbody id="member-list"></tbody></table></div>
+      </div>
+      <div id="view-plans" class="view">
+        <div class="header"><h1 class="title">Membership Plans</h1></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px" id="plan-list"></div>
+      </div>
+      <div id="view-payments" class="view">
+        <div class="header"><h1 class="title">Payment History</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Date</th><th>Member</th><th>Amount</th><th>Plan</th><th>Method</th></tr></thead><tbody id="payment-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">YTD Revenue</div><div class="stat-value" style="color:var(--success)">$58,200</div></div><div class="stat-card"><div class="stat-label">Retention Rate</div><div class="stat-value">87%</div></div><div class="stat-card"><div class="stat-label">New This Month</div><div class="stat-value">12</div></div><div class="stat-card"><div class="stat-label">Avg Tenure</div><div class="stat-value">2.4 yrs</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Add Member</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-row"><div class="form-group"><label class="form-label">First Name</label><input type="text" class="form-input" id="mem-first" placeholder="John"></div><div class="form-group"><label class="form-label">Last Name</label><input type="text" class="form-input" id="mem-last" placeholder="Smith"></div></div><div class="form-group"><label class="form-label">Email</label><input type="email" class="form-input" id="mem-email" placeholder="john@email.com"></div><div class="form-group"><label class="form-label">Plan</label><select class="form-select" id="mem-plan"><option value="basic">Basic - $29/mo</option><option value="standard">Standard - $49/mo</option><option value="premium">Premium - $99/mo</option></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveMember()">Add Member</button></div></div></div>
+  <script>
+    const STORAGE_KEY = 'memberhub_data';
+    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ members, payments, nextMemberId })); }
+    function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const d = JSON.parse(saved); members = d.members || members; payments = d.payments || payments; nextMemberId = d.nextMemberId || nextMemberId; } }
+    let members=[{id:1,first:'Alice',last:'Johnson',email:'alice@email.com',plan:'premium',joined:'2024-03-15',expires:'2026-03-15',status:'active'},{id:2,first:'Bob',last:'Smith',email:'bob@email.com',plan:'standard',joined:'2024-06-01',expires:'2026-01-15',status:'expiring'},{id:3,first:'Carol',last:'Williams',email:'carol@email.com',plan:'basic',joined:'2024-01-01',expires:'2025-12-01',status:'expired'},{id:4,first:'Dan',last:'Brown',email:'dan@email.com',plan:'standard',joined:'2025-01-01',expires:'2027-01-01',status:'active'}];
+    let plans=[{id:'basic',name:'Basic',price:29,features:['Access to facilities','Email support']},{id:'standard',name:'Standard',price:49,features:['All Basic features','Group classes','Phone support']},{id:'premium',name:'Premium',price:99,features:['All Standard features','Personal trainer','Priority booking']}];
+    let payments=[{date:'2026-01-03',member:'Alice Johnson',amount:99,plan:'Premium',method:'Card'},{date:'2026-01-02',member:'Dan Brown',amount:49,plan:'Standard',method:'ACH'},{date:'2026-01-01',member:'Bob Smith',amount:49,plan:'Standard',method:'Card'}];
+    let nextMemberId=5;
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-total').textContent=members.length;
+      document.getElementById('stat-active').textContent=members.filter(m=>m.status==='active').length;
+      document.getElementById('stat-expiring').textContent=members.filter(m=>m.status==='expiring').length;
+      document.getElementById('member-list').innerHTML=members.map(m=>`<tr><td><strong>${m.first} ${m.last}</strong></td><td>${m.email}</td><td style="text-transform:capitalize">${m.plan}</td><td>${m.joined}</td><td>${m.expires}</td><td><span class="badge badge-${m.status}">${m.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="editMember(${m.id})">Edit</button></td></tr>`).join('');
+      document.getElementById('plan-list').innerHTML=plans.map(p=>`<div class="card" style="padding:24px"><h3 style="font-size:20px">${p.name}</h3><p style="font-size:32px;font-weight:700;margin:12px 0">$${p.price}<span style="font-size:14px;font-weight:400;color:var(--muted)">/mo</span></p><ul style="list-style:none;margin-top:16px">${p.features.map(f=>`<li style="padding:8px 0;border-bottom:1px solid var(--border)">✓ ${f}</li>`).join('')}</ul></div>`).join('');
+      document.getElementById('payment-list').innerHTML=payments.map(p=>`<tr><td>${p.date}</td><td>${p.member}</td><td>$${p.amount}</td><td>${p.plan}</td><td>${p.method}</td></tr>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveMember(){const first=document.getElementById('mem-first').value;const last=document.getElementById('mem-last').value;if(!first||!last){alert('Enter name');return;}const plan=document.getElementById('mem-plan').value;const now=new Date();const exp=new Date();exp.setFullYear(exp.getFullYear()+1);members.unshift({id:nextMemberId++,first,last,email:document.getElementById('mem-email').value,plan,joined:now.toISOString().split('T')[0],expires:exp.toISOString().split('T')[0],status:'active'});saveData(); closeModal();render();document.getElementById('mem-first').value='';document.getElementById('mem-last').value='';document.getElementById('mem-email').value='';alert('Member added!');}
+    function editMember(id){alert('Edit member #'+id+' (Demo)');}
+    
+    loadData(); render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

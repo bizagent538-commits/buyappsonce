@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MileageLog - Vehicle Mileage Tracker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#2563eb;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#3b82f6);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(37,99,235,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🚗</div><span class="logo-text">MileageLog</span></div>
+      <div class="nav-item active" onclick="showView('trips')">🚗 Trips</div>
+      <div class="nav-item" onclick="showView('vehicles')">🚙 Vehicles</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-trips" class="view active">
+        <div class="header"><h1 class="title">Trip Log</h1><button class="btn btn-primary" onclick="openModal()">+ Log Trip</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Miles</div><div class="stat-value" id="stat-miles">0</div></div>
+          <div class="stat-card"><div class="stat-label">Business Miles</div><div class="stat-value" style="color:var(--primary)" id="stat-business">0</div></div>
+          <div class="stat-card"><div class="stat-label">Tax Deduction</div><div class="stat-value" style="color:var(--success)" id="stat-deduction">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Trips This Month</div><div class="stat-value" id="stat-trips">0</div></div>
+        </div>
+        <div class="card"><div class="card-header">Recent Trips</div><table class="table"><thead><tr><th>Date</th><th>From → To</th><th>Miles</th><th>Purpose</th><th>Deduction</th></tr></thead><tbody id="trip-list"></tbody></table></div>
+      </div>
+      <div id="view-vehicles" class="view">
+        <div class="header"><h1 class="title">Vehicles</h1><button class="btn btn-primary" onclick="addVehicle()">+ Add Vehicle</button></div>
+        <div class="card"><table class="table"><thead><tr><th>Vehicle</th><th>Odometer</th><th>Trips</th><th>Miles Logged</th></tr></thead><tbody id="vehicle-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">YTD Miles</div><div class="stat-value">4,850</div></div><div class="stat-card"><div class="stat-label">YTD Deduction</div><div class="stat-value" style="color:var(--success)">$3,200</div></div><div class="stat-card"><div class="stat-label">Business %</div><div class="stat-value">78%</div></div><div class="stat-card"><div class="stat-label">Avg Trip</div><div class="stat-value">28 mi</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Log Trip</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="trip-date"></div><div class="form-row"><div class="form-group"><label class="form-label">From</label><input type="text" class="form-input" id="trip-from" placeholder="Start location"></div><div class="form-group"><label class="form-label">To</label><input type="text" class="form-input" id="trip-to" placeholder="End location"></div></div><div class="form-row"><div class="form-group"><label class="form-label">Miles</label><input type="number" class="form-input" id="trip-miles" placeholder="0"></div><div class="form-group"><label class="form-label">Purpose</label><select class="form-select" id="trip-purpose"><option>Business</option><option>Client Meeting</option><option>Personal</option></select></div></div><div class="form-group"><label class="form-label">Notes</label><input type="text" class="form-input" id="trip-notes" placeholder="Optional notes"></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveTrip()">Log Trip</button></div></div></div>
+  <script>
+    const RATE=0.67;
+    let trips=[{id:1,date:'2026-01-03',from:'Office',to:'Client Site',miles:28,purpose:'Client Meeting'},{id:2,date:'2026-01-02',from:'Home',to:'Office',miles:15,purpose:'Business'},{id:3,date:'2026-01-02',from:'Office',to:'Supplier',miles:22,purpose:'Business'}];
+    let vehicles=[{name:'2022 Toyota Camry',odometer:45230,trips:42,miles:1850}];
+    const SK='mileagelog_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({trips:trips,vehicles:vehicles}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.trips)trips=d.trips;if(d.vehicles)vehicles=d.vehicles;}}catch(e){}}
+
+    let nextTripId=4;
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      const totalMiles=trips.reduce((s,t)=>s+t.miles,0);
+      const businessMiles=trips.filter(t=>t.purpose!=='Personal').reduce((s,t)=>s+t.miles,0);
+      document.getElementById('stat-miles').textContent=totalMiles.toLocaleString();
+      document.getElementById('stat-business').textContent=businessMiles.toLocaleString();
+      document.getElementById('stat-deduction').textContent='$'+(businessMiles*RATE).toFixed(2);
+      document.getElementById('stat-trips').textContent=trips.length;
+      document.getElementById('trip-list').innerHTML=trips.map(t=>`<tr><td>${t.date}</td><td>${t.from} → ${t.to}</td><td>${t.miles}</td><td>${t.purpose}</td><td style="color:var(--success)">${t.purpose!=='Personal'?'$'+(t.miles*RATE).toFixed(2):'-'}</td></tr>`).join('');
+      document.getElementById('vehicle-list').innerHTML=vehicles.map(v=>`<tr><td><strong>${v.name}</strong></td><td>${v.odometer.toLocaleString()}</td><td>${v.trips}</td><td>${v.miles.toLocaleString()}</td></tr>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');document.getElementById('trip-date').value=new Date().toISOString().split('T')[0];}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveTrip(){const from=document.getElementById('trip-from').value;const to=document.getElementById('trip-to').value;const miles=parseInt(document.getElementById('trip-miles').value);if(!from||!to||!miles){alert('Fill in all fields');return;}trips.unshift({id:nextTripId++,date:document.getElementById('trip-date').value,from,to,miles,purpose:document.getElementById('trip-purpose').value});closeModal();saveData();render();document.getElementById('trip-from').value='';document.getElementById('trip-to').value='';document.getElementById('trip-miles').value='';alert('Trip logged!');}
+    function addVehicle(){const name=prompt('Vehicle name (e.g., 2020 Toyota Camry):');if(!name)return;const odometer=parseInt(prompt('Current odometer reading:')||'0');vehicles.push({id:vehicles.length+1,name,odometer,trips:0,miles:0});saveData();render();}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

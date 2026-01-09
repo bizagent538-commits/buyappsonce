@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RentRoll - Property Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#059669;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#10b981);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(5,150,105,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-paid{background:rgba(34,197,94,.15);color:var(--success)}.badge-pending{background:rgba(245,158,11,.15);color:var(--warning)}.badge-overdue{background:rgba(239,68,68,.15);color:var(--danger)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">🏢</div><span class="logo-text">RentRoll</span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('properties')">🏠 Properties</div>
+      <div class="nav-item" onclick="showView('tenants')">👥 Tenants</div>
+      <div class="nav-item" onclick="showView('payments')">💰 Payments</div>
+    </nav>
+    <main class="main">
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Dashboard</h1><button class="btn btn-primary" onclick="openModal()">+ Record Payment</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Properties</div><div class="stat-value" id="stat-props">0</div></div>
+          <div class="stat-card"><div class="stat-label">Occupancy</div><div class="stat-value" style="color:var(--success)" id="stat-occ">0%</div></div>
+          <div class="stat-card"><div class="stat-label">Monthly Revenue</div><div class="stat-value" style="color:var(--primary)" id="stat-rev">$0</div></div>
+          <div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value" style="color:var(--danger)" id="stat-out">$0</div></div>
+        </div>
+        <div class="card"><div class="card-header">Rent Status</div><table class="table"><thead><tr><th>Tenant</th><th>Property</th><th>Rent</th><th>Status</th><th>Actions</th></tr></thead><tbody id="rent-list"></tbody></table></div>
+      </div>
+      <div id="view-properties" class="view">
+        <div class="header"><h1 class="title">Properties</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Address</th><th>Units</th><th>Occupied</th><th>Rent</th></tr></thead><tbody id="prop-list"></tbody></table></div>
+      </div>
+      <div id="view-tenants" class="view">
+        <div class="header"><h1 class="title">Tenants</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Name</th><th>Property</th><th>Lease End</th><th>Rent</th></tr></thead><tbody id="tenant-list"></tbody></table></div>
+      </div>
+      <div id="view-payments" class="view">
+        <div class="header"><h1 class="title">Payment History</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Date</th><th>Tenant</th><th>Amount</th><th>Method</th></tr></thead><tbody id="payment-list"></tbody></table></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Record Payment</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Tenant</label><select class="form-select" id="pay-tenant"></select></div><div class="form-group"><label class="form-label">Amount</label><input type="number" class="form-input" id="pay-amount" placeholder="0.00"></div><div class="form-group"><label class="form-label">Method</label><select class="form-select" id="pay-method"><option>Check</option><option>ACH</option><option>Cash</option></select></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="savePayment()">Record</button></div></div></div>
+  <script>
+    let properties=[{id:1,address:'123 Oak St',units:4,occupied:3,rent:1200},{id:2,address:'456 Pine Ave',units:2,occupied:2,rent:1500}];
+    let tenants=[{id:1,name:'John Smith',propId:1,leaseEnd:'2026-12-31',rent:1200,status:'paid'},{id:2,name:'Mary Johnson',propId:1,leaseEnd:'2026-06-30',rent:1200,status:'pending'},{id:3,name:'Bob Williams',propId:2,leaseEnd:'2026-03-31',rent:1500,status:'overdue'}];
+    let payments=[{date:'Jan 3, 2026',tenant:'John Smith',amount:1200,method:'ACH'},{date:'Jan 2, 2026',tenant:'Mary Johnson',amount:1200,method:'Check'}];
+    
+    function getProp(id){return properties.find(p=>p.id===id)}
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      const totalUnits=properties.reduce((s,p)=>s+p.units,0);
+      const occupied=properties.reduce((s,p)=>s+p.occupied,0);
+      const rev=tenants.reduce((s,t)=>s+t.rent,0);
+      const out=tenants.filter(t=>t.status!=='paid').reduce((s,t)=>s+t.rent,0);
+      document.getElementById('stat-props').textContent=properties.length;
+      document.getElementById('stat-occ').textContent=Math.round(occupied/totalUnits*100)+'%';
+      document.getElementById('stat-rev').textContent='$'+rev.toLocaleString();
+      document.getElementById('stat-out').textContent='$'+out.toLocaleString();
+      document.getElementById('rent-list').innerHTML=tenants.map(t=>`<tr><td><strong>${t.name}</strong></td><td>${getProp(t.propId)?.address}</td><td>$${t.rent}</td><td><span class="badge badge-${t.status}">${t.status}</span></td><td>${t.status!=='paid'?`<button class="btn btn-sm btn-primary" onclick="markPaid(${t.id})">Mark Paid</button>`:''}</td></tr>`).join('');
+      document.getElementById('prop-list').innerHTML=properties.map(p=>`<tr><td><strong>${p.address}</strong></td><td>${p.units}</td><td>${p.occupied}/${p.units}</td><td>$${p.rent*p.units}</td></tr>`).join('');
+      document.getElementById('tenant-list').innerHTML=tenants.map(t=>`<tr><td><strong>${t.name}</strong></td><td>${getProp(t.propId)?.address}</td><td>${t.leaseEnd}</td><td>$${t.rent}</td></tr>`).join('');
+      document.getElementById('payment-list').innerHTML=payments.map(p=>`<tr><td>${p.date}</td><td>${p.tenant}</td><td>$${p.amount}</td><td>${p.method}</td></tr>`).join('');
+      document.getElementById('pay-tenant').innerHTML=tenants.map(t=>`<option value="${t.id}">${t.name}</option>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function savePayment(){const tid=parseInt(document.getElementById('pay-tenant').value);const t=tenants.find(x=>x.id===tid);payments.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),tenant:t.name,amount:parseFloat(document.getElementById('pay-amount').value)||t.rent,method:document.getElementById('pay-method').value});t.status='paid';closeModal();render();alert('Payment recorded!');}
+    function markPaid(id){tenants.find(t=>t.id===id).status='paid';render();}
+    
+    render();
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='rentroll_data';
+  const vars=['properties,tenants,payments'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='rentroll-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

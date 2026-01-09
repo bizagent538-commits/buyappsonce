@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ViolationTrack - HOA Violation Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{margin:0;padding:0;box-sizing:border-box}:root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#dc2626;--success:#22c55e;--warning:#f59e0b}body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}.app{display:flex;min-height:100vh}.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}.logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#ef4444);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}.logo-text{font-weight:700;font-size:18px}.nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}.nav-item:hover,.nav-item.active{background:rgba(220,38,38,.1);color:var(--primary)}.main{flex:1;margin-left:220px;padding:24px}.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.title{font-size:22px;font-weight:700}.btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}.btn-primary{background:var(--primary);color:white}.btn-secondary{background:white;border:1px solid var(--border)}.btn-sm{padding:6px 12px;font-size:12px}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}.stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}.stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}.stat-value{font-size:24px;font-weight:700}.card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}.card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600}.table{width:100%;border-collapse:collapse}.table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}.table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}.badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}.badge-open{background:rgba(220,38,38,.15);color:var(--primary)}.badge-warning{background:rgba(245,158,11,.15);color:var(--warning)}.badge-resolved{background:rgba(34,197,94,.15);color:var(--success)}.view{display:none}.view.active{display:block}.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}.modal-overlay.show{display:flex}.modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px}.modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}.modal-title{font-size:18px;font-weight:700}.close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}.form-group{margin-bottom:14px}.form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}.form-input,.form-select,.form-textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}</style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">⚠️</div><span class="logo-text">ViolationTrack</span></div>
+      <div class="nav-item active" onclick="showView('violations')">⚠️ Violations</div>
+      <div class="nav-item" onclick="showView('properties')">🏠 Properties</div>
+      <div class="nav-item" onclick="showView('letters')">✉️ Letters</div>
+      <div class="nav-item" onclick="showView('reports')">📈 Reports</div>
+    </nav>
+    <main class="main">
+      <div id="view-violations" class="view active">
+        <div class="header"><h1 class="title">Violations</h1><button class="btn btn-primary" onclick="openModal()">+ Report Violation</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Open</div><div class="stat-value" style="color:var(--primary)" id="stat-open">0</div></div>
+          <div class="stat-card"><div class="stat-label">Warning Sent</div><div class="stat-value" style="color:var(--warning)" id="stat-warning">0</div></div>
+          <div class="stat-card"><div class="stat-label">Resolved</div><div class="stat-value" style="color:var(--success)" id="stat-resolved">0</div></div>
+          <div class="stat-card"><div class="stat-label">This Month</div><div class="stat-value">8</div></div>
+        </div>
+        <div class="card"><table class="table"><thead><tr><th>Property</th><th>Violation</th><th>Reported</th><th>Status</th><th>Actions</th></tr></thead><tbody id="violation-list"></tbody></table></div>
+      </div>
+      <div id="view-properties" class="view">
+        <div class="header"><h1 class="title">Properties</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Address</th><th>Owner</th><th>Violations</th><th>Status</th></tr></thead><tbody id="property-list"></tbody></table></div>
+      </div>
+      <div id="view-letters" class="view">
+        <div class="header"><h1 class="title">Violation Letters</h1></div>
+        <div class="card"><table class="table"><thead><tr><th>Date</th><th>Property</th><th>Type</th><th>Status</th></tr></thead><tbody id="letter-list"></tbody></table></div>
+      </div>
+      <div id="view-reports" class="view">
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="stats"><div class="stat-card"><div class="stat-label">YTD Violations</div><div class="stat-value">47</div></div><div class="stat-card"><div class="stat-label">Resolution Rate</div><div class="stat-value" style="color:var(--success)">82%</div></div><div class="stat-card"><div class="stat-label">Avg Resolution</div><div class="stat-value">14 days</div></div><div class="stat-card"><div class="stat-label">Repeat Offenders</div><div class="stat-value" style="color:var(--warning)">5</div></div></div>
+      </div>
+    </main>
+  </div>
+  <div class="modal-overlay" id="modal"><div class="modal"><div class="modal-header"><h2 class="modal-title">Report Violation</h2><button class="close-btn" onclick="closeModal()">&times;</button></div><div class="form-group"><label class="form-label">Property Address</label><input type="text" class="form-input" id="v-address" placeholder="123 Main St"></div><div class="form-group"><label class="form-label">Violation Type</label><select class="form-select" id="v-type"><option>Lawn Maintenance</option><option>Exterior Condition</option><option>Trash/Debris</option><option>Parking</option><option>Noise</option><option>Other</option></select></div><div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" id="v-desc" rows="3" placeholder="Describe the violation..."></textarea></div><div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal()">Cancel</button><button class="btn btn-primary" onclick="saveViolation()">Report</button></div></div></div>
+  <script>
+    let violations=[{id:1,address:'123 Oak St',type:'Lawn Maintenance',reported:'Jan 2, 2026',status:'open'},{id:2,address:'456 Pine Ave',type:'Trash/Debris',reported:'Dec 28, 2025',status:'warning'},{id:3,address:'789 Elm Rd',type:'Parking',reported:'Dec 15, 2025',status:'resolved'},{id:4,address:'321 Maple Dr',type:'Exterior Condition',reported:'Jan 3, 2026',status:'open'}];
+    let properties=[{address:'123 Oak St',owner:'John Smith',violations:2,status:'Active'},{address:'456 Pine Ave',owner:'Mary Johnson',violations:1,status:'Warning'},{address:'789 Elm Rd',owner:'Bob Williams',violations:0,status:'Good'}];
+    let letters=[{date:'Dec 28, 2025',property:'456 Pine Ave',type:'First Warning',status:'Sent'},{date:'Dec 20, 2025',property:'789 Elm Rd',type:'Final Notice',status:'Resolved'}];
+    const SK='violationtrack_data';
+    function saveData(){try{localStorage.setItem(SK,JSON.stringify({violations:violations,properties:properties,letters:letters}));}catch(e){}}
+    function loadData(){try{const s=localStorage.getItem(SK);if(s){const d=JSON.parse(s);if(d.violations)violations=d.violations;if(d.properties)properties=d.properties;if(d.letters)letters=d.letters;}}catch(e){}}
+
+    let nextViolationId=5;
+    
+    function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));document.getElementById('view-'+v).classList.add('active');document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));event.target.classList.add('active');render();}
+    
+    function render(){
+      document.getElementById('stat-open').textContent=violations.filter(v=>v.status==='open').length;
+      document.getElementById('stat-warning').textContent=violations.filter(v=>v.status==='warning').length;
+      document.getElementById('stat-resolved').textContent=violations.filter(v=>v.status==='resolved').length;
+      document.getElementById('violation-list').innerHTML=violations.map(v=>`<tr><td><strong>${v.address}</strong></td><td>${v.type}</td><td>${v.reported}</td><td><span class="badge badge-${v.status}">${v.status}</span></td><td>${v.status!=='resolved'?`<button class="btn btn-sm btn-secondary" onclick="sendWarning(${v.id})">Send Letter</button> <button class="btn btn-sm btn-primary" onclick="resolveViolation(${v.id})">Resolve</button>`:''}</td></tr>`).join('');
+      document.getElementById('property-list').innerHTML=properties.map(p=>`<tr><td><strong>${p.address}</strong></td><td>${p.owner}</td><td>${p.violations}</td><td>${p.status}</td></tr>`).join('');
+      document.getElementById('letter-list').innerHTML=letters.map(l=>`<tr><td>${l.date}</td><td>${l.property}</td><td>${l.type}</td><td>${l.status}</td></tr>`).join('');
+    }
+    
+    function openModal(){document.getElementById('modal').classList.add('show');}
+    function closeModal(){document.getElementById('modal').classList.remove('show');}
+    function saveViolation(){const address=document.getElementById('v-address').value;if(!address){alert('Enter address');return;}violations.unshift({id:nextViolationId++,address,type:document.getElementById('v-type').value,reported:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),status:'open'});closeModal();saveData();render();document.getElementById('v-address').value='';document.getElementById('v-desc').value='';alert('Violation reported!');}
+    function sendWarning(id){const v=violations.find(x=>x.id===id);v.status='warning';letters.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});saveData();,property:v.address,type:'Warning Letter',status:'Sent'});render();alert('Warning letter sent!');}
+    function resolveViolation(id){violations.find(x=>x.id===id).status='resolved';saveData();render();alert('Violation resolved!');}
+    loadData();
+
+    render();
+  </script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

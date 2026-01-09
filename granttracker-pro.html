@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GrantTracker Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f1f5f9; color: #1e293b; }
+    .app { display: flex; min-height: 100vh; }
+    
+    /* Sidebar */
+    .sidebar { width: 260px; background: #064e3b; color: white; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 1.5rem; display: flex; align-items: center; gap: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.1); }
+    .sidebar-header .icon { font-size: 1.5rem; }
+    .sidebar-header h1 { font-size: 1.25rem; font-weight: 700; }
+    .sidebar-header span { font-size: 0.75rem; opacity: 0.7; display: block; }
+    .nav { padding: 1rem; flex: 1; }
+    .nav-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem; border-radius: 0.5rem; cursor: pointer; margin-bottom: 0.25rem; transition: all 0.2s; color: rgba(255,255,255,0.7); }
+    .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); color: white; }
+    .nav-item .badge { margin-left: auto; background: #fcd34d; color: #0f172a; padding: 0.125rem 0.5rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    .sidebar-footer { padding: 1rem; border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.875rem; opacity: 0.7; }
+    
+    /* Main */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .header { background: white; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .header h2 { font-size: 1.5rem; font-weight: 700; }
+    .content { flex: 1; padding: 1.5rem; overflow-y: auto; }
+    
+    /* Buttons */
+    .btn { padding: 0.625rem 1.25rem; border-radius: 0.5rem; font-weight: 600; cursor: pointer; border: none; font-size: 0.875rem; transition: all 0.2s; }
+    .btn-primary { background: #059669; color: white; }
+    .btn-primary:hover { background: #047857; }
+    .btn-secondary { background: #e2e8f0; color: #475569; }
+    .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
+    
+    /* Stats */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .stat-card { background: white; padding: 1.25rem; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .stat-value { font-size: 2rem; font-weight: 700; color: #059669; }
+    .stat-label { color: #64748b; font-size: 0.875rem; margin-top: 0.25rem; }
+    
+    /* Cards */
+    .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; overflow: hidden; }
+    .card-header { padding: 1rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .card-title { font-weight: 600; font-size: 1rem; }
+    .card-body { padding: 1.25rem; }
+    
+    /* Pipeline */
+    .pipeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+    .pipeline-column { background: #f8fafc; border-radius: 0.75rem; padding: 1rem; min-height: 400px; }
+    .pipeline-header { font-weight: 600; font-size: 0.875rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+    .pipeline-count { background: #e2e8f0; padding: 0.125rem 0.5rem; border-radius: 100px; font-size: 0.75rem; }
+    .grant-card { background: white; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); cursor: pointer; border-left: 4px solid #059669; }
+    .grant-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .grant-card h4 { font-size: 0.875rem; font-weight: 600; margin-bottom: 0.5rem; }
+    .grant-card .funder { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
+    .grant-card .amount { font-weight: 700; color: #059669; }
+    .grant-card .deadline { font-size: 0.75rem; color: #64748b; margin-top: 0.5rem; display: flex; align-items: center; gap: 0.25rem; }
+    .grant-card .deadline.urgent { color: #dc2626; font-weight: 600; }
+    
+    /* Table */
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 0.75rem 1rem; font-size: 0.75rem; text-transform: uppercase; color: #64748b; border-bottom: 2px solid #e2e8f0; font-weight: 600; }
+    td { padding: 1rem; border-bottom: 1px solid #f1f5f9; }
+    tr:hover { background: #f8fafc; }
+    
+    /* Badges */
+    .badge { display: inline-block; padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+    .badge-researching { background: #e0e7ff; color: #4338ca; }
+    .badge-writing { background: #fef3c7; color: #b45309; }
+    .badge-submitted { background: #dbeafe; color: #1d4ed8; }
+    .badge-awarded { background: #d1fae5; color: #047857; }
+    .badge-declined { background: #fee2e2; color: #dc2626; }
+    .badge-reporting { background: #f3e8ff; color: #7c3aed; }
+    
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: white; border-radius: 1rem; width: 100%; max-width: 600px; max-height: 90vh; overflow: auto; }
+    .modal-header { padding: 1.25rem; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h3 { font-size: 1.25rem; font-weight: 700; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #64748b; }
+    .modal-body { padding: 1.25rem; }
+    .modal-footer { padding: 1.25rem; border-top: 1px solid #e2e8f0; display: flex; justify-content: flex-end; gap: 0.75rem; }
+    
+    /* Forms */
+    .form-group { margin-bottom: 1rem; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { display: block; font-weight: 500; margin-bottom: 0.375rem; font-size: 0.875rem; }
+    input, select, textarea { width: 100%; padding: 0.625rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; font-size: 0.875rem; }
+    input:focus, select:focus, textarea:focus { outline: none; border-color: #059669; box-shadow: 0 0 0 3px rgba(5,150,105,0.1); }
+    
+    /* Deadlines */
+    .deadline-list { display: flex; flex-direction: column; gap: 0.75rem; }
+    .deadline-item { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: #f8fafc; border-radius: 0.5rem; }
+    .deadline-date { font-weight: 700; color: #059669; min-width: 80px; text-align: center; }
+    .deadline-date.urgent { color: #dc2626; }
+    .deadline-info { flex: 1; }
+    .deadline-info h4 { font-size: 0.875rem; font-weight: 600; }
+    .deadline-info p { font-size: 0.75rem; color: #64748b; }
+    
+    /* Tabs */
+    .tabs { display: flex; gap: 0.25rem; border-bottom: 2px solid #e2e8f0; margin-bottom: 1.5rem; }
+    .tab { padding: 0.75rem 1.5rem; cursor: pointer; font-weight: 500; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .tab:hover { color: #059669; }
+    .tab.active { color: #059669; border-bottom-color: #059669; }
+    
+    /* Filters */
+    .filters { display: flex; gap: 0.75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+    .filter-btn { padding: 0.5rem 1rem; border: 1px solid #e2e8f0; background: white; border-radius: 100px; cursor: pointer; font-size: 0.875rem; }
+    .filter-btn.active { background: #059669; color: white; border-color: #059669; }
+    
+    /* Responsive */
+    @media (max-width: 1024px) { .pipeline { grid-template-columns: repeat(2, 1fr); } }
+    @media (max-width: 768px) { .sidebar { display: none; } .pipeline { grid-template-columns: 1fr; } .form-row { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="app" id="app"></div>
+  
+  <script>
+    // Demo Data
+    const demoFunders = [
+      { id: 1, name: "Community Foundation", type: "Foundation", contact: "Jane Smith", email: "grants@commfound.org" },
+      { id: 2, name: "State Arts Council", type: "Government", contact: "Robert Johnson", email: "grants@stateart.gov" },
+      { id: 3, name: "National Endowment", type: "Government", contact: "Mary Williams", email: "info@nea.gov" },
+      { id: 4, name: "Corporate Giving Inc", type: "Corporate", contact: "Tom Davis", email: "giving@corpinc.com" },
+      { id: 5, name: "Family Foundation", type: "Foundation", contact: "Susan Lee", email: "applications@familyfnd.org" }
+    ];
+    
+    const demoGrants = [
+      { id: 1, name: "General Operating Support", funderId: 1, amount: 50000, status: "awarded", deadline: "2026-03-15", reportingDue: "2026-09-30", notes: "Annual renewal", stage: "reporting" },
+      { id: 2, name: "Youth Arts Program", funderId: 2, amount: 25000, status: "submitted", deadline: "2026-01-31", stage: "submitted" },
+      { id: 3, name: "Capacity Building Grant", funderId: 3, amount: 75000, status: "writing", deadline: "2026-02-28", stage: "writing" },
+      { id: 4, name: "Community Outreach", funderId: 4, amount: 15000, status: "researching", deadline: "2026-04-15", stage: "researching" },
+      { id: 5, name: "Technology Upgrade", funderId: 5, amount: 30000, status: "writing", deadline: "2026-02-15", stage: "writing" },
+      { id: 6, name: "Staff Training Initiative", funderId: 1, amount: 20000, status: "researching", deadline: "2026-05-01", stage: "researching" },
+      { id: 7, name: "2025 Program Grant", funderId: 2, amount: 35000, status: "awarded", deadline: "2025-06-30", reportingDue: "2026-01-15", stage: "reporting" },
+      { id: 8, name: "Emergency Fund Request", funderId: 4, amount: 10000, status: "declined", deadline: "2025-12-01", stage: "declined" }
+    ];
+    
+    // App State
+    let state = {
+      view: 'dashboard',
+      grants: [...demoGrants],
+      funders: [...demoFunders],
+      selectedGrant: null,
+      showModal: null,
+      filterStatus: 'all'
+    };
+    
+    const STORAGE_KEY = 'granttracker_data';
+    function saveData() { localStorage.setItem(STORAGE_KEY, JSON.stringify({ grants: state.grants, funders: state.funders })); }
+    function loadData() { const saved = localStorage.getItem(STORAGE_KEY); if (saved) { const d = JSON.parse(saved); state.grants = d.grants || state.grants; state.funders = d.funders || state.funders; } }
+    
+    // Dummy close brace remover
+    };
+    
+    // Helpers
+    const formatCurrency = (n) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n);
+    const formatDate = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const daysUntil = (d) => Math.ceil((new Date(d) - new Date()) / (1000 * 60 * 60 * 24));
+    const getFunder = (id) => state.funders.find(f => f.id === id);
+    
+    const getStatusBadge = (status) => {
+      const classes = { researching: 'badge-researching', writing: 'badge-writing', submitted: 'badge-submitted', awarded: 'badge-awarded', declined: 'badge-declined', reporting: 'badge-reporting' };
+      return `<span class="badge ${classes[status] || ''}">${status}</span>`;
+    };
+    
+    // Stats
+    const getStats = () => {
+      const active = state.grants.filter(g => !['declined'].includes(g.status));
+      const pipeline = state.grants.filter(g => ['researching', 'writing', 'submitted'].includes(g.status));
+      const awarded = state.grants.filter(g => g.status === 'awarded');
+      const upcoming = state.grants.filter(g => g.deadline && daysUntil(g.deadline) <= 30 && daysUntil(g.deadline) > 0 && ['researching', 'writing'].includes(g.status));
+      const pipelineValue = pipeline.reduce((s, g) => s + g.amount, 0);
+      const awardedValue = awarded.reduce((s, g) => s + g.amount, 0);
+      return { active: active.length, pipeline: pipeline.length, pipelineValue, awarded: awarded.length, awardedValue, upcoming: upcoming.length };
+    };
+    
+    const getUpcomingDeadlines = () => {
+      return state.grants
+        .filter(g => g.deadline && ['researching', 'writing'].includes(g.status))
+        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline))
+        .slice(0, 5);
+    };
+    
+    const getReportingDue = () => {
+      return state.grants
+        .filter(g => g.reportingDue && g.status === 'awarded')
+        .sort((a, b) => new Date(a.reportingDue) - new Date(b.reportingDue));
+    };
+    
+    // Render Functions
+    const render = () => {
+      const app = document.getElementById('app');
+      app.innerHTML = `
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <span class="icon">📊</span>
+            <h1>GrantTracker<span>Pro Demo</span></h1>
+          </div>
+          <nav class="nav">
+            <div class="nav-item ${state.view === 'dashboard' ? 'active' : ''}" onclick="navigate('dashboard')">📊 Dashboard</div>
+            <div class="nav-item ${state.view === 'pipeline' ? 'active' : ''}" onclick="navigate('pipeline')">🎯 Pipeline</div>
+            <div class="nav-item ${state.view === 'grants' ? 'active' : ''}" onclick="navigate('grants')">📝 All Grants <span class="badge">${state.grants.length}</span></div>
+            <div class="nav-item ${state.view === 'funders' ? 'active' : ''}" onclick="navigate('funders')">🏛️ Funders <span class="badge">${state.funders.length}</span></div>
+            <div class="nav-item ${state.view === 'deadlines' ? 'active' : ''}" onclick="navigate('deadlines')">📅 Deadlines</div>
+            <div class="nav-item ${state.view === 'reporting' ? 'active' : ''}" onclick="navigate('reporting')">📈 Reporting</div>
+          </nav>
+          <div class="sidebar-footer">Demo Mode • Data resets on refresh</div>
+        </aside>
+        <main class="main">
+          ${renderHeader()}
+          <div class="content">
+            ${renderContent()}
+          </div>
+        </main>
+        ${state.showModal ? renderModal() : ''}
+      `;
+    };
+    
+    const renderHeader = () => {
+      const titles = { dashboard: 'Dashboard', pipeline: 'Grant Pipeline', grants: 'All Grants', funders: 'Funders', deadlines: 'Deadlines', reporting: 'Reporting' };
+      const buttons = {
+        grants: '<button class="btn btn-primary" onclick="openModal(\'grant\')">+ New Grant</button>',
+        funders: '<button class="btn btn-primary" onclick="openModal(\'funder\')">+ New Funder</button>',
+        pipeline: '<button class="btn btn-primary" onclick="openModal(\'grant\')">+ New Grant</button>'
+      };
+      return `<header class="header"><h2>${titles[state.view]}</h2>${buttons[state.view] || ''}</header>`;
+    };
+    
+    const renderContent = () => {
+      switch(state.view) {
+        case 'dashboard': return renderDashboard();
+        case 'pipeline': return renderPipeline();
+        case 'grants': return renderGrants();
+        case 'funders': return renderFunders();
+        case 'deadlines': return renderDeadlines();
+        case 'reporting': return renderReporting();
+        default: return renderDashboard();
+      }
+    };
+    
+    const renderDashboard = () => {
+      const stats = getStats();
+      const upcoming = getUpcomingDeadlines();
+      const reporting = getReportingDue();
+      
+      return `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">${stats.pipeline}</div><div class="stat-label">In Pipeline</div></div>
+          <div class="stat-card"><div class="stat-value">${formatCurrency(stats.pipelineValue)}</div><div class="stat-label">Pipeline Value</div></div>
+          <div class="stat-card"><div class="stat-value" style="color:#059669">${stats.awarded}</div><div class="stat-label">Awarded</div></div>
+          <div class="stat-card"><div class="stat-value" style="color:#059669">${formatCurrency(stats.awardedValue)}</div><div class="stat-label">Awarded Value</div></div>
+        </div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+          <div class="card">
+            <div class="card-header"><span class="card-title">⏰ Upcoming Deadlines</span></div>
+            <div class="card-body">
+              ${upcoming.length === 0 ? '<p style="color:#64748b">No upcoming deadlines</p>' : `
+                <div class="deadline-list">
+                  ${upcoming.map(g => {
+                    const days = daysUntil(g.deadline);
+                    const urgent = days <= 7;
+                    return `
+                      <div class="deadline-item">
+                        <div class="deadline-date ${urgent ? 'urgent' : ''}">${days}d</div>
+                        <div class="deadline-info">
+                          <h4>${g.name}</h4>
+                          <p>${getFunder(g.funderId)?.name} • ${formatCurrency(g.amount)}</p>
+                        </div>
+                        ${getStatusBadge(g.status)}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+          
+          <div class="card">
+            <div class="card-header"><span class="card-title">📋 Reports Due</span></div>
+            <div class="card-body">
+              ${reporting.length === 0 ? '<p style="color:#64748b">No reports due</p>' : `
+                <div class="deadline-list">
+                  ${reporting.map(g => {
+                    const days = daysUntil(g.reportingDue);
+                    const urgent = days <= 14;
+                    return `
+                      <div class="deadline-item">
+                        <div class="deadline-date ${urgent ? 'urgent' : ''}">${formatDate(g.reportingDue)}</div>
+                        <div class="deadline-info">
+                          <h4>${g.name}</h4>
+                          <p>${getFunder(g.funderId)?.name} • ${formatCurrency(g.amount)}</p>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `}
+            </div>
+          </div>
+        </div>
+        
+        <div class="card" style="margin-top:1rem">
+          <div class="card-header"><span class="card-title">📊 Pipeline Summary</span></div>
+          <div class="card-body">
+            <div style="display:flex;gap:2rem">
+              <div><span style="font-size:2rem;font-weight:700;color:#6366f1">${state.grants.filter(g=>g.status==='researching').length}</span><div style="color:#64748b;font-size:0.875rem">Researching</div></div>
+              <div><span style="font-size:2rem;font-weight:700;color:#f59e0b">${state.grants.filter(g=>g.status==='writing').length}</span><div style="color:#64748b;font-size:0.875rem">Writing</div></div>
+              <div><span style="font-size:2rem;font-weight:700;color:#3b82f6">${state.grants.filter(g=>g.status==='submitted').length}</span><div style="color:#64748b;font-size:0.875rem">Submitted</div></div>
+              <div><span style="font-size:2rem;font-weight:700;color:#059669">${state.grants.filter(g=>g.status==='awarded').length}</span><div style="color:#64748b;font-size:0.875rem">Awarded</div></div>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+    
+    const renderPipeline = () => {
+      const stages = [
+        { id: 'researching', label: 'Researching', color: '#6366f1' },
+        { id: 'writing', label: 'Writing', color: '#f59e0b' },
+        { id: 'submitted', label: 'Submitted', color: '#3b82f6' },
+        { id: 'awarded', label: 'Awarded', color: '#059669' }
+      ];
+      
+      return `
+        <div class="pipeline">
+          ${stages.map(stage => {
+            const grants = state.grants.filter(g => g.status === stage.id);
+            const total = grants.reduce((s, g) => s + g.amount, 0);
+            return `
+              <div class="pipeline-column">
+                <div class="pipeline-header">
+                  <span>${stage.label}</span>
+                  <span class="pipeline-count">${grants.length}</span>
+                </div>
+                <div style="font-size:0.875rem;color:#64748b;margin-bottom:1rem">${formatCurrency(total)}</div>
+                ${grants.map(g => {
+                  const days = g.deadline ? daysUntil(g.deadline) : null;
+                  const urgent = days !== null && days <= 7 && days > 0;
+                  return `
+                    <div class="grant-card" style="border-left-color:${stage.color}" onclick="viewGrant(${g.id})">
+                      <h4>${g.name}</h4>
+                      <div class="funder">${getFunder(g.funderId)?.name}</div>
+                      <div class="amount">${formatCurrency(g.amount)}</div>
+                      ${g.deadline ? `<div class="deadline ${urgent ? 'urgent' : ''}">📅 ${formatDate(g.deadline)}${urgent ? ' ('+days+'d)' : ''}</div>` : ''}
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    };
+    
+    const renderGrants = () => {
+      const statuses = ['all', 'researching', 'writing', 'submitted', 'awarded', 'declined'];
+      const filtered = state.filterStatus === 'all' ? state.grants : state.grants.filter(g => g.status === state.filterStatus);
+      
+      return `
+        <div class="filters">
+          ${statuses.map(s => `<button class="filter-btn ${state.filterStatus === s ? 'active' : ''}" onclick="setFilter('${s}')">${s === 'all' ? 'All' : s.charAt(0).toUpperCase() + s.slice(1)}</button>`).join('')}
+        </div>
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Grant Name</th>
+                <th>Funder</th>
+                <th>Amount</th>
+                <th>Deadline</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${filtered.map(g => `
+                <tr>
+                  <td><strong>${g.name}</strong></td>
+                  <td>${getFunder(g.funderId)?.name || '-'}</td>
+                  <td>${formatCurrency(g.amount)}</td>
+                  <td>${g.deadline ? formatDate(g.deadline) : '-'}</td>
+                  <td>${getStatusBadge(g.status)}</td>
+                  <td>
+                    <button class="btn btn-secondary btn-sm" onclick="viewGrant(${g.id})">View</button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+    
+    const renderFunders = () => {
+      return `
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Funder Name</th>
+                <th>Type</th>
+                <th>Contact</th>
+                <th>Email</th>
+                <th>Grants</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.funders.map(f => {
+                const grantCount = state.grants.filter(g => g.funderId === f.id).length;
+                return `
+                  <tr>
+                    <td><strong>${f.name}</strong></td>
+                    <td>${f.type}</td>
+                    <td>${f.contact || '-'}</td>
+                    <td>${f.email || '-'}</td>
+                    <td>${grantCount}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    };
+    
+    const renderDeadlines = () => {
+      const upcoming = state.grants
+        .filter(g => g.deadline && ['researching', 'writing', 'submitted'].includes(g.status))
+        .sort((a, b) => new Date(a.deadline) - new Date(b.deadline));
+      
+      return `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Application Deadlines</span></div>
+          <div class="card-body">
+            ${upcoming.length === 0 ? '<p style="color:#64748b">No upcoming deadlines</p>' : `
+              <div class="deadline-list">
+                ${upcoming.map(g => {
+                  const days = daysUntil(g.deadline);
+                  const urgent = days <= 7 && days > 0;
+                  const past = days < 0;
+                  return `
+                    <div class="deadline-item" style="${past ? 'opacity:0.5' : ''}">
+                      <div class="deadline-date ${urgent ? 'urgent' : ''}">${formatDate(g.deadline)}</div>
+                      <div class="deadline-info">
+                        <h4>${g.name}</h4>
+                        <p>${getFunder(g.funderId)?.name} • ${formatCurrency(g.amount)}</p>
+                      </div>
+                      ${getStatusBadge(g.status)}
+                      <span style="font-size:0.75rem;color:${urgent ? '#dc2626' : '#64748b'}">${days > 0 ? days + ' days' : past ? 'Past' : 'Today'}</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            `}
+          </div>
+        </div>
+      `;
+    };
+    
+    const renderReporting = () => {
+      const reports = state.grants.filter(g => g.status === 'awarded' && g.reportingDue);
+      
+      return `
+        <div class="card">
+          <div class="card-header"><span class="card-title">Report Due Dates</span></div>
+          <div class="card-body">
+            ${reports.length === 0 ? '<p style="color:#64748b">No reports scheduled</p>' : `
+              <table>
+                <thead>
+                  <tr>
+                    <th>Grant</th>
+                    <th>Funder</th>
+                    <th>Amount</th>
+                    <th>Report Due</th>
+                    <th>Days</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${reports.sort((a,b) => new Date(a.reportingDue) - new Date(b.reportingDue)).map(g => {
+                    const days = daysUntil(g.reportingDue);
+                    const urgent = days <= 14 && days > 0;
+                    return `
+                      <tr>
+                        <td><strong>${g.name}</strong></td>
+                        <td>${getFunder(g.funderId)?.name}</td>
+                        <td>${formatCurrency(g.amount)}</td>
+                        <td>${formatDate(g.reportingDue)}</td>
+                        <td style="color:${urgent ? '#dc2626' : '#64748b'};font-weight:${urgent ? '600' : '400'}">${days} days</td>
+                      </tr>
+                    `;
+                  }).join('')}
+                </tbody>
+              </table>
+            `}
+          </div>
+        </div>
+      `;
+    };
+    
+    const renderModal = () => {
+      if (state.showModal === 'grant') return renderGrantModal();
+      if (state.showModal === 'funder') return renderFunderModal();
+      if (state.showModal === 'view-grant') return renderViewGrantModal();
+      return '';
+    };
+    
+    const renderGrantModal = () => {
+      return `
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>New Grant</h3>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form onsubmit="saveGrant(event)">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Grant Name *</label>
+                  <input type="text" id="grantName" required placeholder="e.g., General Operating Support 2026">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Funder *</label>
+                    <select id="grantFunder" required>
+                      <option value="">Select funder...</option>
+                      ${state.funders.map(f => `<option value="${f.id}">${f.name}</option>`).join('')}
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Amount ($)</label>
+                    <input type="number" id="grantAmount" placeholder="50000">
+                  </div>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Status</label>
+                    <select id="grantStatus">
+                      <option value="researching">Researching</option>
+                      <option value="writing">Writing</option>
+                      <option value="submitted">Submitted</option>
+                      <option value="awarded">Awarded</option>
+                      <option value="declined">Declined</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Deadline</label>
+                    <input type="date" id="grantDeadline">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Notes</label>
+                  <textarea id="grantNotes" rows="3" placeholder="Application requirements, contacts, etc."></textarea>
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Grant</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    };
+    
+    const renderFunderModal = () => {
+      return `
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>New Funder</h3>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form onsubmit="saveFunder(event)">
+              <div class="modal-body">
+                <div class="form-group">
+                  <label>Funder Name *</label>
+                  <input type="text" id="funderName" required placeholder="e.g., Community Foundation">
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select id="funderType">
+                      <option value="Foundation">Foundation</option>
+                      <option value="Government">Government</option>
+                      <option value="Corporate">Corporate</option>
+                      <option value="Individual">Individual</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label>Contact Name</label>
+                    <input type="text" id="funderContact" placeholder="Jane Smith">
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label>Email</label>
+                  <input type="email" id="funderEmail" placeholder="grants@foundation.org">
+                </div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Funder</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      `;
+    };
+    
+    const renderViewGrantModal = () => {
+      const g = state.selectedGrant;
+      if (!g) return '';
+      const funder = getFunder(g.funderId);
+      
+      return `
+        <div class="modal-overlay" onclick="closeModal()">
+          <div class="modal" onclick="event.stopPropagation()">
+            <div class="modal-header">
+              <h3>${g.name}</h3>
+              <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem">
+                <div><strong>Funder:</strong> ${funder?.name || '-'}</div>
+                <div><strong>Amount:</strong> ${formatCurrency(g.amount)}</div>
+                <div><strong>Status:</strong> ${getStatusBadge(g.status)}</div>
+                <div><strong>Deadline:</strong> ${g.deadline ? formatDate(g.deadline) : '-'}</div>
+              </div>
+              ${g.reportingDue ? `<div style="margin-bottom:1rem"><strong>Report Due:</strong> ${formatDate(g.reportingDue)}</div>` : ''}
+              ${g.notes ? `<div><strong>Notes:</strong><p style="color:#64748b;margin-top:0.5rem">${g.notes}</p></div>` : ''}
+              
+              <div style="margin-top:1.5rem">
+                <label style="font-weight:600;margin-bottom:0.5rem;display:block">Update Status</label>
+                <select id="updateStatus" style="width:100%" onchange="updateGrantStatus(${g.id}, this.value)">
+                  <option value="researching" ${g.status === 'researching' ? 'selected' : ''}>Researching</option>
+                  <option value="writing" ${g.status === 'writing' ? 'selected' : ''}>Writing</option>
+                  <option value="submitted" ${g.status === 'submitted' ? 'selected' : ''}>Submitted</option>
+                  <option value="awarded" ${g.status === 'awarded' ? 'selected' : ''}>Awarded</option>
+                  <option value="declined" ${g.status === 'declined' ? 'selected' : ''}>Declined</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+            </div>
+          </div>
+        </div>
+      `;
+    };
+    
+    // Actions
+    const navigate = (view) => { state.view = view; render(); };
+    const openModal = (type) => { state.showModal = type; render(); };
+    const closeModal = () => { state.showModal = null; state.selectedGrant = null; render(); };
+    const setFilter = (status) => { state.filterStatus = status; render(); };
+    
+    const viewGrant = (id) => {
+      state.selectedGrant = state.grants.find(g => g.id === id);
+      state.showModal = 'view-grant';
+      render();
+    };
+    
+    const updateGrantStatus = (id, status) => {
+      const grant = state.grants.find(g => g.id === id);
+      if (grant) {
+        grant.status = status;
+        render();
+      }
+    };
+    
+    const saveGrant = (e) => {
+      e.preventDefault();
+      const grant = {
+        id: Date.now(),
+        name: document.getElementById('grantName').value,
+        funderId: parseInt(document.getElementById('grantFunder').value),
+        amount: parseFloat(document.getElementById('grantAmount').value) || 0,
+        status: document.getElementById('grantStatus').value,
+        deadline: document.getElementById('grantDeadline').value || null,
+        notes: document.getElementById('grantNotes').value
+      };
+      state.grants.push(grant); saveData();
+      closeModal();
+    };
+    
+    const saveFunder = (e) => {
+      e.preventDefault();
+      const funder = {
+        id: Date.now(),
+        name: document.getElementById('funderName').value,
+        type: document.getElementById('funderType').value,
+        contact: document.getElementById('funderContact').value,
+        email: document.getElementById('funderEmail').value
+      };
+      state.funders.push(funder); saveData();
+      closeModal();
+    };
+    
+    // Init
+    loadData();
+    render();
+  </script>
+</body>
+</html>

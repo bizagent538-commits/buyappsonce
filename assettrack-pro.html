@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AssetTrack Pro - Equipment & Asset Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    :root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#8b5cf6;--success:#22c55e;--warning:#f59e0b;--danger:#ef4444}
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text)}
+    .app{display:flex;min-height:100vh}
+    .sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);padding:20px;position:fixed;height:100vh}
+    .logo{display:flex;align-items:center;gap:10px;margin-bottom:24px}
+    .logo-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--primary),#a855f7);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px}
+    .logo-text{font-weight:700;font-size:18px}
+    .pro-badge{background:var(--primary);color:white;font-size:10px;padding:2px 6px;border-radius:4px;margin-left:4px}
+    .nav-item{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;cursor:pointer;color:var(--muted);margin-bottom:4px;font-size:14px}
+    .nav-item:hover,.nav-item.active{background:rgba(139,92,246,.1);color:var(--primary)}
+    .main{flex:1;margin-left:220px;padding:24px}
+    .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .title{font-size:22px;font-weight:700}
+    .btn{padding:10px 18px;border-radius:8px;font-weight:600;cursor:pointer;border:none;font-family:inherit;font-size:14px}
+    .btn-primary{background:var(--primary);color:white}
+    .btn-secondary{background:white;border:1px solid var(--border)}
+    .btn-sm{padding:6px 12px;font-size:12px}
+    .btn-danger{background:var(--danger);color:white}
+    .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+    .stat-card{background:var(--card);border-radius:12px;padding:16px;border:1px solid var(--border)}
+    .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;margin-bottom:6px}
+    .stat-value{font-size:24px;font-weight:700}
+    .card{background:var(--card);border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+    .card-header{padding:14px 18px;border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{padding:12px 14px;text-align:left;border-bottom:1px solid var(--border);font-size:14px}
+    .table th{background:var(--bg);font-weight:600;font-size:11px;text-transform:uppercase;color:var(--muted)}
+    .table tr:hover{background:var(--bg)}
+    .badge{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+    .badge-active{background:rgba(34,197,94,.15);color:var(--success)}
+    .badge-maintenance{background:rgba(245,158,11,.15);color:var(--warning)}
+    .badge-retired{background:rgba(100,116,139,.15);color:var(--muted)}
+    .qr-code{width:40px;height:40px;background:var(--bg);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal-overlay.show{display:flex}
+    .modal{background:var(--card);border-radius:16px;padding:24px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto}
+    .modal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+    .modal-title{font-size:18px;font-weight:700}
+    .close-btn{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+    .form-group{margin-bottom:14px}
+    .form-label{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+    .form-input,.form-select{width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);font-size:14px;font-family:inherit}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .view{display:none}.view.active{display:block}
+    .tabs{display:flex;gap:8px;margin-bottom:16px}
+    .tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-size:14px;background:transparent;border:1px solid var(--border);color:var(--muted)}
+    .tab.active{background:var(--primary);color:white;border-color:var(--primary)}
+    .search-box{padding:10px 14px;border:1px solid var(--border);border-radius:8px;width:250px;font-size:14px}
+    @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0}}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><div class="logo-icon">📦</div><span class="logo-text">AssetTrack <span class="pro-badge">PRO</span></span></div>
+      <div class="nav-item active" onclick="showView('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showView('assets')">📦 Assets</div>
+      <div class="nav-item" onclick="showView('categories')">🏷️ Categories</div>
+      <div class="nav-item" onclick="showView('locations')">📍 Locations</div>
+      <div class="nav-item" onclick="showView('maintenance')">🔧 Maintenance</div>
+      <div class="nav-item" onclick="showView('depreciation')">📈 Depreciation</div>
+    </nav>
+    <main class="main">
+      <!-- Dashboard -->
+      <div id="view-dashboard" class="view active">
+        <div class="header"><h1 class="title">Asset Dashboard</h1><button class="btn btn-primary" onclick="openModal('asset')">+ Add Asset</button></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Total Assets</div><div class="stat-value" id="stat-total">0</div></div>
+          <div class="stat-card"><div class="stat-label">Total Value</div><div class="stat-value" style="color:var(--primary)" id="stat-value">$0</div></div>
+          <div class="stat-card"><div class="stat-label">In Maintenance</div><div class="stat-value" style="color:var(--warning)" id="stat-maint">0</div></div>
+          <div class="stat-card"><div class="stat-label">Depreciation YTD</div><div class="stat-value" style="color:var(--danger)" id="stat-dep">$0</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span>Recent Assets</span></div>
+          <table class="table"><thead><tr><th>QR</th><th>Asset</th><th>Category</th><th>Location</th><th>Value</th><th>Status</th></tr></thead><tbody id="recent-assets"></tbody></table>
+        </div>
+      </div>
+      <!-- Assets -->
+      <div id="view-assets" class="view">
+        <div class="header"><h1 class="title">All Assets</h1><div><input type="text" class="search-box" placeholder="Search assets..." onkeyup="searchAssets(this.value)"><button class="btn btn-primary" style="margin-left:10px" onclick="openModal('asset')">+ Add Asset</button></div></div>
+        <div class="tabs">
+          <div class="tab active" onclick="filterAssets('all')">All</div>
+          <div class="tab" onclick="filterAssets('active')">Active</div>
+          <div class="tab" onclick="filterAssets('maintenance')">Maintenance</div>
+          <div class="tab" onclick="filterAssets('retired')">Retired</div>
+        </div>
+        <div class="card">
+          <table class="table"><thead><tr><th>QR</th><th>Asset</th><th>Tag #</th><th>Category</th><th>Location</th><th>Purchase Date</th><th>Value</th><th>Status</th><th>Actions</th></tr></thead><tbody id="all-assets"></tbody></table>
+        </div>
+      </div>
+      <!-- Categories -->
+      <div id="view-categories" class="view">
+        <div class="header"><h1 class="title">Categories</h1><button class="btn btn-primary" onclick="openModal('category')">+ Add Category</button></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Category</th><th>Assets</th><th>Total Value</th><th>Actions</th></tr></thead><tbody id="all-categories"></tbody></table>
+        </div>
+      </div>
+      <!-- Locations -->
+      <div id="view-locations" class="view">
+        <div class="header"><h1 class="title">Locations</h1><button class="btn btn-primary" onclick="openModal('location')">+ Add Location</button></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Location</th><th>Assets</th><th>Total Value</th><th>Actions</th></tr></thead><tbody id="all-locations"></tbody></table>
+        </div>
+      </div>
+      <!-- Maintenance -->
+      <div id="view-maintenance" class="view">
+        <div class="header"><h1 class="title">Maintenance Schedule</h1></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Asset</th><th>Type</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="maint-schedule"></tbody></table>
+        </div>
+      </div>
+      <!-- Depreciation -->
+      <div id="view-depreciation" class="view">
+        <div class="header"><h1 class="title">Depreciation Report</h1></div>
+        <div class="card">
+          <table class="table"><thead><tr><th>Asset</th><th>Purchase Value</th><th>Current Value</th><th>Depreciation</th><th>Method</th></tr></thead><tbody id="dep-report"></tbody></table>
+        </div>
+      </div>
+    </main>
+  </div>
+  <!-- Asset Modal -->
+  <div class="modal-overlay" id="asset-modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">Add Asset</h2><button class="close-btn" onclick="closeModal('asset')">&times;</button></div>
+      <div class="form-group"><label class="form-label">Asset Name</label><input type="text" class="form-input" id="asset-name" placeholder="e.g., MacBook Pro 16"></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Tag #</label><input type="text" class="form-input" id="asset-tag" placeholder="AST-001"></div>
+        <div class="form-group"><label class="form-label">Serial #</label><input type="text" class="form-input" id="asset-serial" placeholder="Optional"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Category</label><select class="form-select" id="asset-category"></select></div>
+        <div class="form-group"><label class="form-label">Location</label><select class="form-select" id="asset-location"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Purchase Date</label><input type="date" class="form-input" id="asset-date"></div>
+        <div class="form-group"><label class="form-label">Purchase Value</label><input type="number" class="form-input" id="asset-value" placeholder="0.00"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Depreciation Method</label><select class="form-select" id="asset-dep"><option>Straight Line - 5 years</option><option>Straight Line - 7 years</option><option>Double Declining</option><option>No Depreciation</option></select></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('asset')">Cancel</button><button class="btn btn-primary" onclick="saveAsset()">Add Asset</button></div>
+    </div>
+  </div>
+  <!-- Category Modal -->
+  <div class="modal-overlay" id="category-modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">Add Category</h2><button class="close-btn" onclick="closeModal('category')">&times;</button></div>
+      <div class="form-group"><label class="form-label">Category Name</label><input type="text" class="form-input" id="cat-name" placeholder="e.g., IT Equipment"></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('category')">Cancel</button><button class="btn btn-primary" onclick="saveCategory()">Add Category</button></div>
+    </div>
+  </div>
+  <!-- Location Modal -->
+  <div class="modal-overlay" id="location-modal">
+    <div class="modal">
+      <div class="modal-header"><h2 class="modal-title">Add Location</h2><button class="close-btn" onclick="closeModal('location')">&times;</button></div>
+      <div class="form-group"><label class="form-label">Location Name</label><input type="text" class="form-input" id="loc-name" placeholder="e.g., Main Office"></div>
+      <div class="form-group"><label class="form-label">Address</label><input type="text" class="form-input" id="loc-address" placeholder="Optional"></div>
+      <div style="display:flex;gap:12px;margin-top:16px"><button class="btn btn-secondary" onclick="closeModal('location')">Cancel</button><button class="btn btn-primary" onclick="saveLocation()">Add Location</button></div>
+    </div>
+  </div>
+  <script>
+    // Data
+    let categories = [{id:1,name:'IT Equipment'},{id:2,name:'Furniture'},{id:3,name:'Vehicles'},{id:4,name:'Tools'}];
+    let locations = [{id:1,name:'Main Office',address:'123 Business Pkwy'},{id:2,name:'Warehouse',address:'456 Industrial Dr'},{id:3,name:'Remote'}];
+    let assets = [
+      {id:1,name:'MacBook Pro 16"',tag:'AST-001',serial:'C02X1234',categoryId:1,locationId:1,date:'2024-03-15',value:2499,status:'active',depMethod:'5yr'},
+      {id:2,name:'Dell Monitor 27"',tag:'AST-002',serial:'CN-0X1234',categoryId:1,locationId:1,date:'2024-03-15',value:450,status:'active',depMethod:'5yr'},
+      {id:3,name:'Standing Desk',tag:'AST-003',serial:'',categoryId:2,locationId:1,date:'2024-01-10',value:899,status:'active',depMethod:'7yr'},
+      {id:4,name:'Ford Transit Van',tag:'AST-004',serial:'1FTBW2CM5',categoryId:3,locationId:2,date:'2023-06-01',value:42000,status:'maintenance',depMethod:'5yr'},
+      {id:5,name:'DeWalt Drill Set',tag:'AST-005',serial:'DW-98765',categoryId:4,locationId:2,date:'2024-06-20',value:350,status:'active',depMethod:'5yr'},
+    ];
+    let nextAssetId=6,nextCatId=5,nextLocId=4;
+    
+    function getCat(id){return categories.find(c=>c.id===id)}
+    function getLoc(id){return locations.find(l=>l.id===id)}
+    function calcDep(asset){
+      const years=asset.depMethod==='7yr'?7:5;
+      const age=(new Date()-new Date(asset.date))/(365.25*24*60*60*1000);
+      const dep=Math.min(asset.value,(asset.value/years)*age);
+      return Math.round(dep);
+    }
+    function currentValue(asset){return asset.value-calcDep(asset)}
+    
+    // Views
+    function showView(v){
+      document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+      document.getElementById('view-'+v).classList.add('active');
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      event.target.classList.add('active');
+      render();
+    }
+    
+    // Render
+    function render(){
+      // Stats
+      const total=assets.length;
+      const totalVal=assets.reduce((s,a)=>s+currentValue(a),0);
+      const maint=assets.filter(a=>a.status==='maintenance').length;
+      const totalDep=assets.reduce((s,a)=>s+calcDep(a),0);
+      document.getElementById('stat-total').textContent=total;
+      document.getElementById('stat-value').textContent='$'+totalVal.toLocaleString();
+      document.getElementById('stat-maint').textContent=maint;
+      document.getElementById('stat-dep').textContent='$'+totalDep.toLocaleString();
+      
+      // Recent assets
+      document.getElementById('recent-assets').innerHTML=assets.slice(0,5).map(a=>`<tr>
+        <td><div class="qr-code">📱</div></td>
+        <td><strong>${a.name}</strong><br><small style="color:var(--muted)">${a.tag}</small></td>
+        <td>${getCat(a.categoryId)?.name||'-'}</td>
+        <td>${getLoc(a.locationId)?.name||'-'}</td>
+        <td>$${currentValue(a).toLocaleString()}</td>
+        <td><span class="badge badge-${a.status}">${a.status}</span></td>
+      </tr>`).join('');
+      
+      // All assets
+      renderAssets(assets);
+      
+      // Categories
+      document.getElementById('all-categories').innerHTML=categories.map(c=>{
+        const catAssets=assets.filter(a=>a.categoryId===c.id);
+        const catVal=catAssets.reduce((s,a)=>s+currentValue(a),0);
+        return `<tr><td><strong>${c.name}</strong></td><td>${catAssets.length}</td><td>$${catVal.toLocaleString()}</td><td><button class="btn btn-sm btn-secondary" onclick="editCat(${c.id})">Edit</button></td></tr>`;
+      }).join('');
+      
+      // Locations
+      document.getElementById('all-locations').innerHTML=locations.map(l=>{
+        const locAssets=assets.filter(a=>a.locationId===l.id);
+        const locVal=locAssets.reduce((s,a)=>s+currentValue(a),0);
+        return `<tr><td><strong>${l.name}</strong><br><small style="color:var(--muted)">${l.address||''}</small></td><td>${locAssets.length}</td><td>$${locVal.toLocaleString()}</td><td><button class="btn btn-sm btn-secondary" onclick="editLoc(${l.id})">Edit</button></td></tr>`;
+      }).join('');
+      
+      // Maintenance
+      document.getElementById('maint-schedule').innerHTML=assets.filter(a=>a.status==='maintenance').map(a=>`<tr>
+        <td><strong>${a.name}</strong></td><td>Scheduled Service</td><td>Jan 15, 2026</td><td><span class="badge badge-maintenance">Pending</span></td>
+        <td><button class="btn btn-sm btn-primary" onclick="completeMaint(${a.id})">Complete</button></td>
+      </tr>`).join('')||'<tr><td colspan="5" style="text-align:center;color:var(--muted)">No maintenance scheduled</td></tr>';
+      
+      // Depreciation
+      document.getElementById('dep-report').innerHTML=assets.map(a=>`<tr>
+        <td><strong>${a.name}</strong></td><td>$${a.value.toLocaleString()}</td><td>$${currentValue(a).toLocaleString()}</td>
+        <td style="color:var(--danger)">-$${calcDep(a).toLocaleString()}</td><td>${a.depMethod==='7yr'?'Straight Line 7yr':'Straight Line 5yr'}</td>
+      </tr>`).join('');
+      
+      // Dropdowns
+      document.getElementById('asset-category').innerHTML=categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('asset-location').innerHTML=locations.map(l=>`<option value="${l.id}">${l.name}</option>`).join('');
+    }
+    
+    function renderAssets(list){
+      document.getElementById('all-assets').innerHTML=list.map(a=>`<tr>
+        <td><div class="qr-code">📱</div></td>
+        <td><strong>${a.name}</strong></td>
+        <td>${a.tag}</td>
+        <td>${getCat(a.categoryId)?.name||'-'}</td>
+        <td>${getLoc(a.locationId)?.name||'-'}</td>
+        <td>${a.date}</td>
+        <td>$${currentValue(a).toLocaleString()}</td>
+        <td><span class="badge badge-${a.status}">${a.status}</span></td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="editAsset(${a.id})">Edit</button>
+          <button class="btn btn-sm btn-secondary" onclick="printQR(${a.id})">QR</button>
+        </td>
+      </tr>`).join('');
+    }
+    
+    function filterAssets(f){
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      event.target.classList.add('active');
+      renderAssets(f==='all'?assets:assets.filter(a=>a.status===f));
+    }
+    
+    function searchAssets(q){
+      const filtered=assets.filter(a=>a.name.toLowerCase().includes(q.toLowerCase())||a.tag.toLowerCase().includes(q.toLowerCase()));
+      renderAssets(filtered);
+    }
+    
+    // Actions
+    function completeMaint(id){const a=assets.find(x=>x.id===id);if(a){a.status='active';render();alert('Maintenance completed!');}}
+    function editAsset(id){alert('Edit asset #'+id+' (Demo)');}
+    function editCat(id){alert('Edit category (Demo)');}
+    function editLoc(id){alert('Edit location (Demo)');}
+    function printQR(id){alert('QR Code generated for asset #'+id+'! Ready to print.');}
+    
+    // Modals
+    function openModal(type){
+      document.getElementById(type+'-modal').classList.add('show');
+      if(type==='asset')document.getElementById('asset-date').value=new Date().toISOString().split('T')[0];
+    }
+    function closeModal(type){document.getElementById(type+'-modal').classList.remove('show');}
+    
+    function saveAsset(){
+      const name=document.getElementById('asset-name').value;
+      const tag=document.getElementById('asset-tag').value;
+      const value=parseFloat(document.getElementById('asset-value').value)||0;
+      if(!name||!tag){alert('Please enter asset name and tag');return;}
+      assets.unshift({
+        id:nextAssetId++,name,tag,
+        serial:document.getElementById('asset-serial').value||'',
+        categoryId:parseInt(document.getElementById('asset-category').value),
+        locationId:parseInt(document.getElementById('asset-location').value),
+        date:document.getElementById('asset-date').value,
+        value,status:'active',
+        depMethod:document.getElementById('asset-dep').value.includes('7')?'7yr':'5yr'
+      });
+      closeModal('asset');render();
+      document.getElementById('asset-name').value='';
+      document.getElementById('asset-tag').value='';
+      document.getElementById('asset-serial').value='';
+      document.getElementById('asset-value').value='';
+      alert('Asset added! QR code generated.');
+    }
+    
+    function saveCategory(){
+      const name=document.getElementById('cat-name').value;
+      if(!name){alert('Please enter category name');return;}
+      categories.push({id:nextCatId++,name});
+      closeModal('category');render();
+      document.getElementById('cat-name').value='';
+      alert('Category added!');
+    }
+    
+    function saveLocation(){
+      const name=document.getElementById('loc-name').value;
+      if(!name){alert('Please enter location name');return;}
+      locations.push({id:nextLocId++,name,address:document.getElementById('loc-address').value||''});
+      closeModal('location');render();
+      document.getElementById('loc-name').value='';
+      document.getElementById('loc-address').value='';
+      alert('Location added!');
+    }
+    
+    render();
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='assettrack_pro_data';
+  const vars=['categories,locations,assets'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='assettrack_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>

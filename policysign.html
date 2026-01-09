@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <link rel="manifest" href="data:application/json,%7B%22name%22%3A%22PolicySign%22%2C%22short_name%22%3A%22PolicySign%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%23f8fafc%22%2C%22theme_color%22%3A%22%233b82f6%22%7D" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolicySign - Policy Acknowledgment Tracking</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-tertiary: #f1f5f9; --bg-card: #ffffff;
+      --text-primary: #0f172a; --text-secondary: #475569; --text-muted: #94a3b8;
+      --border: #e2e8f0; --accent: #0ea5e9; --accent-hover: #0284c7;
+      --success: #10b981; --warning: #f59e0b; --danger: #ef4444; --info: #6366f1;
+    }
+    .dark {
+      --bg-primary: #0f172a; --bg-secondary: #1e293b; --bg-tertiary: #334155; --bg-card: #1e293b;
+      --text-primary: #f1f5f9; --text-secondary: #cbd5e1; --text-muted: #64748b;
+      --border: #334155;
+    }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.5; }
+    input, select, textarea, button { font-family: inherit; }
+    
+    @media print {
+      body { background: white !important; color: black !important; font-size: 11pt; }
+      header, nav, footer, button, .no-print { display: none !important; }
+      [style*="position: fixed"] { display: none !important; }
+      main { padding: 0 !important; max-width: 100% !important; }
+      * { box-shadow: none !important; }
+      table { border-collapse: collapse; width: 100%; }
+      th, td { border: 1px solid #ccc !important; padding: 6px !important; text-align: left; }
+      th { background: #f0f0f0 !important; }
+      @page { margin: 1.5cm; }
+    }
+    
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    .skip-link { position: absolute; top: -40px; left: 0; background: var(--accent); color: white; padding: 8px 16px; z-index: 10000; border-radius: 0 0 8px 0; transition: top 0.2s; }
+    .skip-link:focus { top: 0; }
+    *:focus { outline: 2px solid var(--accent); outline-offset: 2px; }
+    *:focus:not(:focus-visible) { outline: none; }
+    *:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    
+    .signature-pad { border: 2px dashed var(--border); border-radius: 8px; background: var(--bg-tertiary); cursor: crosshair; touch-action: none; }
+    .progress-bar { height: 8px; border-radius: 4px; background: var(--bg-tertiary); overflow: hidden; }
+    .progress-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+  <div id="root"></div>
+    <script>
+    // Pre-load Recharts fallback
+    if (typeof window.Recharts === "undefined") {
+      window.Recharts = {
+        ResponsiveContainer: function() { return null; },
+        BarChart: function() { return null; }, LineChart: function() { return null; },
+        PieChart: function() { return null; }, AreaChart: function() { return null; },
+        CartesianGrid: function() { return null; }, XAxis: function() { return null; },
+        YAxis: function() { return null; }, Tooltip: function() { return null; },
+        Bar: function() { return null; }, Line: function() { return null; },
+        Pie: function() { return null; }, Area: function() { return null; },
+        Cell: function() { return null; }, Legend: function() { return null; }
+      };
+    }
+  </script>
+
+  <script type="text/babel">
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    const APP_VERSION = "1.0.0"; // APP_VERSION = '2.0.0';
+
+    // Utilities
+    const generateId = () => Math.random().toString(36).substr(2, 9);
+    const save = (key, data) => localStorage.setItem(key, JSON.stringify(data));
+    const load = (key, fallback) => { try { return JSON.parse(localStorage.getItem(key)) || fallback; } catch { return fallback; } };
+    const today = () => new Date().toISOString().split('T')[0];
+    const now = () => new Date().toISOString();
+    const formatDate = (date) => date ? new Date(date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+    const formatDateTime = (dt) => dt ? new Date(dt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+
+    const POLICY_CATEGORIES = {
+      hr: { label: 'HR & Employment', icon: '👥', color: '#6366f1' },
+      safety: { label: 'Safety & Compliance', icon: '🛡️', color: '#ef4444' },
+      it: { label: 'IT & Security', icon: '💻', color: '#0ea5e9' },
+      ethics: { label: 'Ethics & Conduct', icon: '⚖️', color: '#8b5cf6' },
+      operations: { label: 'Operations', icon: '⚙️', color: '#f59e0b' },
+      training: { label: 'Training', icon: '📚', color: '#10b981' },
+      other: { label: 'Other', icon: '📄', color: '#64748b' },
+    };
+
+    const MEMBER_GROUPS = [
+      { id: 'all', name: 'All Members' },
+      { id: 'employees', name: 'Employees' },
+      { id: 'contractors', name: 'Contractors' },
+      { id: 'volunteers', name: 'Volunteers' },
+      { id: 'board', name: 'Board Members' },
+      { id: 'management', name: 'Management' },
+    ];
+
+    // Icons
+    const Icons = {
+      Plus: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+      Check: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12"/></svg>,
+      X: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+      Edit: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+      Trash: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+      Search: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>,
+      Sun: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>,
+      Moon: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>,
+      Settings: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+      FileText: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>,
+      Users: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+      User: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+      CheckCircle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+      AlertCircle: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>,
+      Clock: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+      Calendar: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+      Send: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>,
+      Download: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+      Eye: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+      PenTool: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>,
+      Mail: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>,
+      BarChart: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>,
+      RotateCcw: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>,
+      RotateCw: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>,
+      Copy: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>,
+      Refresh: () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+    };
+
+    // Components
+    const Button = ({ children, variant = 'primary', size = 'md', onClick, disabled, style, title, ariaLabel, type = 'button' }) => {
+      const base = { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', fontFamily: 'inherit', fontWeight: 600, border: 'none', borderRadius: '10px', cursor: disabled ? 'not-allowed' : 'pointer', transition: 'all 0.15s ease', opacity: disabled ? 0.5 : 1 };
+      const variants = {
+        primary: { background: 'var(--accent)', color: 'white' },
+        secondary: { background: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border)' },
+        danger: { background: 'var(--danger)', color: 'white' },
+        ghost: { background: 'transparent', color: 'var(--text-secondary)' },
+        success: { background: 'var(--success)', color: 'white' },
+        warning: { background: 'var(--warning)', color: 'white' },
+      };
+      const sizes = { sm: { padding: '0.5rem 0.875rem', fontSize: '0.8125rem' }, md: { padding: '0.75rem 1.25rem', fontSize: '0.9375rem' }, lg: { padding: '1rem 2rem', fontSize: '1.125rem' } };
+      return <button type={type} style={{ ...base, ...variants[variant], ...sizes[size], ...style }} onClick={onClick} disabled={disabled} title={title} aria-label={ariaLabel || title} aria-disabled={disabled}>{children}</button>;
+    };
+
+    const Input = ({ label, value, onChange, type = 'text', placeholder, style, required, disabled, id }) => {
+      const inputId = id || React.useId();
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', ...style }}>
+          {label && <label htmlFor={inputId} style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{label} {required && <span style={{ color: 'var(--danger)' }} aria-hidden="true">*</span>}</label>}
+          <input id={inputId} type={type} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} disabled={disabled} aria-required={required}
+            style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.75rem', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.9375rem' }} />
+        </div>
+      );
+    };
+
+    const Textarea = ({ label, value, onChange, placeholder, style, required, rows = 4, id }) => {
+      const inputId = id || React.useId();
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', ...style }}>
+          {label && <label htmlFor={inputId} style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{label} {required && <span style={{ color: 'var(--danger)' }} aria-hidden="true">*</span>}</label>}
+          <textarea id={inputId} value={value} onChange={(e) => onChange(e.target.value)} placeholder={placeholder} rows={rows} aria-required={required}
+            style={{ width: '100%', background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.75rem', color: 'var(--text-primary)', outline: 'none', fontFamily: 'inherit', fontSize: '0.9375rem', resize: 'vertical' }} />
+        </div>
+      );
+    };
+
+    const Select = ({ label, value, onChange, options, style, required, id }) => {
+      const selectId = id || React.useId();
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem', ...style }}>
+          {label && <label htmlFor={selectId} style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500 }}>{label}</label>}
+          <select id={selectId} value={value} onChange={(e) => onChange(e.target.value)} aria-required={required}
+            style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.75rem', color: 'var(--text-primary)', fontFamily: 'inherit', fontSize: '0.9375rem', cursor: 'pointer' }}>
+            {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
+          </select>
+        </div>
+      );
+    };
+
+    const Modal = ({ isOpen, onClose, title, children, width = '500px' }) => {
+      const modalRef = useRef(null);
+      useEffect(() => {
+        if (isOpen && modalRef.current) {
+          const focusable = modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (focusable.length) focusable[0].focus();
+        }
+      }, [isOpen]);
+      useEffect(() => {
+        const handleTab = (e) => {
+          if (!isOpen || !modalRef.current) return;
+          const focusable = modalRef.current.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+          if (!focusable.length) return;
+          const first = focusable[0], last = focusable[focusable.length - 1];
+          if (e.key === 'Tab') {
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+          }
+        };
+        window.addEventListener('keydown', handleTab);
+        return () => window.removeEventListener('keydown', handleTab);
+      }, [isOpen]);
+      if (!isOpen) return null;
+      return (
+        <div role="dialog" aria-modal="true" aria-labelledby="modal-title" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '1rem' }} onClick={onClose}>
+          <div ref={modalRef} style={{ background: 'var(--bg-card)', borderRadius: '16px', width: '100%', maxWidth: width, maxHeight: '90vh', overflow: 'auto', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1.25rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 id="modal-title" style={{ fontSize: '1.125rem', fontWeight: 600 }}>{title}</h3>
+              <button onClick={onClose} aria-label="Close dialog" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: '0.25rem' }}><Icons.X /></button>
+            </div>
+            <div style={{ padding: '1.5rem' }}>{children}</div>
+          </div>
+        </div>
+      );
+    };
+
+    const StatCard = ({ icon, label, value, subtext, color }) => (
+      <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+          <span style={{ color: color || 'var(--accent)' }}>{icon}</span>
+        </div>
+        <div style={{ fontSize: '1.75rem', fontWeight: 700, fontFamily: "'DM Mono', monospace", color: color || 'var(--text-primary)' }}>{value}</div>
+        <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{label}</div>
+        {subtext && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: '0.25rem' }}>{subtext}</div>}
+      </div>
+    );
+
+    // Signature Pad Component
+    const SignaturePad = ({ onSave, onClear }) => {
+      const canvasRef = useRef(null);
+      const [isDrawing, setIsDrawing] = useState(false);
+      const [hasSignature, setHasSignature] = useState(false);
+
+      
+      const getCoords = (e) => {
+        const rect = canvasRef.current.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return { x: clientX - rect.left, y: clientY - rect.top };
+      };
+
+      const startDrawing = (e) => {
+        e.preventDefault();
+        const ctx = canvasRef.current.getContext('2d');
+        const { x, y } = getCoords(e);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        setIsDrawing(true);
+      };
+
+      const draw = (e) => {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const ctx = canvasRef.current.getContext('2d');
+        const { x, y } = getCoords(e);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        setHasSignature(true);
+      };
+
+      const stopDrawing = () => {
+        setIsDrawing(false);
+      };
+
+      const clear = () => {
+        const ctx = canvasRef.current.getContext('2d');
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+        setHasSignature(false);
+        onClear?.();
+      };
+
+      const saveSignature = () => {
+        if (hasSignature) {
+          const dataUrl = canvasRef.current.toDataURL('image/png');
+          onSave(dataUrl);
+        }
+      };
+
+      return (
+        <div>
+          <canvas
+            ref={canvasRef}
+            width={400}
+            height={150}
+            className="signature-pad"
+            style={{ width: '100%', maxWidth: '400px', height: '150px' }}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
+            onTouchStart={startDrawing}
+            onTouchMove={draw}
+            onTouchEnd={stopDrawing}
+          />
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.75rem' }}>
+            <Button variant="secondary" size="sm" onClick={clear}>Clear</Button>
+            <Button size="sm" onClick={saveSignature} disabled={!hasSignature}>Accept Signature</Button>
+          </div>
+        </div>
+      );
+    };
+
+    // Main App
+    
+    // Help Modal Component
+    const HelpModal = ({ isOpen, onClose }) => {
+      if (!isOpen) return null;
+      return (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={onClose}>
+          <div style={{ background: 'var(--bg-card)', borderRadius: '12px', padding: '1.5rem', maxWidth: '500px', width: '90%', maxHeight: '80vh', overflow: 'auto', border: '1px solid var(--border)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+              <h2 style={{ fontSize: '1.25rem', fontWeight: 700 }}>Help & About</h2>
+              <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: '1.5rem', cursor: 'pointer', color: 'var(--text-muted)' }}>×</button>
+            </div>
+            
+            <p style={{ color: 'var(--text-secondary)', marginBottom: '1rem' }}>
+              Policy acknowledgment tracking for compliance documentation.
+            </p>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>⌨️ Keyboard Shortcuts</h4>
+              <div style={{ fontSize: '0.875rem', display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '0.25rem' }}>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>N</span><span>New item</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>Esc</span><span>Close modals</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>D</span><span>Toggle dark mode</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>P</span><span>Print</span>
+                <span style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>/</span><span>Focus search</span>
+              </div>
+            </div>
+            
+            <div style={{ marginBottom: '1rem' }}>
+              <h4 style={{ fontWeight: 600, marginBottom: '0.5rem' }}>💡 Tips</h4>
+              <ul style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', paddingLeft: '1.25rem' }}>
+                <li key="0">Upload policies for acknowledgment</li><li key="1">Track who has signed</li><li key="2">Set re-acknowledgment schedules</li>
+              </ul>
+            </div>
+            
+            <div style={{ marginTop: '1.5rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
+              Press <kbd style={{ fontFamily: 'monospace', background: 'var(--bg-tertiary)', padding: '0.125rem 0.375rem', borderRadius: '4px' }}>?</kbd> anytime to open this help
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+const App = () => {
+      const [darkMode, setDarkMode] = useState(() => localStorage.getItem('policysign_darkMode') === 'true');
+      const [view, setView] = useState('dashboard');
+      const [policies, setPoliciesRaw] = useState(() => load('policysign_policies', []));
+      const [members, setMembers] = useState(() => load('policysign_members', []));
+      const [acknowledgments, setAcknowledgments] = useState(() => load('policysign_acknowledgments', []));
+      const [showPolicyModal, setShowPolicyModal] = useState(false);
+      const [editingPolicy, setEditingPolicy] = useState(null);
+      const [showMemberModal, setShowMemberModal] = useState(false);
+      const [editingMember, setEditingMember] = useState(null);
+      const [showSignModal, setShowSignModal] = useState(null);
+      const [selectedPolicy, setSelectedPolicy] = useState(null);
+      const [search, setSearch] = useState('');
+      const [filterCategory, setFilterCategory] = useState('all');
+      const [filterStatus, setFilterStatus] = useState('all');
+      const [saveStatus, setSaveStatus] = useState('');
+      const [activityLog, setActivityLog] = useState(() => load('policysign_activity', []));
+      const [settings, setSettings] = useState(() => load('policysign_settings', { orgName: '', requireSignature: true }));
+      const [showHelp, setShowHelp] = useState(false);
+
+      // Undo/Redo
+      const [history, setHistory] = useState([]);
+      const [historyIndex, setHistoryIndex] = useState(-1);
+      const maxHistory = 50;
+
+      const setPolicies = (newDataOrFn) => {
+        setPoliciesRaw(prev => {
+          const newData = typeof newDataOrFn === 'function' ? newDataOrFn(prev) : newDataOrFn;
+          if (JSON.stringify(prev) !== JSON.stringify(newData)) {
+            setHistory(h => {
+              const newHistory = h.slice(0, historyIndex + 1);
+              newHistory.push({ data: prev, timestamp: Date.now() });
+              if (newHistory.length > maxHistory) newHistory.shift();
+              return newHistory;
+            });
+            setHistoryIndex(i => Math.min(i + 1, maxHistory - 1));
+          }
+          return newData;
+        });
+      };
+
+      const canUndo = historyIndex >= 0;
+      const canRedo = historyIndex < history.length - 1;
+      const undo = () => { if (canUndo) { setHistoryIndex(i => i - 1); setPoliciesRaw(history[historyIndex].data); showSave('Undone'); } };
+      const redo = () => { if (canRedo) { setHistoryIndex(i => i + 1); setPoliciesRaw(history[historyIndex + 2].data); showSave('Redone'); } };
+
+
+      useEffect(() => { document.documentElement.classList.toggle('dark', darkMode); }, [darkMode]);
+      useEffect(() => { save('policysign_policies', policies); }, [policies]);
+      useEffect(() => { save('policysign_members', members); }, [members]);
+      useEffect(() => { save('policysign_acknowledgments', acknowledgments); }, [acknowledgments]);
+      useEffect(() => { save('policysign_settings', settings); }, [settings]);
+      useEffect(() => { localStorage.setItem('policysign_darkMode', darkMode); }, [darkMode]);
+
+      const logActivity = (action, entityType, entityName, details = '') => {
+        const entry = { id: generateId(), timestamp: now(), action, entityType, entityName, details };
+        setActivityLog(prev => { const updated = [entry, ...prev].slice(0, 500); save('policysign_activity', updated); return updated; });
+      };
+
+      const showSave = (msg) => { setSaveStatus(msg); setTimeout(() => setSaveStatus(''), 2000); };
+
+      // Keyboard shortcuts
+      useEffect(() => {
+        const handler = (e) => {
+          if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') return;
+          if ((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); return; }
+          if ((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))) { e.preventDefault(); redo(); return; }
+          if (e.key === 'n' && !e.ctrlKey) { e.preventDefault(); setEditingPolicy(null); setShowPolicyModal(true); }
+          if (e.key === 'Escape') { setShowPolicyModal(false); setShowMemberModal(false); setShowSignModal(null); setSelectedPolicy(null); }
+          if (e.key === '1') setView('dashboard');
+          if (e.key === '2') setView('policies');
+          if (e.key === '3') setView('members');
+          if (e.key === '4') setView('reports');
+        };
+        window.addEventListener('keydown', handler);
+        return () => window.removeEventListener('keydown', handler);
+      }, [canUndo, canRedo, historyIndex, history]);
+
+      // Policy CRUD
+      const savePolicy = (policy) => {
+        const isNew = !policies.find(p => p.id === policy.id);
+        if (isNew) {
+          setPolicies([...policies, { ...policy, createdAt: now(), updatedAt: now() }]);
+          logActivity('Created', 'Policy', policy.title);
+        } else {
+          setPolicies(policies.map(p => p.id === policy.id ? { ...policy, updatedAt: now() } : p));
+          logActivity('Updated', 'Policy', policy.title);
+        }
+        setShowPolicyModal(false);
+        setEditingPolicy(null);
+        showSave('Policy saved!');
+      };
+
+      const deletePolicy = (id) => {
+        const policy = policies.find(p => p.id === id);
+        if (confirm('Delete this policy? All acknowledgment records will also be deleted.')) {
+          setPolicies(policies.filter(p => p.id !== id));
+          setAcknowledgments(acknowledgments.filter(a => a.policyId !== id));
+          logActivity('Deleted', 'Policy', policy?.title);
+        }
+      };
+
+      // Member CRUD
+      const saveMember = (member) => {
+        const isNew = !members.find(m => m.id === member.id);
+        if (isNew) {
+          setMembers([...members, { ...member, createdAt: now() }]);
+          logActivity('Added', 'Member', member.name);
+        } else {
+          setMembers(members.map(m => m.id === member.id ? member : m));
+          logActivity('Updated', 'Member', member.name);
+        }
+        setShowMemberModal(false);
+        setEditingMember(null);
+        showSave('Member saved!');
+      };
+
+      const deleteMember = (id) => {
+        const member = members.find(m => m.id === id);
+        if (confirm('Delete this member? Their acknowledgment records will be preserved.')) {
+          setMembers(members.filter(m => m.id !== id));
+          logActivity('Deleted', 'Member', member?.name);
+        }
+      };
+
+      // Acknowledgment
+      const recordAcknowledgment = (policyId, memberId, signature = null) => {
+        const existing = acknowledgments.find(a => a.policyId === policyId && a.memberId === memberId);
+        if (existing) {
+          setAcknowledgments(acknowledgments.map(a => 
+            a.id === existing.id ? { ...a, signedAt: now(), signature, ipAddress: '127.0.0.1' } : a
+          ));
+        } else {
+          setAcknowledgments([...acknowledgments, {
+            id: generateId(),
+            policyId,
+            memberId,
+            signedAt: now(),
+            signature,
+            ipAddress: '127.0.0.1',
+          }]);
+        }
+        const policy = policies.find(p => p.id === policyId);
+        const member = members.find(m => m.id === memberId);
+        logActivity('Signed', 'Policy', policy?.title, `by ${member?.name}`);
+        showSave('Acknowledgment recorded!');
+        setShowSignModal(null);
+      };
+
+      // Get acknowledgment status for a policy
+      const getPolicyStatus = (policyId) => {
+        const policy = policies.find(p => p.id === policyId);
+        if (!policy) return { signed: 0, pending: 0, total: 0, percentage: 0 };
+        
+        const targetMembers = policy.targetGroups?.includes('all') 
+          ? members 
+          : members.filter(m => policy.targetGroups?.includes(m.group));
+        
+        const signed = targetMembers.filter(m => 
+          acknowledgments.some(a => a.policyId === policyId && a.memberId === m.id)
+        ).length;
+        
+        return {
+          signed,
+          pending: targetMembers.length - signed,
+          total: targetMembers.length,
+          percentage: targetMembers.length ? Math.round((signed / targetMembers.length) * 100) : 0
+        };
+      };
+
+      // Stats
+      const stats = useMemo(() => {
+        const totalPolicies = policies.length;
+        const activePolicies = policies.filter(p => p.status === 'active').length;
+        const totalMembers = members.length;
+        const totalAcks = acknowledgments.length;
+        
+        const overdue = policies.filter(p => {
+          if (p.status !== 'active' || !p.dueDate) return false;
+          const status = getPolicyStatus(p.id);
+          return p.dueDate < today() && status.percentage < 100;
+        }).length;
+
+        const avgCompliance = policies.length ? Math.round(
+          policies.reduce((sum, p) => sum + getPolicyStatus(p.id).percentage, 0) / policies.length
+        ) : 0;
+
+        return { totalPolicies, activePolicies, totalMembers, totalAcks, overdue, avgCompliance };
+      }, [policies, members, acknowledgments]);
+
+      // Filtered policies
+      const filteredPolicies = useMemo(() => {
+        return policies.filter(p => {
+          if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+          if (filterCategory !== 'all' && p.category !== filterCategory) return false;
+          if (filterStatus !== 'all' && p.status !== filterStatus) return false;
+          return true;
+        });
+      }, [policies, search, filterCategory, filterStatus]);
+
+      // Dashboard View
+      const DashboardView = () => (
+        <div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            <StatCard icon={<Icons.FileText />} label="Total Policies" value={stats.totalPolicies} subtext={`${stats.activePolicies} active`} />
+            <StatCard icon={<Icons.Users />} label="Members" value={stats.totalMembers} />
+            <StatCard icon={<Icons.CheckCircle />} label="Signatures" value={stats.totalAcks} color="var(--success)" />
+            <StatCard icon={<Icons.BarChart />} label="Avg. Compliance" value={`${stats.avgCompliance}%`} color="var(--info)" />
+            <StatCard icon={<Icons.AlertCircle />} label="Overdue" value={stats.overdue} color={stats.overdue > 0 ? 'var(--danger)' : 'var(--success)'} />
+          </div>
+
+          {/* Recent Policies Needing Attention */}
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Policies Needing Attention</h3>
+            {policies.filter(p => p.status === 'active' && getPolicyStatus(p.id).percentage < 100).slice(0, 5).map(policy => {
+              const status = getPolicyStatus(policy.id);
+              const category = POLICY_CATEGORIES[policy.category];
+              return (
+                <div key={policy.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 0', borderBottom: '1px solid var(--border)' }}>
+                  <span style={{ fontSize: '1.25rem' }}>{category?.icon}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 500 }}>{policy.title}</div>
+                    <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                      {status.signed} of {status.total} signed • Due: {policy.dueDate ? formatDate(policy.dueDate) : 'No deadline'}
+                    </div>
+                  </div>
+                  <div style={{ width: '120px' }}>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${status.percentage}%`, background: status.percentage === 100 ? 'var(--success)' : status.percentage > 50 ? 'var(--warning)' : 'var(--danger)' }}></div>
+                    </div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.25rem' }}>{status.percentage}%</div>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => setSelectedPolicy(policy)}><Icons.Eye /></Button>
+                </div>
+              );
+            })}
+            {policies.filter(p => p.status === 'active' && getPolicyStatus(p.id).percentage < 100).length === 0 && (
+              <div style={{ color: 'var(--text-muted)', textAlign: 'center', padding: '2rem' }}>
+                <Icons.CheckCircle style={{ width: 32, height: 32, marginBottom: '0.5rem' }} />
+                <div>All policies are fully acknowledged!</div>
+              </div>
+            )}
+          </div>
+
+          {/* Recent Activity */}
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Recent Activity</h3>
+            {activityLog.slice(0, 10).map(entry => (
+              <div key={entry.id} style={{ display: 'flex', gap: '1rem', padding: '0.5rem 0', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }}>
+                <span style={{ color: 'var(--text-muted)', minWidth: '140px' }}>{formatDateTime(entry.timestamp)}</span>
+                <span><strong>{entry.action}</strong> {entry.entityType}: {entry.entityName}</span>
+                {entry.details && <span style={{ color: 'var(--text-muted)' }}>{entry.details}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+
+      // Policies View
+      const PoliciesView = () => (
+        <div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem', alignItems: 'center' }}>
+            <div style={{ position: 'relative', flex: '1 1 250px' }}>
+              <Icons.Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search policies..."
+                style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.9375rem' }} />
+            </div>
+            <Select value={filterCategory} onChange={setFilterCategory} options={[{ value: 'all', label: 'All Categories' }, ...Object.entries(POLICY_CATEGORIES).map(([k, v]) => ({ value: k, label: `${v.icon} ${v.label}` }))]} style={{ minWidth: '180px' }} />
+            <Select value={filterStatus} onChange={setFilterStatus} options={[{ value: 'all', label: 'All Status' }, { value: 'active', label: 'Active' }, { value: 'draft', label: 'Draft' }, { value: 'archived', label: 'Archived' }]} style={{ minWidth: '140px' }} />
+            <Button onClick={() => { setEditingPolicy(null); setShowPolicyModal(true); }}><Icons.Plus /> New Policy</Button>
+          </div>
+
+          <div style={{ display: 'grid', gap: '1rem' }}>
+            {filteredPolicies.map(policy => {
+              const category = POLICY_CATEGORIES[policy.category];
+              const status = getPolicyStatus(policy.id);
+              const isOverdue = policy.dueDate && policy.dueDate < today() && status.percentage < 100;
+              
+              return (
+                <div key={policy.id} style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.25rem', border: '1px solid var(--border)', borderLeft: `4px solid ${category?.color || 'var(--border)'}` }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '1rem' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.5rem' }}>
+                        <span style={{ fontSize: '1.5rem' }}>{category?.icon}</span>
+                        <div>
+                          <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>{policy.title}</h3>
+                          <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                            {category?.label} • Version {policy.version || '1.0'}
+                            {policy.status === 'draft' && <span style={{ marginLeft: '0.5rem', padding: '0.125rem 0.5rem', background: 'var(--warning)', color: 'white', borderRadius: '4px', fontSize: '0.6875rem' }}>DRAFT</span>}
+                            {policy.status === 'archived' && <span style={{ marginLeft: '0.5rem', padding: '0.125rem 0.5rem', background: 'var(--text-muted)', color: 'white', borderRadius: '4px', fontSize: '0.6875rem' }}>ARCHIVED</span>}
+                          </div>
+                        </div>
+                      </div>
+                      {policy.description && <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>{policy.description}</p>}
+                      <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
+                        {policy.dueDate && (
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: isOverdue ? 'var(--danger)' : 'inherit' }}>
+                            <Icons.Calendar /> Due: {formatDate(policy.dueDate)}
+                          </span>
+                        )}
+                        <span style={{ display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Icons.Users /> {status.signed}/{status.total} signed
+                        </span>
+                      </div>
+                    </div>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.75rem' }}>
+                      <div style={{ width: '150px' }}>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: `${status.percentage}%`, background: status.percentage === 100 ? 'var(--success)' : status.percentage > 50 ? 'var(--warning)' : 'var(--danger)' }}></div>
+                        </div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center', marginTop: '0.25rem' }}>
+                          {status.percentage}% complete
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                        <Button variant="ghost" size="sm" onClick={() => setSelectedPolicy(policy)} title="View details"><Icons.Eye /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => { setEditingPolicy(policy); setShowPolicyModal(true); }} title="Edit"><Icons.Edit /></Button>
+                        <Button variant="ghost" size="sm" onClick={() => deletePolicy(policy.id)} title="Delete"><Icons.Trash /></Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+            {filteredPolicies.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                <Icons.FileText style={{ width: 48, height: 48, marginBottom: '1rem', opacity: 0.5 }} />
+                <div>No policies found</div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+      // Members View
+      const MembersView = () => (
+        <div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ position: 'relative', flex: '1 1 300px', maxWidth: '400px' }}>
+              <Icons.Search style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search members..."
+                style={{ width: '100%', padding: '0.75rem 0.75rem 0.75rem 2.5rem', background: 'var(--bg-secondary)', border: '1px solid var(--border)', borderRadius: '8px', color: 'var(--text-primary)', fontSize: '0.9375rem' }} />
+            </div>
+            <Button onClick={() => { setEditingMember(null); setShowMemberModal(true); }}><Icons.Plus /> Add Member</Button>
+          </div>
+
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', border: '1px solid var(--border)', overflow: 'hidden' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr style={{ background: 'var(--bg-tertiary)' }}>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Member</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Group</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Email</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Policies Signed</th>
+                  <th style={{ padding: '0.75rem 1rem', textAlign: 'center', fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {members.filter(m => !search || m.name.toLowerCase().includes(search.toLowerCase()) || m.email?.toLowerCase().includes(search.toLowerCase())).map(member => {
+                  const memberAcks = acknowledgments.filter(a => a.memberId === member.id);
+                  const applicablePolicies = policies.filter(p => p.status === 'active' && (p.targetGroups?.includes('all') || p.targetGroups?.includes(member.group)));
+                  const signedCount = memberAcks.length;
+                  const totalCount = applicablePolicies.length;
+                  
+                  return (
+                    <tr key={member.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600 }}>
+                            {member.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <div style={{ fontWeight: 500 }}>{member.name}</div>
+                            {member.title && <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{member.title}</div>}
+                          </div>
+                        </div>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem' }}>
+                        <span style={{ padding: '0.25rem 0.75rem', borderRadius: '20px', fontSize: '0.8125rem', background: 'var(--bg-tertiary)' }}>
+                          {MEMBER_GROUPS.find(g => g.id === member.group)?.name || member.group}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem', color: 'var(--text-secondary)' }}>{member.email || '—'}</td>
+                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
+                        <span style={{ color: signedCount === totalCount ? 'var(--success)' : 'var(--text-primary)' }}>
+                          {signedCount}/{totalCount}
+                        </span>
+                      </td>
+                      <td style={{ padding: '0.875rem 1rem', textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '0.25rem' }}>
+                          <Button variant="ghost" size="sm" onClick={() => setShowSignModal(member)} title="Sign policies"><Icons.PenTool /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => { setEditingMember(member); setShowMemberModal(true); }} title="Edit"><Icons.Edit /></Button>
+                          <Button variant="ghost" size="sm" onClick={() => deleteMember(member.id)} title="Delete"><Icons.Trash /></Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            {members.length === 0 && (
+              <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                <Icons.Users style={{ width: 48, height: 48, marginBottom: '1rem', opacity: 0.5 }} />
+                <div>No members added yet</div>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+
+      // Reports View
+      const ReportsView = () => {
+        const complianceByCategory = useMemo(() => {
+          return Object.entries(POLICY_CATEGORIES).map(([key, cat]) => {
+            const catPolicies = policies.filter(p => p.category === key && p.status === 'active');
+            const avgCompliance = catPolicies.length ? Math.round(
+              catPolicies.reduce((sum, p) => sum + getPolicyStatus(p.id).percentage, 0) / catPolicies.length
+            ) : 0;
+            return { ...cat, key, count: catPolicies.length, compliance: avgCompliance };
+          }).filter(c => c.count > 0);
+        }, [policies, acknowledgments]);
+
+        return (
+          <div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '1.5rem' }}>
+              {/* Compliance by Category */}
+              <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Compliance by Category</h3>
+                {complianceByCategory.map(cat => (
+                  <div key={cat.key} style={{ marginBottom: '1rem' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.375rem' }}>
+                      <span>{cat.icon} {cat.label}</span>
+                      <span style={{ fontWeight: 600, color: cat.compliance === 100 ? 'var(--success)' : cat.compliance > 70 ? 'var(--warning)' : 'var(--danger)' }}>{cat.compliance}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div className="progress-fill" style={{ width: `${cat.compliance}%`, background: cat.color }}></div>
+                    </div>
+                  </div>
+                ))}
+                {complianceByCategory.length === 0 && <div style={{ color: 'var(--text-muted)' }}>No active policies</div>}
+              </div>
+
+              {/* Outstanding Signatures */}
+              <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Outstanding Signatures</h3>
+                {members.slice(0, 10).map(member => {
+                  const applicablePolicies = policies.filter(p => p.status === 'active' && (p.targetGroups?.includes('all') || p.targetGroups?.includes(member.group)));
+                  const unsignedCount = applicablePolicies.filter(p => !acknowledgments.some(a => a.policyId === p.id && a.memberId === member.id)).length;
+                  if (unsignedCount === 0) return null;
+                  return (
+                    <div key={member.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.5rem 0', borderBottom: '1px solid var(--border)' }}>
+                      <span>{member.name}</span>
+                      <span style={{ color: 'var(--danger)', fontWeight: 500 }}>{unsignedCount} unsigned</span>
+                    </div>
+                  );
+                }).filter(Boolean)}
+                {members.every(m => {
+                  const applicable = policies.filter(p => p.status === 'active' && (p.targetGroups?.includes('all') || p.targetGroups?.includes(m.group)));
+                  return applicable.every(p => acknowledgments.some(a => a.policyId === p.id && a.memberId === m.id));
+                }) && <div style={{ color: 'var(--success)', textAlign: 'center' }}>✓ All members have signed all applicable policies</div>}
+              </div>
+
+              {/* Export */}
+              <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Export Reports</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <Button variant="secondary" onClick={() => {
+                    const data = policies.map(p => {
+                      const status = getPolicyStatus(p.id);
+                      return { title: p.title, category: POLICY_CATEGORIES[p.category]?.label, signed: status.signed, total: status.total, percentage: status.percentage };
+                    });
+                    const csv = 'Policy,Category,Signed,Total,Percentage\n' + data.map(r => `"${r.title}","${r.category}",${r.signed},${r.total},${r.percentage}%`).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `policy-compliance-${today()}.csv`; a.click();
+                  }}><Icons.Download /> Policy Compliance Report</Button>
+                  
+                  <Button variant="secondary" onClick={() => {
+                    const data = acknowledgments.map(a => {
+                      const policy = policies.find(p => p.id === a.policyId);
+                      const member = members.find(m => m.id === a.memberId);
+                      return { policy: policy?.title, member: member?.name, signedAt: a.signedAt };
+                    });
+                    const csv = 'Policy,Member,Signed At\n' + data.map(r => `"${r.policy}","${r.member}","${r.signedAt}"`).join('\n');
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a'); a.href = url; a.download = `acknowledgments-${today()}.csv`; a.click();
+                  }}><Icons.Download /> Acknowledgment Log</Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      // Settings View
+      const SettingsView = () => (
+        <div style={{ maxWidth: '600px' }}>
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Organization</h3>
+            <Input label="Organization Name" value={settings.orgName} onChange={v => setSettings({ ...settings, orgName: v })} placeholder="Your Company" />
+          </div>
+          
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Signature Settings</h3>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+              <input type="checkbox" checked={settings.requireSignature} onChange={e => setSettings({ ...settings, requireSignature: e.target.checked })} style={{ width: 18, height: 18, accentColor: 'var(--accent)' }} />
+              <span>Require drawn signature (vs. checkbox acknowledgment)</span>
+            </label>
+          </div>
+          
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>License</h3>
+            <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', marginTop: '0.75rem' }}>
+            </p>
+          </div>
+          
+          <div style={{ background: 'var(--bg-secondary)', borderRadius: '12px', padding: '1.5rem', border: '1px solid var(--border)' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>Data Management</h3>
+            <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <Button variant="secondary" onClick={() => {
+                const data = JSON.stringify({ policies, members, acknowledgments, settings }, null, 2);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a'); a.href = url; a.download = `policysign-backup-${today()}.json`; a.click();
+              }}><Icons.Download /> Export Backup</Button>
+              <Button variant="danger" onClick={() => {
+                if (confirm('Clear all data? This cannot be undone.')) {
+                  localStorage.removeItem('policysign_policies');
+                  localStorage.removeItem('policysign_members');
+                  localStorage.removeItem('policysign_acknowledgments');
+                  localStorage.removeItem('policysign_activity');
+                  window.location.reload();
+                }
+              }}><Icons.Trash /> Clear All Data</Button>
+            </div>
+          </div>
+        </div>
+      );
+
+      // Policy Detail Sidebar
+      const PolicyDetail = ({ policy, onClose }) => {
+        const category = POLICY_CATEGORIES[policy.category];
+        const status = getPolicyStatus(policy.id);
+        const targetMembers = policy.targetGroups?.includes('all') 
+          ? members 
+          : members.filter(m => policy.targetGroups?.includes(m.group));
+
+        return (
+          <div style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: '450px', maxWidth: '100vw', background: 'var(--bg-card)', borderLeft: '1px solid var(--border)', zIndex: 1000, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', borderBottom: '1px solid var(--border)' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 600 }}>Policy Details</h3>
+              <Button variant="ghost" size="sm" onClick={onClose}><Icons.X /></Button>
+            </div>
+            
+            <div style={{ flex: 1, overflow: 'auto', padding: '1.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
+                <span style={{ fontSize: '2rem' }}>{category?.icon}</span>
+                <div>
+                  <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>{policy.title}</h2>
+                  <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{category?.label} • v{policy.version || '1.0'}</div>
+                </div>
+              </div>
+              
+              {policy.description && <p style={{ color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>{policy.description}</p>}
+              
+              <div style={{ marginBottom: '1.5rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                  <span style={{ fontWeight: 500 }}>Completion</span>
+                  <span style={{ fontWeight: 600, color: status.percentage === 100 ? 'var(--success)' : 'var(--text-primary)' }}>{status.signed}/{status.total} ({status.percentage}%)</span>
+                </div>
+                <div className="progress-bar" style={{ height: '12px' }}>
+                  <div className="progress-fill" style={{ width: `${status.percentage}%`, background: status.percentage === 100 ? 'var(--success)' : 'var(--accent)' }}></div>
+                </div>
+              </div>
+              
+              <h4 style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.75rem', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Acknowledgments</h4>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {targetMembers.map(member => {
+                  const ack = acknowledgments.find(a => a.policyId === policy.id && a.memberId === member.id);
+                  return (
+                    <div key={member.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: 32, height: 32, borderRadius: '50%', background: ack ? 'var(--success)' : 'var(--bg-secondary)', color: ack ? 'white' : 'var(--text-muted)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {ack ? <Icons.Check /> : member.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 500 }}>{member.name}</div>
+                          {ack && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Signed {formatDateTime(ack.signedAt)}</div>}
+                        </div>
+                      </div>
+                      {!ack && (
+                        <Button size="sm" onClick={() => setShowSignModal({ member, policy })}><Icons.PenTool /> Sign</Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        );
+      };
+
+      return (
+        <div className={darkMode ? 'dark' : ''} style={{ minHeight: '100vh', background: 'var(--bg-primary)' }}>
+          <header style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)', padding: '0.75rem 1.5rem', position: 'sticky', top: 0, zIndex: 100 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: '1400px', margin: '0 auto' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <h1 style={{ fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <Icons.FileText /> {settings.orgName || 'PolicySign'}
+                </h1>
+                <button onClick={() => setShowHelp(true)} title="Help" style={{ background: 'var(--bg-tertiary)', border: '1px solid var(--border)', borderRadius: '8px', padding: '0.5rem', cursor: 'pointer', fontSize: '1rem' }}>❓</button>
+                <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', padding: '0.25rem 0.5rem', background: 'var(--bg-tertiary)', borderRadius: '4px' }}>v{APP_VERSION}</span>
+              </div>
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <span role="status" aria-live="polite">{saveStatus && <span style={{ color: 'var(--success)', fontSize: '0.875rem', fontWeight: 500 }}><Icons.Check /> {saveStatus}</span>}</span>
+                <Button variant="ghost" size="sm" onClick={undo} disabled={!canUndo} title="Undo (Ctrl+Z)"><Icons.RotateCcw /></Button>
+                <Button variant="ghost" size="sm" onClick={redo} disabled={!canRedo} title="Redo (Ctrl+Y)"><Icons.RotateCw /></Button>
+                
+                <nav role="navigation" aria-label="Main navigation" style={{ display: 'flex', gap: '0.25rem' }}>
+                  <Button variant={view === 'dashboard' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('dashboard')}><Icons.BarChart /> Dashboard</Button>
+                  <Button variant={view === 'policies' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('policies')}><Icons.FileText /> Policies</Button>
+                  <Button variant={view === 'members' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('members')}><Icons.Users /> Members</Button>
+                  <Button variant={view === 'reports' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('reports')}><Icons.Download /> Reports</Button>
+                  <Button variant={view === 'settings' ? 'secondary' : 'ghost'} size="sm" onClick={() => setView('settings')}><Icons.Settings /></Button>
+                </nav>
+                
+                <Button variant="ghost" size="sm" onClick={() => setDarkMode(!darkMode)} title="Toggle theme">
+                  {darkMode ? <Icons.Sun /> : <Icons.Moon />}
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <main id="main-content" role="main" style={{ padding: '1.5rem', maxWidth: '1400px', margin: '0 auto' }}>
+            {view === 'dashboard' && <DashboardView />}
+            {view === 'policies' && <PoliciesView />}
+            {view === 'members' && <MembersView />}
+            {view === 'reports' && <ReportsView />}
+            {view === 'settings' && <SettingsView />}
+          </main>
+
+          {/* Policy Modal */}
+          <Modal isOpen={showPolicyModal} onClose={() => { setShowPolicyModal(false); setEditingPolicy(null); }} title={editingPolicy ? 'Edit Policy' : 'New Policy'} width="600px">
+            {(() => {
+              const [form, setForm] = useState(editingPolicy || { title: '', description: '', category: 'hr', status: 'active', version: '1.0', dueDate: '', targetGroups: ['all'], content: '' });
+              useEffect(() => { setForm(editingPolicy || { title: '', description: '', category: 'hr', status: 'active', version: '1.0', dueDate: '', targetGroups: ['all'], content: '' }); }, [editingPolicy]);
+              
+              const toggleGroup = (groupId) => {
+                if (groupId === 'all') {
+                  setForm({ ...form, targetGroups: ['all'] });
+                } else {
+                  const current = form.targetGroups.filter(g => g !== 'all');
+                  if (current.includes(groupId)) {
+                    setForm({ ...form, targetGroups: current.filter(g => g !== groupId) });
+                  } else {
+                    setForm({ ...form, targetGroups: [...current, groupId] });
+                  }
+                }
+              };
+              
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <Input label="Policy Title" value={form.title} onChange={v => setForm({ ...form, title: v })} required placeholder="e.g., Employee Handbook Acknowledgment" />
+                  <Textarea label="Description" value={form.description} onChange={v => setForm({ ...form, description: v })} placeholder="Brief description of this policy..." rows={2} />
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <Select label="Category" value={form.category} onChange={v => setForm({ ...form, category: v })} options={Object.entries(POLICY_CATEGORIES).map(([k, v]) => ({ value: k, label: `${v.icon} ${v.label}` }))} />
+                    <Select label="Status" value={form.status} onChange={v => setForm({ ...form, status: v })} options={[{ value: 'draft', label: 'Draft' }, { value: 'active', label: 'Active' }, { value: 'archived', label: 'Archived' }]} />
+                  </div>
+                  
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                    <Input label="Version" value={form.version} onChange={v => setForm({ ...form, version: v })} placeholder="1.0" />
+                    <Input label="Due Date" type="date" value={form.dueDate} onChange={v => setForm({ ...form, dueDate: v })} />
+                  </div>
+                  
+                  <div>
+                    <label style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Target Groups</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      {MEMBER_GROUPS.map(group => (
+                        <button key={group.id} type="button" onClick={() => toggleGroup(group.id)}
+                          style={{ padding: '0.375rem 0.75rem', borderRadius: '6px', border: form.targetGroups.includes(group.id) ? '2px solid var(--accent)' : '2px solid var(--border)', background: form.targetGroups.includes(group.id) ? 'var(--accent)' : 'var(--bg-tertiary)', color: form.targetGroups.includes(group.id) ? 'white' : 'var(--text-primary)', fontSize: '0.8125rem', cursor: 'pointer' }}>
+                          {group.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <Textarea label="Policy Content (optional)" value={form.content} onChange={v => setForm({ ...form, content: v })} placeholder="Full policy text or leave blank to link to external document..." rows={4} />
+                  
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <Button variant="secondary" onClick={() => { setShowPolicyModal(false); setEditingPolicy(null); }} style={{ flex: 1 }}>Cancel</Button>
+                    <Button onClick={() => savePolicy({ ...form, id: editingPolicy?.id || generateId() })} style={{ flex: 1 }} disabled={!form.title}>{editingPolicy ? 'Save Changes' : 'Create Policy'}</Button>
+                  </div>
+                </div>
+              );
+            })()}
+          </Modal>
+
+          {/* Member Modal */}
+          <Modal isOpen={showMemberModal} onClose={() => { setShowMemberModal(false); setEditingMember(null); }} title={editingMember ? 'Edit Member' : 'Add Member'}>
+            {(() => {
+              const [form, setForm] = useState(editingMember || { name: '', email: '', title: '', group: 'employees' });
+              useEffect(() => { setForm(editingMember || { name: '', email: '', title: '', group: 'employees' });
+      // Backup & Restore
+      const backupAllData = () => {
+        const data = { policies, signatures, settings, exportedAt: new Date().toISOString() };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `policysign-backup-\${new Date().toISOString().split('T')[0]}.json`;
+        a.click();
+      };
+      
+      const restoreAllData = (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+          try {
+            const data = JSON.parse(ev.target.result);
+            if (data.policies) { setPolicies(data.policies); save('policies', data.policies); }
+            if (data.signatures) { setSignatures(data.signatures); save('signatures', data.signatures); }
+            if (data.settings) { setSettings(data.settings); save('settings', data.settings); }
+            alert('Data restored successfully!');
+            window.location.reload();
+          } catch (err) { alert('Invalid backup file'); }
+        };
+        reader.readAsText(file);
+      };
+ }, [editingMember]);
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <Input label="Full Name" value={form.name} onChange={v => setForm({ ...form, name: v })} required placeholder="John Smith" />
+                  <Input label="Email" type="email" value={form.email} onChange={v => setForm({ ...form, email: v })} placeholder="john@company.com" />
+                  <Input label="Title/Position" value={form.title} onChange={v => setForm({ ...form, title: v })} placeholder="Software Engineer" />
+                  <Select label="Group" value={form.group} onChange={v => setForm({ ...form, group: v })} options={MEMBER_GROUPS.filter(g => g.id !== 'all').map(g => ({ value: g.id, label: g.name }))} />
+                  <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                    <Button variant="secondary" onClick={() => { setShowMemberModal(false); setEditingMember(null); }} style={{ flex: 1 }}>Cancel</Button>
+                    <Button onClick={() => saveMember({ ...form, id: editingMember?.id || generateId() })} style={{ flex: 1 }} disabled={!form.name}>Save</Button>
+                  </div>
+                </div>
+              );
+            })()}
+          </Modal>
+
+          {/* Sign Modal */}
+          <Modal isOpen={!!showSignModal} onClose={() => setShowSignModal(null)} title="Sign Policy" width="500px">
+            {showSignModal && (() => {
+              const member = showSignModal.member || showSignModal;
+              const policy = showSignModal.policy;
+              const [selectedPolicyId, setSelectedPolicyId] = useState(policy?.id || '');
+              const [agreed, setAgreed] = useState(false);
+              const [signature, setSignature] = useState(null);
+              
+              const applicablePolicies = policies.filter(p => 
+                p.status === 'active' && 
+                (p.targetGroups?.includes('all') || p.targetGroups?.includes(member.group)) &&
+                !acknowledgments.some(a => a.policyId === p.id && a.memberId === member.id)
+              );
+              
+              const currentPolicy = policies.find(p => p.id === selectedPolicyId);
+              
+              return (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem', background: 'var(--bg-tertiary)', borderRadius: '8px' }}>
+                    <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--accent)', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '1.125rem' }}>
+                      {member.name.charAt(0)}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{member.name}</div>
+                      <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{member.email}</div>
+                    </div>
+                  </div>
+                  
+                  {!policy && (
+                    <Select label="Select Policy to Sign" value={selectedPolicyId} onChange={setSelectedPolicyId} 
+                      options={[{ value: '', label: 'Choose a policy...' }, ...applicablePolicies.map(p => ({ value: p.id, label: p.title }))]} />
+                  )}
+                  
+                  {currentPolicy && (
+                    <>
+                      <div style={{ padding: '1rem', background: 'var(--bg-tertiary)', borderRadius: '8px', maxHeight: '200px', overflow: 'auto' }}>
+                        <h4 style={{ marginBottom: '0.5rem' }}>{currentPolicy.title}</h4>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>{currentPolicy.content || currentPolicy.description || 'No policy content available.'}</p>
+                      </div>
+                      
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '0.75rem', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={{ width: 18, height: 18, marginTop: 2, accentColor: 'var(--accent)' }} />
+                        <span style={{ fontSize: '0.875rem' }}>I have read, understood, and agree to comply with this policy.</span>
+                      </label>
+                      
+                      {settings.requireSignature && agreed && (
+                        <div>
+                          <label style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500, marginBottom: '0.5rem', display: 'block' }}>Your Signature</label>
+                          <SignaturePad onSave={setSignature} onClear={() => setSignature(null)} />
+                        </div>
+                      )}
+                      
+                      <Button 
+                        onClick={() => recordAcknowledgment(currentPolicy.id, member.id, signature)} 
+                        disabled={!agreed || (settings.requireSignature && !signature)}
+                        style={{ marginTop: '0.5rem' }}
+                      >
+                        <Icons.PenTool /> Sign & Acknowledge
+                      </Button>
+                    </>
+                  )}
+                  
+                  {applicablePolicies.length === 0 && !policy && (
+                    <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>
+                      <Icons.CheckCircle style={{ width: 32, height: 32, marginBottom: '0.5rem' }} />
+                      <div>All policies have been signed!</div>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </Modal>
+
+          {/* Policy Detail Sidebar */}
+          {selectedPolicy && <PolicyDetail policy={selectedPolicy} onClose={() => setSelectedPolicy(null)} />}
+
+          <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+          <footer className="no-print" style={{ textAlign: 'center', padding: '1.5rem', borderTop: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
+            PolicySign v{APP_VERSION} • Secure policy acknowledgment tracking
+          <p style="margin-top:1rem;font-size:.8rem;text-align:center;color:#64748b">© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+        </div>
+      );
+    };
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
