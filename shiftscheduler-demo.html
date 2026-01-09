@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShiftScheduler - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .week-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    
+    .week-nav button { padding: 0.5rem 1rem; }
+    .week-label { font-weight: 600; font-size: 1.125rem; }
+    
+    .schedule-grid {
+      display: grid;
+      grid-template-columns: 150px repeat(7, 1fr);
+      gap: 1px;
+      background: var(--gray-200);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+    
+    .schedule-header {
+      background: var(--gray-100);
+      padding: 0.75rem 0.5rem;
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    
+    .schedule-header.today { background: var(--primary-light); }
+    
+    .employee-row {
+      display: contents;
+    }
+    
+    .employee-name {
+      background: white;
+      padding: 0.75rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      border-right: 2px solid var(--gray-200);
+    }
+    
+    .shift-cell {
+      background: white;
+      padding: 0.25rem;
+      min-height: 60px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .shift-cell:hover { background: var(--gray-50); }
+    .shift-cell.today { background: #f0fdfa; }
+    
+    .shift-block {
+      background: var(--primary);
+      color: white;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.75rem;
+      margin-bottom: 0.25rem;
+      cursor: pointer;
+    }
+    
+    .shift-block.morning { background: #f59e0b; }
+    .shift-block.afternoon { background: #3b82f6; }
+    .shift-block.evening { background: #8b5cf6; }
+    .shift-block.night { background: #1f2937; }
+    .shift-block.off { background: var(--gray-300); color: var(--gray-600); }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.inactive { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.approved { background: #dcfce7; color: #166534; }
+    .status-badge.denied { background: #fee2e2; color: #991b1b; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .availability-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    
+    .avail-day {
+      text-align: center;
+      padding: 0.5rem;
+      border: 1px solid var(--gray-200);
+      border-radius: 0.25rem;
+      cursor: pointer;
+      font-size: 0.75rem;
+    }
+    
+    .avail-day.selected {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 900px) {
+      .schedule-grid { font-size: 0.75rem; grid-template-columns: 100px repeat(7, 1fr); }
+      .employee-name { padding: 0.5rem; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📅 ShiftScheduler</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="schedule">Schedule</div>
+    <div class="nav-tab" data-tab="employees">Employees</div>
+    <div class="nav-tab" data-tab="shifts">Shift Templates</div>
+    <div class="nav-tab" data-tab="requests">Time Off</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Schedule -->
+    <div class="tab-content active" id="tab-schedule">
+      <div class="card">
+        <div class="card-header">
+          <div class="week-nav">
+            <button class="btn btn-secondary" onclick="changeWeek(-1)">← Prev</button>
+            <span class="week-label" id="week-label">Week of Jan 1</span>
+            <button class="btn btn-secondary" onclick="changeWeek(1)">Next →</button>
+            <button class="btn btn-secondary btn-sm" onclick="goToToday()">Today</button>
+          </div>
+          <div>
+            <button class="btn btn-secondary" onclick="exportSchedule()">Export</button>
+            <button class="btn btn-primary" onclick="openShiftModal()">+ Add Shift</button>
+          </div>
+        </div>
+        <div class="schedule-grid" id="schedule-grid"></div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-scheduled">0</div>
+          <div class="stat-label">Shifts This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-hours">0</div>
+          <div class="stat-label">Total Hours</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-coverage">0%</div>
+          <div class="stat-label">Coverage</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Employees -->
+    <div class="tab-content" id="tab-employees">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Employees</h2>
+          <button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Status</th>
+              <th>This Week Hrs</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="employees-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Shift Templates -->
+    <div class="tab-content" id="tab-shifts">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Shift Templates</h2>
+          <button class="btn btn-primary" onclick="openTemplateModal()">+ Add Template</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Start Time</th>
+              <th>End Time</th>
+              <th>Duration</th>
+              <th>Color</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="templates-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Time Off Requests -->
+    <div class="tab-content" id="tab-requests">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Time Off Requests</h2>
+          <button class="btn btn-primary" onclick="openRequestModal()">+ New Request</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Employee</th>
+              <th>Type</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Status</th>
+              <th>Notes</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="requests-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportSchedule()">📅 Weekly Schedule</button>
+          <button class="btn btn-secondary" onclick="exportHours()">⏱️ Hours by Employee</button>
+          <button class="btn btn-secondary" onclick="exportTimeOff()">🏖️ Time Off Report</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Hours by Employee (This Week)</h3>
+        <div id="hours-chart"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Coverage by Day</h3>
+        <div id="coverage-chart"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Shift Modal -->
+  <div class="modal-overlay" id="shift-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="shift-modal-title">Add Shift</h3>
+        <button class="modal-close" onclick="closeModal('shift-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sh-id">
+        <div class="form-group">
+          <label class="form-label">Employee *</label>
+          <select class="form-input" id="sh-employee"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Date *</label>
+          <input type="date" class="form-input" id="sh-date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Shift Template</label>
+          <select class="form-input" id="sh-template" onchange="applyTemplate()">
+            <option value="">Custom...</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Time *</label>
+            <input type="time" class="form-input" id="sh-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time *</label>
+            <input type="time" class="form-input" id="sh-end">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <input type="text" class="form-input" id="sh-notes" placeholder="Optional notes">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="sh-delete-btn" onclick="deleteShift()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('shift-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveShift()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Employee Modal -->
+  <div class="modal-overlay" id="employee-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="employee-modal-title">Add Employee</h3>
+        <button class="modal-close" onclick="closeModal('employee-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="emp-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="emp-name">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="emp-email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="emp-phone">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Role</label>
+            <input type="text" class="form-input" id="emp-role" placeholder="e.g., Server, Cook, Manager">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="emp-status">
+              <option value="active">Active</option>
+              <option value="inactive">Inactive</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Max Hours/Week</label>
+          <input type="number" class="form-input" id="emp-max-hours" min="0" max="60" value="40">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Availability</label>
+          <div class="availability-grid" id="emp-availability">
+            <div class="avail-day selected" data-day="0">Sun</div>
+            <div class="avail-day selected" data-day="1">Mon</div>
+            <div class="avail-day selected" data-day="2">Tue</div>
+            <div class="avail-day selected" data-day="3">Wed</div>
+            <div class="avail-day selected" data-day="4">Thu</div>
+            <div class="avail-day selected" data-day="5">Fri</div>
+            <div class="avail-day selected" data-day="6">Sat</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="emp-delete-btn" onclick="deleteEmployee()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('employee-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveEmployee()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Template Modal -->
+  <div class="modal-overlay" id="template-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="template-modal-title">Add Shift Template</h3>
+        <button class="modal-close" onclick="closeModal('template-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="tpl-id">
+        <div class="form-group">
+          <label class="form-label">Template Name *</label>
+          <input type="text" class="form-input" id="tpl-name" placeholder="e.g., Morning, Evening">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Time *</label>
+            <input type="time" class="form-input" id="tpl-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Time *</label>
+            <input type="time" class="form-input" id="tpl-end">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <select class="form-input" id="tpl-color">
+            <option value="morning">Orange (Morning)</option>
+            <option value="afternoon">Blue (Afternoon)</option>
+            <option value="evening">Purple (Evening)</option>
+            <option value="night">Dark (Night)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="tpl-delete-btn" onclick="deleteTemplate()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('template-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveTemplate()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Request Modal -->
+  <div class="modal-overlay" id="request-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="request-modal-title">Time Off Request</h3>
+        <button class="modal-close" onclick="closeModal('request-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="req-id">
+        <div class="form-group">
+          <label class="form-label">Employee *</label>
+          <select class="form-input" id="req-employee"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Type</label>
+          <select class="form-input" id="req-type">
+            <option value="vacation">Vacation</option>
+            <option value="sick">Sick Leave</option>
+            <option value="personal">Personal</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Date *</label>
+            <input type="date" class="form-input" id="req-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date *</label>
+            <input type="date" class="form-input" id="req-end">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="req-status">
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="denied">Denied</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="req-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="req-delete-btn" onclick="deleteRequest()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('request-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveRequest()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let employees = [], templates = [], shifts = [], requests = [];
+    let currentWeekStart = getWeekStart(new Date());
+    
+    function init() {
+      loadData();
+      setupTabs();
+      setupAvailability();
+      renderAll();
+    }
+    
+    function getWeekStart(date) {
+      const d = new Date(date);
+      const day = d.getDay();
+      d.setDate(d.getDate() - day);
+      d.setHours(0, 0, 0, 0);
+      return d;
+    }
+    
+    function loadData() {
+      const saved = {
+        employees: localStorage.getItem('shiftsch_employees'),
+        templates: localStorage.getItem('shiftsch_templates'),
+        shifts: localStorage.getItem('shiftsch_shifts'),
+        requests: localStorage.getItem('shiftsch_requests')
+      };
+      
+      employees = saved.employees ? JSON.parse(saved.employees) : [
+        { id: 1, name: 'John Smith', email: 'john@email.com', phone: '555-0101', role: 'Manager', status: 'active', maxHours: 40, availability: [1,1,1,1,1,1,0] },
+        { id: 2, name: 'Sarah Johnson', email: 'sarah@email.com', phone: '555-0102', role: 'Server', status: 'active', maxHours: 32, availability: [1,1,1,1,1,0,0] },
+        { id: 3, name: 'Mike Williams', email: 'mike@email.com', phone: '555-0103', role: 'Cook', status: 'active', maxHours: 40, availability: [0,1,1,1,1,1,1] },
+        { id: 4, name: 'Emily Brown', email: 'emily@email.com', phone: '555-0104', role: 'Server', status: 'active', maxHours: 24, availability: [1,0,1,0,1,1,1] },
+        { id: 5, name: 'David Lee', email: 'david@email.com', phone: '555-0105', role: 'Bartender', status: 'active', maxHours: 30, availability: [0,0,1,1,1,1,1] },
+      ];
+      
+      templates = saved.templates ? JSON.parse(saved.templates) : [
+        { id: 1, name: 'Morning', start: '06:00', end: '14:00', color: 'morning' },
+        { id: 2, name: 'Afternoon', start: '14:00', end: '22:00', color: 'afternoon' },
+        { id: 3, name: 'Evening', start: '17:00', end: '23:00', color: 'evening' },
+        { id: 4, name: 'Night', start: '22:00', end: '06:00', color: 'night' },
+      ];
+      
+      // Generate sample shifts for current week
+      if (!saved.shifts) {
+        const weekDates = getWeekDates(currentWeekStart);
+        shifts = [
+          { id: 1, employeeId: 1, date: weekDates[1], start: '08:00', end: '16:00', templateId: null, notes: '' },
+          { id: 2, employeeId: 1, date: weekDates[2], start: '08:00', end: '16:00', templateId: null, notes: '' },
+          { id: 3, employeeId: 1, date: weekDates[3], start: '08:00', end: '16:00', templateId: null, notes: '' },
+          { id: 4, employeeId: 2, date: weekDates[1], start: '14:00', end: '22:00', templateId: 2, notes: '' },
+          { id: 5, employeeId: 2, date: weekDates[3], start: '14:00', end: '22:00', templateId: 2, notes: '' },
+          { id: 6, employeeId: 2, date: weekDates[4], start: '14:00', end: '22:00', templateId: 2, notes: '' },
+          { id: 7, employeeId: 3, date: weekDates[2], start: '06:00', end: '14:00', templateId: 1, notes: '' },
+          { id: 8, employeeId: 3, date: weekDates[4], start: '06:00', end: '14:00', templateId: 1, notes: '' },
+          { id: 9, employeeId: 3, date: weekDates[5], start: '06:00', end: '14:00', templateId: 1, notes: '' },
+          { id: 10, employeeId: 4, date: weekDates[5], start: '17:00', end: '23:00', templateId: 3, notes: '' },
+          { id: 11, employeeId: 4, date: weekDates[6], start: '17:00', end: '23:00', templateId: 3, notes: '' },
+          { id: 12, employeeId: 5, date: weekDates[4], start: '17:00', end: '23:00', templateId: 3, notes: '' },
+          { id: 13, employeeId: 5, date: weekDates[5], start: '17:00', end: '23:00', templateId: 3, notes: '' },
+          { id: 14, employeeId: 5, date: weekDates[6], start: '17:00', end: '23:00', templateId: 3, notes: '' },
+        ];
+      } else {
+        shifts = JSON.parse(saved.shifts);
+      }
+      
+      requests = saved.requests ? JSON.parse(saved.requests) : [
+        { id: 1, employeeId: 2, type: 'vacation', startDate: getDateString(7), endDate: getDateString(9), status: 'approved', notes: 'Family trip' },
+        { id: 2, employeeId: 4, type: 'personal', startDate: getDateString(14), endDate: getDateString(14), status: 'pending', notes: 'Doctor appointment' },
+      ];
+      
+      saveData();
+    }
+    
+    function getDateString(daysFromNow) {
+      const d = new Date();
+      d.setDate(d.getDate() + daysFromNow);
+      return d.toISOString().split('T')[0];
+    }
+    
+    function getWeekDates(weekStart) {
+      const dates = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(weekStart);
+        d.setDate(d.getDate() + i);
+        dates.push(d.toISOString().split('T')[0]);
+      }
+      return dates;
+    }
+    
+    function saveData() {
+      localStorage.setItem('shiftsch_employees', JSON.stringify(employees));
+      localStorage.setItem('shiftsch_templates', JSON.stringify(templates));
+      localStorage.setItem('shiftsch_shifts', JSON.stringify(shifts));
+      localStorage.setItem('shiftsch_requests', JSON.stringify(requests));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function setupAvailability() {
+      document.querySelectorAll('.avail-day').forEach(day => {
+        day.addEventListener('click', () => day.classList.toggle('selected'));
+      });
+    }
+    
+    function renderAll() {
+      renderSchedule();
+      renderEmployees();
+      renderTemplates();
+      renderRequests();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const activeEmps = employees.filter(e => e.status === 'active');
+      const empOpts = '<option value="">Select Employee</option>' + activeEmps.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+      document.getElementById('sh-employee').innerHTML = empOpts;
+      document.getElementById('req-employee').innerHTML = empOpts;
+      
+      const tplOpts = '<option value="">Custom...</option>' + templates.map(t => `<option value="${t.id}">${t.name} (${t.start}-${t.end})</option>`).join('');
+      document.getElementById('sh-template').innerHTML = tplOpts;
+    }
+    
+    function changeWeek(delta) {
+      currentWeekStart.setDate(currentWeekStart.getDate() + delta * 7);
+      renderSchedule();
+    }
+    
+    function goToToday() {
+      currentWeekStart = getWeekStart(new Date());
+      renderSchedule();
+    }
+    
+    function renderSchedule() {
+      const weekDates = getWeekDates(currentWeekStart);
+      const today = new Date().toISOString().split('T')[0];
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      // Update week label
+      const startMonth = currentWeekStart.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const endDate = new Date(currentWeekStart);
+      endDate.setDate(endDate.getDate() + 6);
+      const endMonth = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      document.getElementById('week-label').textContent = `${startMonth} - ${endMonth}`;
+      
+      // Build grid
+      let html = '<div class="schedule-header">Employee</div>';
+      weekDates.forEach((date, i) => {
+        const isToday = date === today;
+        const dayNum = new Date(date).getDate();
+        html += `<div class="schedule-header ${isToday ? 'today' : ''}">${days[i]}<br>${dayNum}</div>`;
+      });
+      
+      const activeEmps = employees.filter(e => e.status === 'active');
+      activeEmps.forEach(emp => {
+        html += `<div class="employee-name">${emp.name}<br><span style="font-size:0.75rem;color:var(--gray-500);">${emp.role}</span></div>`;
+        
+        weekDates.forEach(date => {
+          const isToday = date === today;
+          const dayShifts = shifts.filter(s => s.employeeId === emp.id && s.date === date);
+          
+          html += `<div class="shift-cell ${isToday ? 'today' : ''}" onclick="openShiftModal(null, ${emp.id}, '${date}')">`;
+          dayShifts.forEach(s => {
+            const tpl = templates.find(t => t.id === s.templateId);
+            const color = tpl?.color || 'primary';
+            html += `<div class="shift-block ${color}" onclick="event.stopPropagation(); editShift(${s.id})">${s.start}-${s.end}</div>`;
+          });
+          html += '</div>';
+        });
+      });
+      
+      document.getElementById('schedule-grid').innerHTML = html;
+      
+      // Stats
+      const weekShifts = shifts.filter(s => weekDates.includes(s.date));
+      const totalHours = weekShifts.reduce((sum, s) => sum + getShiftHours(s), 0);
+      const coveragePct = Math.round((weekShifts.length / (activeEmps.length * 5)) * 100);
+      
+      document.getElementById('stat-scheduled').textContent = weekShifts.length;
+      document.getElementById('stat-hours').textContent = totalHours;
+      document.getElementById('stat-coverage').textContent = Math.min(100, coveragePct) + '%';
+    }
+    
+    function getShiftHours(shift) {
+      const [sh, sm] = shift.start.split(':').map(Number);
+      const [eh, em] = shift.end.split(':').map(Number);
+      let hours = eh - sh + (em - sm) / 60;
+      if (hours < 0) hours += 24; // overnight shift
+      return hours;
+    }
+    
+    function openShiftModal(id = null, employeeId = null, date = null) {
+      if (id) {
+        const s = shifts.find(x => x.id === id);
+        document.getElementById('shift-modal-title').textContent = 'Edit Shift';
+        document.getElementById('sh-id').value = id;
+        document.getElementById('sh-employee').value = s.employeeId;
+        document.getElementById('sh-date').value = s.date;
+        document.getElementById('sh-template').value = s.templateId || '';
+        document.getElementById('sh-start').value = s.start;
+        document.getElementById('sh-end').value = s.end;
+        document.getElementById('sh-notes').value = s.notes || '';
+        document.getElementById('sh-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('shift-modal-title').textContent = 'Add Shift';
+        document.getElementById('sh-id').value = '';
+        document.getElementById('sh-employee').value = employeeId || '';
+        document.getElementById('sh-date').value = date || new Date().toISOString().split('T')[0];
+        document.getElementById('sh-template').value = '';
+        document.getElementById('sh-start').value = '09:00';
+        document.getElementById('sh-end').value = '17:00';
+        document.getElementById('sh-notes').value = '';
+        document.getElementById('sh-delete-btn').style.display = 'none';
+      }
+      document.getElementById('shift-modal').classList.add('active');
+    }
+    
+    function editShift(id) { openShiftModal(id); }
+    
+    function applyTemplate() {
+      const tplId = parseInt(document.getElementById('sh-template').value);
+      if (tplId) {
+        const tpl = templates.find(t => t.id === tplId);
+        document.getElementById('sh-start').value = tpl.start;
+        document.getElementById('sh-end').value = tpl.end;
+      }
+    }
+    
+    function saveShift() {
+      const id = document.getElementById('sh-id').value;
+      const employeeId = parseInt(document.getElementById('sh-employee').value);
+      const date = document.getElementById('sh-date').value;
+      const templateId = parseInt(document.getElementById('sh-template').value) || null;
+      const start = document.getElementById('sh-start').value;
+      const end = document.getElementById('sh-end').value;
+      const notes = document.getElementById('sh-notes').value.trim();
+      
+      if (!employeeId || !date || !start || !end) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = shifts.findIndex(s => s.id === parseInt(id));
+        shifts[i] = { ...shifts[i], employeeId, date, templateId, start, end, notes };
+        showToast('Shift updated');
+      } else {
+        shifts.push({ id: Math.max(0, ...shifts.map(s => s.id)) + 1, employeeId, date, templateId, start, end, notes });
+        showToast('Shift added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('shift-modal');
+    }
+    
+    function deleteShift() {
+      const id = parseInt(document.getElementById('sh-id').value);
+      if (!confirm('Delete this shift?')) return;
+      shifts = shifts.filter(s => s.id !== id);
+      saveData();
+      renderAll();
+      closeModal('shift-modal');
+      showToast('Shift deleted');
+    }
+    
+    // Employees
+    function renderEmployees() {
+      const weekDates = getWeekDates(currentWeekStart);
+      
+      document.getElementById('employees-table').innerHTML = employees.map(e => {
+        const weekShifts = shifts.filter(s => s.employeeId === e.id && weekDates.includes(s.date));
+        const weekHours = weekShifts.reduce((sum, s) => sum + getShiftHours(s), 0);
+        
+        return `<tr>
+          <td><strong>${e.name}</strong></td>
+          <td>${e.email || '-'}</td>
+          <td>${e.phone || '-'}</td>
+          <td>${e.role || '-'}</td>
+          <td><span class="status-badge ${e.status}">${e.status}</span></td>
+          <td>${weekHours} / ${e.maxHours || 40}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editEmployee(${e.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openEmployeeModal(id = null) {
+      document.querySelectorAll('.avail-day').forEach(d => d.classList.add('selected'));
+      
+      if (id) {
+        const e = employees.find(x => x.id === id);
+        document.getElementById('employee-modal-title').textContent = 'Edit Employee';
+        document.getElementById('emp-id').value = id;
+        document.getElementById('emp-name').value = e.name;
+        document.getElementById('emp-email').value = e.email || '';
+        document.getElementById('emp-phone').value = e.phone || '';
+        document.getElementById('emp-role').value = e.role || '';
+        document.getElementById('emp-status').value = e.status;
+        document.getElementById('emp-max-hours').value = e.maxHours || 40;
+        
+        if (e.availability) {
+          document.querySelectorAll('.avail-day').forEach((d, i) => {
+            d.classList.toggle('selected', e.availability[i] === 1);
+          });
+        }
+        document.getElementById('emp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('employee-modal-title').textContent = 'Add Employee';
+        document.getElementById('emp-id').value = '';
+        document.getElementById('emp-name').value = '';
+        document.getElementById('emp-email').value = '';
+        document.getElementById('emp-phone').value = '';
+        document.getElementById('emp-role').value = '';
+        document.getElementById('emp-status').value = 'active';
+        document.getElementById('emp-max-hours').value = '40';
+        document.getElementById('emp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('employee-modal').classList.add('active');
+    }
+    
+    function editEmployee(id) { openEmployeeModal(id); }
+    
+    function saveEmployee() {
+      const id = document.getElementById('emp-id').value;
+      const name = document.getElementById('emp-name').value.trim();
+      const email = document.getElementById('emp-email').value.trim();
+      const phone = document.getElementById('emp-phone').value.trim();
+      const role = document.getElementById('emp-role').value.trim();
+      const status = document.getElementById('emp-status').value;
+      const maxHours = parseInt(document.getElementById('emp-max-hours').value) || 40;
+      
+      const availability = [];
+      document.querySelectorAll('.avail-day').forEach(d => {
+        availability.push(d.classList.contains('selected') ? 1 : 0);
+      });
+      
+      if (!name) { showToast('Please enter employee name', 'error'); return; }
+      
+      if (id) {
+        const i = employees.findIndex(e => e.id === parseInt(id));
+        employees[i] = { ...employees[i], name, email, phone, role, status, maxHours, availability };
+        showToast('Employee updated');
+      } else {
+        employees.push({ id: Math.max(0, ...employees.map(e => e.id)) + 1, name, email, phone, role, status, maxHours, availability });
+        showToast('Employee added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('employee-modal');
+    }
+    
+    function deleteEmployee() {
+      const id = parseInt(document.getElementById('emp-id').value);
+      if (!confirm('Delete this employee?')) return;
+      employees = employees.filter(e => e.id !== id);
+      shifts = shifts.filter(s => s.employeeId !== id);
+      saveData();
+      renderAll();
+      closeModal('employee-modal');
+      showToast('Employee deleted');
+    }
+    
+    // Templates
+    function renderTemplates() {
+      document.getElementById('templates-table').innerHTML = templates.map(t => {
+        const duration = getShiftHours({ start: t.start, end: t.end });
+        return `<tr>
+          <td><strong>${t.name}</strong></td>
+          <td>${t.start}</td>
+          <td>${t.end}</td>
+          <td>${duration} hrs</td>
+          <td><span class="shift-block ${t.color}" style="display:inline-block;">${t.color}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editTemplate(${t.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openTemplateModal(id = null) {
+      if (id) {
+        const t = templates.find(x => x.id === id);
+        document.getElementById('template-modal-title').textContent = 'Edit Template';
+        document.getElementById('tpl-id').value = id;
+        document.getElementById('tpl-name').value = t.name;
+        document.getElementById('tpl-start').value = t.start;
+        document.getElementById('tpl-end').value = t.end;
+        document.getElementById('tpl-color').value = t.color;
+        document.getElementById('tpl-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('template-modal-title').textContent = 'Add Template';
+        document.getElementById('tpl-id').value = '';
+        document.getElementById('tpl-name').value = '';
+        document.getElementById('tpl-start').value = '09:00';
+        document.getElementById('tpl-end').value = '17:00';
+        document.getElementById('tpl-color').value = 'morning';
+        document.getElementById('tpl-delete-btn').style.display = 'none';
+      }
+      document.getElementById('template-modal').classList.add('active');
+    }
+    
+    function editTemplate(id) { openTemplateModal(id); }
+    
+    function saveTemplate() {
+      const id = document.getElementById('tpl-id').value;
+      const name = document.getElementById('tpl-name').value.trim();
+      const start = document.getElementById('tpl-start').value;
+      const end = document.getElementById('tpl-end').value;
+      const color = document.getElementById('tpl-color').value;
+      
+      if (!name || !start || !end) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = templates.findIndex(t => t.id === parseInt(id));
+        templates[i] = { ...templates[i], name, start, end, color };
+        showToast('Template updated');
+      } else {
+        templates.push({ id: Math.max(0, ...templates.map(t => t.id)) + 1, name, start, end, color });
+        showToast('Template added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('template-modal');
+    }
+    
+    function deleteTemplate() {
+      const id = parseInt(document.getElementById('tpl-id').value);
+      if (!confirm('Delete this template?')) return;
+      templates = templates.filter(t => t.id !== id);
+      saveData();
+      renderAll();
+      closeModal('template-modal');
+      showToast('Template deleted');
+    }
+    
+    // Requests
+    function renderRequests() {
+      document.getElementById('requests-table').innerHTML = requests.map(r => {
+        const emp = employees.find(e => e.id === r.employeeId);
+        return `<tr>
+          <td>${emp?.name || 'Unknown'}</td>
+          <td style="text-transform: capitalize;">${r.type}</td>
+          <td>${formatDate(r.startDate)}</td>
+          <td>${formatDate(r.endDate)}</td>
+          <td><span class="status-badge ${r.status}">${r.status}</span></td>
+          <td>${r.notes || '-'}</td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editRequest(${r.id})">Edit</button>
+            ${r.status === 'pending' ? `
+              <button class="btn btn-sm btn-success" onclick="approveRequest(${r.id})">✓</button>
+              <button class="btn btn-sm btn-danger" onclick="denyRequest(${r.id})">✗</button>
+            ` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openRequestModal(id = null) {
+      if (id) {
+        const r = requests.find(x => x.id === id);
+        document.getElementById('request-modal-title').textContent = 'Edit Request';
+        document.getElementById('req-id').value = id;
+        document.getElementById('req-employee').value = r.employeeId;
+        document.getElementById('req-type').value = r.type;
+        document.getElementById('req-start').value = r.startDate;
+        document.getElementById('req-end').value = r.endDate;
+        document.getElementById('req-status').value = r.status;
+        document.getElementById('req-notes').value = r.notes || '';
+        document.getElementById('req-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('request-modal-title').textContent = 'New Request';
+        document.getElementById('req-id').value = '';
+        document.getElementById('req-employee').value = '';
+        document.getElementById('req-type').value = 'vacation';
+        document.getElementById('req-start').value = '';
+        document.getElementById('req-end').value = '';
+        document.getElementById('req-status').value = 'pending';
+        document.getElementById('req-notes').value = '';
+        document.getElementById('req-delete-btn').style.display = 'none';
+      }
+      document.getElementById('request-modal').classList.add('active');
+    }
+    
+    function editRequest(id) { openRequestModal(id); }
+    
+    function saveRequest() {
+      const id = document.getElementById('req-id').value;
+      const employeeId = parseInt(document.getElementById('req-employee').value);
+      const type = document.getElementById('req-type').value;
+      const startDate = document.getElementById('req-start').value;
+      const endDate = document.getElementById('req-end').value;
+      const status = document.getElementById('req-status').value;
+      const notes = document.getElementById('req-notes').value.trim();
+      
+      if (!employeeId || !startDate || !endDate) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = requests.findIndex(r => r.id === parseInt(id));
+        requests[i] = { ...requests[i], employeeId, type, startDate, endDate, status, notes };
+        showToast('Request updated');
+      } else {
+        requests.push({ id: Math.max(0, ...requests.map(r => r.id)) + 1, employeeId, type, startDate, endDate, status, notes });
+        showToast('Request submitted');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('request-modal');
+    }
+    
+    function approveRequest(id) {
+      const r = requests.find(x => x.id === id);
+      r.status = 'approved';
+      saveData();
+      renderRequests();
+      showToast('Request approved');
+    }
+    
+    function denyRequest(id) {
+      const r = requests.find(x => x.id === id);
+      r.status = 'denied';
+      saveData();
+      renderRequests();
+      showToast('Request denied');
+    }
+    
+    function deleteRequest() {
+      const id = parseInt(document.getElementById('req-id').value);
+      if (!confirm('Delete this request?')) return;
+      requests = requests.filter(r => r.id !== id);
+      saveData();
+      renderAll();
+      closeModal('request-modal');
+      showToast('Request deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const weekDates = getWeekDates(currentWeekStart);
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      
+      // Hours by employee
+      const empHours = employees.filter(e => e.status === 'active').map(e => {
+        const hrs = shifts.filter(s => s.employeeId === e.id && weekDates.includes(s.date)).reduce((sum, s) => sum + getShiftHours(s), 0);
+        return { name: e.name, hours: hrs, max: e.maxHours || 40 };
+      });
+      
+      const maxHrs = Math.max(...empHours.map(e => e.hours), 1);
+      
+      document.getElementById('hours-chart').innerHTML = empHours.map(e => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+          <span style="width: 120px; font-size: 0.875rem;">${e.name}</span>
+          <div style="flex: 1; height: 24px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${e.hours / maxHrs * 100}%; height: 100%; background: ${e.hours > e.max ? 'var(--danger)' : 'var(--primary)'}; border-radius: 4px;"></div>
+          </div>
+          <span style="width: 60px; text-align: right; font-weight: 600;">${e.hours} hrs</span>
+        </div>
+      `).join('');
+      
+      // Coverage by day
+      const activeCount = employees.filter(e => e.status === 'active').length;
+      const dayCoverage = weekDates.map((date, i) => {
+        const count = shifts.filter(s => s.date === date).length;
+        return { day: days[i], count, pct: Math.round(count / activeCount * 100) };
+      });
+      
+      document.getElementById('coverage-chart').innerHTML = `
+        <div style="display: flex; gap: 0.5rem; height: 120px; align-items: flex-end;">
+          ${dayCoverage.map(d => `
+            <div style="flex: 1; text-align: center;">
+              <div style="background: var(--primary-light); border: 1px solid var(--primary); border-radius: 4px 4px 0 0; height: ${d.pct}px;"></div>
+              <div style="font-size: 0.75rem; margin-top: 0.25rem;">${d.day}</div>
+              <div style="font-size: 0.7rem; color: var(--gray-500);">${d.count}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    // Exports
+    function exportSchedule() {
+      const weekDates = getWeekDates(currentWeekStart);
+      const headers = ['Employee', ...weekDates];
+      const rows = employees.filter(e => e.status === 'active').map(e => {
+        const row = [e.name];
+        weekDates.forEach(date => {
+          const dayShifts = shifts.filter(s => s.employeeId === e.id && s.date === date);
+          row.push(dayShifts.map(s => `${s.start}-${s.end}`).join(', ') || 'OFF');
+        });
+        return row;
+      });
+      downloadCSV([headers, ...rows], 'schedule.csv');
+      showToast('Schedule exported');
+    }
+    
+    function exportHours() {
+      const weekDates = getWeekDates(currentWeekStart);
+      const headers = ['Employee', 'Role', 'Hours This Week', 'Max Hours'];
+      const rows = employees.map(e => {
+        const hrs = shifts.filter(s => s.employeeId === e.id && weekDates.includes(s.date)).reduce((sum, s) => sum + getShiftHours(s), 0);
+        return [e.name, e.role || '', hrs, e.maxHours || 40];
+      });
+      downloadCSV([headers, ...rows], 'hours.csv');
+      showToast('Hours exported');
+    }
+    
+    function exportTimeOff() {
+      const headers = ['Employee', 'Type', 'Start', 'End', 'Status', 'Notes'];
+      const rows = requests.map(r => {
+        const emp = employees.find(e => e.id === r.employeeId);
+        return [emp?.name || '', r.type, r.startDate, r.endDate, r.status, r.notes || ''];
+      });
+      downloadCSV([headers, ...rows], 'time-off.csv');
+      showToast('Time off exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>

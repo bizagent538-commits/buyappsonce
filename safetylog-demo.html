@@ -1,0 +1,1308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafetyLog - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #dc2626;
+      --primary-dark: #b91c1c;
+      --primary-light: #fef2f2;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-value.red { color: var(--primary); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.blue { color: var(--info); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-info { background: var(--info); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.open { background: #fee2e2; color: #991b1b; }
+    .status-badge.investigating { background: #fef3c7; color: #92400e; }
+    .status-badge.resolved { background: #dcfce7; color: #166534; }
+    .status-badge.closed { background: var(--gray-200); color: var(--gray-600); }
+    
+    .severity-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .severity-badge.critical { background: #dc2626; color: white; }
+    .severity-badge.high { background: #f97316; color: white; }
+    .severity-badge.medium { background: #eab308; color: white; }
+    .severity-badge.low { background: #22c55e; color: white; }
+    
+    .type-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--gray-100);
+      color: var(--gray-700);
+    }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .incident-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+      border-left: 4px solid var(--gray-300);
+    }
+    
+    .incident-item.critical { border-left-color: #dc2626; }
+    .incident-item.high { border-left-color: #f97316; }
+    .incident-item.medium { border-left-color: #eab308; }
+    .incident-item.low { border-left-color: #22c55e; }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 650px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; }
+    
+    .days-without {
+      background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+      color: white;
+      padding: 2rem;
+      border-radius: 0.5rem;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+    
+    .days-count { font-size: 4rem; font-weight: 700; line-height: 1; }
+    .days-label { font-size: 1.25rem; margin-top: 0.5rem; }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--primary); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row, .form-row-3, .grid-2 { grid-template-columns: 1fr; }
+      .days-count { font-size: 3rem; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>⚠️ SafetyLog</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="incidents">Incidents</div>
+    <div class="nav-tab" data-tab="hazards">Hazards</div>
+    <div class="nav-tab" data-tab="inspections">Inspections</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="days-without">
+        <div class="days-count" id="days-without">0</div>
+        <div class="days-label">Days Without Incident</div>
+      </div>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value red" id="stat-open">0</div>
+          <div class="stat-label">Open Incidents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-hazards">0</div>
+          <div class="stat-label">Active Hazards</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-inspections">0</div>
+          <div class="stat-label">Inspections Due</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-ytd">0</div>
+          <div class="stat-label">YTD Incidents</div>
+        </div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🚨 Recent Incidents</h2>
+            <button class="btn btn-primary btn-sm" onclick="openIncidentModal()">+ Report Incident</button>
+          </div>
+          <div id="recent-incidents"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚠️ Active Hazards</h2>
+            <button class="btn btn-warning btn-sm" onclick="openHazardModal()">+ Report Hazard</button>
+          </div>
+          <div id="active-hazards"></div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📋 Upcoming Inspections</h2>
+        </div>
+        <div id="upcoming-inspections"></div>
+      </div>
+    </div>
+    
+    <!-- Incidents -->
+    <div class="tab-content" id="tab-incidents">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Incident Reports</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportIncidents()">Export</button>
+            <button class="btn btn-primary" onclick="openIncidentModal()">+ Report Incident</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-inc-status" onchange="renderIncidents()">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="investigating">Investigating</option>
+            <option value="resolved">Resolved</option>
+            <option value="closed">Closed</option>
+          </select>
+          <select class="filter-select" id="filter-inc-severity" onchange="renderIncidents()">
+            <option value="">All Severities</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+          <select class="filter-select" id="filter-inc-type" onchange="renderIncidents()">
+            <option value="">All Types</option>
+            <option value="injury">Injury</option>
+            <option value="near-miss">Near Miss</option>
+            <option value="property-damage">Property Damage</option>
+            <option value="environmental">Environmental</option>
+            <option value="security">Security</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search..." id="filter-inc-search" oninput="renderIncidents()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Date</th>
+              <th>Type</th>
+              <th>Description</th>
+              <th>Location</th>
+              <th>Severity</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="incidents-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Hazards -->
+    <div class="tab-content" id="tab-hazards">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Hazard Reports</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportHazards()">Export</button>
+            <button class="btn btn-warning" onclick="openHazardModal()">+ Report Hazard</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-haz-status" onchange="renderHazards()">
+            <option value="">All Statuses</option>
+            <option value="open">Open</option>
+            <option value="investigating">In Progress</option>
+            <option value="resolved">Resolved</option>
+          </select>
+          <select class="filter-select" id="filter-haz-risk" onchange="renderHazards()">
+            <option value="">All Risk Levels</option>
+            <option value="critical">Critical</option>
+            <option value="high">High</option>
+            <option value="medium">Medium</option>
+            <option value="low">Low</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Reported</th>
+              <th>Hazard</th>
+              <th>Location</th>
+              <th>Risk Level</th>
+              <th>Status</th>
+              <th>Assigned To</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="hazards-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Inspections -->
+    <div class="tab-content" id="tab-inspections">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Safety Inspections</h2>
+          <button class="btn btn-info" onclick="openInspectionModal()">+ Schedule Inspection</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-insp-status" onchange="renderInspections()">
+            <option value="">All Statuses</option>
+            <option value="scheduled">Scheduled</option>
+            <option value="completed">Completed</option>
+            <option value="overdue">Overdue</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Area/Equipment</th>
+              <th>Type</th>
+              <th>Scheduled</th>
+              <th>Inspector</th>
+              <th>Status</th>
+              <th>Findings</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="inspections-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Safety Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportIncidents()">📋 All Incidents</button>
+          <button class="btn btn-secondary" onclick="exportHazards()">⚠️ Hazard Log</button>
+          <button class="btn btn-secondary" onclick="exportInspections()">🔍 Inspections</button>
+          <button class="btn btn-secondary" onclick="exportOSHA()">📄 OSHA 300 Log</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Incidents by Type (YTD)</h3>
+        <div id="incidents-by-type"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Monthly Incident Trend</h3>
+        <div id="monthly-trend" style="display: flex; align-items: flex-end; gap: 0.5rem; height: 150px;"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Safety Metrics</h3>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" id="stat-trir">0</div>
+            <div class="stat-label">TRIR (per 200k hrs)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value green" id="stat-near-miss">0</div>
+            <div class="stat-label">Near Misses Reported</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-resolved-time">0</div>
+            <div class="stat-label">Avg Days to Resolve</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Incident Modal -->
+  <div class="modal-overlay" id="incident-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="incident-modal-title">Report Incident</h3>
+        <button class="modal-close" onclick="closeModal('incident-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="inc-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Incident Date *</label>
+            <input type="date" class="form-input" id="inc-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time</label>
+            <input type="time" class="form-input" id="inc-time">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Type *</label>
+            <select class="form-input" id="inc-type">
+              <option value="injury">Injury</option>
+              <option value="near-miss">Near Miss</option>
+              <option value="property-damage">Property Damage</option>
+              <option value="environmental">Environmental</option>
+              <option value="security">Security</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Severity *</label>
+            <select class="form-input" id="inc-severity">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Location *</label>
+          <input type="text" class="form-input" id="inc-location" placeholder="e.g., Warehouse, Floor 2, Loading Dock">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description *</label>
+          <textarea class="form-input" id="inc-description" rows="3" placeholder="Describe what happened..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">People Involved</label>
+          <input type="text" class="form-input" id="inc-people" placeholder="Names of people involved">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Witnesses</label>
+          <input type="text" class="form-input" id="inc-witnesses" placeholder="Names of witnesses">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reported By</label>
+            <input type="text" class="form-input" id="inc-reporter">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="inc-status">
+              <option value="open">Open</option>
+              <option value="investigating">Investigating</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Corrective Actions</label>
+          <textarea class="form-input" id="inc-actions" rows="2" placeholder="Actions taken or to be taken..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="inc-delete-btn" onclick="deleteIncident()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('incident-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveIncident()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Hazard Modal -->
+  <div class="modal-overlay" id="hazard-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="hazard-modal-title">Report Hazard</h3>
+        <button class="modal-close" onclick="closeModal('hazard-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="haz-id">
+        <div class="form-group">
+          <label class="form-label">Hazard Description *</label>
+          <textarea class="form-input" id="haz-description" rows="2" placeholder="Describe the hazard..."></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Location *</label>
+            <input type="text" class="form-input" id="haz-location" placeholder="Where is the hazard?">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Risk Level *</label>
+            <select class="form-input" id="haz-risk">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="critical">Critical</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Reported By</label>
+            <input type="text" class="form-input" id="haz-reporter">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date Reported</label>
+            <input type="date" class="form-input" id="haz-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Assigned To</label>
+            <input type="text" class="form-input" id="haz-assigned" placeholder="Person responsible">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="haz-status">
+              <option value="open">Open</option>
+              <option value="investigating">In Progress</option>
+              <option value="resolved">Resolved</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Mitigation Actions</label>
+          <textarea class="form-input" id="haz-actions" rows="2" placeholder="Actions to address hazard..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="haz-delete-btn" onclick="deleteHazard()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('hazard-modal')">Cancel</button>
+        <button class="btn btn-warning" onclick="saveHazard()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Inspection Modal -->
+  <div class="modal-overlay" id="inspection-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="inspection-modal-title">Schedule Inspection</h3>
+        <button class="modal-close" onclick="closeModal('inspection-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="insp-id">
+        <div class="form-group">
+          <label class="form-label">Area/Equipment *</label>
+          <input type="text" class="form-input" id="insp-area" placeholder="e.g., Fire Extinguishers, Warehouse A">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Inspection Type *</label>
+            <select class="form-input" id="insp-type">
+              <option value="routine">Routine</option>
+              <option value="fire-safety">Fire Safety</option>
+              <option value="equipment">Equipment</option>
+              <option value="workplace">Workplace</option>
+              <option value="vehicle">Vehicle</option>
+              <option value="special">Special</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Scheduled Date *</label>
+            <input type="date" class="form-input" id="insp-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Inspector</label>
+            <input type="text" class="form-input" id="insp-inspector">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="insp-status">
+              <option value="scheduled">Scheduled</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Findings / Notes</label>
+          <textarea class="form-input" id="insp-findings" rows="3" placeholder="Inspection findings..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="insp-delete-btn" onclick="deleteInspection()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('inspection-modal')">Cancel</button>
+        <button class="btn btn-info" onclick="saveInspection()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let incidents = [], hazards = [], inspections = [];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        incidents: localStorage.getItem('safetylog_incidents'),
+        hazards: localStorage.getItem('safetylog_hazards'),
+        inspections: localStorage.getItem('safetylog_inspections')
+      };
+      
+      const today = new Date();
+      const thisYear = today.getFullYear();
+      const lastWeek = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+      const twoWeeksAgo = new Date(today.getTime() - 14 * 86400000).toISOString().split('T')[0];
+      const lastMonth = new Date(thisYear, today.getMonth() - 1, 15).toISOString().split('T')[0];
+      const twoMonthsAgo = new Date(thisYear, today.getMonth() - 2, 10).toISOString().split('T')[0];
+      const nextWeek = new Date(today.getTime() + 7 * 86400000).toISOString().split('T')[0];
+      const inTwoDays = new Date(today.getTime() + 2 * 86400000).toISOString().split('T')[0];
+      
+      incidents = saved.incidents ? JSON.parse(saved.incidents) : [
+        { id: 1, date: twoMonthsAgo, time: '09:30', type: 'injury', severity: 'medium', location: 'Warehouse B', description: 'Employee slipped on wet floor near loading dock', people: 'John Smith', witnesses: 'Mike Brown', reporter: 'Sarah Johnson', status: 'closed', actions: 'Added non-slip mats, improved drainage' },
+        { id: 2, date: lastMonth, time: '14:15', type: 'near-miss', severity: 'high', location: 'Production Floor', description: 'Forklift nearly struck pedestrian at blind corner', people: '', witnesses: 'David Lee', reporter: 'David Lee', status: 'resolved', actions: 'Installed convex mirrors, added warning signs' },
+        { id: 3, date: twoWeeksAgo, time: '11:00', type: 'property-damage', severity: 'low', location: 'Parking Lot', description: 'Minor vehicle collision - no injuries', people: 'Emily Chen, Robert Wilson', witnesses: '', reporter: 'Security', status: 'closed', actions: 'Insurance claim filed' },
+        { id: 4, date: lastWeek, time: '08:45', type: 'near-miss', severity: 'medium', location: 'Office Area', description: 'Unsecured filing cabinet nearly fell during earthquake drill', people: '', witnesses: 'Lisa Park', reporter: 'Lisa Park', status: 'investigating', actions: 'Reviewing all furniture anchoring' },
+      ];
+      
+      hazards = saved.hazards ? JSON.parse(saved.hazards) : [
+        { id: 1, description: 'Frayed electrical cord on break room coffee maker', location: 'Break Room', risk: 'high', reporter: 'Tom Harris', date: lastWeek, assigned: 'Maintenance', status: 'open', actions: '' },
+        { id: 2, description: 'Missing handrail section on stairwell B', location: 'Stairwell B, 2nd Floor', risk: 'critical', reporter: 'Safety Committee', date: twoWeeksAgo, assigned: 'Facilities', status: 'investigating', actions: 'Temporary barrier installed, parts ordered' },
+        { id: 3, description: 'Poor lighting in storage area', location: 'Storage Room 3', risk: 'medium', reporter: 'Night Shift Lead', date: lastMonth, assigned: 'Maintenance', status: 'resolved', actions: 'New LED fixtures installed' },
+      ];
+      
+      inspections = saved.inspections ? JSON.parse(saved.inspections) : [
+        { id: 1, area: 'Fire Extinguishers', type: 'fire-safety', date: nextWeek, inspector: 'Fire Safety Officer', status: 'scheduled', findings: '' },
+        { id: 2, area: 'Warehouse A', type: 'workplace', date: inTwoDays, inspector: 'Safety Manager', status: 'scheduled', findings: '' },
+        { id: 3, area: 'Forklifts (3)', type: 'equipment', date: lastWeek, inspector: 'Equipment Manager', status: 'completed', findings: 'All units passed. Unit #2 needs tire replacement within 30 days.' },
+        { id: 4, area: 'Emergency Exits', type: 'fire-safety', date: lastMonth, inspector: 'Safety Committee', status: 'completed', findings: 'All exits clear and properly marked.' },
+      ];
+      
+      updateInspectionStatuses();
+      saveData();
+    }
+    
+    function updateInspectionStatuses() {
+      const today = new Date().toISOString().split('T')[0];
+      inspections.forEach(i => {
+        if (i.status === 'scheduled' && i.date < today) {
+          i.status = 'overdue';
+        }
+      });
+    }
+    
+    function saveData() {
+      localStorage.setItem('safetylog_incidents', JSON.stringify(incidents));
+      localStorage.setItem('safetylog_hazards', JSON.stringify(hazards));
+      localStorage.setItem('safetylog_inspections', JSON.stringify(inspections));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderIncidents();
+      renderHazards();
+      renderInspections();
+      renderReports();
+    }
+    
+    function getDaysWithoutIncident() {
+      const injuries = incidents.filter(i => i.type === 'injury').sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (injuries.length === 0) return 365;
+      const lastInjury = new Date(injuries[0].date);
+      const today = new Date();
+      return Math.floor((today - lastInjury) / 86400000);
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const daysWithout = getDaysWithoutIncident();
+      document.getElementById('days-without').textContent = daysWithout;
+      
+      const openIncidents = incidents.filter(i => i.status === 'open' || i.status === 'investigating').length;
+      const activeHazards = hazards.filter(h => h.status !== 'resolved').length;
+      const inspectionsDue = inspections.filter(i => i.status === 'scheduled' || i.status === 'overdue').length;
+      const ytdIncidents = incidents.filter(i => new Date(i.date).getFullYear() === new Date().getFullYear()).length;
+      
+      document.getElementById('stat-open').textContent = openIncidents;
+      document.getElementById('stat-hazards').textContent = activeHazards;
+      document.getElementById('stat-inspections').textContent = inspectionsDue;
+      document.getElementById('stat-ytd').textContent = ytdIncidents;
+      
+      // Recent incidents
+      const recent = [...incidents].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 5);
+      document.getElementById('recent-incidents').innerHTML = recent.length ? recent.map(i => `
+        <div class="incident-item ${i.severity}">
+          <div>
+            <div style="font-weight: 500;">${i.description.substring(0, 50)}${i.description.length > 50 ? '...' : ''}</div>
+            <div style="font-size: 0.875rem; color: var(--gray-500);">${i.location} • ${formatDate(i.date)}</div>
+          </div>
+          <div style="text-align: right;">
+            <span class="severity-badge ${i.severity}">${i.severity}</span>
+            <span class="status-badge ${i.status}">${i.status}</span>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No incidents recorded</div>';
+      
+      // Active hazards
+      const activeHaz = hazards.filter(h => h.status !== 'resolved').slice(0, 5);
+      document.getElementById('active-hazards').innerHTML = activeHaz.length ? activeHaz.map(h => `
+        <div class="incident-item ${h.risk}">
+          <div>
+            <div style="font-weight: 500;">${h.description.substring(0, 50)}${h.description.length > 50 ? '...' : ''}</div>
+            <div style="font-size: 0.875rem; color: var(--gray-500);">${h.location}</div>
+          </div>
+          <div style="text-align: right;">
+            <span class="severity-badge ${h.risk}">${h.risk}</span>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No active hazards 👍</div>';
+      
+      // Upcoming inspections
+      const upcoming = inspections.filter(i => i.status !== 'completed').sort((a, b) => new Date(a.date) - new Date(b.date)).slice(0, 5);
+      document.getElementById('upcoming-inspections').innerHTML = upcoming.length ? upcoming.map(i => `
+        <div class="incident-item">
+          <div>
+            <div style="font-weight: 500;">${i.area}</div>
+            <div style="font-size: 0.875rem; color: var(--gray-500);">${i.type} inspection • ${i.inspector || 'Unassigned'}</div>
+          </div>
+          <div style="text-align: right;">
+            <div>${formatDate(i.date)}</div>
+            <span class="status-badge ${i.status === 'overdue' ? 'open' : 'investigating'}">${i.status}</span>
+          </div>
+        </div>
+      `).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No upcoming inspections</div>';
+    }
+    
+    // Incidents
+    function renderIncidents() {
+      const statusFilter = document.getElementById('filter-inc-status').value;
+      const severityFilter = document.getElementById('filter-inc-severity').value;
+      const typeFilter = document.getElementById('filter-inc-type').value;
+      const search = document.getElementById('filter-inc-search').value.toLowerCase();
+      
+      let filtered = [...incidents];
+      if (statusFilter) filtered = filtered.filter(i => i.status === statusFilter);
+      if (severityFilter) filtered = filtered.filter(i => i.severity === severityFilter);
+      if (typeFilter) filtered = filtered.filter(i => i.type === typeFilter);
+      if (search) filtered = filtered.filter(i => i.description.toLowerCase().includes(search) || i.location.toLowerCase().includes(search));
+      
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('incidents-table').innerHTML = filtered.map(i => `
+        <tr>
+          <td><strong>INC-${String(i.id).padStart(4, '0')}</strong></td>
+          <td>${formatDate(i.date)}</td>
+          <td><span class="type-badge">${i.type.replace('-', ' ')}</span></td>
+          <td>${i.description.substring(0, 40)}${i.description.length > 40 ? '...' : ''}</td>
+          <td>${i.location}</td>
+          <td><span class="severity-badge ${i.severity}">${i.severity}</span></td>
+          <td><span class="status-badge ${i.status}">${i.status}</span></td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editIncident(${i.id})">View</button></td>
+        </tr>
+      `).join('');
+    }
+    
+    function openIncidentModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (id) {
+        const i = incidents.find(x => x.id === id);
+        document.getElementById('incident-modal-title').textContent = 'Edit Incident';
+        document.getElementById('inc-id').value = id;
+        document.getElementById('inc-date').value = i.date;
+        document.getElementById('inc-time').value = i.time || '';
+        document.getElementById('inc-type').value = i.type;
+        document.getElementById('inc-severity').value = i.severity;
+        document.getElementById('inc-location').value = i.location;
+        document.getElementById('inc-description').value = i.description;
+        document.getElementById('inc-people').value = i.people || '';
+        document.getElementById('inc-witnesses').value = i.witnesses || '';
+        document.getElementById('inc-reporter').value = i.reporter || '';
+        document.getElementById('inc-status').value = i.status;
+        document.getElementById('inc-actions').value = i.actions || '';
+        document.getElementById('inc-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('incident-modal-title').textContent = 'Report Incident';
+        document.getElementById('inc-id').value = '';
+        document.getElementById('inc-date').value = today;
+        document.getElementById('inc-time').value = '';
+        document.getElementById('inc-type').value = 'injury';
+        document.getElementById('inc-severity').value = 'medium';
+        document.getElementById('inc-location').value = '';
+        document.getElementById('inc-description').value = '';
+        document.getElementById('inc-people').value = '';
+        document.getElementById('inc-witnesses').value = '';
+        document.getElementById('inc-reporter').value = '';
+        document.getElementById('inc-status').value = 'open';
+        document.getElementById('inc-actions').value = '';
+        document.getElementById('inc-delete-btn').style.display = 'none';
+      }
+      document.getElementById('incident-modal').classList.add('active');
+    }
+    
+    function editIncident(id) { openIncidentModal(id); }
+    
+    function saveIncident() {
+      const id = document.getElementById('inc-id').value;
+      const date = document.getElementById('inc-date').value;
+      const time = document.getElementById('inc-time').value;
+      const type = document.getElementById('inc-type').value;
+      const severity = document.getElementById('inc-severity').value;
+      const location = document.getElementById('inc-location').value.trim();
+      const description = document.getElementById('inc-description').value.trim();
+      const people = document.getElementById('inc-people').value.trim();
+      const witnesses = document.getElementById('inc-witnesses').value.trim();
+      const reporter = document.getElementById('inc-reporter').value.trim();
+      const status = document.getElementById('inc-status').value;
+      const actions = document.getElementById('inc-actions').value.trim();
+      
+      if (!date || !location || !description) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = incidents.findIndex(x => x.id === parseInt(id));
+        incidents[i] = { ...incidents[i], date, time, type, severity, location, description, people, witnesses, reporter, status, actions };
+        showToast('Incident updated');
+      } else {
+        incidents.push({ id: Math.max(0, ...incidents.map(i => i.id)) + 1, date, time, type, severity, location, description, people, witnesses, reporter, status, actions });
+        showToast('Incident reported');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('incident-modal');
+    }
+    
+    function deleteIncident() {
+      const id = parseInt(document.getElementById('inc-id').value);
+      if (!confirm('Delete this incident record?')) return;
+      incidents = incidents.filter(i => i.id !== id);
+      saveData();
+      renderAll();
+      closeModal('incident-modal');
+      showToast('Incident deleted');
+    }
+    
+    // Hazards
+    function renderHazards() {
+      const statusFilter = document.getElementById('filter-haz-status').value;
+      const riskFilter = document.getElementById('filter-haz-risk').value;
+      
+      let filtered = [...hazards];
+      if (statusFilter) filtered = filtered.filter(h => h.status === statusFilter);
+      if (riskFilter) filtered = filtered.filter(h => h.risk === riskFilter);
+      
+      filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+      
+      document.getElementById('hazards-table').innerHTML = filtered.map(h => `
+        <tr>
+          <td><strong>HAZ-${String(h.id).padStart(4, '0')}</strong></td>
+          <td>${formatDate(h.date)}</td>
+          <td>${h.description.substring(0, 40)}${h.description.length > 40 ? '...' : ''}</td>
+          <td>${h.location}</td>
+          <td><span class="severity-badge ${h.risk}">${h.risk}</span></td>
+          <td><span class="status-badge ${h.status}">${h.status}</span></td>
+          <td>${h.assigned || '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editHazard(${h.id})">View</button></td>
+        </tr>
+      `).join('');
+    }
+    
+    function openHazardModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      
+      if (id) {
+        const h = hazards.find(x => x.id === id);
+        document.getElementById('hazard-modal-title').textContent = 'Edit Hazard';
+        document.getElementById('haz-id').value = id;
+        document.getElementById('haz-description').value = h.description;
+        document.getElementById('haz-location').value = h.location;
+        document.getElementById('haz-risk').value = h.risk;
+        document.getElementById('haz-reporter').value = h.reporter || '';
+        document.getElementById('haz-date').value = h.date;
+        document.getElementById('haz-assigned').value = h.assigned || '';
+        document.getElementById('haz-status').value = h.status;
+        document.getElementById('haz-actions').value = h.actions || '';
+        document.getElementById('haz-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('hazard-modal-title').textContent = 'Report Hazard';
+        document.getElementById('haz-id').value = '';
+        document.getElementById('haz-description').value = '';
+        document.getElementById('haz-location').value = '';
+        document.getElementById('haz-risk').value = 'medium';
+        document.getElementById('haz-reporter').value = '';
+        document.getElementById('haz-date').value = today;
+        document.getElementById('haz-assigned').value = '';
+        document.getElementById('haz-status').value = 'open';
+        document.getElementById('haz-actions').value = '';
+        document.getElementById('haz-delete-btn').style.display = 'none';
+      }
+      document.getElementById('hazard-modal').classList.add('active');
+    }
+    
+    function editHazard(id) { openHazardModal(id); }
+    
+    function saveHazard() {
+      const id = document.getElementById('haz-id').value;
+      const description = document.getElementById('haz-description').value.trim();
+      const location = document.getElementById('haz-location').value.trim();
+      const risk = document.getElementById('haz-risk').value;
+      const reporter = document.getElementById('haz-reporter').value.trim();
+      const date = document.getElementById('haz-date').value;
+      const assigned = document.getElementById('haz-assigned').value.trim();
+      const status = document.getElementById('haz-status').value;
+      const actions = document.getElementById('haz-actions').value.trim();
+      
+      if (!description || !location) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = hazards.findIndex(h => h.id === parseInt(id));
+        hazards[i] = { ...hazards[i], description, location, risk, reporter, date, assigned, status, actions };
+        showToast('Hazard updated');
+      } else {
+        hazards.push({ id: Math.max(0, ...hazards.map(h => h.id)) + 1, description, location, risk, reporter, date, assigned, status, actions });
+        showToast('Hazard reported');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('hazard-modal');
+    }
+    
+    function deleteHazard() {
+      const id = parseInt(document.getElementById('haz-id').value);
+      if (!confirm('Delete this hazard record?')) return;
+      hazards = hazards.filter(h => h.id !== id);
+      saveData();
+      renderAll();
+      closeModal('hazard-modal');
+      showToast('Hazard deleted');
+    }
+    
+    // Inspections
+    function renderInspections() {
+      const statusFilter = document.getElementById('filter-insp-status').value;
+      
+      let filtered = [...inspections];
+      if (statusFilter) filtered = filtered.filter(i => i.status === statusFilter);
+      
+      filtered.sort((a, b) => new Date(a.date) - new Date(b.date));
+      
+      document.getElementById('inspections-table').innerHTML = filtered.map(i => `
+        <tr>
+          <td><strong>${i.area}</strong></td>
+          <td style="text-transform: capitalize;">${i.type.replace('-', ' ')}</td>
+          <td>${formatDate(i.date)}</td>
+          <td>${i.inspector || '-'}</td>
+          <td><span class="status-badge ${i.status === 'overdue' ? 'open' : i.status === 'completed' ? 'resolved' : 'investigating'}">${i.status}</span></td>
+          <td>${i.findings ? i.findings.substring(0, 30) + '...' : '-'}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editInspection(${i.id})">View</button></td>
+        </tr>
+      `).join('');
+    }
+    
+    function openInspectionModal(id = null) {
+      const nextWeek = new Date(Date.now() + 7 * 86400000).toISOString().split('T')[0];
+      
+      if (id) {
+        const i = inspections.find(x => x.id === id);
+        document.getElementById('inspection-modal-title').textContent = 'Edit Inspection';
+        document.getElementById('insp-id').value = id;
+        document.getElementById('insp-area').value = i.area;
+        document.getElementById('insp-type').value = i.type;
+        document.getElementById('insp-date').value = i.date;
+        document.getElementById('insp-inspector').value = i.inspector || '';
+        document.getElementById('insp-status').value = i.status === 'overdue' ? 'scheduled' : i.status;
+        document.getElementById('insp-findings').value = i.findings || '';
+        document.getElementById('insp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('inspection-modal-title').textContent = 'Schedule Inspection';
+        document.getElementById('insp-id').value = '';
+        document.getElementById('insp-area').value = '';
+        document.getElementById('insp-type').value = 'routine';
+        document.getElementById('insp-date').value = nextWeek;
+        document.getElementById('insp-inspector').value = '';
+        document.getElementById('insp-status').value = 'scheduled';
+        document.getElementById('insp-findings').value = '';
+        document.getElementById('insp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('inspection-modal').classList.add('active');
+    }
+    
+    function editInspection(id) { openInspectionModal(id); }
+    
+    function saveInspection() {
+      const id = document.getElementById('insp-id').value;
+      const area = document.getElementById('insp-area').value.trim();
+      const type = document.getElementById('insp-type').value;
+      const date = document.getElementById('insp-date').value;
+      const inspector = document.getElementById('insp-inspector').value.trim();
+      const status = document.getElementById('insp-status').value;
+      const findings = document.getElementById('insp-findings').value.trim();
+      
+      if (!area || !date) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = inspections.findIndex(x => x.id === parseInt(id));
+        inspections[i] = { ...inspections[i], area, type, date, inspector, status, findings };
+        showToast('Inspection updated');
+      } else {
+        inspections.push({ id: Math.max(0, ...inspections.map(i => i.id)) + 1, area, type, date, inspector, status, findings });
+        showToast('Inspection scheduled');
+      }
+      
+      updateInspectionStatuses();
+      saveData();
+      renderAll();
+      closeModal('inspection-modal');
+    }
+    
+    function deleteInspection() {
+      const id = parseInt(document.getElementById('insp-id').value);
+      if (!confirm('Delete this inspection?')) return;
+      inspections = inspections.filter(i => i.id !== id);
+      saveData();
+      renderAll();
+      closeModal('inspection-modal');
+      showToast('Inspection deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      const thisYear = new Date().getFullYear();
+      const ytdIncidents = incidents.filter(i => new Date(i.date).getFullYear() === thisYear);
+      
+      // Incidents by type
+      const types = ['injury', 'near-miss', 'property-damage', 'environmental', 'security'];
+      const typeLabels = ['Injury', 'Near Miss', 'Property Damage', 'Environmental', 'Security'];
+      const typeCounts = types.map(t => ytdIncidents.filter(i => i.type === t).length);
+      const maxType = Math.max(...typeCounts, 1);
+      
+      document.getElementById('incidents-by-type').innerHTML = types.map((t, idx) => `
+        <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
+          <span style="width: 120px; font-size: 0.875rem;">${typeLabels[idx]}</span>
+          <div style="flex: 1; height: 24px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${typeCounts[idx] / maxType * 100}%; height: 100%; background: var(--primary); border-radius: 4px;"></div>
+          </div>
+          <span style="width: 30px; text-align: right; font-weight: 600;">${typeCounts[idx]}</span>
+        </div>
+      `).join('');
+      
+      // Monthly trend
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthlyData = Array(12).fill(0);
+      
+      ytdIncidents.forEach(i => {
+        monthlyData[new Date(i.date).getMonth()]++;
+      });
+      
+      const maxMonth = Math.max(...monthlyData, 1);
+      
+      document.getElementById('monthly-trend').innerHTML = monthlyData.map((val, i) => `
+        <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+          <div style="width: 100%; max-width: 30px; background: ${val > 0 ? 'var(--primary-light)' : 'var(--gray-100)'}; border: 1px solid ${val > 0 ? 'var(--primary)' : 'var(--gray-200)'}; border-radius: 4px 4px 0 0; height: ${val / maxMonth * 120}px; min-height: 4px;"></div>
+          <div style="font-size: 0.7rem; color: var(--gray-500); margin-top: 0.25rem;">${months[i]}</div>
+        </div>
+      `).join('');
+      
+      // Safety metrics
+      const nearMisses = ytdIncidents.filter(i => i.type === 'near-miss').length;
+      document.getElementById('stat-near-miss').textContent = nearMisses;
+      
+      // TRIR calculation (simplified - assumes 100 employees, 2000 hrs/yr each)
+      const injuries = ytdIncidents.filter(i => i.type === 'injury').length;
+      const hoursWorked = 200000; // placeholder
+      const trir = ((injuries * 200000) / hoursWorked).toFixed(2);
+      document.getElementById('stat-trir').textContent = trir;
+      
+      // Avg resolution time
+      const resolved = incidents.filter(i => i.status === 'closed' || i.status === 'resolved');
+      document.getElementById('stat-resolved-time').textContent = resolved.length > 0 ? '~7' : 'N/A';
+    }
+    
+    // Exports
+    function exportIncidents() {
+      const headers = ['ID', 'Date', 'Time', 'Type', 'Severity', 'Location', 'Description', 'People Involved', 'Witnesses', 'Reporter', 'Status', 'Corrective Actions'];
+      const rows = incidents.map(i => [
+        'INC-' + String(i.id).padStart(4, '0'), i.date, i.time || '', i.type, i.severity, i.location, i.description, i.people || '', i.witnesses || '', i.reporter || '', i.status, i.actions || ''
+      ]);
+      downloadCSV([headers, ...rows], 'incidents.csv');
+      showToast('Incidents exported');
+    }
+    
+    function exportHazards() {
+      const headers = ['ID', 'Date', 'Description', 'Location', 'Risk Level', 'Reporter', 'Assigned To', 'Status', 'Mitigation Actions'];
+      const rows = hazards.map(h => [
+        'HAZ-' + String(h.id).padStart(4, '0'), h.date, h.description, h.location, h.risk, h.reporter || '', h.assigned || '', h.status, h.actions || ''
+      ]);
+      downloadCSV([headers, ...rows], 'hazards.csv');
+      showToast('Hazards exported');
+    }
+    
+    function exportInspections() {
+      const headers = ['Area/Equipment', 'Type', 'Scheduled Date', 'Inspector', 'Status', 'Findings'];
+      const rows = inspections.map(i => [i.area, i.type, i.date, i.inspector || '', i.status, i.findings || '']);
+      downloadCSV([headers, ...rows], 'inspections.csv');
+      showToast('Inspections exported');
+    }
+    
+    function exportOSHA() {
+      const injuries = incidents.filter(i => i.type === 'injury');
+      const headers = ['Case No', 'Date', 'Employee Name', 'Job Title', 'Location', 'Description', 'Days Away', 'Days Restricted'];
+      const rows = injuries.map(i => [
+        'INC-' + String(i.id).padStart(4, '0'), i.date, i.people || 'Unknown', '', i.location, i.description, '', ''
+      ]);
+      downloadCSV([headers, ...rows], 'osha-300-log.csv');
+      showToast('OSHA 300 Log exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
