@@ -66,7 +66,7 @@
     function openModal(){document.getElementById('modal').classList.add('show');}
     function closeModal(){document.getElementById('modal').classList.remove('show');}
     function saveViolation(){const address=document.getElementById('v-address').value;if(!address){alert('Enter address');return;}violations.unshift({id:nextViolationId++,address,type:document.getElementById('v-type').value,reported:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),status:'open'});closeModal();saveData();render();document.getElementById('v-address').value='';document.getElementById('v-desc').value='';alert('Violation reported!');}
-    function sendWarning(id){const v=violations.find(x=>x.id===id);v.status='warning';letters.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});saveData();,property:v.address,type:'Warning Letter',status:'Sent'});render();alert('Warning letter sent!');}
+    function sendWarning(id){const v=violations.find(x=>x.id===id);v.status='warning';letters.unshift({date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}),property:v.address,type:'Warning Letter',status:'Sent'}); saveData(); render();alert('Warning letter sent!');}
     function resolveViolation(id){violations.find(x=>x.id===id).status='resolved';saveData();render();alert('Violation resolved!');}
     loadData();
 
