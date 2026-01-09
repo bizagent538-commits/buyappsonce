@@ -1,0 +1,1543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookIt - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #0891b2;
+      --primary-dark: #0e7490;
+      --primary-light: #ecfeff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+      --gray-900: #111827;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: var(--primary);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    .header-right { display: flex; align-items: center; gap: 1rem; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-900);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .view-toggle {
+      display: flex;
+      background: rgba(255,255,255,0.2);
+      border-radius: 0.375rem;
+      overflow: hidden;
+    }
+    
+    .view-toggle button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: transparent;
+      color: white;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    
+    .view-toggle button.active {
+      background: white;
+      color: var(--primary);
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-secondary:hover { background: var(--gray-300); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    .btn-lg { padding: 0.75rem 1.5rem; font-size: 1rem; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; }
+    
+    .staff-calendars {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    
+    .staff-calendar {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    
+    .staff-calendar-header {
+      background: var(--gray-100);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .staff-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      color: white;
+      font-size: 1rem;
+    }
+    
+    .staff-calendar-name { font-weight: 600; }
+    .staff-calendar-role { font-size: 0.75rem; color: var(--gray-500); }
+    
+    .day-schedule {
+      padding: 1rem;
+      min-height: 200px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    
+    .time-slot {
+      display: flex;
+      align-items: center;
+      padding: 0.5rem;
+      margin-bottom: 0.25rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    
+    .time-slot.available {
+      background: var(--gray-50);
+      border: 1px dashed var(--gray-300);
+      color: var(--gray-500);
+    }
+    
+    .time-slot.available:hover {
+      background: var(--primary-light);
+      border-color: var(--primary);
+    }
+    
+    .time-slot.booked {
+      background: var(--primary-light);
+      border: 1px solid var(--primary);
+      color: var(--primary-dark);
+    }
+    
+    .time-slot-time { width: 60px; font-weight: 500; }
+    .time-slot-info { flex: 1; }
+    
+    .calendar-nav {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    
+    .calendar-nav button {
+      background: var(--gray-200);
+      border: none;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    
+    .calendar-nav button:hover { background: var(--gray-300); }
+    .calendar-date { font-size: 1.25rem; font-weight: 600; }
+    
+    .staff-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+    
+    .staff-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .staff-card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .staff-info { flex: 1; }
+    .staff-name { font-weight: 600; }
+    .staff-role { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .staff-services {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem;
+      margin-bottom: 0.75rem;
+    }
+    
+    .service-tag {
+      font-size: 0.7rem;
+      padding: 0.125rem 0.5rem;
+      background: var(--gray-200);
+      border-radius: 9999px;
+      color: var(--gray-600);
+    }
+    
+    .staff-actions { display: flex; gap: 0.5rem; }
+    
+    .availability-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .avail-day {
+      text-align: center;
+      padding: 0.5rem;
+      background: var(--gray-50);
+      border-radius: 0.25rem;
+    }
+    
+    .avail-day-name {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--gray-600);
+      margin-bottom: 0.25rem;
+    }
+    
+    .avail-day-hours { font-size: 0.65rem; color: var(--gray-500); }
+    .avail-day.off { background: var(--gray-100); color: var(--gray-400); }
+    
+    .grid-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+    
+    .grid-item {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1rem;
+    }
+    
+    .grid-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+    
+    .grid-item-title { font-weight: 600; }
+    .grid-item-subtitle { font-size: 0.875rem; color: var(--gray-500); }
+    .grid-item-actions { display: flex; gap: 0.25rem; margin-top: 0.75rem; }
+    
+    .service-price { font-size: 1.125rem; font-weight: 700; color: var(--primary); }
+    .service-duration { font-size: 0.75rem; color: var(--gray-500); }
+    
+    .booking-view { max-width: 800px; margin: 0 auto; }
+    
+    .booking-steps {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 2rem;
+    }
+    
+    .booking-step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      color: var(--gray-400);
+    }
+    
+    .booking-step.active { color: var(--primary); font-weight: 600; }
+    .booking-step.completed { color: var(--success); }
+    
+    .step-number {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 600;
+      background: var(--gray-200);
+      color: var(--gray-600);
+    }
+    
+    .booking-step.active .step-number { background: var(--primary); color: white; }
+    .booking-step.completed .step-number { background: var(--success); color: white; }
+    
+    .service-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    
+    .service-option {
+      padding: 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .service-option:hover { border-color: var(--gray-400); }
+    .service-option.selected { border-color: var(--primary); background: var(--primary-light); }
+    
+    .staff-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 1rem;
+    }
+    
+    .staff-option {
+      padding: 1rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 0.5rem;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+    }
+    
+    .staff-option:hover { border-color: var(--gray-400); }
+    .staff-option.selected { border-color: var(--primary); background: var(--primary-light); }
+    .staff-option .staff-avatar { margin: 0 auto 0.5rem; }
+    
+    .time-select-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+    }
+    
+    .time-option {
+      padding: 0.75rem;
+      border: 2px solid var(--gray-200);
+      border-radius: 0.375rem;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+    
+    .time-option:hover { border-color: var(--gray-400); }
+    .time-option.selected { border-color: var(--primary); background: var(--primary-light); }
+    .time-option.unavailable { background: var(--gray-100); color: var(--gray-400); cursor: not-allowed; text-decoration: line-through; }
+    
+    .booking-summary {
+      background: var(--gray-50);
+      border-radius: 0.5rem;
+      padding: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .summary-row:last-child { border-bottom: none; font-weight: 600; }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--gray-400);
+    }
+    
+    .modal-close:hover { color: var(--gray-600); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    .form-check { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem; }
+    .form-check input { width: auto; }
+    
+    .color-options { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    
+    .color-option {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 3px solid transparent;
+    }
+    
+    .color-option.selected { border-color: var(--gray-800); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.confirmed { background: #dcfce7; color: #166534; }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+    .status-badge.completed { background: #dbeafe; color: #1e40af; }
+    
+    .empty-state { text-align: center; padding: 3rem; color: var(--gray-500); }
+    .empty-state-icon { font-size: 3rem; margin-bottom: 1rem; }
+    
+    .toast-container {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      z-index: 2000;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    .hidden { display: none !important; }
+    
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr; }
+      .staff-calendars { grid-template-columns: 1fr; }
+      .booking-steps { flex-wrap: wrap; }
+      .availability-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📅 BookIt</h1>
+    <div class="header-right">
+      <div class="view-toggle">
+        <button class="active" onclick="setView('admin')">Admin</button>
+        <button onclick="setView('client')">Client Booking</button>
+      </div>
+      <span class="demo-badge">Demo Mode</span>
+    </div>
+  </header>
+  
+  <div id="admin-view">
+    <nav class="nav-tabs">
+      <div class="nav-tab active" data-tab="calendar">Calendar</div>
+      <div class="nav-tab" data-tab="appointments">Appointments</div>
+      <div class="nav-tab" data-tab="staff">Staff</div>
+      <div class="nav-tab" data-tab="services">Services</div>
+      <div class="nav-tab" data-tab="clients">Clients</div>
+    </nav>
+    
+    <main class="main-content">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="stat-today">0</div>
+          <div class="stat-label">Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-week">0</div>
+          <div class="stat-label">This Week</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-staff">0</div>
+          <div class="stat-label">Staff</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-revenue">$0</div>
+          <div class="stat-label">This Month</div>
+        </div>
+      </div>
+      
+      <div class="tab-content active" id="tab-calendar">
+        <div class="card">
+          <div class="card-header">
+            <div class="calendar-nav">
+              <button onclick="changeDate(-1)">◀</button>
+              <span class="calendar-date" id="calendar-date"></span>
+              <button onclick="changeDate(1)">▶</button>
+              <button onclick="goToToday()" style="margin-left: 1rem;">Today</button>
+            </div>
+            <button class="btn btn-primary" onclick="openAppointmentModal()">+ New Appointment</button>
+          </div>
+          <div class="staff-calendars" id="staff-calendars"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-appointments">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">All Appointments</h2>
+            <button class="btn btn-primary" onclick="openAppointmentModal()">+ New Appointment</button>
+          </div>
+          <div class="grid-list" id="appointments-list"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-staff">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Staff Members</h2>
+            <button class="btn btn-primary" onclick="openStaffModal()">+ Add Staff</button>
+          </div>
+          <div class="staff-grid" id="staff-list"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-services">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Services</h2>
+            <button class="btn btn-primary" onclick="openServiceModal()">+ Add Service</button>
+          </div>
+          <div class="grid-list" id="services-list"></div>
+        </div>
+      </div>
+      
+      <div class="tab-content" id="tab-clients">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Clients</h2>
+            <button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button>
+          </div>
+          <div class="grid-list" id="clients-list"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <div id="client-view" class="hidden">
+    <main class="main-content booking-view">
+      <div class="card" id="booking-card">
+        <h2 style="text-align: center; margin-bottom: 1.5rem;">Book an Appointment</h2>
+        
+        <div class="booking-steps">
+          <div class="booking-step active" data-step="1"><span class="step-number">1</span><span>Service</span></div>
+          <div class="booking-step" data-step="2"><span class="step-number">2</span><span>Staff</span></div>
+          <div class="booking-step" data-step="3"><span class="step-number">3</span><span>Date & Time</span></div>
+          <div class="booking-step" data-step="4"><span class="step-number">4</span><span>Confirm</span></div>
+        </div>
+        
+        <div id="booking-step-1" class="booking-step-content">
+          <h3 style="margin-bottom: 1rem;">Select a Service</h3>
+          <div class="service-select-grid" id="service-select-grid"></div>
+        </div>
+        
+        <div id="booking-step-2" class="booking-step-content hidden">
+          <h3 style="margin-bottom: 1rem;">Choose Your Provider</h3>
+          <div class="staff-select-grid" id="staff-select-grid"></div>
+        </div>
+        
+        <div id="booking-step-3" class="booking-step-content hidden">
+          <h3 style="margin-bottom: 1rem;">Select Date & Time</h3>
+          <div class="form-group">
+            <label class="form-label">Date</label>
+            <input type="date" class="form-input" id="booking-date" onchange="loadAvailableTimes()">
+          </div>
+          <h4 style="margin: 1rem 0 0.5rem;">Available Times</h4>
+          <div class="time-select-grid" id="time-select-grid"></div>
+        </div>
+        
+        <div id="booking-step-4" class="booking-step-content hidden">
+          <h3 style="margin-bottom: 1rem;">Your Information</h3>
+          <div class="form-group">
+            <label class="form-label">Name *</label>
+            <input type="text" class="form-input" id="booking-name" placeholder="Your name">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Email *</label>
+              <input type="email" class="form-input" id="booking-email" placeholder="your@email.com">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Phone</label>
+              <input type="tel" class="form-input" id="booking-phone" placeholder="(555) 123-4567">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Notes</label>
+            <textarea class="form-input" id="booking-notes" rows="2" placeholder="Any special requests..."></textarea>
+          </div>
+          <div class="booking-summary" id="booking-summary"></div>
+        </div>
+        
+        <div style="display: flex; justify-content: space-between; margin-top: 1.5rem;">
+          <button class="btn btn-secondary" id="booking-back" onclick="bookingBack()" disabled>← Back</button>
+          <button class="btn btn-primary btn-lg" id="booking-next" onclick="bookingNext()">Next →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+  
+  <!-- Staff Modal -->
+  <div class="modal-overlay" id="staff-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="staff-modal-title">Add Staff Member</h3>
+        <button class="modal-close" onclick="closeModal('staff-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="staff-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="staff-name" placeholder="e.g., Jane Smith">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Role / Title</label>
+          <input type="text" class="form-input" id="staff-role" placeholder="e.g., Senior Stylist">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <div class="color-options" id="color-options"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Services Offered</label>
+          <div id="staff-services-checkboxes"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Weekly Availability</label>
+          <div id="staff-availability"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('staff-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStaff()">Save Staff</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Service Modal -->
+  <div class="modal-overlay" id="service-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="service-modal-title">Add Service</h3>
+        <button class="modal-close" onclick="closeModal('service-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="service-id">
+        <div class="form-group">
+          <label class="form-label">Service Name *</label>
+          <input type="text" class="form-input" id="service-name" placeholder="e.g., Haircut">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Price ($) *</label>
+            <input type="number" class="form-input" id="service-price" placeholder="e.g., 50">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Duration (min) *</label>
+            <input type="number" class="form-input" id="service-duration" placeholder="e.g., 60" value="60">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="service-description" rows="2" placeholder="Service description..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('service-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveService()">Save Service</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Client Modal -->
+  <div class="modal-overlay" id="client-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="client-modal-title">Add Client</h3>
+        <button class="modal-close" onclick="closeModal('client-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="client-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="client-name" placeholder="e.g., John Smith">
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" id="client-email" placeholder="john@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" id="client-phone" placeholder="(555) 123-4567">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="client-notes" rows="2" placeholder="Client preferences..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('client-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveClient()">Save Client</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Appointment Modal -->
+  <div class="modal-overlay" id="appointment-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="appt-modal-title">New Appointment</h3>
+        <button class="modal-close" onclick="closeModal('appointment-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="appt-id">
+        <div class="form-group">
+          <label class="form-label">Client *</label>
+          <select class="form-input" id="appt-client"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Staff Member *</label>
+          <select class="form-input" id="appt-staff"></select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service *</label>
+          <select class="form-input" id="appt-service" onchange="updateApptDuration()"></select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="appt-date">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Time *</label>
+            <input type="time" class="form-input" id="appt-time">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Duration (min)</label>
+            <input type="number" class="form-input" id="appt-duration" value="60">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="appt-status">
+              <option value="confirmed">Confirmed</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="appt-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="appt-delete-btn" onclick="deleteAppointment()" style="margin-right: auto; display: none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('appointment-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveAppointment()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let staff = [], services = [], clients = [], appointments = [];
+    let currentDate = new Date();
+    let selectedStaffColor = '#0891b2';
+    let bookingStep = 1;
+    let bookingData = { serviceId: null, staffId: null, date: null, time: null };
+    
+    const COLORS = ['#0891b2', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#2563eb', '#dc2626', '#854d0e'];
+    const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+      updateCalendarDate();
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('booking-date').min = today;
+      document.getElementById('booking-date').value = today;
+      document.getElementById('appt-date').value = today;
+    }
+    
+    function loadData() {
+      const saved = {
+        staff: localStorage.getItem('bookit_staff'),
+        services: localStorage.getItem('bookit_services'),
+        clients: localStorage.getItem('bookit_clients'),
+        appointments: localStorage.getItem('bookit_appointments')
+      };
+      
+      services = saved.services ? JSON.parse(saved.services) : [
+        { id: 1, name: 'Haircut', price: 45, duration: 45, description: 'Classic haircut and style' },
+        { id: 2, name: 'Color', price: 95, duration: 90, description: 'Full color treatment' },
+        { id: 3, name: 'Highlights', price: 120, duration: 120, description: 'Partial or full highlights' },
+        { id: 4, name: 'Blowout', price: 35, duration: 30, description: 'Wash and blowdry style' },
+      ];
+      
+      staff = saved.staff ? JSON.parse(saved.staff) : [
+        { id: 1, name: 'Sarah Johnson', role: 'Senior Stylist', color: '#0891b2', serviceIds: [1,2,3,4], availability: {0:null,1:{start:'09:00',end:'17:00'},2:{start:'09:00',end:'17:00'},3:{start:'09:00',end:'17:00'},4:{start:'09:00',end:'17:00'},5:{start:'09:00',end:'17:00'},6:{start:'10:00',end:'15:00'}} },
+        { id: 2, name: 'Mike Chen', role: 'Stylist', color: '#7c3aed', serviceIds: [1,4], availability: {0:null,1:{start:'10:00',end:'18:00'},2:{start:'10:00',end:'18:00'},3:null,4:{start:'10:00',end:'18:00'},5:{start:'10:00',end:'18:00'},6:{start:'09:00',end:'14:00'}} },
+        { id: 3, name: 'Lisa Park', role: 'Color Specialist', color: '#db2777', serviceIds: [2,3], availability: {0:null,1:{start:'09:00',end:'17:00'},2:{start:'09:00',end:'17:00'},3:{start:'09:00',end:'17:00'},4:{start:'09:00',end:'17:00'},5:null,6:null} },
+      ];
+      
+      clients = saved.clients ? JSON.parse(saved.clients) : [
+        { id: 1, name: 'Emma Wilson', email: 'emma@example.com', phone: '(555) 123-4567', notes: 'Prefers Sarah' },
+        { id: 2, name: 'James Brown', email: 'james@example.com', phone: '(555) 234-5678', notes: '' },
+        { id: 3, name: 'Olivia Davis', email: 'olivia@example.com', phone: '(555) 345-6789', notes: 'Allergic to certain products' },
+      ];
+      
+      const today = formatDate(new Date());
+      appointments = saved.appointments ? JSON.parse(saved.appointments) : [
+        { id: 1, clientId: 1, staffId: 1, serviceId: 1, date: today, time: '10:00', duration: 45, status: 'confirmed', notes: '' },
+        { id: 2, clientId: 2, staffId: 2, serviceId: 1, date: today, time: '11:00', duration: 45, status: 'confirmed', notes: '' },
+        { id: 3, clientId: 3, staffId: 3, serviceId: 2, date: today, time: '14:00', duration: 90, status: 'pending', notes: 'First color appointment' },
+      ];
+      
+      saveData();
+    }
+    
+    function saveData() {
+      localStorage.setItem('bookit_staff', JSON.stringify(staff));
+      localStorage.setItem('bookit_services', JSON.stringify(services));
+      localStorage.setItem('bookit_clients', JSON.stringify(clients));
+      localStorage.setItem('bookit_appointments', JSON.stringify(appointments));
+    }
+    
+    function formatDate(d) { return d.toISOString().split('T')[0]; }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function setView(view) {
+      document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      if (view === 'admin') {
+        document.getElementById('admin-view').classList.remove('hidden');
+        document.getElementById('client-view').classList.add('hidden');
+      } else {
+        document.getElementById('admin-view').classList.add('hidden');
+        document.getElementById('client-view').classList.remove('hidden');
+        resetBookingFlow();
+      }
+    }
+    
+    function renderAll() {
+      renderStats();
+      renderStaffCalendars();
+      renderAppointments();
+      renderStaff();
+      renderServices();
+      renderClients();
+      updateSelects();
+      renderServiceSelectGrid();
+    }
+    
+    function renderStats() {
+      const today = formatDate(new Date());
+      const startOfWeek = new Date(); startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
+      const endOfWeek = new Date(startOfWeek); endOfWeek.setDate(endOfWeek.getDate() + 6);
+      const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+      const endOfMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+      
+      document.getElementById('stat-today').textContent = appointments.filter(a => a.date === today && a.status !== 'cancelled').length;
+      document.getElementById('stat-week').textContent = appointments.filter(a => { const d = new Date(a.date); return d >= startOfWeek && d <= endOfWeek && a.status !== 'cancelled'; }).length;
+      document.getElementById('stat-staff').textContent = staff.length;
+      document.getElementById('stat-revenue').textContent = '$' + appointments.filter(a => { const d = new Date(a.date); return d >= startOfMonth && d <= endOfMonth && a.status === 'completed'; }).reduce((sum, a) => { const s = services.find(sv => sv.id === a.serviceId); return sum + (s ? s.price : 0); }, 0).toLocaleString();
+    }
+    
+    function updateCalendarDate() {
+      document.getElementById('calendar-date').textContent = currentDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    }
+    
+    function changeDate(delta) { currentDate.setDate(currentDate.getDate() + delta); updateCalendarDate(); renderStaffCalendars(); }
+    function goToToday() { currentDate = new Date(); updateCalendarDate(); renderStaffCalendars(); }
+    
+    function renderStaffCalendars() {
+      const container = document.getElementById('staff-calendars');
+      const dateStr = formatDate(currentDate);
+      const dayOfWeek = currentDate.getDay();
+      
+      container.innerHTML = staff.map(s => {
+        const avail = s.availability[dayOfWeek];
+        const dayAppts = appointments.filter(a => a.staffId === s.id && a.date === dateStr && a.status !== 'cancelled');
+        
+        let slotsHtml = '';
+        if (!avail) {
+          slotsHtml = '<div style="color: var(--gray-400); text-align: center; padding: 2rem;">Day Off</div>';
+        } else {
+          const slots = generateTimeSlots(avail.start, avail.end, 30);
+          slotsHtml = slots.map(time => {
+            const appt = dayAppts.find(a => a.time === time);
+            if (appt) {
+              const client = clients.find(c => c.id === appt.clientId);
+              const service = services.find(sv => sv.id === appt.serviceId);
+              return `<div class="time-slot booked" onclick="editAppointment(${appt.id})"><span class="time-slot-time">${time}</span><span class="time-slot-info">${client ? client.name : 'Unknown'} - ${service ? service.name : ''}</span></div>`;
+            }
+            return `<div class="time-slot available" onclick="openAppointmentModal('${dateStr}', '${time}', ${s.id})"><span class="time-slot-time">${time}</span><span class="time-slot-info">Available</span></div>`;
+          }).join('');
+        }
+        
+        return `<div class="staff-calendar"><div class="staff-calendar-header"><div class="staff-avatar" style="background: ${s.color}">${s.name.split(' ').map(n => n[0]).join('')}</div><div><div class="staff-calendar-name">${s.name}</div><div class="staff-calendar-role">${s.role || 'Staff'}</div></div></div><div class="day-schedule">${slotsHtml}</div></div>`;
+      }).join('');
+    }
+    
+    function generateTimeSlots(start, end, interval) {
+      const slots = [];
+      let [h, m] = start.split(':').map(Number);
+      const [eh, em] = end.split(':').map(Number);
+      while (h < eh || (h === eh && m < em)) {
+        slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+        m += interval;
+        if (m >= 60) { h++; m -= 60; }
+      }
+      return slots;
+    }
+    
+    function renderAppointments() {
+      const list = document.getElementById('appointments-list');
+      const sorted = [...appointments].sort((a, b) => a.date !== b.date ? new Date(b.date) - new Date(a.date) : a.time.localeCompare(b.time));
+      
+      if (!sorted.length) { list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📅</div><p>No appointments</p></div>'; return; }
+      
+      list.innerHTML = sorted.map(a => {
+        const client = clients.find(c => c.id === a.clientId);
+        const staffMember = staff.find(s => s.id === a.staffId);
+        const service = services.find(s => s.id === a.serviceId);
+        const date = new Date(a.date + 'T00:00:00');
+        return `<div class="grid-item"><div class="grid-item-header"><div><div class="grid-item-title">${client ? client.name : 'Unknown'}</div><div class="grid-item-subtitle">${service ? service.name : ''} with ${staffMember ? staffMember.name : ''}</div></div><span class="status-badge ${a.status}">${a.status}</span></div><p style="font-size: 0.875rem; color: var(--gray-600);">📅 ${date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })} at ${a.time}</p><div class="grid-item-actions"><button class="btn btn-secondary btn-sm" onclick="editAppointment(${a.id})">Edit</button>${a.status === 'confirmed' ? `<button class="btn btn-success btn-sm" onclick="completeAppt(${a.id})">Complete</button>` : ''}</div></div>`;
+      }).join('');
+    }
+    
+    function updateSelects() {
+      document.getElementById('appt-client').innerHTML = '<option value="">Select Client</option>' + clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('appt-staff').innerHTML = '<option value="">Select Staff</option>' + staff.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+      document.getElementById('appt-service').innerHTML = '<option value="">Select Service</option>' + services.map(s => `<option value="${s.id}">${s.name} ($${s.price})</option>`).join('');
+    }
+    
+    function updateApptDuration() {
+      const service = services.find(s => s.id === parseInt(document.getElementById('appt-service').value));
+      if (service) document.getElementById('appt-duration').value = service.duration;
+    }
+    
+    function openAppointmentModal(date = null, time = null, staffId = null) {
+      document.getElementById('appt-modal-title').textContent = 'New Appointment';
+      document.getElementById('appt-id').value = '';
+      document.getElementById('appt-client').value = '';
+      document.getElementById('appt-staff').value = staffId || '';
+      document.getElementById('appt-service').value = '';
+      document.getElementById('appt-date').value = date || formatDate(currentDate);
+      document.getElementById('appt-time').value = time || '10:00';
+      document.getElementById('appt-duration').value = '60';
+      document.getElementById('appt-status').value = 'confirmed';
+      document.getElementById('appt-notes').value = '';
+      document.getElementById('appt-delete-btn').style.display = 'none';
+      document.getElementById('appointment-modal').classList.add('active');
+    }
+    
+    function editAppointment(id) {
+      const a = appointments.find(ap => ap.id === id);
+      document.getElementById('appt-modal-title').textContent = 'Edit Appointment';
+      document.getElementById('appt-id').value = id;
+      document.getElementById('appt-client').value = a.clientId;
+      document.getElementById('appt-staff').value = a.staffId;
+      document.getElementById('appt-service').value = a.serviceId;
+      document.getElementById('appt-date').value = a.date;
+      document.getElementById('appt-time').value = a.time;
+      document.getElementById('appt-duration').value = a.duration;
+      document.getElementById('appt-status').value = a.status;
+      document.getElementById('appt-notes').value = a.notes || '';
+      document.getElementById('appt-delete-btn').style.display = 'block';
+      document.getElementById('appointment-modal').classList.add('active');
+    }
+    
+    function saveAppointment() {
+      const id = document.getElementById('appt-id').value;
+      const data = {
+        clientId: parseInt(document.getElementById('appt-client').value),
+        staffId: parseInt(document.getElementById('appt-staff').value),
+        serviceId: parseInt(document.getElementById('appt-service').value),
+        date: document.getElementById('appt-date').value,
+        time: document.getElementById('appt-time').value,
+        duration: parseInt(document.getElementById('appt-duration').value) || 60,
+        status: document.getElementById('appt-status').value,
+        notes: document.getElementById('appt-notes').value.trim()
+      };
+      
+      if (!data.clientId || !data.staffId || !data.serviceId || !data.date || !data.time) { showToast('Please fill all required fields', 'error'); return; }
+      
+      if (id) {
+        const i = appointments.findIndex(a => a.id === parseInt(id));
+        appointments[i] = { ...appointments[i], ...data };
+        showToast('Appointment updated');
+      } else {
+        appointments.push({ id: Math.max(0, ...appointments.map(a => a.id)) + 1, ...data });
+        showToast('Appointment created');
+      }
+      
+      saveData(); renderAll(); closeModal('appointment-modal');
+    }
+    
+    function deleteAppointment() {
+      if (!confirm('Delete this appointment?')) return;
+      appointments = appointments.filter(a => a.id !== parseInt(document.getElementById('appt-id').value));
+      saveData(); renderAll(); closeModal('appointment-modal'); showToast('Appointment deleted');
+    }
+    
+    function completeAppt(id) {
+      appointments.find(a => a.id === id).status = 'completed';
+      saveData(); renderAll(); showToast('Marked complete');
+    }
+    
+    function renderStaff() {
+      const list = document.getElementById('staff-list');
+      if (!staff.length) { list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No staff members</p></div>'; return; }
+      
+      list.innerHTML = staff.map(s => {
+        const staffServices = services.filter(sv => s.serviceIds.includes(sv.id));
+        return `<div class="staff-card"><div class="staff-card-header"><div class="staff-avatar" style="background: ${s.color}">${s.name.split(' ').map(n => n[0]).join('')}</div><div class="staff-info"><div class="staff-name">${s.name}</div><div class="staff-role">${s.role || 'Staff'}</div></div></div><div class="staff-services">${staffServices.map(sv => `<span class="service-tag">${sv.name}</span>`).join('')}</div><div class="availability-grid">${DAYS.map((d, i) => { const av = s.availability[i]; return `<div class="avail-day${av ? '' : ' off'}"><div class="avail-day-name">${d}</div><div class="avail-day-hours">${av ? av.start.slice(0,5)+'-'+av.end.slice(0,5) : 'Off'}</div></div>`; }).join('')}</div><div class="staff-actions"><button class="btn btn-secondary btn-sm" onclick="editStaff(${s.id})">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteStaff(${s.id})">Delete</button></div></div>`;
+      }).join('');
+    }
+    
+    function renderColorOptions() {
+      document.getElementById('color-options').innerHTML = COLORS.map(c => `<div class="color-option${c === selectedStaffColor ? ' selected' : ''}" style="background: ${c}" onclick="selectColor('${c}')"></div>`).join('');
+    }
+    
+    function selectColor(c) { selectedStaffColor = c; renderColorOptions(); }
+    
+    function renderStaffServicesCheckboxes() {
+      document.getElementById('staff-services-checkboxes').innerHTML = services.map(s => `<div class="form-check"><input type="checkbox" id="staff-service-${s.id}" value="${s.id}"><label for="staff-service-${s.id}">${s.name}</label></div>`).join('');
+    }
+    
+    function renderStaffAvailability(availability = null) {
+      const def = { start: '09:00', end: '17:00' };
+      document.getElementById('staff-availability').innerHTML = DAYS.map((d, i) => {
+        const av = availability ? availability[i] : (i > 0 && i < 6 ? def : null);
+        return `<div class="form-check" style="margin-bottom: 0.5rem;"><input type="checkbox" id="avail-day-${i}" ${av ? 'checked' : ''} onchange="toggleAvailDay(${i})"><label for="avail-day-${i}" style="width: 35px;">${d}</label><input type="time" class="form-input" id="avail-start-${i}" value="${av ? av.start : '09:00'}" style="width: 95px; margin-left: 0.5rem; padding: 0.25rem;" ${av ? '' : 'disabled'}><span style="margin: 0 0.25rem;">-</span><input type="time" class="form-input" id="avail-end-${i}" value="${av ? av.end : '17:00'}" style="width: 95px; padding: 0.25rem;" ${av ? '' : 'disabled'}></div>`;
+      }).join('');
+    }
+    
+    function toggleAvailDay(day) {
+      const checked = document.getElementById(`avail-day-${day}`).checked;
+      document.getElementById(`avail-start-${day}`).disabled = !checked;
+      document.getElementById(`avail-end-${day}`).disabled = !checked;
+    }
+    
+    function openStaffModal(id = null) {
+      if (id) {
+        const s = staff.find(st => st.id === id);
+        document.getElementById('staff-modal-title').textContent = 'Edit Staff Member';
+        document.getElementById('staff-id').value = id;
+        document.getElementById('staff-name').value = s.name;
+        document.getElementById('staff-role').value = s.role || '';
+        selectedStaffColor = s.color;
+        renderColorOptions();
+        renderStaffServicesCheckboxes();
+        s.serviceIds.forEach(sid => { const cb = document.getElementById(`staff-service-${sid}`); if (cb) cb.checked = true; });
+        renderStaffAvailability(s.availability);
+      } else {
+        document.getElementById('staff-modal-title').textContent = 'Add Staff Member';
+        document.getElementById('staff-id').value = '';
+        document.getElementById('staff-name').value = '';
+        document.getElementById('staff-role').value = '';
+        selectedStaffColor = COLORS[staff.length % COLORS.length];
+        renderColorOptions();
+        renderStaffServicesCheckboxes();
+        renderStaffAvailability();
+      }
+      document.getElementById('staff-modal').classList.add('active');
+    }
+    
+    function editStaff(id) { openStaffModal(id); }
+    
+    function saveStaff() {
+      const id = document.getElementById('staff-id').value;
+      const name = document.getElementById('staff-name').value.trim();
+      const role = document.getElementById('staff-role').value.trim();
+      if (!name) { showToast('Please enter name', 'error'); return; }
+      
+      const serviceIds = services.filter(s => document.getElementById(`staff-service-${s.id}`).checked).map(s => s.id);
+      const availability = {};
+      DAYS.forEach((d, i) => {
+        availability[i] = document.getElementById(`avail-day-${i}`).checked ? { start: document.getElementById(`avail-start-${i}`).value, end: document.getElementById(`avail-end-${i}`).value } : null;
+      });
+      
+      if (id) {
+        const i = staff.findIndex(s => s.id === parseInt(id));
+        staff[i] = { ...staff[i], name, role, color: selectedStaffColor, serviceIds, availability };
+        showToast('Staff updated');
+      } else {
+        staff.push({ id: Math.max(0, ...staff.map(s => s.id)) + 1, name, role, color: selectedStaffColor, serviceIds, availability });
+        showToast('Staff added');
+      }
+      
+      saveData(); renderAll(); closeModal('staff-modal');
+    }
+    
+    function deleteStaff(id) {
+      if (!confirm('Delete this staff member?')) return;
+      staff = staff.filter(s => s.id !== id);
+      saveData(); renderAll(); showToast('Staff deleted');
+    }
+    
+    function renderServices() {
+      const list = document.getElementById('services-list');
+      if (!services.length) { list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">💼</div><p>No services</p></div>'; return; }
+      list.innerHTML = services.map(s => `<div class="grid-item"><div class="grid-item-header"><div><div class="grid-item-title">${s.name}</div><div class="grid-item-subtitle">${s.description || 'No description'}</div></div><div style="text-align: right;"><div class="service-price">$${s.price}</div><div class="service-duration">${s.duration} min</div></div></div><div class="grid-item-actions"><button class="btn btn-secondary btn-sm" onclick="editService(${s.id})">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteService(${s.id})">Delete</button></div></div>`).join('');
+    }
+    
+    function openServiceModal(id = null) {
+      if (id) {
+        const s = services.find(sv => sv.id === id);
+        document.getElementById('service-modal-title').textContent = 'Edit Service';
+        document.getElementById('service-id').value = id;
+        document.getElementById('service-name').value = s.name;
+        document.getElementById('service-price').value = s.price;
+        document.getElementById('service-duration').value = s.duration;
+        document.getElementById('service-description').value = s.description || '';
+      } else {
+        document.getElementById('service-modal-title').textContent = 'Add Service';
+        document.getElementById('service-id').value = '';
+        document.getElementById('service-name').value = '';
+        document.getElementById('service-price').value = '';
+        document.getElementById('service-duration').value = '60';
+        document.getElementById('service-description').value = '';
+      }
+      document.getElementById('service-modal').classList.add('active');
+    }
+    
+    function editService(id) { openServiceModal(id); }
+    
+    function saveService() {
+      const id = document.getElementById('service-id').value;
+      const name = document.getElementById('service-name').value.trim();
+      const price = parseFloat(document.getElementById('service-price').value) || 0;
+      const duration = parseInt(document.getElementById('service-duration').value) || 60;
+      const description = document.getElementById('service-description').value.trim();
+      if (!name || price <= 0) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = services.findIndex(s => s.id === parseInt(id));
+        services[i] = { ...services[i], name, price, duration, description };
+        showToast('Service updated');
+      } else {
+        services.push({ id: Math.max(0, ...services.map(s => s.id)) + 1, name, price, duration, description });
+        showToast('Service added');
+      }
+      saveData(); renderAll(); closeModal('service-modal');
+    }
+    
+    function deleteService(id) {
+      if (!confirm('Delete this service?')) return;
+      services = services.filter(s => s.id !== id);
+      staff.forEach(s => { s.serviceIds = s.serviceIds.filter(sid => sid !== id); });
+      saveData(); renderAll(); showToast('Service deleted');
+    }
+    
+    function renderClients() {
+      const list = document.getElementById('clients-list');
+      if (!clients.length) { list.innerHTML = '<div class="empty-state"><div class="empty-state-icon">👥</div><p>No clients</p></div>'; return; }
+      list.innerHTML = clients.map(c => `<div class="grid-item"><div class="grid-item-header"><div><div class="grid-item-title">${c.name}</div><div class="grid-item-subtitle">${c.email || 'No email'}</div></div></div>${c.phone ? `<p style="font-size: 0.875rem;">📞 ${c.phone}</p>` : ''}${c.notes ? `<p style="font-size: 0.75rem; color: var(--gray-500); font-style: italic;">${c.notes}</p>` : ''}<div class="grid-item-actions"><button class="btn btn-secondary btn-sm" onclick="editClient(${c.id})">Edit</button><button class="btn btn-danger btn-sm" onclick="deleteClient(${c.id})">Delete</button></div></div>`).join('');
+    }
+    
+    function openClientModal(id = null) {
+      if (id) {
+        const c = clients.find(cl => cl.id === id);
+        document.getElementById('client-modal-title').textContent = 'Edit Client';
+        document.getElementById('client-id').value = id;
+        document.getElementById('client-name').value = c.name;
+        document.getElementById('client-email').value = c.email || '';
+        document.getElementById('client-phone').value = c.phone || '';
+        document.getElementById('client-notes').value = c.notes || '';
+      } else {
+        document.getElementById('client-modal-title').textContent = 'Add Client';
+        document.getElementById('client-id').value = '';
+        document.getElementById('client-name').value = '';
+        document.getElementById('client-email').value = '';
+        document.getElementById('client-phone').value = '';
+        document.getElementById('client-notes').value = '';
+      }
+      document.getElementById('client-modal').classList.add('active');
+    }
+    
+    function editClient(id) { openClientModal(id); }
+    
+    function saveClient() {
+      const id = document.getElementById('client-id').value;
+      const name = document.getElementById('client-name').value.trim();
+      const email = document.getElementById('client-email').value.trim();
+      const phone = document.getElementById('client-phone').value.trim();
+      const notes = document.getElementById('client-notes').value.trim();
+      if (!name) { showToast('Please enter name', 'error'); return; }
+      
+      if (id) {
+        const i = clients.findIndex(c => c.id === parseInt(id));
+        clients[i] = { ...clients[i], name, email, phone, notes };
+        showToast('Client updated');
+      } else {
+        clients.push({ id: Math.max(0, ...clients.map(c => c.id)) + 1, name, email, phone, notes });
+        showToast('Client added');
+      }
+      saveData(); renderAll(); closeModal('client-modal');
+    }
+    
+    function deleteClient(id) {
+      if (!confirm('Delete this client?')) return;
+      clients = clients.filter(c => c.id !== id);
+      saveData(); renderAll(); showToast('Client deleted');
+    }
+    
+    // CLIENT BOOKING FLOW
+    function resetBookingFlow() {
+      bookingStep = 1;
+      bookingData = { serviceId: null, staffId: null, date: null, time: null };
+      updateBookingSteps();
+      showBookingStep(1);
+      renderServiceSelectGrid();
+      document.getElementById('booking-back').disabled = true;
+      document.getElementById('booking-next').textContent = 'Next →';
+    }
+    
+    function updateBookingSteps() {
+      document.querySelectorAll('.booking-step').forEach(step => {
+        const n = parseInt(step.dataset.step);
+        step.classList.remove('active', 'completed');
+        if (n === bookingStep) step.classList.add('active');
+        else if (n < bookingStep) step.classList.add('completed');
+      });
+    }
+    
+    function showBookingStep(step) {
+      document.querySelectorAll('.booking-step-content').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`booking-step-${step}`).classList.remove('hidden');
+    }
+    
+    function renderServiceSelectGrid() {
+      document.getElementById('service-select-grid').innerHTML = services.map(s => `<div class="service-option${bookingData.serviceId === s.id ? ' selected' : ''}" onclick="selectBookingService(${s.id})"><div style="font-weight: 600;">${s.name}</div><div style="color: var(--primary); font-weight: 700;">$${s.price}</div><div style="font-size: 0.75rem; color: var(--gray-500);">${s.duration} min</div></div>`).join('');
+    }
+    
+    function selectBookingService(id) {
+      bookingData.serviceId = id;
+      bookingData.staffId = null;
+      renderServiceSelectGrid();
+    }
+    
+    function renderStaffSelectGrid() {
+      const available = staff.filter(s => s.serviceIds.includes(bookingData.serviceId));
+      document.getElementById('staff-select-grid').innerHTML = available.length ? available.map(s => `<div class="staff-option${bookingData.staffId === s.id ? ' selected' : ''}" onclick="selectBookingStaff(${s.id})"><div class="staff-avatar" style="background: ${s.color}">${s.name.split(' ').map(n => n[0]).join('')}</div><div style="font-weight: 600;">${s.name}</div><div style="font-size: 0.75rem; color: var(--gray-500);">${s.role || 'Staff'}</div></div>`).join('') : '<div class="empty-state">No staff available for this service</div>';
+    }
+    
+    function selectBookingStaff(id) {
+      bookingData.staffId = id;
+      bookingData.time = null;
+      renderStaffSelectGrid();
+    }
+    
+    function loadAvailableTimes() {
+      const date = document.getElementById('booking-date').value;
+      // Only reset time if date changed
+      if (bookingData.date !== date) {
+        bookingData.time = null;
+      }
+      bookingData.date = date;
+      
+      const staffMember = staff.find(s => s.id === bookingData.staffId);
+      const dayOfWeek = new Date(date + 'T00:00:00').getDay();
+      const avail = staffMember.availability[dayOfWeek];
+      const grid = document.getElementById('time-select-grid');
+      
+      if (!avail) { grid.innerHTML = '<div style="color: var(--gray-500);">This provider is not available on the selected day.</div>'; return; }
+      
+      const slots = generateTimeSlots(avail.start, avail.end, 30);
+      const booked = appointments.filter(a => a.staffId === bookingData.staffId && a.date === date && a.status !== 'cancelled').map(a => a.time);
+      
+      grid.innerHTML = slots.map(time => {
+        const isBooked = booked.includes(time);
+        return `<div class="time-option${bookingData.time === time ? ' selected' : ''}${isBooked ? ' unavailable' : ''}" onclick="${isBooked ? '' : `selectBookingTime('${time}')`}">${time}</div>`;
+      }).join('');
+    }
+    
+    function selectBookingTime(time) { bookingData.time = time; loadAvailableTimes(); }
+    
+    function renderBookingSummary() {
+      const service = services.find(s => s.id === bookingData.serviceId);
+      const staffMember = staff.find(s => s.id === bookingData.staffId);
+      const date = new Date(bookingData.date + 'T00:00:00');
+      document.getElementById('booking-summary').innerHTML = `<h4 style="margin-bottom: 1rem;">Booking Summary</h4><div class="summary-row"><span>Service</span><span>${service.name}</span></div><div class="summary-row"><span>Provider</span><span>${staffMember.name}</span></div><div class="summary-row"><span>Date</span><span>${date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span></div><div class="summary-row"><span>Time</span><span>${bookingData.time}</span></div><div class="summary-row"><span>Duration</span><span>${service.duration} min</span></div><div class="summary-row"><span>Total</span><span>$${service.price}</span></div>`;
+    }
+    
+    function bookingNext() {
+      if (bookingStep === 1) {
+        if (!bookingData.serviceId) { showToast('Please select a service', 'error'); return; }
+        bookingStep = 2;
+        renderStaffSelectGrid();
+      } else if (bookingStep === 2) {
+        if (!bookingData.staffId) { showToast('Please select a provider', 'error'); return; }
+        bookingStep = 3;
+        loadAvailableTimes();
+      } else if (bookingStep === 3) {
+        if (!bookingData.date || !bookingData.time) { showToast('Please select date and time', 'error'); return; }
+        bookingStep = 4;
+        renderBookingSummary();
+        document.getElementById('booking-next').textContent = 'Confirm Booking';
+      } else if (bookingStep === 4) {
+        submitBooking();
+        return;
+      }
+      document.getElementById('booking-back').disabled = false;
+      updateBookingSteps();
+      showBookingStep(bookingStep);
+    }
+    
+    function bookingBack() {
+      if (bookingStep > 1) {
+        bookingStep--;
+        updateBookingSteps();
+        showBookingStep(bookingStep);
+        document.getElementById('booking-next').textContent = 'Next →';
+        if (bookingStep === 1) document.getElementById('booking-back').disabled = true;
+      }
+    }
+    
+    function submitBooking() {
+      const name = document.getElementById('booking-name').value.trim();
+      const email = document.getElementById('booking-email').value.trim();
+      const phone = document.getElementById('booking-phone').value.trim();
+      const notes = document.getElementById('booking-notes').value.trim();
+      if (!name || !email) { showToast('Please enter your name and email', 'error'); return; }
+      
+      let client = clients.find(c => c.email.toLowerCase() === email.toLowerCase());
+      if (!client) {
+        client = { id: Math.max(0, ...clients.map(c => c.id)) + 1, name, email, phone, notes: '' };
+        clients.push(client);
+      }
+      
+      const service = services.find(s => s.id === bookingData.serviceId);
+      appointments.push({
+        id: Math.max(0, ...appointments.map(a => a.id)) + 1,
+        clientId: client.id,
+        staffId: bookingData.staffId,
+        serviceId: bookingData.serviceId,
+        date: bookingData.date,
+        time: bookingData.time,
+        duration: service.duration,
+        status: 'confirmed',
+        notes
+      });
+      
+      saveData(); renderAll();
+      showToast('Booking confirmed!');
+      document.getElementById('booking-card').innerHTML = `<div style="text-align: center; padding: 2rem;"><div style="font-size: 4rem; margin-bottom: 1rem;">✅</div><h2 style="margin-bottom: 1rem;">Booking Confirmed!</h2><p style="color: var(--gray-600); margin-bottom: 2rem;">Thank you, ${name}. Your appointment has been scheduled.</p><button class="btn btn-primary btn-lg" onclick="location.reload()">Book Another</button></div>`;
+    }
+    
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
