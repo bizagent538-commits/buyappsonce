@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolicySign - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --primary-light: #dbeafe;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-value.blue { color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-warning { background: var(--warning); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.signed { background: #dcfce7; color: #166534; }
+    .status-badge.pending { background: #fef3c7; color: #92400e; }
+    .status-badge.overdue { background: #fee2e2; color: #991b1b; }
+    .status-badge.active { background: #dbeafe; color: #1e40af; }
+    .status-badge.archived { background: var(--gray-200); color: var(--gray-600); }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--success);
+      border-radius: 4px;
+    }
+    
+    .policy-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .policy-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.75rem;
+    }
+    
+    .policy-title { font-weight: 600; font-size: 1rem; }
+    .policy-meta { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .policy-stats {
+      display: flex;
+      gap: 1.5rem;
+      margin: 0.75rem 0;
+      font-size: 0.875rem;
+    }
+    
+    .policy-stat { display: flex; align-items: center; gap: 0.25rem; }
+    .policy-stat .count { font-weight: 600; }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .person-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .person-name { font-weight: 500; }
+    .person-meta { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .checkbox-list {
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid var(--gray-200);
+      border-radius: 0.375rem;
+      padding: 0.5rem;
+    }
+    
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .checkbox-item:hover { background: var(--gray-50); }
+    .checkbox-item input { width: 18px; height: 18px; }
+    
+    .signature-box {
+      background: var(--primary-light);
+      border: 2px dashed var(--primary);
+      border-radius: 0.5rem;
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+    }
+    
+    .signature-box.signed {
+      background: #dcfce7;
+      border-color: var(--success);
+    }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row, .grid-2 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📝 PolicySign</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="policies">Policies</div>
+    <div class="nav-tab" data-tab="signatures">Signatures</div>
+    <div class="nav-tab" data-tab="people">People</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value blue" id="stat-policies">0</div>
+          <div class="stat-label">Active Policies</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-signed">0</div>
+          <div class="stat-label">Signed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-pending">0</div>
+          <div class="stat-label">Pending</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value red" id="stat-overdue">0</div>
+          <div class="stat-label">Overdue</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-compliance">0%</div>
+          <div class="stat-label">Compliance Rate</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📋 Active Policies</h2>
+          <button class="btn btn-primary btn-sm" onclick="openPolicyModal()">+ New Policy</button>
+        </div>
+        <div id="active-policies"></div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚠️ Overdue Signatures</h2>
+          </div>
+          <div id="overdue-list"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">✅ Recent Signatures</h2>
+          </div>
+          <div id="recent-signatures"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Policies -->
+    <div class="tab-content" id="tab-policies">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Policies</h2>
+          <button class="btn btn-primary" onclick="openPolicyModal()">+ New Policy</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-policy-status" onchange="renderPolicies()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search policies..." id="filter-policy-search" oninput="renderPolicies()">
+        </div>
+        <div id="policies-list"></div>
+      </div>
+    </div>
+    
+    <!-- Signatures -->
+    <div class="tab-content" id="tab-signatures">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Signature Tracking</h2>
+          <button class="btn btn-secondary" onclick="exportSignatures()">Export</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-sig-status" onchange="renderSignatures()">
+            <option value="">All Statuses</option>
+            <option value="signed">Signed</option>
+            <option value="pending">Pending</option>
+            <option value="overdue">Overdue</option>
+          </select>
+          <select class="filter-select" id="filter-sig-policy" onchange="renderSignatures()">
+            <option value="">All Policies</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search person..." id="filter-sig-search" oninput="renderSignatures()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Person</th>
+              <th>Policy</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Signed Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="signatures-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- People -->
+    <div class="tab-content" id="tab-people">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">People</h2>
+          <button class="btn btn-primary" onclick="openPersonModal()">+ Add Person</button>
+        </div>
+        <input type="text" class="filter-input" placeholder="Search people..." id="filter-person-search" oninput="renderPeople()" style="margin-bottom: 1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Department</th>
+              <th>Signed</th>
+              <th>Pending</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="people-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportSignatures()">📋 All Signatures</button>
+          <button class="btn btn-secondary" onclick="exportPending()">⏳ Pending/Overdue</button>
+          <button class="btn btn-secondary" onclick="exportByPolicy()">📄 By Policy</button>
+          <button class="btn btn-secondary" onclick="exportByPerson()">👥 By Person</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Compliance by Policy</h3>
+        <div id="policy-compliance"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Department Compliance</h3>
+        <div id="dept-compliance"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Policy Modal -->
+  <div class="modal-overlay" id="policy-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="policy-modal-title">New Policy</h3>
+        <button class="modal-close" onclick="closeModal('policy-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pol-id">
+        <div class="form-group">
+          <label class="form-label">Policy Name *</label>
+          <input type="text" class="form-input" id="pol-name" placeholder="e.g., Employee Handbook">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="pol-description" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Version</label>
+            <input type="text" class="form-input" id="pol-version" placeholder="e.g., 1.0">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" class="form-input" id="pol-due">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="form-input" id="pol-status">
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Assign To</label>
+          <div style="margin-bottom: 0.5rem;">
+            <button class="btn btn-sm btn-secondary" onclick="selectAllPeople()">Select All</button>
+            <button class="btn btn-sm btn-secondary" onclick="selectNonePeople()">Select None</button>
+          </div>
+          <div class="checkbox-list" id="pol-assignees"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="pol-delete-btn" onclick="deletePolicy()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('policy-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePolicy()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Person Modal -->
+  <div class="modal-overlay" id="person-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="person-modal-title">Add Person</h3>
+        <button class="modal-close" onclick="closeModal('person-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="per-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="per-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email *</label>
+          <input type="email" class="form-input" id="per-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Department</label>
+          <input type="text" class="form-input" id="per-department" placeholder="e.g., Sales, Engineering">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Title</label>
+          <input type="text" class="form-input" id="per-title">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="per-delete-btn" onclick="deletePerson()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('person-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePerson()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Sign Modal -->
+  <div class="modal-overlay" id="sign-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Sign Policy</h3>
+        <button class="modal-close" onclick="closeModal('sign-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sign-id">
+        <div id="sign-policy-info" style="margin-bottom: 1.5rem;"></div>
+        <div class="form-group">
+          <label class="form-label">Type your name to sign *</label>
+          <input type="text" class="form-input" id="sign-name" placeholder="Full Name">
+        </div>
+        <div class="signature-box" id="signature-preview">
+          <div style="color: var(--gray-500); margin-bottom: 0.5rem;">Signature Preview</div>
+          <div id="sig-display" style="font-family: 'Brush Script MT', cursive; font-size: 2rem; color: var(--primary);"></div>
+        </div>
+        <div class="form-group" style="margin-top: 1rem;">
+          <label style="display: flex; align-items: center; gap: 0.5rem;">
+            <input type="checkbox" id="sign-confirm">
+            I acknowledge that I have read and understand this policy
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('sign-modal')">Cancel</button>
+        <button class="btn btn-success" onclick="submitSignature()">Sign Policy</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- View Policy Modal -->
+  <div class="modal-overlay" id="view-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="view-modal-title">Policy Details</h3>
+        <button class="modal-close" onclick="closeModal('view-modal')">&times;</button>
+      </div>
+      <div class="modal-body" id="view-modal-body"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('view-modal')">Close</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let policies = [], people = [], signatures = [];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      document.getElementById('sign-name').addEventListener('input', e => {
+        document.getElementById('sig-display').textContent = e.target.value;
+      });
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        policies: localStorage.getItem('policysign_policies'),
+        people: localStorage.getItem('policysign_people'),
+        signatures: localStorage.getItem('policysign_signatures')
+      };
+      
+      const today = new Date();
+      const lastWeek = new Date(today.getTime() - 7 * 86400000).toISOString().split('T')[0];
+      const nextWeek = new Date(today.getTime() + 7 * 86400000).toISOString().split('T')[0];
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 15).toISOString().split('T')[0];
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().split('T')[0];
+      
+      people = saved.people ? JSON.parse(saved.people) : [
+        { id: 1, name: 'John Smith', email: 'john.smith@company.com', department: 'Engineering', title: 'Software Engineer' },
+        { id: 2, name: 'Sarah Johnson', email: 'sarah.j@company.com', department: 'Sales', title: 'Sales Manager' },
+        { id: 3, name: 'Mike Williams', email: 'mike.w@company.com', department: 'Engineering', title: 'Senior Developer' },
+        { id: 4, name: 'Emily Brown', email: 'emily.b@company.com', department: 'HR', title: 'HR Coordinator' },
+        { id: 5, name: 'David Miller', email: 'david.m@company.com', department: 'Sales', title: 'Account Executive' },
+        { id: 6, name: 'Lisa Davis', email: 'lisa.d@company.com', department: 'Marketing', title: 'Marketing Specialist' },
+      ];
+      
+      policies = saved.policies ? JSON.parse(saved.policies) : [
+        { id: 1, name: 'Employee Handbook', description: 'Company policies and procedures', version: '2.1', dueDate: nextMonth, status: 'active', createdDate: lastMonth },
+        { id: 2, name: 'Code of Conduct', description: 'Professional behavior expectations', version: '1.3', dueDate: nextWeek, status: 'active', createdDate: lastMonth },
+        { id: 3, name: 'IT Security Policy', description: 'Data security and access guidelines', version: '3.0', dueDate: nextMonth, status: 'active', createdDate: lastMonth },
+        { id: 4, name: 'Remote Work Agreement', description: 'Terms for remote work arrangements', version: '1.0', dueDate: lastWeek, status: 'active', createdDate: lastMonth },
+      ];
+      
+      signatures = saved.signatures ? JSON.parse(saved.signatures) : [
+        // Employee Handbook
+        { id: 1, policyId: 1, personId: 1, status: 'signed', signedDate: lastWeek, dueDate: nextMonth },
+        { id: 2, policyId: 1, personId: 2, status: 'signed', signedDate: lastWeek, dueDate: nextMonth },
+        { id: 3, policyId: 1, personId: 3, status: 'pending', signedDate: null, dueDate: nextMonth },
+        { id: 4, policyId: 1, personId: 4, status: 'signed', signedDate: lastWeek, dueDate: nextMonth },
+        { id: 5, policyId: 1, personId: 5, status: 'pending', signedDate: null, dueDate: nextMonth },
+        { id: 6, policyId: 1, personId: 6, status: 'pending', signedDate: null, dueDate: nextMonth },
+        // Code of Conduct
+        { id: 7, policyId: 2, personId: 1, status: 'signed', signedDate: lastWeek, dueDate: nextWeek },
+        { id: 8, policyId: 2, personId: 2, status: 'pending', signedDate: null, dueDate: nextWeek },
+        { id: 9, policyId: 2, personId: 3, status: 'signed', signedDate: lastWeek, dueDate: nextWeek },
+        { id: 10, policyId: 2, personId: 4, status: 'signed', signedDate: lastWeek, dueDate: nextWeek },
+        // IT Security
+        { id: 11, policyId: 3, personId: 1, status: 'signed', signedDate: lastWeek, dueDate: nextMonth },
+        { id: 12, policyId: 3, personId: 3, status: 'signed', signedDate: lastWeek, dueDate: nextMonth },
+        // Remote Work (overdue)
+        { id: 13, policyId: 4, personId: 1, status: 'signed', signedDate: lastMonth, dueDate: lastWeek },
+        { id: 14, policyId: 4, personId: 2, status: 'overdue', signedDate: null, dueDate: lastWeek },
+        { id: 15, policyId: 4, personId: 5, status: 'overdue', signedDate: null, dueDate: lastWeek },
+      ];
+      
+      updateOverdueStatuses();
+      saveData();
+    }
+    
+    function updateOverdueStatuses() {
+      const today = new Date().toISOString().split('T')[0];
+      signatures.forEach(s => {
+        if (s.status === 'pending' && s.dueDate < today) {
+          s.status = 'overdue';
+        }
+      });
+    }
+    
+    function saveData() {
+      localStorage.setItem('policysign_policies', JSON.stringify(policies));
+      localStorage.setItem('policysign_people', JSON.stringify(people));
+      localStorage.setItem('policysign_signatures', JSON.stringify(signatures));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderPolicies();
+      renderSignatures();
+      renderPeople();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      document.getElementById('filter-sig-policy').innerHTML = '<option value="">All Policies</option>' + 
+        policies.filter(p => p.status === 'active').map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+    }
+    
+    function getPolicyStats(policyId) {
+      const policySigs = signatures.filter(s => s.policyId === policyId);
+      return {
+        total: policySigs.length,
+        signed: policySigs.filter(s => s.status === 'signed').length,
+        pending: policySigs.filter(s => s.status === 'pending').length,
+        overdue: policySigs.filter(s => s.status === 'overdue').length
+      };
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const activePolicies = policies.filter(p => p.status === 'active');
+      const totalSigned = signatures.filter(s => s.status === 'signed').length;
+      const totalPending = signatures.filter(s => s.status === 'pending').length;
+      const totalOverdue = signatures.filter(s => s.status === 'overdue').length;
+      const totalSigs = signatures.length;
+      const complianceRate = totalSigs > 0 ? Math.round(totalSigned / totalSigs * 100) : 0;
+      
+      document.getElementById('stat-policies').textContent = activePolicies.length;
+      document.getElementById('stat-signed').textContent = totalSigned;
+      document.getElementById('stat-pending').textContent = totalPending;
+      document.getElementById('stat-overdue').textContent = totalOverdue;
+      document.getElementById('stat-compliance').textContent = complianceRate + '%';
+      
+      // Active policies
+      document.getElementById('active-policies').innerHTML = activePolicies.map(p => {
+        const stats = getPolicyStats(p.id);
+        const progress = stats.total > 0 ? Math.round(stats.signed / stats.total * 100) : 0;
+        
+        return `<div class="policy-card">
+          <div class="policy-header">
+            <div>
+              <div class="policy-title">${p.name}</div>
+              <div class="policy-meta">Version ${p.version} • Due: ${formatDate(p.dueDate)}</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="viewPolicy(${p.id})">View</button>
+          </div>
+          <div class="policy-stats">
+            <div class="policy-stat"><span class="count" style="color: var(--success);">${stats.signed}</span> Signed</div>
+            <div class="policy-stat"><span class="count" style="color: var(--warning);">${stats.pending}</span> Pending</div>
+            <div class="policy-stat"><span class="count" style="color: var(--danger);">${stats.overdue}</span> Overdue</div>
+          </div>
+          <div style="display: flex; justify-content: space-between; font-size: 0.875rem; margin-bottom: 0.25rem;">
+            <span>${stats.signed} of ${stats.total} signed</span>
+            <span>${progress}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+        </div>`;
+      }).join('') || '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No active policies</div>';
+      
+      // Overdue list
+      const overdue = signatures.filter(s => s.status === 'overdue').slice(0, 5);
+      document.getElementById('overdue-list').innerHTML = overdue.length ? overdue.map(s => {
+        const person = people.find(p => p.id === s.personId);
+        const policy = policies.find(p => p.id === s.policyId);
+        return `<div class="person-item">
+          <div>
+            <div class="person-name">${person?.name || 'Unknown'}</div>
+            <div class="person-meta">${policy?.name || ''}</div>
+          </div>
+          <button class="btn btn-sm btn-warning" onclick="sendReminder(${s.id})">Remind</button>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No overdue signatures</div>';
+      
+      // Recent signatures
+      const recent = signatures.filter(s => s.status === 'signed').sort((a, b) => new Date(b.signedDate) - new Date(a.signedDate)).slice(0, 5);
+      document.getElementById('recent-signatures').innerHTML = recent.map(s => {
+        const person = people.find(p => p.id === s.personId);
+        const policy = policies.find(p => p.id === s.policyId);
+        return `<div class="person-item">
+          <div>
+            <div class="person-name">${person?.name || 'Unknown'}</div>
+            <div class="person-meta">${policy?.name || ''}</div>
+          </div>
+          <span style="color: var(--gray-500); font-size: 0.875rem;">${formatDate(s.signedDate)}</span>
+        </div>`;
+      }).join('');
+    }
+    
+    // Policies
+    function renderPolicies() {
+      const statusFilter = document.getElementById('filter-policy-status').value;
+      const search = document.getElementById('filter-policy-search').value.toLowerCase();
+      
+      let filtered = [...policies];
+      if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+      if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search));
+      
+      document.getElementById('policies-list').innerHTML = filtered.map(p => {
+        const stats = getPolicyStats(p.id);
+        const progress = stats.total > 0 ? Math.round(stats.signed / stats.total * 100) : 0;
+        
+        return `<div class="policy-card">
+          <div class="policy-header">
+            <div>
+              <div class="policy-title">${p.name}</div>
+              <div class="policy-meta">${p.description || ''}</div>
+              <div class="policy-meta">Version ${p.version} • Due: ${formatDate(p.dueDate)}</div>
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="status-badge ${p.status}">${p.status}</span>
+              <button class="btn btn-sm btn-secondary" onclick="editPolicy(${p.id})">Edit</button>
+            </div>
+          </div>
+          <div class="policy-stats">
+            <div class="policy-stat"><span class="count" style="color: var(--success);">${stats.signed}</span> Signed</div>
+            <div class="policy-stat"><span class="count" style="color: var(--warning);">${stats.pending}</span> Pending</div>
+            <div class="policy-stat"><span class="count" style="color: var(--danger);">${stats.overdue}</span> Overdue</div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: ${progress}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    function openPolicyModal(id = null) {
+      document.getElementById('pol-assignees').innerHTML = people.map(p => `
+        <div class="checkbox-item">
+          <input type="checkbox" id="assign-${p.id}" value="${p.id}">
+          <label for="assign-${p.id}">${p.name} (${p.department || 'No dept'})</label>
+        </div>
+      `).join('');
+      
+      if (id) {
+        const p = policies.find(x => x.id === id);
+        document.getElementById('policy-modal-title').textContent = 'Edit Policy';
+        document.getElementById('pol-id').value = id;
+        document.getElementById('pol-name').value = p.name;
+        document.getElementById('pol-description').value = p.description || '';
+        document.getElementById('pol-version').value = p.version || '';
+        document.getElementById('pol-due').value = p.dueDate || '';
+        document.getElementById('pol-status').value = p.status;
+        
+        const assigned = signatures.filter(s => s.policyId === id).map(s => s.personId);
+        assigned.forEach(pid => {
+          const cb = document.getElementById(`assign-${pid}`);
+          if (cb) cb.checked = true;
+        });
+        
+        document.getElementById('pol-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('policy-modal-title').textContent = 'New Policy';
+        document.getElementById('pol-id').value = '';
+        document.getElementById('pol-name').value = '';
+        document.getElementById('pol-description').value = '';
+        document.getElementById('pol-version').value = '1.0';
+        document.getElementById('pol-due').value = '';
+        document.getElementById('pol-status').value = 'active';
+        document.getElementById('pol-delete-btn').style.display = 'none';
+      }
+      document.getElementById('policy-modal').classList.add('active');
+    }
+    
+    function selectAllPeople() {
+      document.querySelectorAll('#pol-assignees input[type="checkbox"]').forEach(cb => cb.checked = true);
+    }
+    
+    function selectNonePeople() {
+      document.querySelectorAll('#pol-assignees input[type="checkbox"]').forEach(cb => cb.checked = false);
+    }
+    
+    function editPolicy(id) { openPolicyModal(id); }
+    
+    function viewPolicy(id) {
+      const p = policies.find(x => x.id === id);
+      const stats = getPolicyStats(id);
+      const policySigs = signatures.filter(s => s.policyId === id);
+      
+      document.getElementById('view-modal-title').textContent = p.name;
+      document.getElementById('view-modal-body').innerHTML = `
+        <div style="margin-bottom: 1rem;">
+          <p><strong>Version:</strong> ${p.version}</p>
+          <p><strong>Due Date:</strong> ${formatDate(p.dueDate)}</p>
+          ${p.description ? `<p><strong>Description:</strong> ${p.description}</p>` : ''}
+        </div>
+        <h4 style="margin-bottom: 0.5rem;">Signature Status (${stats.signed}/${stats.total})</h4>
+        <table style="font-size: 0.875rem;">
+          <thead>
+            <tr><th>Name</th><th>Status</th><th>Date</th></tr>
+          </thead>
+          <tbody>
+            ${policySigs.map(s => {
+              const person = people.find(per => per.id === s.personId);
+              return `<tr>
+                <td>${person?.name || 'Unknown'}</td>
+                <td><span class="status-badge ${s.status}">${s.status}</span></td>
+                <td>${s.signedDate ? formatDate(s.signedDate) : '-'}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      `;
+      document.getElementById('view-modal').classList.add('active');
+    }
+    
+    function savePolicy() {
+      const id = document.getElementById('pol-id').value;
+      const name = document.getElementById('pol-name').value.trim();
+      const description = document.getElementById('pol-description').value.trim();
+      const version = document.getElementById('pol-version').value.trim();
+      const dueDate = document.getElementById('pol-due').value;
+      const status = document.getElementById('pol-status').value;
+      
+      if (!name) { showToast('Please enter policy name', 'error'); return; }
+      
+      const assignedPeople = [];
+      document.querySelectorAll('#pol-assignees input[type="checkbox"]:checked').forEach(cb => {
+        assignedPeople.push(parseInt(cb.value));
+      });
+      
+      let policyId;
+      if (id) {
+        policyId = parseInt(id);
+        const i = policies.findIndex(p => p.id === policyId);
+        policies[i] = { ...policies[i], name, description, version, dueDate, status };
+        showToast('Policy updated');
+      } else {
+        policyId = Math.max(0, ...policies.map(p => p.id)) + 1;
+        policies.push({ id: policyId, name, description, version, dueDate, status, createdDate: new Date().toISOString().split('T')[0] });
+        showToast('Policy created');
+      }
+      
+      // Update signatures
+      const existingSigs = signatures.filter(s => s.policyId === policyId);
+      const existingPeople = existingSigs.map(s => s.personId);
+      
+      // Add new assignments
+      assignedPeople.forEach(personId => {
+        if (!existingPeople.includes(personId)) {
+          signatures.push({
+            id: Math.max(0, ...signatures.map(s => s.id)) + 1,
+            policyId,
+            personId,
+            status: 'pending',
+            signedDate: null,
+            dueDate
+          });
+        }
+      });
+      
+      // Remove unassigned (only if not signed)
+      signatures = signatures.filter(s => {
+        if (s.policyId !== policyId) return true;
+        if (s.status === 'signed') return true;
+        return assignedPeople.includes(s.personId);
+      });
+      
+      updateOverdueStatuses();
+      saveData();
+      renderAll();
+      closeModal('policy-modal');
+    }
+    
+    function deletePolicy() {
+      const id = parseInt(document.getElementById('pol-id').value);
+      if (!confirm('Delete this policy and all signatures?')) return;
+      policies = policies.filter(p => p.id !== id);
+      signatures = signatures.filter(s => s.policyId !== id);
+      saveData();
+      renderAll();
+      closeModal('policy-modal');
+      showToast('Policy deleted');
+    }
+    
+    // Signatures
+    function renderSignatures() {
+      const statusFilter = document.getElementById('filter-sig-status').value;
+      const policyFilter = document.getElementById('filter-sig-policy').value;
+      const search = document.getElementById('filter-sig-search').value.toLowerCase();
+      
+      let filtered = [...signatures];
+      if (statusFilter) filtered = filtered.filter(s => s.status === statusFilter);
+      if (policyFilter) filtered = filtered.filter(s => s.policyId === parseInt(policyFilter));
+      if (search) {
+        filtered = filtered.filter(s => {
+          const person = people.find(p => p.id === s.personId);
+          return person?.name.toLowerCase().includes(search);
+        });
+      }
+      
+      filtered.sort((a, b) => {
+        if (a.status === 'overdue' && b.status !== 'overdue') return -1;
+        if (a.status !== 'overdue' && b.status === 'overdue') return 1;
+        return new Date(a.dueDate) - new Date(b.dueDate);
+      });
+      
+      document.getElementById('signatures-table').innerHTML = filtered.map(s => {
+        const person = people.find(p => p.id === s.personId);
+        const policy = policies.find(p => p.id === s.policyId);
+        
+        return `<tr>
+          <td><strong>${person?.name || 'Unknown'}</strong><br><span style="font-size:0.75rem;color:var(--gray-500);">${person?.email || ''}</span></td>
+          <td>${policy?.name || 'Unknown'}</td>
+          <td><span class="status-badge ${s.status}">${s.status}</span></td>
+          <td>${formatDate(s.dueDate)}</td>
+          <td>${s.signedDate ? formatDate(s.signedDate) : '-'}</td>
+          <td>
+            ${s.status !== 'signed' ? `<button class="btn btn-sm btn-success" onclick="openSignModal(${s.id})">Sign</button>` : ''}
+            ${s.status === 'overdue' || s.status === 'pending' ? `<button class="btn btn-sm btn-warning" onclick="sendReminder(${s.id})">Remind</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openSignModal(sigId) {
+      const sig = signatures.find(s => s.id === sigId);
+      const policy = policies.find(p => p.id === sig.policyId);
+      const person = people.find(p => p.id === sig.personId);
+      
+      document.getElementById('sign-id').value = sigId;
+      document.getElementById('sign-name').value = '';
+      document.getElementById('sig-display').textContent = '';
+      document.getElementById('sign-confirm').checked = false;
+      
+      document.getElementById('sign-policy-info').innerHTML = `
+        <h4>${policy?.name || 'Unknown Policy'}</h4>
+        <p style="color: var(--gray-500);">Version ${policy?.version} • Due: ${formatDate(sig.dueDate)}</p>
+        <p style="margin-top: 0.5rem;"><strong>Signing as:</strong> ${person?.name}</p>
+      `;
+      
+      document.getElementById('sign-modal').classList.add('active');
+    }
+    
+    function submitSignature() {
+      const sigId = parseInt(document.getElementById('sign-id').value);
+      const name = document.getElementById('sign-name').value.trim();
+      const confirmed = document.getElementById('sign-confirm').checked;
+      
+      if (!name) { showToast('Please type your name', 'error'); return; }
+      if (!confirmed) { showToast('Please confirm acknowledgment', 'error'); return; }
+      
+      const sig = signatures.find(s => s.id === sigId);
+      const person = people.find(p => p.id === sig.personId);
+      
+      if (name.toLowerCase() !== person.name.toLowerCase()) {
+        showToast('Name must match your registered name', 'error');
+        return;
+      }
+      
+      sig.status = 'signed';
+      sig.signedDate = new Date().toISOString().split('T')[0];
+      
+      saveData();
+      renderAll();
+      closeModal('sign-modal');
+      showToast('Policy signed successfully');
+    }
+    
+    function sendReminder(sigId) {
+      const sig = signatures.find(s => s.id === sigId);
+      const person = people.find(p => p.id === sig.personId);
+      const policy = policies.find(p => p.id === sig.policyId);
+      showToast(`Reminder sent to ${person?.name} for "${policy?.name}"`);
+    }
+    
+    // People
+    function renderPeople() {
+      const search = document.getElementById('filter-person-search').value.toLowerCase();
+      let filtered = [...people];
+      if (search) filtered = filtered.filter(p => p.name.toLowerCase().includes(search) || p.email.toLowerCase().includes(search));
+      
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      
+      document.getElementById('people-table').innerHTML = filtered.map(p => {
+        const personSigs = signatures.filter(s => s.personId === p.id);
+        const signed = personSigs.filter(s => s.status === 'signed').length;
+        const pending = personSigs.filter(s => s.status !== 'signed').length;
+        
+        return `<tr>
+          <td><strong>${p.name}</strong></td>
+          <td>${p.email}</td>
+          <td>${p.department || '-'}</td>
+          <td style="color: var(--success);">${signed}</td>
+          <td style="color: ${pending > 0 ? 'var(--warning)' : 'var(--gray-400)'};">${pending}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editPerson(${p.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openPersonModal(id = null) {
+      if (id) {
+        const p = people.find(x => x.id === id);
+        document.getElementById('person-modal-title').textContent = 'Edit Person';
+        document.getElementById('per-id').value = id;
+        document.getElementById('per-name').value = p.name;
+        document.getElementById('per-email').value = p.email;
+        document.getElementById('per-department').value = p.department || '';
+        document.getElementById('per-title').value = p.title || '';
+        document.getElementById('per-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('person-modal-title').textContent = 'Add Person';
+        document.getElementById('per-id').value = '';
+        document.getElementById('per-name').value = '';
+        document.getElementById('per-email').value = '';
+        document.getElementById('per-department').value = '';
+        document.getElementById('per-title').value = '';
+        document.getElementById('per-delete-btn').style.display = 'none';
+      }
+      document.getElementById('person-modal').classList.add('active');
+    }
+    
+    function editPerson(id) { openPersonModal(id); }
+    
+    function savePerson() {
+      const id = document.getElementById('per-id').value;
+      const name = document.getElementById('per-name').value.trim();
+      const email = document.getElementById('per-email').value.trim();
+      const department = document.getElementById('per-department').value.trim();
+      const title = document.getElementById('per-title').value.trim();
+      
+      if (!name || !email) { showToast('Please enter name and email', 'error'); return; }
+      
+      if (id) {
+        const i = people.findIndex(p => p.id === parseInt(id));
+        people[i] = { ...people[i], name, email, department, title };
+        showToast('Person updated');
+      } else {
+        people.push({ id: Math.max(0, ...people.map(p => p.id)) + 1, name, email, department, title });
+        showToast('Person added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('person-modal');
+    }
+    
+    function deletePerson() {
+      const id = parseInt(document.getElementById('per-id').value);
+      const hasSigs = signatures.some(s => s.personId === id);
+      if (hasSigs && !confirm('This person has signatures. Delete anyway?')) return;
+      if (!hasSigs && !confirm('Delete this person?')) return;
+      people = people.filter(p => p.id !== id);
+      signatures = signatures.filter(s => s.personId !== id);
+      saveData();
+      renderAll();
+      closeModal('person-modal');
+      showToast('Person deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      // Policy compliance
+      document.getElementById('policy-compliance').innerHTML = policies.filter(p => p.status === 'active').map(p => {
+        const stats = getPolicyStats(p.id);
+        const rate = stats.total > 0 ? Math.round(stats.signed / stats.total * 100) : 0;
+        
+        return `<div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+          <span style="width: 200px; font-size: 0.875rem;">${p.name}</span>
+          <div style="flex: 1; height: 20px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${rate}%; height: 100%; background: ${rate === 100 ? 'var(--success)' : 'var(--primary)'}; border-radius: 4px;"></div>
+          </div>
+          <span style="width: 80px; text-align: right; font-weight: 600;">${stats.signed}/${stats.total}</span>
+          <span style="width: 50px; text-align: right; color: var(--gray-500);">${rate}%</span>
+        </div>`;
+      }).join('');
+      
+      // Department compliance
+      const depts = [...new Set(people.map(p => p.department).filter(Boolean))];
+      document.getElementById('dept-compliance').innerHTML = depts.map(dept => {
+        const deptPeople = people.filter(p => p.department === dept);
+        const deptSigs = signatures.filter(s => deptPeople.map(p => p.id).includes(s.personId));
+        const signed = deptSigs.filter(s => s.status === 'signed').length;
+        const total = deptSigs.length;
+        const rate = total > 0 ? Math.round(signed / total * 100) : 0;
+        
+        return `<div style="display: flex; align-items: center; margin-bottom: 0.75rem;">
+          <span style="width: 150px; font-size: 0.875rem;">${dept}</span>
+          <div style="flex: 1; height: 20px; background: var(--gray-200); border-radius: 4px; margin: 0 1rem;">
+            <div style="width: ${rate}%; height: 100%; background: ${rate === 100 ? 'var(--success)' : 'var(--primary)'}; border-radius: 4px;"></div>
+          </div>
+          <span style="width: 80px; text-align: right; font-weight: 600;">${signed}/${total}</span>
+          <span style="width: 50px; text-align: right; color: var(--gray-500);">${rate}%</span>
+        </div>`;
+      }).join('');
+    }
+    
+    // Exports
+    function exportSignatures() {
+      const headers = ['Person', 'Email', 'Department', 'Policy', 'Status', 'Due Date', 'Signed Date'];
+      const rows = signatures.map(s => {
+        const person = people.find(p => p.id === s.personId);
+        const policy = policies.find(p => p.id === s.policyId);
+        return [person?.name || '', person?.email || '', person?.department || '', policy?.name || '', s.status, s.dueDate, s.signedDate || ''];
+      });
+      downloadCSV([headers, ...rows], 'signatures.csv');
+      showToast('Signatures exported');
+    }
+    
+    function exportPending() {
+      const pending = signatures.filter(s => s.status !== 'signed');
+      const headers = ['Person', 'Email', 'Policy', 'Status', 'Due Date'];
+      const rows = pending.map(s => {
+        const person = people.find(p => p.id === s.personId);
+        const policy = policies.find(p => p.id === s.policyId);
+        return [person?.name || '', person?.email || '', policy?.name || '', s.status, s.dueDate];
+      });
+      downloadCSV([headers, ...rows], 'pending-signatures.csv');
+      showToast('Pending signatures exported');
+    }
+    
+    function exportByPolicy() {
+      const headers = ['Policy', 'Version', 'Status', 'Total', 'Signed', 'Pending', 'Overdue', 'Compliance %'];
+      const rows = policies.map(p => {
+        const stats = getPolicyStats(p.id);
+        const rate = stats.total > 0 ? Math.round(stats.signed / stats.total * 100) : 0;
+        return [p.name, p.version, p.status, stats.total, stats.signed, stats.pending, stats.overdue, rate + '%'];
+      });
+      downloadCSV([headers, ...rows], 'policy-summary.csv');
+      showToast('Policy summary exported');
+    }
+    
+    function exportByPerson() {
+      const headers = ['Name', 'Email', 'Department', 'Total Assigned', 'Signed', 'Pending', 'Compliance %'];
+      const rows = people.map(p => {
+        const personSigs = signatures.filter(s => s.personId === p.id);
+        const signed = personSigs.filter(s => s.status === 'signed').length;
+        const total = personSigs.length;
+        const rate = total > 0 ? Math.round(signed / total * 100) : 0;
+        return [p.name, p.email, p.department || '', total, signed, total - signed, rate + '%'];
+      });
+      downloadCSV([headers, ...rows], 'person-compliance.csv');
+      showToast('Person compliance exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>

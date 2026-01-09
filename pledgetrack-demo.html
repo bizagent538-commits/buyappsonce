@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PledgeTrack - Demo</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #8b5cf6;
+      --primary-dark: #7c3aed;
+      --primary-light: #f5f3ff;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-300: #d1d5db;
+      --gray-400: #9ca3af;
+      --gray-500: #6b7280;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-800: #1f2937;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--gray-100);
+      color: var(--gray-800);
+      line-height: 1.5;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      color: white;
+      padding: 1rem 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .header h1 { font-size: 1.5rem; font-weight: 600; }
+    
+    .demo-badge {
+      background: var(--warning);
+      color: var(--gray-800);
+      padding: 0.25rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    
+    .nav-tabs {
+      background: white;
+      display: flex;
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 1rem;
+      overflow-x: auto;
+    }
+    
+    .nav-tab {
+      padding: 1rem 1.5rem;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      font-weight: 500;
+      color: var(--gray-500);
+      white-space: nowrap;
+    }
+    
+    .nav-tab:hover { color: var(--gray-700); }
+    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
+    
+    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
+    
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+    
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .stat-card {
+      background: white;
+      padding: 1.25rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-value.purple { color: var(--primary); }
+    .stat-value.green { color: var(--success); }
+    .stat-value.yellow { color: var(--warning); }
+    .stat-value.red { color: var(--danger); }
+    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; margin-top: 0.25rem; }
+    
+    .card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    
+    .card-title { font-size: 1.125rem; font-weight: 600; }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-size: 0.875rem;
+    }
+    
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-success { background: var(--success); color: white; }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
+    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
+    
+    .filters {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    
+    .filter-select, .filter-input {
+      padding: 0.5rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
+    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
+    tr:hover { background: var(--gray-50); }
+    
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    
+    .status-badge.active { background: #dcfce7; color: #166534; }
+    .status-badge.fulfilled { background: #dbeafe; color: #1e40af; }
+    .status-badge.partial { background: #fef3c7; color: #92400e; }
+    .status-badge.pending { background: var(--gray-200); color: var(--gray-600); }
+    .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
+    
+    .progress-bar {
+      height: 8px;
+      background: var(--gray-200);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+    
+    .progress-fill.success { background: var(--success); }
+    .progress-fill.warning { background: var(--warning); }
+    
+    .campaign-card {
+      background: var(--gray-50);
+      border: 1px solid var(--gray-200);
+      border-radius: 0.5rem;
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    
+    .campaign-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 1rem;
+    }
+    
+    .campaign-title { font-weight: 600; font-size: 1.125rem; }
+    .campaign-dates { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .campaign-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin: 1rem 0;
+      text-align: center;
+    }
+    
+    .campaign-stat-value { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+    .campaign-stat-label { font-size: 0.75rem; color: var(--gray-500); }
+    
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+    
+    .pledge-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .pledge-donor { font-weight: 500; }
+    .pledge-amount { font-weight: 600; color: var(--primary); }
+    .pledge-meta { font-size: 0.875rem; color: var(--gray-500); }
+    
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .modal-overlay.active { display: flex; }
+    
+    .modal {
+      background: white;
+      border-radius: 0.5rem;
+      width: 100%;
+      max-width: 550px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .modal-title { font-size: 1.125rem; font-weight: 600; }
+    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
+    .modal-body { padding: 1.5rem; }
+    
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--gray-200);
+      background: var(--gray-50);
+    }
+    
+    .form-group { margin-bottom: 1rem; }
+    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
+    
+    .form-input {
+      width: 100%;
+      padding: 0.625rem 0.75rem;
+      border: 1px solid var(--gray-300);
+      border-radius: 0.375rem;
+      font-size: 0.875rem;
+    }
+    
+    .form-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+    }
+    
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    
+    .payment-history {
+      background: var(--gray-50);
+      border-radius: 0.375rem;
+      padding: 1rem;
+      margin-top: 1rem;
+    }
+    
+    .payment-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    
+    .payment-item:last-child { border-bottom: none; }
+    
+    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
+    
+    .toast {
+      background: var(--gray-800);
+      color: white;
+      padding: 0.75rem 1rem;
+      border-radius: 0.375rem;
+      margin-top: 0.5rem;
+      animation: slideIn 0.3s ease;
+    }
+    
+    .toast.success { background: var(--success); }
+    .toast.error { background: var(--danger); }
+    
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+    
+    @media (max-width: 768px) {
+      .form-row, .grid-2 { grid-template-columns: 1fr; }
+      .campaign-stats { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>💝 PledgeTrack</h1>
+    <span class="demo-badge">Demo Mode</span>
+  </header>
+  
+  <nav class="nav-tabs">
+    <div class="nav-tab active" data-tab="dashboard">Dashboard</div>
+    <div class="nav-tab" data-tab="campaigns">Campaigns</div>
+    <div class="nav-tab" data-tab="pledges">Pledges</div>
+    <div class="nav-tab" data-tab="payments">Payments</div>
+    <div class="nav-tab" data-tab="donors">Donors</div>
+    <div class="nav-tab" data-tab="reports">Reports</div>
+  </nav>
+  
+  <main class="main-content">
+    <!-- Dashboard -->
+    <div class="tab-content active" id="tab-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value purple" id="stat-pledged">$0</div>
+          <div class="stat-label">Total Pledged</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value green" id="stat-collected">$0</div>
+          <div class="stat-label">Collected</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value yellow" id="stat-outstanding">$0</div>
+          <div class="stat-label">Outstanding</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-pledges">0</div>
+          <div class="stat-label">Active Pledges</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="stat-fulfillment">0%</div>
+          <div class="stat-label">Fulfillment Rate</div>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">🎯 Active Campaigns</h2>
+          <button class="btn btn-primary btn-sm" onclick="openCampaignModal()">+ New Campaign</button>
+        </div>
+        <div id="active-campaigns"></div>
+      </div>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">💰 Recent Pledges</h2>
+          </div>
+          <div id="recent-pledges"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">⚠️ Upcoming Due</h2>
+          </div>
+          <div id="upcoming-due"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Campaigns -->
+    <div class="tab-content" id="tab-campaigns">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Campaigns</h2>
+          <button class="btn btn-primary" onclick="openCampaignModal()">+ New Campaign</button>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-campaign-status" onchange="renderCampaigns()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="planned">Planned</option>
+          </select>
+        </div>
+        <div id="campaigns-list"></div>
+      </div>
+    </div>
+    
+    <!-- Pledges -->
+    <div class="tab-content" id="tab-pledges">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Pledges</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportPledges()">Export</button>
+            <button class="btn btn-primary" onclick="openPledgeModal()">+ New Pledge</button>
+          </div>
+        </div>
+        <div class="filters">
+          <select class="filter-select" id="filter-pledge-status" onchange="renderPledges()">
+            <option value="">All Statuses</option>
+            <option value="active">Active</option>
+            <option value="fulfilled">Fulfilled</option>
+            <option value="partial">Partial</option>
+            <option value="pending">Pending</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <select class="filter-select" id="filter-pledge-campaign" onchange="renderPledges()">
+            <option value="">All Campaigns</option>
+          </select>
+          <input type="text" class="filter-input" placeholder="Search donor..." id="filter-pledge-search" oninput="renderPledges()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Donor</th>
+              <th>Campaign</th>
+              <th>Pledged</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Status</th>
+              <th>Due Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="pledges-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Payments -->
+    <div class="tab-content" id="tab-payments">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Payment History</h2>
+          <div style="display: flex; gap: 0.5rem;">
+            <button class="btn btn-secondary" onclick="exportPayments()">Export</button>
+            <button class="btn btn-primary" onclick="openPaymentModal()">+ Record Payment</button>
+          </div>
+        </div>
+        <div class="filters">
+          <input type="month" class="filter-input" id="filter-payment-month" onchange="renderPayments()">
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Donor</th>
+              <th>Campaign</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="payments-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Donors -->
+    <div class="tab-content" id="tab-donors">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">Donors</h2>
+          <button class="btn btn-primary" onclick="openDonorModal()">+ Add Donor</button>
+        </div>
+        <input type="text" class="filter-input" placeholder="Search donors..." id="filter-donor-search" oninput="renderDonors()" style="margin-bottom: 1rem;">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Total Pledged</th>
+              <th>Total Paid</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="donors-table"></tbody>
+        </table>
+      </div>
+    </div>
+    
+    <!-- Reports -->
+    <div class="tab-content" id="tab-reports">
+      <div class="card">
+        <div class="card-header">
+          <h2 class="card-title">📊 Reports</h2>
+        </div>
+        <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+          <button class="btn btn-primary" onclick="exportPledges()">📋 All Pledges</button>
+          <button class="btn btn-secondary" onclick="exportOutstanding()">⚠️ Outstanding</button>
+          <button class="btn btn-secondary" onclick="exportPayments()">💰 Payments</button>
+          <button class="btn btn-secondary" onclick="exportCampaignSummary()">🎯 Campaign Summary</button>
+          <button class="btn btn-secondary" onclick="exportDonorSummary()">👥 Donor Summary</button>
+        </div>
+        
+        <h3 style="margin-bottom: 1rem;">Campaign Performance</h3>
+        <div id="campaign-performance"></div>
+        
+        <h3 style="margin: 1.5rem 0 1rem;">Monthly Collections</h3>
+        <div id="monthly-collections"></div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Campaign Modal -->
+  <div class="modal-overlay" id="campaign-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="campaign-modal-title">New Campaign</h3>
+        <button class="modal-close" onclick="closeModal('campaign-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="camp-id">
+        <div class="form-group">
+          <label class="form-label">Campaign Name *</label>
+          <input type="text" class="form-input" id="camp-name" placeholder="e.g., Annual Fund 2024">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Description</label>
+          <textarea class="form-input" id="camp-description" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Goal Amount</label>
+            <input type="number" class="form-input" id="camp-goal" min="0" step="1">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Status</label>
+            <select class="form-input" id="camp-status">
+              <option value="planned">Planned</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Start Date</label>
+            <input type="date" class="form-input" id="camp-start">
+          </div>
+          <div class="form-group">
+            <label class="form-label">End Date</label>
+            <input type="date" class="form-input" id="camp-end">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="camp-delete-btn" onclick="deleteCampaign()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('campaign-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCampaign()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Pledge Modal -->
+  <div class="modal-overlay" id="pledge-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="pledge-modal-title">New Pledge</h3>
+        <button class="modal-close" onclick="closeModal('pledge-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pled-id">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Donor *</label>
+            <select class="form-input" id="pled-donor"></select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Campaign *</label>
+            <select class="form-input" id="pled-campaign"></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Pledge Amount *</label>
+            <input type="number" class="form-input" id="pled-amount" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Pledge Date</label>
+            <input type="date" class="form-input" id="pled-date">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Due Date</label>
+            <input type="date" class="form-input" id="pled-due">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Frequency</label>
+            <select class="form-input" id="pled-frequency">
+              <option value="one-time">One-Time</option>
+              <option value="monthly">Monthly</option>
+              <option value="quarterly">Quarterly</option>
+              <option value="annual">Annual</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="pled-notes" rows="2"></textarea>
+        </div>
+        <div id="pledge-payment-history"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="pled-delete-btn" onclick="deletePledge()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('pledge-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePledge()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Payment Modal -->
+  <div class="modal-overlay" id="payment-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title">Record Payment</h3>
+        <button class="modal-close" onclick="closeModal('payment-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Pledge *</label>
+          <select class="form-input" id="pay-pledge" onchange="updatePaymentInfo()"></select>
+        </div>
+        <div id="payment-pledge-info" style="background: var(--gray-50); padding: 0.75rem; border-radius: 0.375rem; margin-bottom: 1rem; display: none;"></div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Amount *</label>
+            <input type="number" class="form-input" id="pay-amount" min="0" step="0.01">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date *</label>
+            <input type="date" class="form-input" id="pay-date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Payment Method</label>
+          <select class="form-input" id="pay-method">
+            <option value="check">Check</option>
+            <option value="credit-card">Credit Card</option>
+            <option value="cash">Cash</option>
+            <option value="bank-transfer">Bank Transfer</option>
+            <option value="online">Online</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="pay-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeModal('payment-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="savePayment()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Donor Modal -->
+  <div class="modal-overlay" id="donor-modal">
+    <div class="modal">
+      <div class="modal-header">
+        <h3 class="modal-title" id="donor-modal-title">Add Donor</h3>
+        <button class="modal-close" onclick="closeModal('donor-modal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="don-id">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input type="text" class="form-input" id="don-name">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="don-email">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input type="tel" class="form-input" id="don-phone">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Address</label>
+          <textarea class="form-input" id="don-address" rows="2"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Notes</label>
+          <textarea class="form-input" id="don-notes" rows="2"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-danger" id="don-delete-btn" onclick="deleteDonor()" style="margin-right:auto;display:none;">Delete</button>
+        <button class="btn btn-secondary" onclick="closeModal('donor-modal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveDonor()">Save</button>
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toast-container"></div>
+
+  <script>
+    let campaigns = [], pledges = [], payments = [], donors = [];
+    
+    function init() {
+      loadData();
+      setupTabs();
+      renderAll();
+    }
+    
+    function loadData() {
+      const saved = {
+        campaigns: localStorage.getItem('pledge_campaigns'),
+        pledges: localStorage.getItem('pledge_pledges'),
+        payments: localStorage.getItem('pledge_payments'),
+        donors: localStorage.getItem('pledge_donors')
+      };
+      
+      const today = new Date();
+      const thisYear = today.getFullYear();
+      const lastMonth = new Date(today.getFullYear(), today.getMonth() - 1, 15).toISOString().split('T')[0];
+      const twoMonthsAgo = new Date(today.getFullYear(), today.getMonth() - 2, 15).toISOString().split('T')[0];
+      const nextMonth = new Date(today.getFullYear(), today.getMonth() + 1, 15).toISOString().split('T')[0];
+      const inTwoWeeks = new Date(today.getTime() + 14 * 86400000).toISOString().split('T')[0];
+      const yearEnd = `${thisYear}-12-31`;
+      const yearStart = `${thisYear}-01-01`;
+      
+      donors = saved.donors ? JSON.parse(saved.donors) : [
+        { id: 1, name: 'John & Mary Smith', email: 'smiths@email.com', phone: '555-0101', address: '123 Main St', notes: 'Major donor' },
+        { id: 2, name: 'ABC Corporation', email: 'giving@abccorp.com', phone: '555-0102', address: '456 Business Blvd', notes: 'Corporate sponsor' },
+        { id: 3, name: 'Sarah Johnson', email: 'sarah.j@email.com', phone: '555-0103', address: '789 Oak Ave', notes: '' },
+        { id: 4, name: 'The Williams Family Foundation', email: 'info@williamsfdn.org', phone: '555-0104', address: '', notes: 'Foundation - annual giving' },
+        { id: 5, name: 'Michael Brown', email: 'mbrown@email.com', phone: '555-0105', address: '321 Elm St', notes: 'Board member' },
+      ];
+      
+      campaigns = saved.campaigns ? JSON.parse(saved.campaigns) : [
+        { id: 1, name: 'Annual Fund ' + thisYear, description: 'General operating support', goal: 100000, status: 'active', startDate: yearStart, endDate: yearEnd },
+        { id: 2, name: 'Building Renovation', description: 'Capital campaign for facility upgrades', goal: 500000, status: 'active', startDate: yearStart, endDate: `${thisYear + 2}-12-31` },
+        { id: 3, name: 'Scholarship Fund', description: 'Student financial aid', goal: 50000, status: 'active', startDate: yearStart, endDate: yearEnd },
+      ];
+      
+      pledges = saved.pledges ? JSON.parse(saved.pledges) : [
+        { id: 1, donorId: 1, campaignId: 1, amount: 10000, pledgeDate: yearStart, dueDate: yearEnd, frequency: 'annual', notes: 'Annual commitment', status: 'active' },
+        { id: 2, donorId: 2, campaignId: 2, amount: 50000, pledgeDate: yearStart, dueDate: nextMonth, frequency: 'one-time', notes: 'Corporate match available', status: 'active' },
+        { id: 3, donorId: 3, campaignId: 1, amount: 1200, pledgeDate: yearStart, dueDate: yearEnd, frequency: 'monthly', notes: '$100/month', status: 'active' },
+        { id: 4, donorId: 4, campaignId: 3, amount: 25000, pledgeDate: yearStart, dueDate: yearEnd, frequency: 'annual', notes: 'Foundation grant', status: 'partial' },
+        { id: 5, donorId: 5, campaignId: 1, amount: 5000, pledgeDate: twoMonthsAgo, dueDate: inTwoWeeks, frequency: 'one-time', notes: '', status: 'active' },
+        { id: 6, donorId: 1, campaignId: 2, amount: 25000, pledgeDate: yearStart, dueDate: `${thisYear + 1}-12-31`, frequency: 'annual', notes: 'Multi-year pledge', status: 'active' },
+      ];
+      
+      payments = saved.payments ? JSON.parse(saved.payments) : [
+        { id: 1, pledgeId: 1, amount: 5000, date: lastMonth, method: 'check', notes: 'First installment' },
+        { id: 2, pledgeId: 2, amount: 25000, date: twoMonthsAgo, method: 'bank-transfer', notes: 'First payment' },
+        { id: 3, pledgeId: 3, amount: 300, date: twoMonthsAgo, method: 'credit-card', notes: 'Jan-Mar' },
+        { id: 4, pledgeId: 3, amount: 300, date: lastMonth, method: 'credit-card', notes: 'Apr-Jun' },
+        { id: 5, pledgeId: 4, amount: 15000, date: lastMonth, method: 'check', notes: 'Partial payment' },
+        { id: 6, pledgeId: 6, amount: 10000, date: twoMonthsAgo, method: 'check', notes: 'Year 1 payment' },
+      ];
+      
+      updatePledgeStatuses();
+      saveData();
+    }
+    
+    function updatePledgeStatuses() {
+      pledges.forEach(p => {
+        if (p.status === 'cancelled') return;
+        const paid = getPledgePaid(p.id);
+        if (paid >= p.amount) p.status = 'fulfilled';
+        else if (paid > 0) p.status = 'partial';
+        else p.status = 'active';
+      });
+    }
+    
+    function saveData() {
+      localStorage.setItem('pledge_campaigns', JSON.stringify(campaigns));
+      localStorage.setItem('pledge_pledges', JSON.stringify(pledges));
+      localStorage.setItem('pledge_payments', JSON.stringify(payments));
+      localStorage.setItem('pledge_donors', JSON.stringify(donors));
+    }
+    
+    function setupTabs() {
+      document.querySelectorAll('.nav-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+          tab.classList.add('active');
+          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+        });
+      });
+    }
+    
+    function renderAll() {
+      renderDashboard();
+      renderCampaigns();
+      renderPledges();
+      renderPayments();
+      renderDonors();
+      renderReports();
+      updateSelects();
+    }
+    
+    function updateSelects() {
+      const donorOpts = '<option value="">Select Donor</option>' + donors.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
+      document.getElementById('pled-donor').innerHTML = donorOpts;
+      
+      const campOpts = '<option value="">Select Campaign</option>' + campaigns.filter(c => c.status !== 'completed').map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      document.getElementById('pled-campaign').innerHTML = campOpts;
+      document.getElementById('filter-pledge-campaign').innerHTML = '<option value="">All Campaigns</option>' + campaigns.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+      
+      const pledgeOpts = '<option value="">Select Pledge</option>' + pledges.filter(p => p.status !== 'fulfilled' && p.status !== 'cancelled').map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const campaign = campaigns.find(c => c.id === p.campaignId);
+        const balance = p.amount - getPledgePaid(p.id);
+        return `<option value="${p.id}">${donor?.name} - ${campaign?.name} (${formatCurrency(balance)} due)</option>`;
+      }).join('');
+      document.getElementById('pay-pledge').innerHTML = pledgeOpts;
+    }
+    
+    function getPledgePaid(pledgeId) {
+      return payments.filter(p => p.pledgeId === pledgeId).reduce((sum, p) => sum + p.amount, 0);
+    }
+    
+    function getCampaignTotals(campaignId) {
+      const campPledges = pledges.filter(p => p.campaignId === campaignId && p.status !== 'cancelled');
+      const pledged = campPledges.reduce((sum, p) => sum + p.amount, 0);
+      const paid = campPledges.reduce((sum, p) => sum + getPledgePaid(p.id), 0);
+      return { pledged, paid, count: campPledges.length };
+    }
+    
+    // Dashboard
+    function renderDashboard() {
+      const activePledges = pledges.filter(p => p.status !== 'cancelled' && p.status !== 'fulfilled');
+      const totalPledged = pledges.filter(p => p.status !== 'cancelled').reduce((sum, p) => sum + p.amount, 0);
+      const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
+      const outstanding = totalPledged - totalPaid;
+      const fulfillmentRate = totalPledged > 0 ? Math.round(totalPaid / totalPledged * 100) : 0;
+      
+      document.getElementById('stat-pledged').textContent = formatCurrency(totalPledged);
+      document.getElementById('stat-collected').textContent = formatCurrency(totalPaid);
+      document.getElementById('stat-outstanding').textContent = formatCurrency(outstanding);
+      document.getElementById('stat-pledges').textContent = activePledges.length;
+      document.getElementById('stat-fulfillment').textContent = fulfillmentRate + '%';
+      
+      // Active campaigns
+      const active = campaigns.filter(c => c.status === 'active');
+      document.getElementById('active-campaigns').innerHTML = active.length ? active.map(c => {
+        const totals = getCampaignTotals(c.id);
+        const progress = c.goal > 0 ? Math.min(100, Math.round(totals.pledged / c.goal * 100)) : 0;
+        return `<div class="campaign-card">
+          <div class="campaign-header">
+            <div>
+              <div class="campaign-title">${c.name}</div>
+              <div class="campaign-dates">${formatDate(c.startDate)} - ${formatDate(c.endDate)}</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="editCampaign(${c.id})">Edit</button>
+          </div>
+          <div class="campaign-stats">
+            <div>
+              <div class="campaign-stat-value">${formatCurrency(totals.pledged)}</div>
+              <div class="campaign-stat-label">Pledged</div>
+            </div>
+            <div>
+              <div class="campaign-stat-value">${formatCurrency(totals.paid)}</div>
+              <div class="campaign-stat-label">Collected</div>
+            </div>
+            <div>
+              <div class="campaign-stat-value">${totals.count}</div>
+              <div class="campaign-stat-label">Pledges</div>
+            </div>
+          </div>
+          <div style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; font-size: 0.875rem;">
+            <span>Goal: ${formatCurrency(c.goal)}</span>
+            <span>${progress}%</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${progress >= 100 ? 'success' : progress >= 50 ? '' : 'warning'}" style="width: ${progress}%"></div>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No active campaigns</div>';
+      
+      // Recent pledges
+      const recent = [...pledges].sort((a, b) => new Date(b.pledgeDate) - new Date(a.pledgeDate)).slice(0, 5);
+      document.getElementById('recent-pledges').innerHTML = recent.map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const campaign = campaigns.find(c => c.id === p.campaignId);
+        return `<div class="pledge-item">
+          <div>
+            <div class="pledge-donor">${donor?.name || 'Unknown'}</div>
+            <div class="pledge-meta">${campaign?.name || ''} • ${formatDate(p.pledgeDate)}</div>
+          </div>
+          <div class="pledge-amount">${formatCurrency(p.amount)}</div>
+        </div>`;
+      }).join('');
+      
+      // Upcoming due
+      const today = new Date();
+      const thirtyDays = new Date(today.getTime() + 30 * 86400000);
+      const upcoming = pledges.filter(p => {
+        if (p.status === 'fulfilled' || p.status === 'cancelled') return false;
+        const due = new Date(p.dueDate);
+        return due >= today && due <= thirtyDays;
+      }).sort((a, b) => new Date(a.dueDate) - new Date(b.dueDate)).slice(0, 5);
+      
+      document.getElementById('upcoming-due').innerHTML = upcoming.length ? upcoming.map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const balance = p.amount - getPledgePaid(p.id);
+        const daysLeft = Math.ceil((new Date(p.dueDate) - today) / 86400000);
+        return `<div class="pledge-item">
+          <div>
+            <div class="pledge-donor">${donor?.name || 'Unknown'}</div>
+            <div class="pledge-meta">Due ${formatDate(p.dueDate)} (${daysLeft} days)</div>
+          </div>
+          <div>
+            <div class="pledge-amount">${formatCurrency(balance)}</div>
+            <button class="btn btn-sm btn-success" onclick="quickPayment(${p.id})">Pay</button>
+          </div>
+        </div>`;
+      }).join('') : '<div style="text-align:center;color:var(--gray-500);padding:2rem;">No pledges due soon</div>';
+    }
+    
+    // Campaigns
+    function renderCampaigns() {
+      const statusFilter = document.getElementById('filter-campaign-status').value;
+      let filtered = [...campaigns];
+      if (statusFilter) filtered = filtered.filter(c => c.status === statusFilter);
+      
+      document.getElementById('campaigns-list').innerHTML = filtered.map(c => {
+        const totals = getCampaignTotals(c.id);
+        const progress = c.goal > 0 ? Math.min(100, Math.round(totals.pledged / c.goal * 100)) : 0;
+        return `<div class="campaign-card">
+          <div class="campaign-header">
+            <div>
+              <div class="campaign-title">${c.name}</div>
+              <div class="campaign-dates">${formatDate(c.startDate)} - ${formatDate(c.endDate)}</div>
+              ${c.description ? `<div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 0.25rem;">${c.description}</div>` : ''}
+            </div>
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <span class="status-badge ${c.status}">${c.status}</span>
+              <button class="btn btn-sm btn-secondary" onclick="editCampaign(${c.id})">Edit</button>
+            </div>
+          </div>
+          <div class="campaign-stats">
+            <div>
+              <div class="campaign-stat-value">${formatCurrency(totals.pledged)}</div>
+              <div class="campaign-stat-label">Pledged</div>
+            </div>
+            <div>
+              <div class="campaign-stat-value">${formatCurrency(totals.paid)}</div>
+              <div class="campaign-stat-label">Collected</div>
+            </div>
+            <div>
+              <div class="campaign-stat-value">${formatCurrency(c.goal)}</div>
+              <div class="campaign-stat-label">Goal</div>
+            </div>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill ${progress >= 100 ? 'success' : ''}" style="width: ${progress}%"></div>
+          </div>
+        </div>`;
+      }).join('');
+    }
+    
+    function openCampaignModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      if (id) {
+        const c = campaigns.find(x => x.id === id);
+        document.getElementById('campaign-modal-title').textContent = 'Edit Campaign';
+        document.getElementById('camp-id').value = id;
+        document.getElementById('camp-name').value = c.name;
+        document.getElementById('camp-description').value = c.description || '';
+        document.getElementById('camp-goal').value = c.goal;
+        document.getElementById('camp-status').value = c.status;
+        document.getElementById('camp-start').value = c.startDate;
+        document.getElementById('camp-end').value = c.endDate;
+        document.getElementById('camp-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('campaign-modal-title').textContent = 'New Campaign';
+        document.getElementById('camp-id').value = '';
+        document.getElementById('camp-name').value = '';
+        document.getElementById('camp-description').value = '';
+        document.getElementById('camp-goal').value = '';
+        document.getElementById('camp-status').value = 'active';
+        document.getElementById('camp-start').value = today;
+        document.getElementById('camp-end').value = '';
+        document.getElementById('camp-delete-btn').style.display = 'none';
+      }
+      document.getElementById('campaign-modal').classList.add('active');
+    }
+    
+    function editCampaign(id) { openCampaignModal(id); }
+    
+    function saveCampaign() {
+      const id = document.getElementById('camp-id').value;
+      const name = document.getElementById('camp-name').value.trim();
+      const description = document.getElementById('camp-description').value.trim();
+      const goal = parseFloat(document.getElementById('camp-goal').value) || 0;
+      const status = document.getElementById('camp-status').value;
+      const startDate = document.getElementById('camp-start').value;
+      const endDate = document.getElementById('camp-end').value;
+      
+      if (!name) { showToast('Please enter campaign name', 'error'); return; }
+      
+      if (id) {
+        const i = campaigns.findIndex(c => c.id === parseInt(id));
+        campaigns[i] = { ...campaigns[i], name, description, goal, status, startDate, endDate };
+        showToast('Campaign updated');
+      } else {
+        campaigns.push({ id: Math.max(0, ...campaigns.map(c => c.id)) + 1, name, description, goal, status, startDate, endDate });
+        showToast('Campaign created');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('campaign-modal');
+    }
+    
+    function deleteCampaign() {
+      const id = parseInt(document.getElementById('camp-id').value);
+      const hasPledges = pledges.some(p => p.campaignId === id);
+      if (hasPledges && !confirm('This campaign has pledges. Delete anyway?')) return;
+      if (!hasPledges && !confirm('Delete this campaign?')) return;
+      campaigns = campaigns.filter(c => c.id !== id);
+      saveData();
+      renderAll();
+      closeModal('campaign-modal');
+      showToast('Campaign deleted');
+    }
+    
+    // Pledges
+    function renderPledges() {
+      const statusFilter = document.getElementById('filter-pledge-status').value;
+      const campaignFilter = document.getElementById('filter-pledge-campaign').value;
+      const search = document.getElementById('filter-pledge-search').value.toLowerCase();
+      
+      let filtered = [...pledges];
+      if (statusFilter) filtered = filtered.filter(p => p.status === statusFilter);
+      if (campaignFilter) filtered = filtered.filter(p => p.campaignId === parseInt(campaignFilter));
+      if (search) {
+        filtered = filtered.filter(p => {
+          const donor = donors.find(d => d.id === p.donorId);
+          return donor?.name.toLowerCase().includes(search);
+        });
+      }
+      
+      filtered.sort((a, b) => new Date(b.pledgeDate) - new Date(a.pledgeDate));
+      
+      document.getElementById('pledges-table').innerHTML = filtered.map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const campaign = campaigns.find(c => c.id === p.campaignId);
+        const paid = getPledgePaid(p.id);
+        const balance = p.amount - paid;
+        
+        return `<tr>
+          <td><strong>${donor?.name || 'Unknown'}</strong></td>
+          <td>${campaign?.name || '-'}</td>
+          <td>${formatCurrency(p.amount)}</td>
+          <td>${formatCurrency(paid)}</td>
+          <td style="color: ${balance > 0 ? 'var(--warning)' : 'var(--success)'}">${formatCurrency(balance)}</td>
+          <td><span class="status-badge ${p.status}">${p.status}</span></td>
+          <td>${formatDate(p.dueDate)}</td>
+          <td>
+            <button class="btn btn-sm btn-secondary" onclick="editPledge(${p.id})">Edit</button>
+            ${balance > 0 && p.status !== 'cancelled' ? `<button class="btn btn-sm btn-success" onclick="quickPayment(${p.id})">Pay</button>` : ''}
+          </td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openPledgeModal(id = null) {
+      const today = new Date().toISOString().split('T')[0];
+      if (id) {
+        const p = pledges.find(x => x.id === id);
+        document.getElementById('pledge-modal-title').textContent = 'Edit Pledge';
+        document.getElementById('pled-id').value = id;
+        document.getElementById('pled-donor').value = p.donorId;
+        document.getElementById('pled-campaign').value = p.campaignId;
+        document.getElementById('pled-amount').value = p.amount;
+        document.getElementById('pled-date').value = p.pledgeDate;
+        document.getElementById('pled-due').value = p.dueDate;
+        document.getElementById('pled-frequency').value = p.frequency;
+        document.getElementById('pled-notes').value = p.notes || '';
+        document.getElementById('pled-delete-btn').style.display = 'block';
+        
+        // Payment history
+        const pledgePayments = payments.filter(pay => pay.pledgeId === id);
+        document.getElementById('pledge-payment-history').innerHTML = pledgePayments.length ? `
+          <div class="payment-history">
+            <strong>Payment History</strong>
+            ${pledgePayments.map(pay => `
+              <div class="payment-item">
+                <span>${formatDate(pay.date)}</span>
+                <span>${formatCurrency(pay.amount)}</span>
+              </div>
+            `).join('')}
+          </div>
+        ` : '';
+      } else {
+        document.getElementById('pledge-modal-title').textContent = 'New Pledge';
+        document.getElementById('pled-id').value = '';
+        document.getElementById('pled-donor').value = '';
+        document.getElementById('pled-campaign').value = '';
+        document.getElementById('pled-amount').value = '';
+        document.getElementById('pled-date').value = today;
+        document.getElementById('pled-due').value = '';
+        document.getElementById('pled-frequency').value = 'one-time';
+        document.getElementById('pled-notes').value = '';
+        document.getElementById('pled-delete-btn').style.display = 'none';
+        document.getElementById('pledge-payment-history').innerHTML = '';
+      }
+      document.getElementById('pledge-modal').classList.add('active');
+    }
+    
+    function editPledge(id) { openPledgeModal(id); }
+    
+    function savePledge() {
+      const id = document.getElementById('pled-id').value;
+      const donorId = parseInt(document.getElementById('pled-donor').value);
+      const campaignId = parseInt(document.getElementById('pled-campaign').value);
+      const amount = parseFloat(document.getElementById('pled-amount').value);
+      const pledgeDate = document.getElementById('pled-date').value;
+      const dueDate = document.getElementById('pled-due').value;
+      const frequency = document.getElementById('pled-frequency').value;
+      const notes = document.getElementById('pled-notes').value.trim();
+      
+      if (!donorId || !campaignId || !amount) { showToast('Please fill required fields', 'error'); return; }
+      
+      if (id) {
+        const i = pledges.findIndex(p => p.id === parseInt(id));
+        pledges[i] = { ...pledges[i], donorId, campaignId, amount, pledgeDate, dueDate, frequency, notes };
+        showToast('Pledge updated');
+      } else {
+        pledges.push({ id: Math.max(0, ...pledges.map(p => p.id)) + 1, donorId, campaignId, amount, pledgeDate, dueDate, frequency, notes, status: 'active' });
+        showToast('Pledge created');
+      }
+      
+      updatePledgeStatuses();
+      saveData();
+      renderAll();
+      closeModal('pledge-modal');
+    }
+    
+    function deletePledge() {
+      const id = parseInt(document.getElementById('pled-id').value);
+      const hasPayments = payments.some(p => p.pledgeId === id);
+      if (hasPayments && !confirm('This pledge has payments. Delete anyway?')) return;
+      if (!hasPayments && !confirm('Delete this pledge?')) return;
+      pledges = pledges.filter(p => p.id !== id);
+      payments = payments.filter(p => p.pledgeId !== id);
+      saveData();
+      renderAll();
+      closeModal('pledge-modal');
+      showToast('Pledge deleted');
+    }
+    
+    // Payments
+    function renderPayments() {
+      const monthFilter = document.getElementById('filter-payment-month').value;
+      let filtered = [...payments].sort((a, b) => new Date(b.date) - new Date(a.date));
+      if (monthFilter) filtered = filtered.filter(p => p.date.startsWith(monthFilter));
+      
+      document.getElementById('payments-table').innerHTML = filtered.map(p => {
+        const pledge = pledges.find(pl => pl.id === p.pledgeId);
+        const donor = pledge ? donors.find(d => d.id === pledge.donorId) : null;
+        const campaign = pledge ? campaigns.find(c => c.id === pledge.campaignId) : null;
+        
+        return `<tr>
+          <td>${formatDate(p.date)}</td>
+          <td>${donor?.name || 'Unknown'}</td>
+          <td>${campaign?.name || '-'}</td>
+          <td><strong>${formatCurrency(p.amount)}</strong></td>
+          <td style="text-transform: capitalize;">${p.method.replace('-', ' ')}</td>
+          <td>${p.notes || '-'}</td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openPaymentModal(pledgeId = null) {
+      document.getElementById('pay-pledge').value = pledgeId || '';
+      document.getElementById('pay-amount').value = '';
+      document.getElementById('pay-date').value = new Date().toISOString().split('T')[0];
+      document.getElementById('pay-method').value = 'check';
+      document.getElementById('pay-notes').value = '';
+      updatePaymentInfo();
+      document.getElementById('payment-modal').classList.add('active');
+    }
+    
+    function quickPayment(pledgeId) { openPaymentModal(pledgeId); }
+    
+    function updatePaymentInfo() {
+      const pledgeId = parseInt(document.getElementById('pay-pledge').value);
+      const infoDiv = document.getElementById('payment-pledge-info');
+      
+      if (pledgeId) {
+        const pledge = pledges.find(p => p.id === pledgeId);
+        const paid = getPledgePaid(pledgeId);
+        const balance = pledge.amount - paid;
+        
+        infoDiv.innerHTML = `
+          <div style="display: flex; justify-content: space-between;">
+            <span>Pledge Amount:</span><strong>${formatCurrency(pledge.amount)}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span>Already Paid:</span><strong>${formatCurrency(paid)}</strong>
+          </div>
+          <div style="display: flex; justify-content: space-between; color: var(--primary);">
+            <span>Balance Due:</span><strong>${formatCurrency(balance)}</strong>
+          </div>
+        `;
+        infoDiv.style.display = 'block';
+        document.getElementById('pay-amount').value = balance;
+      } else {
+        infoDiv.style.display = 'none';
+      }
+    }
+    
+    function savePayment() {
+      const pledgeId = parseInt(document.getElementById('pay-pledge').value);
+      const amount = parseFloat(document.getElementById('pay-amount').value);
+      const date = document.getElementById('pay-date').value;
+      const method = document.getElementById('pay-method').value;
+      const notes = document.getElementById('pay-notes').value.trim();
+      
+      if (!pledgeId || !amount || !date) { showToast('Please fill required fields', 'error'); return; }
+      
+      payments.push({ id: Math.max(0, ...payments.map(p => p.id)) + 1, pledgeId, amount, date, method, notes });
+      
+      updatePledgeStatuses();
+      saveData();
+      renderAll();
+      closeModal('payment-modal');
+      showToast('Payment recorded');
+    }
+    
+    // Donors
+    function renderDonors() {
+      const search = document.getElementById('filter-donor-search').value.toLowerCase();
+      let filtered = [...donors];
+      if (search) filtered = filtered.filter(d => d.name.toLowerCase().includes(search));
+      
+      filtered.sort((a, b) => a.name.localeCompare(b.name));
+      
+      document.getElementById('donors-table').innerHTML = filtered.map(d => {
+        const donorPledges = pledges.filter(p => p.donorId === d.id && p.status !== 'cancelled');
+        const totalPledged = donorPledges.reduce((sum, p) => sum + p.amount, 0);
+        const totalPaid = donorPledges.reduce((sum, p) => sum + getPledgePaid(p.id), 0);
+        
+        return `<tr>
+          <td><strong>${d.name}</strong></td>
+          <td>${d.email || '-'}</td>
+          <td>${d.phone || '-'}</td>
+          <td>${formatCurrency(totalPledged)}</td>
+          <td style="color: var(--success);">${formatCurrency(totalPaid)}</td>
+          <td><button class="btn btn-sm btn-secondary" onclick="editDonor(${d.id})">Edit</button></td>
+        </tr>`;
+      }).join('');
+    }
+    
+    function openDonorModal(id = null) {
+      if (id) {
+        const d = donors.find(x => x.id === id);
+        document.getElementById('donor-modal-title').textContent = 'Edit Donor';
+        document.getElementById('don-id').value = id;
+        document.getElementById('don-name').value = d.name;
+        document.getElementById('don-email').value = d.email || '';
+        document.getElementById('don-phone').value = d.phone || '';
+        document.getElementById('don-address').value = d.address || '';
+        document.getElementById('don-notes').value = d.notes || '';
+        document.getElementById('don-delete-btn').style.display = 'block';
+      } else {
+        document.getElementById('donor-modal-title').textContent = 'Add Donor';
+        document.getElementById('don-id').value = '';
+        document.getElementById('don-name').value = '';
+        document.getElementById('don-email').value = '';
+        document.getElementById('don-phone').value = '';
+        document.getElementById('don-address').value = '';
+        document.getElementById('don-notes').value = '';
+        document.getElementById('don-delete-btn').style.display = 'none';
+      }
+      document.getElementById('donor-modal').classList.add('active');
+    }
+    
+    function editDonor(id) { openDonorModal(id); }
+    
+    function saveDonor() {
+      const id = document.getElementById('don-id').value;
+      const name = document.getElementById('don-name').value.trim();
+      const email = document.getElementById('don-email').value.trim();
+      const phone = document.getElementById('don-phone').value.trim();
+      const address = document.getElementById('don-address').value.trim();
+      const notes = document.getElementById('don-notes').value.trim();
+      
+      if (!name) { showToast('Please enter donor name', 'error'); return; }
+      
+      if (id) {
+        const i = donors.findIndex(d => d.id === parseInt(id));
+        donors[i] = { ...donors[i], name, email, phone, address, notes };
+        showToast('Donor updated');
+      } else {
+        donors.push({ id: Math.max(0, ...donors.map(d => d.id)) + 1, name, email, phone, address, notes });
+        showToast('Donor added');
+      }
+      
+      saveData();
+      renderAll();
+      closeModal('donor-modal');
+    }
+    
+    function deleteDonor() {
+      const id = parseInt(document.getElementById('don-id').value);
+      const hasPledges = pledges.some(p => p.donorId === id);
+      if (hasPledges) { showToast('Cannot delete donor with pledges', 'error'); return; }
+      if (!confirm('Delete this donor?')) return;
+      donors = donors.filter(d => d.id !== id);
+      saveData();
+      renderAll();
+      closeModal('donor-modal');
+      showToast('Donor deleted');
+    }
+    
+    // Reports
+    function renderReports() {
+      // Campaign performance
+      document.getElementById('campaign-performance').innerHTML = campaigns.map(c => {
+        const totals = getCampaignTotals(c.id);
+        const progress = c.goal > 0 ? Math.min(100, Math.round(totals.pledged / c.goal * 100)) : 0;
+        const collectionRate = totals.pledged > 0 ? Math.round(totals.paid / totals.pledged * 100) : 0;
+        
+        return `<div style="display: flex; align-items: center; margin-bottom: 0.75rem; padding: 0.75rem; background: var(--gray-50); border-radius: 0.375rem;">
+          <div style="flex: 1;">
+            <div style="font-weight: 500;">${c.name}</div>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">Goal: ${formatCurrency(c.goal)} | Pledged: ${formatCurrency(totals.pledged)} | Collected: ${formatCurrency(totals.paid)}</div>
+          </div>
+          <div style="text-align: right; width: 100px;">
+            <div style="font-weight: 600; color: var(--primary);">${progress}%</div>
+            <div style="font-size: 0.75rem; color: var(--gray-500);">${collectionRate}% collected</div>
+          </div>
+        </div>`;
+      }).join('');
+      
+      // Monthly collections
+      const thisYear = new Date().getFullYear();
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const monthlyData = Array(12).fill(0);
+      
+      payments.filter(p => new Date(p.date).getFullYear() === thisYear).forEach(p => {
+        monthlyData[new Date(p.date).getMonth()] += p.amount;
+      });
+      
+      const maxMonth = Math.max(...monthlyData, 1);
+      
+      document.getElementById('monthly-collections').innerHTML = `
+        <div style="display: flex; align-items: flex-end; gap: 0.5rem; height: 150px;">
+          ${monthlyData.map((val, i) => `
+            <div style="flex: 1; display: flex; flex-direction: column; align-items: center;">
+              <div style="width: 100%; max-width: 40px; background: var(--primary-light); border-radius: 4px 4px 0 0; height: ${val / maxMonth * 120}px; min-height: 4px;"></div>
+              <div style="font-size: 0.7rem; color: var(--gray-500); margin-top: 0.25rem;">${months[i]}</div>
+              <div style="font-size: 0.6rem; color: var(--gray-400);">${val > 0 ? '$' + Math.round(val / 1000) + 'k' : ''}</div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    
+    // Exports
+    function exportPledges() {
+      const headers = ['Donor', 'Campaign', 'Amount', 'Paid', 'Balance', 'Status', 'Pledge Date', 'Due Date', 'Frequency', 'Notes'];
+      const rows = pledges.map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const campaign = campaigns.find(c => c.id === p.campaignId);
+        const paid = getPledgePaid(p.id);
+        return [donor?.name || '', campaign?.name || '', p.amount, paid, p.amount - paid, p.status, p.pledgeDate, p.dueDate, p.frequency, p.notes || ''];
+      });
+      downloadCSV([headers, ...rows], 'pledges.csv');
+      showToast('Pledges exported');
+    }
+    
+    function exportOutstanding() {
+      const outstanding = pledges.filter(p => p.status !== 'fulfilled' && p.status !== 'cancelled');
+      const headers = ['Donor', 'Campaign', 'Amount', 'Paid', 'Balance', 'Due Date'];
+      const rows = outstanding.map(p => {
+        const donor = donors.find(d => d.id === p.donorId);
+        const campaign = campaigns.find(c => c.id === p.campaignId);
+        const paid = getPledgePaid(p.id);
+        return [donor?.name || '', campaign?.name || '', p.amount, paid, p.amount - paid, p.dueDate];
+      });
+      downloadCSV([headers, ...rows], 'outstanding-pledges.csv');
+      showToast('Outstanding pledges exported');
+    }
+    
+    function exportPayments() {
+      const headers = ['Date', 'Donor', 'Campaign', 'Amount', 'Method', 'Notes'];
+      const rows = payments.map(p => {
+        const pledge = pledges.find(pl => pl.id === p.pledgeId);
+        const donor = pledge ? donors.find(d => d.id === pledge.donorId) : null;
+        const campaign = pledge ? campaigns.find(c => c.id === pledge.campaignId) : null;
+        return [p.date, donor?.name || '', campaign?.name || '', p.amount, p.method, p.notes || ''];
+      });
+      downloadCSV([headers, ...rows], 'payments.csv');
+      showToast('Payments exported');
+    }
+    
+    function exportCampaignSummary() {
+      const headers = ['Campaign', 'Status', 'Goal', 'Pledged', 'Collected', 'Pledges', '% to Goal', '% Collected'];
+      const rows = campaigns.map(c => {
+        const totals = getCampaignTotals(c.id);
+        const pctGoal = c.goal > 0 ? Math.round(totals.pledged / c.goal * 100) : 0;
+        const pctCollected = totals.pledged > 0 ? Math.round(totals.paid / totals.pledged * 100) : 0;
+        return [c.name, c.status, c.goal, totals.pledged, totals.paid, totals.count, pctGoal + '%', pctCollected + '%'];
+      });
+      downloadCSV([headers, ...rows], 'campaign-summary.csv');
+      showToast('Campaign summary exported');
+    }
+    
+    function exportDonorSummary() {
+      const headers = ['Donor', 'Email', 'Phone', 'Total Pledged', 'Total Paid', 'Balance'];
+      const rows = donors.map(d => {
+        const donorPledges = pledges.filter(p => p.donorId === d.id && p.status !== 'cancelled');
+        const totalPledged = donorPledges.reduce((sum, p) => sum + p.amount, 0);
+        const totalPaid = donorPledges.reduce((sum, p) => sum + getPledgePaid(p.id), 0);
+        return [d.name, d.email || '', d.phone || '', totalPledged, totalPaid, totalPledged - totalPaid];
+      });
+      downloadCSV([headers, ...rows], 'donor-summary.csv');
+      showToast('Donor summary exported');
+    }
+    
+    function downloadCSV(data, filename) {
+      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename; a.click();
+    }
+    
+    function formatCurrency(n) { return '$' + (n || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+    function formatDate(d) { return d ? new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''; }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+    
+    function showToast(msg, type = 'success') {
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.textContent = msg;
+      document.getElementById('toast-container').appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
+    
+    init();
+  </script>
+</body>
+</html>
