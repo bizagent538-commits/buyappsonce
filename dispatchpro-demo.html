@@ -5,1466 +5,396 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DispatchPro - Demo</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    :root {
-      --primary: #2563eb;
-      --primary-dark: #1d4ed8;
-      --primary-light: #eff6ff;
-      --success: #10b981;
-      --danger: #ef4444;
-      --warning: #f59e0b;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-300: #d1d5db;
-      --gray-400: #9ca3af;
-      --gray-500: #6b7280;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-800: #1f2937;
-    }
-    
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--gray-100);
-      color: var(--gray-800);
-      line-height: 1.5;
-    }
-    
-    .header {
-      background: var(--primary);
-      color: white;
-      padding: 1rem 1.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .header h1 { font-size: 1.5rem; font-weight: 600; }
-    .header-right { display: flex; align-items: center; gap: 1rem; }
-    
-    .demo-badge {
-      background: var(--warning);
-      color: var(--gray-800);
-      padding: 0.25rem 0.75rem;
-      border-radius: 9999px;
-      font-size: 0.75rem;
-      font-weight: 600;
-    }
-    
-    .current-time {
-      font-size: 0.875rem;
-      opacity: 0.9;
-    }
-    
-    .nav-tabs {
-      background: white;
-      display: flex;
-      border-bottom: 1px solid var(--gray-200);
-      padding: 0 1rem;
-      overflow-x: auto;
-    }
-    
-    .nav-tab {
-      padding: 1rem 1.5rem;
-      cursor: pointer;
-      border-bottom: 3px solid transparent;
-      font-weight: 500;
-      color: var(--gray-500);
-      white-space: nowrap;
-    }
-    
-    .nav-tab:hover { color: var(--gray-700); }
-    .nav-tab.active { color: var(--primary); border-bottom-color: var(--primary); }
-    
-    .main-content { max-width: 1400px; margin: 0 auto; padding: 1.5rem; }
-    
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .stat-card {
-      background: white;
-      padding: 1.25rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    
-    .stat-value { font-size: 2rem; font-weight: 700; }
-    .stat-value.blue { color: var(--primary); }
-    .stat-value.green { color: var(--success); }
-    .stat-value.yellow { color: var(--warning); }
-    .stat-value.red { color: var(--danger); }
-    .stat-label { font-size: 0.75rem; color: var(--gray-500); text-transform: uppercase; }
-    
-    .card {
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    
-    .card-title { font-size: 1.125rem; font-weight: 600; }
-    
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.5rem 1rem;
-      border-radius: 0.375rem;
-      font-weight: 500;
-      cursor: pointer;
-      border: none;
-      font-size: 0.875rem;
-    }
-    
-    .btn-primary { background: var(--primary); color: white; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .btn-success { background: var(--success); color: white; }
-    .btn-danger { background: var(--danger); color: white; }
-    .btn-warning { background: var(--warning); color: white; }
-    .btn-secondary { background: var(--gray-200); color: var(--gray-700); }
-    .btn-sm { padding: 0.25rem 0.5rem; font-size: 0.75rem; }
-    
-    .dispatch-board {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-    
-    .driver-column {
-      background: var(--gray-50);
-      border-radius: 0.5rem;
-      border: 1px solid var(--gray-200);
-      overflow: hidden;
-    }
-    
-    .driver-header {
-      padding: 1rem;
-      background: white;
-      border-bottom: 1px solid var(--gray-200);
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-    }
-    
-    .driver-avatar {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      color: white;
-      font-size: 1rem;
-    }
-    
-    .driver-info { flex: 1; }
-    .driver-name { font-weight: 600; }
-    .driver-status { font-size: 0.75rem; }
-    
-    .driver-jobs {
-      padding: 1rem;
-      min-height: 200px;
-      display: flex;
-      flex-direction: column;
-      gap: 0.75rem;
-    }
-    
-    .job-card {
-      background: white;
-      border-radius: 0.375rem;
-      padding: 0.75rem;
-      border-left: 4px solid var(--gray-300);
-      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-      cursor: pointer;
-    }
-    
-    .job-card:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    .job-card.pending { border-left-color: var(--warning); }
-    .job-card.in-progress { border-left-color: var(--primary); }
-    .job-card.completed { border-left-color: var(--success); }
-    .job-card.cancelled { border-left-color: var(--danger); opacity: 0.6; }
-    
-    .job-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-    }
-    
-    .job-id { font-weight: 600; font-size: 0.875rem; }
-    .job-time { font-size: 0.75rem; color: var(--gray-500); }
-    .job-address { font-size: 0.875rem; color: var(--gray-600); margin-bottom: 0.25rem; }
-    .job-customer { font-size: 0.75rem; color: var(--gray-500); }
-    
-    .unassigned-section {
-      background: var(--gray-100);
-      border: 2px dashed var(--gray-300);
-      border-radius: 0.5rem;
-      padding: 1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .unassigned-title {
-      font-weight: 600;
-      margin-bottom: 1rem;
-      color: var(--gray-700);
-    }
-    
-    .unassigned-jobs {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-    }
-    
-    .status-badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 9999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-      text-transform: uppercase;
-    }
-    
-    .status-badge.pending { background: #fef3c7; color: #92400e; }
-    .status-badge.in-progress { background: #dbeafe; color: #1e40af; }
-    .status-badge.completed { background: #dcfce7; color: #166534; }
-    .status-badge.cancelled { background: #fee2e2; color: #991b1b; }
-    .status-badge.available { background: #dcfce7; color: #166534; }
-    .status-badge.on-job { background: #dbeafe; color: #1e40af; }
-    .status-badge.off-duty { background: var(--gray-200); color: var(--gray-600); }
-    
-    .filters {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 1rem;
-      flex-wrap: wrap;
-    }
-    
-    .filter-select, .filter-input {
-      padding: 0.5rem;
-      border: 1px solid var(--gray-300);
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-    }
-    
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 24px; }
+    .logo-text { font-weight: 700; font-size: 15px; color: #fff; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 13px; color: #fff; }
+    .user-name { font-size: 11px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 13px; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(59,130,246,0.2); color: #fff; font-weight: 500; }
+    .nav-badge { background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: auto; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .btn-en-route { background: #3b82f6; color: #fff; border: none; }
+    .btn-arrived { background: #f59e0b; color: #fff; border: none; }
+    .btn-complete { background: #22c55e; color: #fff; border: none; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .dispatch-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; }
+    .driver-columns { display: flex; gap: 16px; overflow-x: auto; padding-bottom: 8px; }
+    .driver-col { min-width: 250px; max-width: 300px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 16px; flex-shrink: 0; }
+    .job-card { background: #f8fafc; border-radius: 8px; padding: 12px; margin-bottom: 8px; cursor: pointer; }
+    .job-card:hover { background: #f1f5f9; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 0.75rem; text-align: left; border-bottom: 1px solid var(--gray-200); }
-    th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--gray-500); background: var(--gray-50); }
-    tr:hover { background: var(--gray-50); }
-    
-    .grid-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1rem;
-    }
-    
-    .grid-item {
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      border-radius: 0.5rem;
-      padding: 1rem;
-    }
-    
-    .grid-item-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 0.5rem;
-    }
-    
-    .grid-item-title { font-weight: 600; }
-    .grid-item-subtitle { font-size: 0.875rem; color: var(--gray-500); }
-    .grid-item-actions { display: flex; gap: 0.25rem; margin-top: 0.75rem; }
-    
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .modal-overlay.active { display: flex; }
-    
-    .modal {
-      background: white;
-      border-radius: 0.5rem;
-      width: 100%;
-      max-width: 500px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-    
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 1.5rem;
-      border-bottom: 1px solid var(--gray-200);
-    }
-    
-    .modal-title { font-size: 1.125rem; font-weight: 600; }
-    .modal-close { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--gray-400); }
-    .modal-body { padding: 1.5rem; }
-    
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 0.75rem;
-      padding: 1rem 1.5rem;
-      border-top: 1px solid var(--gray-200);
-      background: var(--gray-50);
-    }
-    
-    .form-group { margin-bottom: 1rem; }
-    .form-label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-size: 0.875rem; }
-    
-    .form-input {
-      width: 100%;
-      padding: 0.625rem 0.75rem;
-      border: 1px solid var(--gray-300);
-      border-radius: 0.375rem;
-      font-size: 0.875rem;
-    }
-    
-    .form-input:focus {
-      outline: none;
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    }
-    
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
-    
-    .timeline {
-      border-left: 2px solid var(--gray-200);
-      padding-left: 1rem;
-      margin-left: 0.5rem;
-    }
-    
-    .timeline-item {
-      position: relative;
-      padding-bottom: 1rem;
-    }
-    
-    .timeline-item::before {
-      content: '';
-      position: absolute;
-      left: -1.35rem;
-      top: 0.25rem;
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--gray-300);
-    }
-    
-    .timeline-item.active::before { background: var(--primary); }
-    .timeline-item.completed::before { background: var(--success); }
-    
-    .timeline-time { font-size: 0.75rem; color: var(--gray-500); }
-    .timeline-text { font-size: 0.875rem; }
-    
-    .empty-state { text-align: center; padding: 2rem; color: var(--gray-500); }
-    .empty-state-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    
-    .toast-container { position: fixed; bottom: 1rem; right: 1rem; z-index: 2000; }
-    
-    .toast {
-      background: var(--gray-800);
-      color: white;
-      padding: 0.75rem 1rem;
-      border-radius: 0.375rem;
-      margin-top: 0.5rem;
-      animation: slideIn 0.3s ease;
-    }
-    
-    .toast.success { background: var(--success); }
-    .toast.error { background: var(--danger); }
-    
-    @keyframes slideIn {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    
-    .priority-high { color: var(--danger); font-weight: 600; }
-    .priority-normal { color: var(--gray-600); }
-    .priority-low { color: var(--gray-400); }
-    
-    @media (max-width: 768px) {
-      .form-row { grid-template-columns: 1fr; }
-      .dispatch-board { grid-template-columns: 1fr; }
-    }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 600px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #1d4ed8); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+    .status-dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
   </style>
 </head>
 <body>
-  <header class="header">
-    <h1>🚚 DispatchPro</h1>
-    <div class="header-right">
-      <span class="current-time" id="current-time"></span>
-      <span class="demo-badge">Demo Mode</span>
+  <div class="demo-banner">🚚 DispatchPro Demo - Data stored in browser | <a href="https://buyappsonce.com/landing-dispatchpro.html">Get DispatchPro - $99 →</a></div>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">🚚</span><span class="logo-text">DispatchPro</span></div>
+      <div class="org-info"><div class="org-name">Demo Services</div><div class="user-name">Dispatcher</div></div>
+      <div class="nav-item active" onclick="showTab('dispatch')" id="navDispatch">📋 Dispatch</div>
+      <div class="nav-item" onclick="showTab('jobs')">📝 All Jobs</div>
+      <div class="nav-item" onclick="showTab('drivers')">🚗 Drivers</div>
+      <div class="nav-item" onclick="showTab('customers')">👥 Customers</div>
+      <div class="nav-item" onclick="showTab('reports')">📈 Reports</div>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
     </div>
-  </header>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const JOB_TYPES = ['Service Call', 'Installation', 'Repair', 'Inspection', 'Delivery', 'Pickup', 'Estimate'];
+const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
+const STATUSES = ['unassigned', 'assigned', 'en_route', 'on_site', 'completed', 'cancelled'];
+const PRIORITY_COLORS = { low: '#94a3b8', normal: '#3b82f6', high: '#f59e0b', urgent: '#ef4444' };
+const STATUS_COLORS = { unassigned: '#94a3b8', assigned: '#8b5cf6', en_route: '#3b82f6', on_site: '#f59e0b', completed: '#22c55e', cancelled: '#ef4444' };
+
+let state = { tab: 'dispatch', jobs: [], drivers: [], customers: [], editing: null, selectedDate: new Date().toISOString().split('T')[0] };
+
+function init() {
+  loadData();
+  if (state.drivers.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.jobs = JSON.parse(localStorage.getItem('dp_jobs') || '[]');
+  state.drivers = JSON.parse(localStorage.getItem('dp_drivers') || '[]');
+  state.customers = JSON.parse(localStorage.getItem('dp_customers') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('dp_jobs', JSON.stringify(state.jobs));
+  localStorage.setItem('dp_drivers', JSON.stringify(state.drivers));
+  localStorage.setItem('dp_customers', JSON.stringify(state.customers));
+}
+
+function loadSampleData() {
+  const today = new Date().toISOString().split('T')[0];
   
-  <nav class="nav-tabs">
-    <div class="nav-tab active" data-tab="dispatch">Dispatch Board</div>
-    <div class="nav-tab" data-tab="jobs">All Jobs</div>
-    <div class="nav-tab" data-tab="drivers">Drivers</div>
-    <div class="nav-tab" data-tab="customers">Customers</div>
-    <div class="nav-tab" data-tab="reports">Reports</div>
-  </nav>
+  state.drivers = [
+    { id: 1, name: 'Mike Johnson', phone: '555-0101', vehicle: 'Ford Transit', license_plate: 'ABC-1234', color: '#3b82f6', status: 'available' },
+    { id: 2, name: 'Sarah Chen', phone: '555-0102', vehicle: 'Chevy Express', license_plate: 'XYZ-5678', color: '#22c55e', status: 'busy' },
+    { id: 3, name: 'Tom Williams', phone: '555-0103', vehicle: 'Ram ProMaster', license_plate: 'DEF-9012', color: '#f59e0b', status: 'available' }
+  ];
   
-  <main class="main-content">
-    <!-- Dispatch Board -->
-    <div class="tab-content active" id="tab-dispatch">
-      <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-value blue" id="stat-total">0</div>
-          <div class="stat-label">Today's Jobs</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value yellow" id="stat-pending">0</div>
-          <div class="stat-label">Pending</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value blue" id="stat-inprogress">0</div>
-          <div class="stat-label">In Progress</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-value green" id="stat-completed">0</div>
-          <div class="stat-label">Completed</div>
-        </div>
-      </div>
-      
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">📋 Dispatch Board</h2>
+  state.customers = [
+    { id: 1, name: 'John Smith', company: 'Smith Industries', phone: '555-1001', email: 'john@smith.com', address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701' },
+    { id: 2, name: 'Jane Doe', company: 'Doe Enterprises', phone: '555-1002', email: 'jane@doe.com', address: '456 Oak Ave', city: 'Springfield', state: 'IL', zip: '62702' },
+    { id: 3, name: 'Bob Wilson', company: '', phone: '555-1003', email: 'bob@email.com', address: '789 Pine Rd', city: 'Springfield', state: 'IL', zip: '62703' }
+  ];
+  
+  state.jobs = [
+    { id: 1, job_number: 'JOB-' + today.replace(/-/g, '') + '-0001', job_type: 'Service Call', title: 'HVAC Inspection', customer_id: 1, driver_id: 1, status: 'assigned', priority: 'normal', address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701', scheduled_date: today, scheduled_time: '09:00', estimated_duration: 60 },
+    { id: 2, job_number: 'JOB-' + today.replace(/-/g, '') + '-0002', job_type: 'Installation', title: 'New AC Unit Install', customer_id: 2, driver_id: 2, status: 'en_route', priority: 'high', address: '456 Oak Ave', city: 'Springfield', state: 'IL', zip: '62702', scheduled_date: today, scheduled_time: '10:30', estimated_duration: 180 },
+    { id: 3, job_number: 'JOB-' + today.replace(/-/g, '') + '-0003', job_type: 'Repair', title: 'Fix Water Heater', customer_id: 3, driver_id: null, status: 'unassigned', priority: 'urgent', address: '789 Pine Rd', city: 'Springfield', state: 'IL', zip: '62703', scheduled_date: today, scheduled_time: '14:00', estimated_duration: 90 },
+    { id: 4, job_number: 'JOB-' + today.replace(/-/g, '') + '-0004', job_type: 'Estimate', title: 'Kitchen Remodel Quote', customer_id: 1, driver_id: 3, status: 'on_site', priority: 'low', address: '123 Main St', city: 'Springfield', state: 'IL', zip: '62701', scheduled_date: today, scheduled_time: '15:00', estimated_duration: 45 }
+  ];
+  
+  saveData();
+}
+
+function showTab(tab) { state.tab = tab; updateNav(); render(); }
+
+function updateNav() {
+  document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['dispatch', 'jobs', 'drivers', 'customers', 'reports'].indexOf(state.tab)));
+  const unassigned = state.jobs.filter(j => j.status === 'unassigned' && j.scheduled_date === state.selectedDate).length;
+  document.getElementById('navDispatch').innerHTML = `📋 Dispatch ${unassigned > 0 ? `<span class="nav-badge">${unassigned}</span>` : ''}`;
+}
+
+function getCustomer(id) { return state.customers.find(c => c.id === id); }
+function getDriver(id) { return state.drivers.find(d => d.id === id); }
+function fmtTime(t) { return t ? new Date('2000-01-01T' + t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : ''; }
+function fmtDate(d) { return d ? new Date(d + 'T12:00:00').toLocaleDateString() : '-'; }
+function today() { return new Date().toISOString().split('T')[0]; }
+
+function genJobNumber() {
+  const dateStr = state.selectedDate.replace(/-/g, '');
+  const count = state.jobs.filter(j => j.job_number?.includes(dateStr)).length + 1;
+  return `JOB-${dateStr}-${String(count).padStart(4, '0')}`;
+}
+
+function render() {
+  const main = document.getElementById('mainContent');
+  const dayJobs = state.jobs.filter(j => j.scheduled_date === state.selectedDate);
+  const unassigned = dayJobs.filter(j => j.status === 'unassigned');
+  const inProgress = dayJobs.filter(j => ['en_route', 'on_site'].includes(j.status));
+  const completed = dayJobs.filter(j => j.status === 'completed');
+
+  switch (state.tab) {
+    case 'dispatch':
+      main.innerHTML = `
+        <div class="header">
+          <div style="display:flex;align-items:center;gap:16px">
+            <h1 class="title">Dispatch Board</h1>
+            <input type="date" value="${state.selectedDate}" onchange="state.selectedDate=this.value;render()" style="padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px">
+            <button class="btn btn-sm btn-secondary" onclick="state.selectedDate=today();render()">Today</button>
+          </div>
           <button class="btn btn-primary" onclick="openJobModal()">+ New Job</button>
         </div>
-        
-        <div class="unassigned-section" id="unassigned-section">
-          <div class="unassigned-title">🔴 Unassigned Jobs</div>
-          <div class="unassigned-jobs" id="unassigned-jobs"></div>
+        <div class="stats">
+          <div class="stat-card"><div class="stat-label">Today's Jobs</div><div class="stat-value">${dayJobs.length}</div></div>
+          <div class="stat-card"><div class="stat-label">Unassigned</div><div class="stat-value" style="color:${unassigned.length > 0 ? '#f59e0b' : '#22c55e'}">${unassigned.length}</div></div>
+          <div class="stat-card"><div class="stat-label">In Progress</div><div class="stat-value" style="color:#3b82f6">${inProgress.length}</div></div>
+          <div class="stat-card"><div class="stat-label">Completed</div><div class="stat-value" style="color:#22c55e">${completed.length}</div></div>
         </div>
-        
-        <div class="dispatch-board" id="dispatch-board"></div>
-      </div>
-    </div>
-    
-    <!-- All Jobs -->
-    <div class="tab-content" id="tab-jobs">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">All Jobs</h2>
-          <div style="display: flex; gap: 0.5rem;">
-            <button class="btn btn-secondary" onclick="exportJobs()">Export CSV</button>
-            <button class="btn btn-primary" onclick="openJobModal()">+ New Job</button>
-          </div>
-        </div>
-        <div class="filters">
-          <select class="filter-select" id="filter-job-status" onchange="renderJobs()">
-            <option value="">All Statuses</option>
-            <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-          <select class="filter-select" id="filter-job-driver" onchange="renderJobs()">
-            <option value="">All Drivers</option>
-          </select>
-          <input type="date" class="filter-input" id="filter-job-date" onchange="renderJobs()">
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Job #</th>
-              <th>Customer</th>
-              <th>Address</th>
-              <th>Driver</th>
-              <th>Scheduled</th>
-              <th>Priority</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="jobs-table"></tbody>
-        </table>
-      </div>
-    </div>
-    
-    <!-- Drivers -->
-    <div class="tab-content" id="tab-drivers">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Drivers</h2>
-          <button class="btn btn-primary" onclick="openDriverModal()">+ Add Driver</button>
-        </div>
-        <div class="grid-list" id="drivers-list"></div>
-      </div>
-    </div>
-    
-    <!-- Customers -->
-    <div class="tab-content" id="tab-customers">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">Customers</h2>
-          <button class="btn btn-primary" onclick="openCustomerModal()">+ Add Customer</button>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th>Name</th>
-              <th>Phone</th>
-              <th>Email</th>
-              <th>Address</th>
-              <th>Total Jobs</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody id="customers-table"></tbody>
-        </table>
-      </div>
-    </div>
-    
-    <!-- Reports -->
-    <div class="tab-content" id="tab-reports">
-      <div class="card">
-        <div class="card-header">
-          <h2 class="card-title">📊 Reports</h2>
-        </div>
-        <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-          <button class="btn btn-primary" onclick="exportDailyReport()">📋 Daily Summary</button>
-          <button class="btn btn-secondary" onclick="exportDriverReport()">🚚 Driver Performance</button>
-          <button class="btn btn-secondary" onclick="exportCustomerReport()">👥 Customer History</button>
-        </div>
-        
-        <h3 style="margin-bottom: 1rem;">Driver Performance (Last 7 Days)</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Driver</th>
-              <th>Jobs Completed</th>
-              <th>On-Time %</th>
-              <th>Avg Duration</th>
-            </tr>
-          </thead>
-          <tbody id="driver-perf-table"></tbody>
-        </table>
-      </div>
-    </div>
-  </main>
-  
-  <!-- Job Modal -->
-  <div class="modal-overlay" id="job-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="job-modal-title">New Job</h3>
-        <button class="modal-close" onclick="closeModal('job-modal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="job-id">
-        <div class="form-group">
-          <label class="form-label">Customer *</label>
-          <select class="form-input" id="job-customer" onchange="fillCustomerAddress()">
-            <option value="">Select Customer</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Pickup/Service Address *</label>
-          <input type="text" class="form-input" id="job-address" placeholder="123 Main St, City, State">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Date *</label>
-            <input type="date" class="form-input" id="job-date">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Time</label>
-            <input type="time" class="form-input" id="job-time">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Assign Driver</label>
-            <select class="form-input" id="job-driver">
-              <option value="">Unassigned</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Priority</label>
-            <select class="form-input" id="job-priority">
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-              <option value="low">Low</option>
-            </select>
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Job Type</label>
-          <select class="form-input" id="job-type">
-            <option value="delivery">Delivery</option>
-            <option value="pickup">Pickup</option>
-            <option value="service">Service Call</option>
-            <option value="install">Installation</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Notes</label>
-          <textarea class="form-input" id="job-notes" rows="2" placeholder="Special instructions..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger" id="job-delete-btn" onclick="deleteJob()" style="margin-right:auto;display:none;">Delete</button>
-        <button class="btn btn-secondary" onclick="closeModal('job-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveJob()">Save Job</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Job Detail Modal -->
-  <div class="modal-overlay" id="job-detail-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title">Job Details</h3>
-        <button class="modal-close" onclick="closeModal('job-detail-modal')">&times;</button>
-      </div>
-      <div class="modal-body" id="job-detail-content"></div>
-      <div class="modal-footer" id="job-detail-footer"></div>
-    </div>
-  </div>
-  
-  <!-- Driver Modal -->
-  <div class="modal-overlay" id="driver-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="driver-modal-title">Add Driver</h3>
-        <button class="modal-close" onclick="closeModal('driver-modal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="driver-id">
-        <div class="form-group">
-          <label class="form-label">Name *</label>
-          <input type="text" class="form-input" id="driver-name" placeholder="e.g., John Smith">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Phone *</label>
-            <input type="tel" class="form-input" id="driver-phone" placeholder="(555) 123-4567">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-input" id="driver-email" placeholder="john@example.com">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Vehicle</label>
-          <input type="text" class="form-input" id="driver-vehicle" placeholder="e.g., Ford Transit - ABC123">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Status</label>
-          <select class="form-input" id="driver-status">
-            <option value="available">Available</option>
-            <option value="on-job">On Job</option>
-            <option value="off-duty">Off Duty</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Color</label>
-          <div class="color-options" id="driver-colors"></div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger" id="driver-delete-btn" onclick="deleteDriver()" style="margin-right:auto;display:none;">Delete</button>
-        <button class="btn btn-secondary" onclick="closeModal('driver-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveDriver()">Save Driver</button>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Customer Modal -->
-  <div class="modal-overlay" id="customer-modal">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 class="modal-title" id="customer-modal-title">Add Customer</h3>
-        <button class="modal-close" onclick="closeModal('customer-modal')">&times;</button>
-      </div>
-      <div class="modal-body">
-        <input type="hidden" id="customer-id">
-        <div class="form-group">
-          <label class="form-label">Name *</label>
-          <input type="text" class="form-input" id="customer-name" placeholder="Customer or company name">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label class="form-label">Phone</label>
-            <input type="tel" class="form-input" id="customer-phone" placeholder="(555) 123-4567">
-          </div>
-          <div class="form-group">
-            <label class="form-label">Email</label>
-            <input type="email" class="form-input" id="customer-email" placeholder="email@example.com">
-          </div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Default Address</label>
-          <input type="text" class="form-input" id="customer-address" placeholder="123 Main St, City, State">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Notes</label>
-          <textarea class="form-input" id="customer-notes" rows="2" placeholder="Gate code, preferences..."></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger" id="customer-delete-btn" onclick="deleteCustomer()" style="margin-right:auto;display:none;">Delete</button>
-        <button class="btn btn-secondary" onclick="closeModal('customer-modal')">Cancel</button>
-        <button class="btn btn-primary" onclick="saveCustomer()">Save Customer</button>
-      </div>
-    </div>
-  </div>
-  
-  <div class="toast-container" id="toast-container"></div>
-
-  <script>
-    let jobs = [], drivers = [], customers = [];
-    let selectedDriverColor = '#2563eb';
-    const COLORS = ['#2563eb', '#7c3aed', '#db2777', '#ea580c', '#16a34a', '#0891b2', '#dc2626', '#854d0e'];
-    
-    function init() {
-      loadData();
-      setupTabs();
-      renderAll();
-      updateTime();
-      setInterval(updateTime, 60000);
-    }
-    
-    function updateTime() {
-      document.getElementById('current-time').textContent = new Date().toLocaleString('en-US', {
-        weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit'
-      });
-    }
-    
-    function loadData() {
-      const saved = {
-        jobs: localStorage.getItem('dispatch_jobs'),
-        drivers: localStorage.getItem('dispatch_drivers'),
-        customers: localStorage.getItem('dispatch_customers')
-      };
-      
-      const today = formatDate(new Date());
-      
-      drivers = saved.drivers ? JSON.parse(saved.drivers) : [
-        { id: 1, name: 'Mike Johnson', phone: '(555) 123-4567', email: 'mike@example.com', vehicle: 'Ford Transit - TR-101', status: 'available', color: '#2563eb' },
-        { id: 2, name: 'Sarah Chen', phone: '(555) 234-5678', email: 'sarah@example.com', vehicle: 'Chevy Express - TR-102', status: 'on-job', color: '#7c3aed' },
-        { id: 3, name: 'James Wilson', phone: '(555) 345-6789', email: 'james@example.com', vehicle: 'Ram ProMaster - TR-103', status: 'available', color: '#16a34a' },
-      ];
-      
-      customers = saved.customers ? JSON.parse(saved.customers) : [
-        { id: 1, name: 'ABC Corporation', phone: '(555) 111-2222', email: 'orders@abc.com', address: '100 Business Park Dr, Suite 200', notes: 'Loading dock in rear' },
-        { id: 2, name: 'Smith Residence', phone: '(555) 333-4444', email: 'smith@email.com', address: '456 Oak Lane', notes: 'Gate code: 1234' },
-        { id: 3, name: 'Downtown Medical', phone: '(555) 555-6666', email: 'receiving@dtmed.com', address: '789 Health Center Blvd', notes: 'Check in at front desk' },
-        { id: 4, name: 'Quick Mart #12', phone: '(555) 777-8888', email: 'store12@quickmart.com', address: '321 Commerce St', notes: '' },
-      ];
-      
-      jobs = saved.jobs ? JSON.parse(saved.jobs) : [
-        { id: 1001, customerId: 1, address: '100 Business Park Dr, Suite 200', date: today, time: '09:00', driverId: 2, priority: 'high', type: 'delivery', status: 'in-progress', notes: 'Fragile items', history: [{time: new Date().toISOString(), action: 'Started', by: 'Sarah Chen'}] },
-        { id: 1002, customerId: 2, address: '456 Oak Lane', date: today, time: '10:30', driverId: 1, priority: 'normal', type: 'delivery', status: 'pending', notes: '', history: [] },
-        { id: 1003, customerId: 3, address: '789 Health Center Blvd', date: today, time: '11:00', driverId: null, priority: 'high', type: 'pickup', status: 'pending', notes: 'Medical supplies - urgent', history: [] },
-        { id: 1004, customerId: 4, address: '321 Commerce St', date: today, time: '14:00', driverId: 3, priority: 'normal', type: 'delivery', status: 'pending', notes: '', history: [] },
-        { id: 1005, customerId: 1, address: '100 Business Park Dr, Suite 200', date: today, time: '16:00', driverId: null, priority: 'low', type: 'pickup', status: 'pending', notes: 'Return pickup', history: [] },
-      ];
-      
-      saveData();
-    }
-    
-    function saveData() {
-      localStorage.setItem('dispatch_jobs', JSON.stringify(jobs));
-      localStorage.setItem('dispatch_drivers', JSON.stringify(drivers));
-      localStorage.setItem('dispatch_customers', JSON.stringify(customers));
-    }
-    
-    function formatDate(d) { return d.toISOString().split('T')[0]; }
-    
-    function setupTabs() {
-      document.querySelectorAll('.nav-tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-          document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-          document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-          tab.classList.add('active');
-          document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
-        });
-      });
-    }
-    
-    function renderAll() {
-      renderStats();
-      renderDispatchBoard();
-      renderJobs();
-      renderDrivers();
-      renderCustomers();
-      renderDriverPerf();
-      updateSelects();
-    }
-    
-    function renderStats() {
-      const today = formatDate(new Date());
-      const todayJobs = jobs.filter(j => j.date === today);
-      document.getElementById('stat-total').textContent = todayJobs.length;
-      document.getElementById('stat-pending').textContent = todayJobs.filter(j => j.status === 'pending').length;
-      document.getElementById('stat-inprogress').textContent = todayJobs.filter(j => j.status === 'in-progress').length;
-      document.getElementById('stat-completed').textContent = todayJobs.filter(j => j.status === 'completed').length;
-    }
-    
-    function renderDispatchBoard() {
-      const today = formatDate(new Date());
-      const todayJobs = jobs.filter(j => j.date === today && j.status !== 'cancelled');
-      
-      // Unassigned jobs
-      const unassigned = todayJobs.filter(j => !j.driverId);
-      const unassignedContainer = document.getElementById('unassigned-jobs');
-      const unassignedSection = document.getElementById('unassigned-section');
-      
-      if (unassigned.length === 0) {
-        unassignedSection.style.display = 'none';
-      } else {
-        unassignedSection.style.display = 'block';
-        unassignedContainer.innerHTML = unassigned.map(j => {
-          const customer = customers.find(c => c.id === j.customerId);
-          return `<div class="job-card ${j.status}" onclick="openJobDetail(${j.id})" style="width: 200px;">
-            <div class="job-header">
-              <span class="job-id">#${j.id}</span>
-              <span class="job-time">${j.time || 'ASAP'}</span>
-            </div>
-            <div class="job-address">${truncate(j.address, 30)}</div>
-            <div class="job-customer">${customer ? customer.name : 'Unknown'}</div>
-            <div style="margin-top: 0.5rem;">
-              <span class="priority-${j.priority}">${j.priority === 'high' ? '⚡ HIGH' : ''}</span>
-            </div>
-          </div>`;
-        }).join('');
-      }
-      
-      // Driver columns
-      const board = document.getElementById('dispatch-board');
-      board.innerHTML = drivers.filter(d => d.status !== 'off-duty').map(driver => {
-        const driverJobs = todayJobs.filter(j => j.driverId === driver.id).sort((a, b) => (a.time || '').localeCompare(b.time || ''));
-        
-        return `<div class="driver-column">
-          <div class="driver-header">
-            <div class="driver-avatar" style="background: ${driver.color}">${driver.name.split(' ').map(n => n[0]).join('')}</div>
-            <div class="driver-info">
-              <div class="driver-name">${driver.name}</div>
-              <div class="driver-status"><span class="status-badge ${driver.status}">${driver.status.replace('-', ' ')}</span></div>
-            </div>
-          </div>
-          <div class="driver-jobs">
-            ${driverJobs.length ? driverJobs.map(j => {
-              const customer = customers.find(c => c.id === j.customerId);
-              return `<div class="job-card ${j.status}" onclick="openJobDetail(${j.id})">
-                <div class="job-header">
-                  <span class="job-id">#${j.id}</span>
-                  <span class="job-time">${j.time || 'ASAP'}</span>
+        <div class="dispatch-grid">
+          <div class="card">
+            <h3 style="margin-bottom:16px">Unassigned (${unassigned.length})</h3>
+            ${unassigned.map(job => `
+              <div class="job-card" style="border-left:4px solid ${PRIORITY_COLORS[job.priority]}" draggable="true" ondragstart="event.dataTransfer.setData('jobId','${job.id}')">
+                <div style="font-weight:600">${job.title}</div>
+                <div style="font-size:12px;color:#64748b">${getCustomer(job.customer_id)?.name || 'No customer'}</div>
+                <div style="font-size:12px;color:#64748b">${job.address}</div>
+                <div style="font-size:12px">${fmtTime(job.scheduled_time)} • ${job.estimated_duration}min</div>
+                <div style="margin-top:8px">
+                  <select style="padding:4px;font-size:12px;border:1px solid #e2e8f0;border-radius:4px" onchange="assignDriver(${job.id}, this.value)">
+                    <option value="">Assign...</option>
+                    ${state.drivers.map(d => `<option value="${d.id}">${d.name}</option>`).join('')}
+                  </select>
                 </div>
-                <div class="job-address">${truncate(j.address, 35)}</div>
-                <div class="job-customer">${customer ? customer.name : 'Unknown'} • ${j.type}</div>
-                ${j.priority === 'high' ? '<div class="priority-high">⚡ HIGH PRIORITY</div>' : ''}
-              </div>`;
-            }).join('') : '<div class="empty-state"><div class="empty-state-icon">📭</div><p>No jobs assigned</p></div>'}
+              </div>
+            `).join('') || '<p style="color:#64748b;font-size:13px">No unassigned jobs</p>'}
           </div>
-        </div>`;
-      }).join('');
-    }
-    
-    function truncate(str, len) {
-      return str.length > len ? str.substring(0, len) + '...' : str;
-    }
-    
-    // Jobs
-    function updateSelects() {
-      const customerOpts = '<option value="">Select Customer</option>' + customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
-      const driverOpts = '<option value="">Unassigned</option>' + drivers.filter(d => d.status !== 'off-duty').map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-      
-      document.getElementById('job-customer').innerHTML = customerOpts;
-      document.getElementById('job-driver').innerHTML = driverOpts;
-      document.getElementById('filter-job-driver').innerHTML = '<option value="">All Drivers</option>' + drivers.map(d => `<option value="${d.id}">${d.name}</option>`).join('');
-    }
-    
-    function renderJobs() {
-      const tbody = document.getElementById('jobs-table');
-      const statusFilter = document.getElementById('filter-job-status').value;
-      const driverFilter = document.getElementById('filter-job-driver').value;
-      const dateFilter = document.getElementById('filter-job-date').value;
-      
-      let filtered = [...jobs];
-      if (statusFilter) filtered = filtered.filter(j => j.status === statusFilter);
-      if (driverFilter) filtered = filtered.filter(j => j.driverId === parseInt(driverFilter));
-      if (dateFilter) filtered = filtered.filter(j => j.date === dateFilter);
-      
-      filtered.sort((a, b) => {
-        if (a.date !== b.date) return new Date(b.date) - new Date(a.date);
-        return (a.time || '').localeCompare(b.time || '');
-      });
-      
-      if (!filtered.length) {
-        tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No jobs found</td></tr>';
-        return;
-      }
-      
-      tbody.innerHTML = filtered.map(j => {
-        const customer = customers.find(c => c.id === j.customerId);
-        const driver = drivers.find(d => d.id === j.driverId);
-        return `<tr>
-          <td><strong>#${j.id}</strong></td>
-          <td>${customer ? customer.name : 'Unknown'}</td>
-          <td>${truncate(j.address, 25)}</td>
-          <td>${driver ? driver.name : '<span style="color:var(--danger)">Unassigned</span>'}</td>
-          <td>${formatDateShort(j.date)} ${j.time || ''}</td>
-          <td><span class="priority-${j.priority}">${j.priority}</span></td>
-          <td><span class="status-badge ${j.status}">${j.status}</span></td>
-          <td>
-            <button class="btn btn-sm btn-secondary" onclick="openJobDetail(${j.id})">View</button>
-            <button class="btn btn-sm btn-secondary" onclick="editJob(${j.id})">Edit</button>
-          </td>
-        </tr>`;
-      }).join('');
-    }
-    
-    function formatDateShort(dateStr) {
-      return new Date(dateStr + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    }
-    
-    function openJobModal(id = null) {
-      document.getElementById('job-date').value = formatDate(new Date());
-      
-      if (id) {
-        const job = jobs.find(j => j.id === id);
-        document.getElementById('job-modal-title').textContent = 'Edit Job #' + id;
-        document.getElementById('job-id').value = id;
-        document.getElementById('job-customer').value = job.customerId;
-        document.getElementById('job-address').value = job.address;
-        document.getElementById('job-date').value = job.date;
-        document.getElementById('job-time').value = job.time || '';
-        document.getElementById('job-driver').value = job.driverId || '';
-        document.getElementById('job-priority').value = job.priority;
-        document.getElementById('job-type').value = job.type;
-        document.getElementById('job-notes').value = job.notes || '';
-        document.getElementById('job-delete-btn').style.display = 'block';
-      } else {
-        document.getElementById('job-modal-title').textContent = 'New Job';
-        document.getElementById('job-id').value = '';
-        document.getElementById('job-customer').value = '';
-        document.getElementById('job-address').value = '';
-        document.getElementById('job-time').value = '';
-        document.getElementById('job-driver').value = '';
-        document.getElementById('job-priority').value = 'normal';
-        document.getElementById('job-type').value = 'delivery';
-        document.getElementById('job-notes').value = '';
-        document.getElementById('job-delete-btn').style.display = 'none';
-      }
-      document.getElementById('job-modal').classList.add('active');
-    }
-    
-    function editJob(id) { openJobModal(id); }
-    
-    function fillCustomerAddress() {
-      const customerId = parseInt(document.getElementById('job-customer').value);
-      const customer = customers.find(c => c.id === customerId);
-      if (customer && customer.address) {
-        document.getElementById('job-address').value = customer.address;
-      }
-    }
-    
-    function saveJob() {
-      const id = document.getElementById('job-id').value;
-      const customerId = parseInt(document.getElementById('job-customer').value);
-      const address = document.getElementById('job-address').value.trim();
-      const date = document.getElementById('job-date').value;
-      const time = document.getElementById('job-time').value;
-      const driverId = document.getElementById('job-driver').value ? parseInt(document.getElementById('job-driver').value) : null;
-      const priority = document.getElementById('job-priority').value;
-      const type = document.getElementById('job-type').value;
-      const notes = document.getElementById('job-notes').value.trim();
-      
-      if (!customerId || !address || !date) {
-        showToast('Please fill required fields', 'error');
-        return;
-      }
-      
-      if (id) {
-        const i = jobs.findIndex(j => j.id === parseInt(id));
-        const oldDriverId = jobs[i].driverId;
-        jobs[i] = { ...jobs[i], customerId, address, date, time, driverId, priority, type, notes };
-        
-        // Update driver status if assignment changed
-        if (oldDriverId !== driverId) {
-          if (oldDriverId) updateDriverStatus(oldDriverId);
-          if (driverId) updateDriverStatus(driverId);
-        }
-        showToast('Job updated');
-      } else {
-        const newId = Math.max(1000, ...jobs.map(j => j.id)) + 1;
-        jobs.push({ id: newId, customerId, address, date, time, driverId, priority, type, notes, status: 'pending', history: [] });
-        if (driverId) updateDriverStatus(driverId);
-        showToast('Job created: #' + newId);
-      }
-      
-      saveData();
-      renderAll();
-      closeModal('job-modal');
-    }
-    
-    function deleteJob() {
-      const id = parseInt(document.getElementById('job-id').value);
-      if (!confirm('Delete this job?')) return;
-      const job = jobs.find(j => j.id === id);
-      jobs = jobs.filter(j => j.id !== id);
-      if (job.driverId) updateDriverStatus(job.driverId);
-      saveData();
-      renderAll();
-      closeModal('job-modal');
-      showToast('Job deleted');
-    }
-    
-    function updateDriverStatus(driverId) {
-      const driver = drivers.find(d => d.id === driverId);
-      if (!driver) return;
-      
-      const activeJobs = jobs.filter(j => j.driverId === driverId && j.status === 'in-progress');
-      driver.status = activeJobs.length > 0 ? 'on-job' : 'available';
-      saveData();
-    }
-    
-    // Job Detail
-    function openJobDetail(id) {
-      const job = jobs.find(j => j.id === id);
-      const customer = customers.find(c => c.id === job.customerId);
-      const driver = drivers.find(d => d.id === job.driverId);
-      
-      const content = document.getElementById('job-detail-content');
-      content.innerHTML = `
-        <div style="margin-bottom: 1rem;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h2>Job #${job.id}</h2>
-            <span class="status-badge ${job.status}">${job.status}</span>
+          <div class="driver-columns">
+            ${state.drivers.map(driver => {
+              const driverJobs = dayJobs.filter(j => j.driver_id === driver.id).sort((a,b) => (a.scheduled_time||'').localeCompare(b.scheduled_time||''));
+              return `
+                <div class="driver-col" style="border-top:4px solid ${driver.color}" ondragover="event.preventDefault()" ondrop="event.preventDefault();assignDriver(parseInt(event.dataTransfer.getData('jobId')), ${driver.id})">
+                  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                    <div><div style="font-weight:600">${driver.name}</div><div style="font-size:11px;color:#64748b">${driver.vehicle}</div></div>
+                    <span class="badge" style="background:${driver.status === 'available' ? '#dcfce7' : '#fef3c7'};color:${driver.status === 'available' ? '#166534' : '#92400e'}">${driver.status}</span>
+                  </div>
+                  ${driverJobs.map(job => `
+                    <div class="job-card" style="border-left:4px solid ${STATUS_COLORS[job.status]}" onclick="editJob(${job.id})">
+                      <div style="display:flex;justify-content:space-between"><span style="font-weight:500">${fmtTime(job.scheduled_time)}</span><span class="badge" style="background:${STATUS_COLORS[job.status]};color:#fff;font-size:9px">${job.status.replace('_', ' ')}</span></div>
+                      <div style="font-weight:600;font-size:13px">${job.title}</div>
+                      <div style="font-size:11px;color:#64748b">${getCustomer(job.customer_id)?.name || ''}</div>
+                      <div style="font-size:11px;color:#64748b">${job.address}</div>
+                      ${job.status !== 'completed' && job.status !== 'cancelled' ? `
+                        <div style="display:flex;gap:4px;margin-top:8px;flex-wrap:wrap">
+                          ${job.status === 'assigned' ? `<button class="btn btn-sm btn-en-route" onclick="event.stopPropagation();updateStatus(${job.id},'en_route')">En Route</button>` : ''}
+                          ${job.status === 'en_route' ? `<button class="btn btn-sm btn-arrived" onclick="event.stopPropagation();updateStatus(${job.id},'on_site')">Arrived</button>` : ''}
+                          ${job.status === 'on_site' ? `<button class="btn btn-sm btn-complete" onclick="event.stopPropagation();updateStatus(${job.id},'completed')">Complete</button>` : ''}
+                        </div>
+                      ` : ''}
+                    </div>
+                  `).join('') || '<p style="color:#94a3b8;font-size:12px;text-align:center">No jobs</p>'}
+                </div>
+              `;
+            }).join('')}
           </div>
-          <span class="priority-${job.priority}">${job.priority.toUpperCase()} PRIORITY</span>
-        </div>
-        
-        <div style="margin-bottom: 1rem;">
-          <strong>Customer:</strong> ${customer ? customer.name : 'Unknown'}<br>
-          <strong>Address:</strong> ${job.address}<br>
-          <strong>Type:</strong> ${job.type}<br>
-          <strong>Scheduled:</strong> ${formatDateShort(job.date)} ${job.time || 'ASAP'}<br>
-          <strong>Driver:</strong> ${driver ? driver.name : '<span style="color:var(--danger)">Unassigned</span>'}
-          ${job.notes ? `<br><strong>Notes:</strong> ${job.notes}` : ''}
-        </div>
-        
-        <h4 style="margin-bottom: 0.5rem;">Activity</h4>
-        <div class="timeline">
-          ${job.history && job.history.length ? job.history.map(h => `
-            <div class="timeline-item completed">
-              <div class="timeline-time">${new Date(h.time).toLocaleString()}</div>
-              <div class="timeline-text">${h.action}${h.by ? ' by ' + h.by : ''}</div>
-            </div>
-          `).join('') : '<div class="timeline-item"><div class="timeline-text" style="color:var(--gray-400)">No activity yet</div></div>'}
         </div>
       `;
-      
-      const footer = document.getElementById('job-detail-footer');
-      let buttons = '';
-      
-      if (job.status === 'pending') {
-        buttons = `
-          <button class="btn btn-primary" onclick="startJob(${job.id})">▶ Start Job</button>
-          <button class="btn btn-secondary" onclick="editJob(${job.id}); closeModal('job-detail-modal');">Edit</button>
-        `;
-      } else if (job.status === 'in-progress') {
-        buttons = `
-          <button class="btn btn-success" onclick="completeJob(${job.id})">✓ Complete</button>
-          <button class="btn btn-danger" onclick="cancelJob(${job.id})">✕ Cancel</button>
-        `;
-      } else {
-        buttons = `<button class="btn btn-secondary" onclick="closeModal('job-detail-modal')">Close</button>`;
-      }
-      
-      footer.innerHTML = buttons;
-      document.getElementById('job-detail-modal').classList.add('active');
-    }
-    
-    function startJob(id) {
-      const job = jobs.find(j => j.id === id);
-      const driver = drivers.find(d => d.id === job.driverId);
-      
-      if (!job.driverId) {
-        showToast('Please assign a driver first', 'error');
-        return;
-      }
-      
-      job.status = 'in-progress';
-      job.history = job.history || [];
-      job.history.push({ time: new Date().toISOString(), action: 'Started', by: driver.name });
-      driver.status = 'on-job';
-      
-      saveData();
-      renderAll();
-      closeModal('job-detail-modal');
-      showToast('Job started');
-    }
-    
-    function completeJob(id) {
-      const job = jobs.find(j => j.id === id);
-      const driver = drivers.find(d => d.id === job.driverId);
-      
-      job.status = 'completed';
-      job.history.push({ time: new Date().toISOString(), action: 'Completed', by: driver ? driver.name : 'Unknown' });
-      if (driver) updateDriverStatus(driver.id);
-      
-      saveData();
-      renderAll();
-      closeModal('job-detail-modal');
-      showToast('Job completed!');
-    }
-    
-    function cancelJob(id) {
-      if (!confirm('Cancel this job?')) return;
-      const job = jobs.find(j => j.id === id);
-      const driver = drivers.find(d => d.id === job.driverId);
-      
-      job.status = 'cancelled';
-      job.history.push({ time: new Date().toISOString(), action: 'Cancelled', by: 'Dispatcher' });
-      if (driver) updateDriverStatus(driver.id);
-      
-      saveData();
-      renderAll();
-      closeModal('job-detail-modal');
-      showToast('Job cancelled');
-    }
-    
-    // Drivers
-    function renderDrivers() {
-      const list = document.getElementById('drivers-list');
-      
-      list.innerHTML = drivers.map(d => {
-        const activeJobs = jobs.filter(j => j.driverId === d.id && (j.status === 'pending' || j.status === 'in-progress')).length;
-        const completedToday = jobs.filter(j => j.driverId === d.id && j.status === 'completed' && j.date === formatDate(new Date())).length;
-        
-        return `<div class="grid-item">
-          <div class="grid-item-header">
-            <div style="display: flex; align-items: center; gap: 0.75rem;">
-              <div class="driver-avatar" style="background: ${d.color}">${d.name.split(' ').map(n => n[0]).join('')}</div>
-              <div>
-                <div class="grid-item-title">${d.name}</div>
-                <div class="grid-item-subtitle">${d.vehicle || 'No vehicle'}</div>
-              </div>
-            </div>
-            <span class="status-badge ${d.status}">${d.status.replace('-', ' ')}</span>
+      break;
+
+    case 'jobs':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">All Jobs</h1><button class="btn btn-primary" onclick="openJobModal()">+ New Job</button></div>
+        <div class="card">
+          <table><thead><tr><th>Job #</th><th>Date</th><th>Time</th><th>Customer</th><th>Title</th><th>Driver</th><th>Priority</th><th>Status</th><th></th></tr></thead>
+          <tbody>${state.jobs.slice(0, 100).map(j => `
+            <tr><td><strong>${j.job_number}</strong></td><td>${fmtDate(j.scheduled_date)}</td><td>${fmtTime(j.scheduled_time)}</td><td>${getCustomer(j.customer_id)?.name || '-'}</td><td>${j.title}</td><td>${getDriver(j.driver_id)?.name || '-'}</td><td><span class="badge" style="background:${PRIORITY_COLORS[j.priority]};color:#fff">${j.priority}</span></td><td><span class="badge" style="background:${STATUS_COLORS[j.status]};color:#fff">${j.status.replace('_',' ')}</span></td><td><button class="btn btn-sm btn-secondary" onclick="editJob(${j.id})">Edit</button></td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+
+    case 'drivers':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Drivers</h1><button class="btn btn-primary" onclick="openDriverModal()">+ Add Driver</button></div>
+        <div class="grid">${state.drivers.map(d => `
+          <div class="card" style="border-left:4px solid ${d.color};cursor:pointer" onclick="editDriver(${d.id})">
+            <div style="display:flex;justify-content:space-between;align-items:start"><h3>${d.name}</h3><span class="badge" style="background:${d.status === 'available' ? '#dcfce7' : '#fef3c7'}">${d.status}</span></div>
+            <p style="color:#64748b;font-size:13px">${d.phone}</p>
+            <p style="color:#64748b;font-size:13px">${d.vehicle} • ${d.license_plate}</p>
+            <div style="margin-top:12px;font-size:13px"><strong>${state.jobs.filter(j => j.driver_id === d.id && j.scheduled_date === today()).length}</strong> jobs today</div>
           </div>
-          <div style="font-size: 0.875rem; margin-top: 0.5rem;">
-            📞 ${d.phone}<br>
-            📧 ${d.email || 'No email'}
+        `).join('')}</div>
+      `;
+      break;
+
+    case 'customers':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Customers</h1><button class="btn btn-primary" onclick="openCustomerModal()">+ Add Customer</button></div>
+        <div class="card">
+          <table><thead><tr><th>Name</th><th>Company</th><th>Phone</th><th>Address</th><th>Jobs</th><th></th></tr></thead>
+          <tbody>${state.customers.map(c => `
+            <tr><td><strong>${c.name}</strong></td><td>${c.company || '-'}</td><td>${c.phone}</td><td>${c.address}, ${c.city}</td><td>${state.jobs.filter(j => j.customer_id === c.id).length}</td><td><button class="btn btn-sm btn-secondary" onclick="editCustomer(${c.id})">Edit</button></td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+
+    case 'reports':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+          <div class="card"><h3 style="margin-bottom:16px">Job Summary (All Time)</h3>
+            ${STATUSES.map(s => `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0"><span style="display:flex;align-items:center;gap:8px"><span class="status-dot" style="background:${STATUS_COLORS[s]}"></span>${s.replace('_',' ')}</span><strong>${state.jobs.filter(j => j.status === s).length}</strong></div>`).join('')}
           </div>
-          <div style="display: flex; gap: 1rem; margin-top: 0.75rem; font-size: 0.875rem; color: var(--gray-600);">
-            <span>🚚 ${activeJobs} active</span>
-            <span>✓ ${completedToday} today</span>
+          <div class="card"><h3 style="margin-bottom:16px">Driver Performance (This Month)</h3>
+            ${state.drivers.map(d => { const dJobs = state.jobs.filter(j => j.driver_id === d.id && j.scheduled_date?.startsWith(today().slice(0,7))); const comp = dJobs.filter(j => j.status === 'completed').length; return `<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e2e8f0"><span style="display:flex;align-items:center;gap:8px"><span class="status-dot" style="background:${d.color}"></span>${d.name}</span><span><strong>${comp}</strong> / ${dJobs.length}</span></div>`; }).join('')}
           </div>
-          <div class="grid-item-actions">
-            <button class="btn btn-sm btn-secondary" onclick="editDriver(${d.id})">Edit</button>
-            <button class="btn btn-sm ${d.status === 'off-duty' ? 'btn-success' : 'btn-warning'}" onclick="toggleDriverDuty(${d.id})">${d.status === 'off-duty' ? 'On Duty' : 'Off Duty'}</button>
-          </div>
-        </div>`;
-      }).join('');
-    }
-    
-    function openDriverModal(id = null) {
-      renderDriverColors();
-      
-      if (id) {
-        const d = drivers.find(dr => dr.id === id);
-        document.getElementById('driver-modal-title').textContent = 'Edit Driver';
-        document.getElementById('driver-id').value = id;
-        document.getElementById('driver-name').value = d.name;
-        document.getElementById('driver-phone').value = d.phone;
-        document.getElementById('driver-email').value = d.email || '';
-        document.getElementById('driver-vehicle').value = d.vehicle || '';
-        document.getElementById('driver-status').value = d.status;
-        selectedDriverColor = d.color;
-        renderDriverColors();
-        document.getElementById('driver-delete-btn').style.display = 'block';
-      } else {
-        document.getElementById('driver-modal-title').textContent = 'Add Driver';
-        document.getElementById('driver-id').value = '';
-        document.getElementById('driver-name').value = '';
-        document.getElementById('driver-phone').value = '';
-        document.getElementById('driver-email').value = '';
-        document.getElementById('driver-vehicle').value = '';
-        document.getElementById('driver-status').value = 'available';
-        selectedDriverColor = COLORS[drivers.length % COLORS.length];
-        renderDriverColors();
-        document.getElementById('driver-delete-btn').style.display = 'none';
-      }
-      document.getElementById('driver-modal').classList.add('active');
-    }
-    
-    function editDriver(id) { openDriverModal(id); }
-    
-    function renderDriverColors() {
-      document.getElementById('driver-colors').innerHTML = COLORS.map(c => 
-        `<div style="width:32px;height:32px;border-radius:50%;background:${c};cursor:pointer;border:3px solid ${c === selectedDriverColor ? 'var(--gray-800)' : 'transparent'}" onclick="selectedDriverColor='${c}';renderDriverColors()"></div>`
-      ).join('');
-    }
-    
-    function saveDriver() {
-      const id = document.getElementById('driver-id').value;
-      const name = document.getElementById('driver-name').value.trim();
-      const phone = document.getElementById('driver-phone').value.trim();
-      const email = document.getElementById('driver-email').value.trim();
-      const vehicle = document.getElementById('driver-vehicle').value.trim();
-      const status = document.getElementById('driver-status').value;
-      
-      if (!name || !phone) {
-        showToast('Please enter name and phone', 'error');
-        return;
-      }
-      
-      if (id) {
-        const i = drivers.findIndex(d => d.id === parseInt(id));
-        drivers[i] = { ...drivers[i], name, phone, email, vehicle, status, color: selectedDriverColor };
-        showToast('Driver updated');
-      } else {
-        drivers.push({ id: Math.max(0, ...drivers.map(d => d.id)) + 1, name, phone, email, vehicle, status, color: selectedDriverColor });
-        showToast('Driver added');
-      }
-      
-      saveData();
-      renderAll();
-      closeModal('driver-modal');
-    }
-    
-    function deleteDriver() {
-      const id = parseInt(document.getElementById('driver-id').value);
-      if (!confirm('Delete this driver?')) return;
-      
-      // Unassign their jobs
-      jobs.filter(j => j.driverId === id).forEach(j => { j.driverId = null; });
-      drivers = drivers.filter(d => d.id !== id);
-      
-      saveData();
-      renderAll();
-      closeModal('driver-modal');
-      showToast('Driver deleted');
-    }
-    
-    function toggleDriverDuty(id) {
-      const driver = drivers.find(d => d.id === id);
-      driver.status = driver.status === 'off-duty' ? 'available' : 'off-duty';
-      saveData();
-      renderAll();
-      showToast(`${driver.name} is now ${driver.status.replace('-', ' ')}`);
-    }
-    
-    // Customers
-    function renderCustomers() {
-      const tbody = document.getElementById('customers-table');
-      tbody.innerHTML = customers.map(c => {
-        const jobCount = jobs.filter(j => j.customerId === c.id).length;
-        return `<tr>
-          <td><strong>${c.name}</strong></td>
-          <td>${c.phone || '-'}</td>
-          <td>${c.email || '-'}</td>
-          <td>${truncate(c.address || '-', 30)}</td>
-          <td>${jobCount}</td>
-          <td>
-            <button class="btn btn-sm btn-secondary" onclick="editCustomer(${c.id})">Edit</button>
-            <button class="btn btn-sm btn-primary" onclick="quickJob(${c.id})">+ Job</button>
-          </td>
-        </tr>`;
-      }).join('');
-    }
-    
-    function openCustomerModal(id = null) {
-      if (id) {
-        const c = customers.find(cu => cu.id === id);
-        document.getElementById('customer-modal-title').textContent = 'Edit Customer';
-        document.getElementById('customer-id').value = id;
-        document.getElementById('customer-name').value = c.name;
-        document.getElementById('customer-phone').value = c.phone || '';
-        document.getElementById('customer-email').value = c.email || '';
-        document.getElementById('customer-address').value = c.address || '';
-        document.getElementById('customer-notes').value = c.notes || '';
-        document.getElementById('customer-delete-btn').style.display = 'block';
-      } else {
-        document.getElementById('customer-modal-title').textContent = 'Add Customer';
-        document.getElementById('customer-id').value = '';
-        document.getElementById('customer-name').value = '';
-        document.getElementById('customer-phone').value = '';
-        document.getElementById('customer-email').value = '';
-        document.getElementById('customer-address').value = '';
-        document.getElementById('customer-notes').value = '';
-        document.getElementById('customer-delete-btn').style.display = 'none';
-      }
-      document.getElementById('customer-modal').classList.add('active');
-    }
-    
-    function editCustomer(id) { openCustomerModal(id); }
-    
-    function quickJob(customerId) {
-      openJobModal();
-      document.getElementById('job-customer').value = customerId;
-      fillCustomerAddress();
-    }
-    
-    function saveCustomer() {
-      const id = document.getElementById('customer-id').value;
-      const name = document.getElementById('customer-name').value.trim();
-      const phone = document.getElementById('customer-phone').value.trim();
-      const email = document.getElementById('customer-email').value.trim();
-      const address = document.getElementById('customer-address').value.trim();
-      const notes = document.getElementById('customer-notes').value.trim();
-      
-      if (!name) {
-        showToast('Please enter customer name', 'error');
-        return;
-      }
-      
-      if (id) {
-        const i = customers.findIndex(c => c.id === parseInt(id));
-        customers[i] = { ...customers[i], name, phone, email, address, notes };
-        showToast('Customer updated');
-      } else {
-        customers.push({ id: Math.max(0, ...customers.map(c => c.id)) + 1, name, phone, email, address, notes });
-        showToast('Customer added');
-      }
-      
-      saveData();
-      renderAll();
-      closeModal('customer-modal');
-    }
-    
-    function deleteCustomer() {
-      const id = parseInt(document.getElementById('customer-id').value);
-      const hasJobs = jobs.some(j => j.customerId === id);
-      if (hasJobs && !confirm('This customer has jobs. Delete anyway?')) return;
-      if (!hasJobs && !confirm('Delete this customer?')) return;
-      
-      customers = customers.filter(c => c.id !== id);
-      saveData();
-      renderAll();
-      closeModal('customer-modal');
-      showToast('Customer deleted');
-    }
-    
-    // Reports
-    function renderDriverPerf() {
-      const tbody = document.getElementById('driver-perf-table');
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      
-      tbody.innerHTML = drivers.map(d => {
-        const driverJobs = jobs.filter(j => j.driverId === d.id && new Date(j.date) >= weekAgo);
-        const completed = driverJobs.filter(j => j.status === 'completed').length;
-        const onTime = completed > 0 ? Math.round((completed / Math.max(completed, 1)) * 100) : 0;
-        
-        return `<tr>
-          <td><div style="display:flex;align-items:center;gap:0.5rem;"><div class="driver-avatar" style="background:${d.color};width:28px;height:28px;font-size:0.75rem;">${d.name.split(' ').map(n => n[0]).join('')}</div>${d.name}</div></td>
-          <td>${completed}</td>
-          <td>${onTime}%</td>
-          <td>~45 min</td>
-        </tr>`;
-      }).join('');
-    }
-    
-    function exportJobs() {
-      const headers = ['Job #', 'Customer', 'Address', 'Date', 'Time', 'Driver', 'Type', 'Priority', 'Status'];
-      const rows = jobs.map(j => {
-        const customer = customers.find(c => c.id === j.customerId);
-        const driver = drivers.find(d => d.id === j.driverId);
-        return [j.id, customer?.name || '', j.address, j.date, j.time || '', driver?.name || 'Unassigned', j.type, j.priority, j.status];
-      });
-      downloadCSV([headers, ...rows], 'jobs-export.csv');
-      showToast('Jobs exported');
-    }
-    
-    function exportDailyReport() {
-      const today = formatDate(new Date());
-      const todayJobs = jobs.filter(j => j.date === today);
-      const headers = ['Job #', 'Customer', 'Address', 'Time', 'Driver', 'Type', 'Status'];
-      const rows = todayJobs.map(j => {
-        const customer = customers.find(c => c.id === j.customerId);
-        const driver = drivers.find(d => d.id === j.driverId);
-        return [j.id, customer?.name || '', j.address, j.time || 'ASAP', driver?.name || 'Unassigned', j.type, j.status];
-      });
-      downloadCSV([headers, ...rows], `daily-report-${today}.csv`);
-      showToast('Daily report exported');
-    }
-    
-    function exportDriverReport() {
-      const headers = ['Driver', 'Phone', 'Vehicle', 'Status', 'Jobs Today', 'Jobs This Week', 'Completed This Week'];
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-      const today = formatDate(new Date());
-      
-      const rows = drivers.map(d => {
-        const todayJobs = jobs.filter(j => j.driverId === d.id && j.date === today).length;
-        const weekJobs = jobs.filter(j => j.driverId === d.id && new Date(j.date) >= weekAgo).length;
-        const weekCompleted = jobs.filter(j => j.driverId === d.id && j.status === 'completed' && new Date(j.date) >= weekAgo).length;
-        return [d.name, d.phone, d.vehicle || '', d.status, todayJobs, weekJobs, weekCompleted];
-      });
-      downloadCSV([headers, ...rows], `driver-report-${today}.csv`);
-      showToast('Driver report exported');
-    }
-    
-    function exportCustomerReport() {
-      const headers = ['Customer', 'Phone', 'Email', 'Address', 'Total Jobs', 'Completed', 'Pending'];
-      const rows = customers.map(c => {
-        const custJobs = jobs.filter(j => j.customerId === c.id);
-        return [c.name, c.phone || '', c.email || '', c.address || '', custJobs.length, custJobs.filter(j => j.status === 'completed').length, custJobs.filter(j => j.status === 'pending').length];
-      });
-      downloadCSV([headers, ...rows], `customer-report-${formatDate(new Date())}.csv`);
-      showToast('Customer report exported');
-    }
-    
-    function downloadCSV(data, filename) {
-      const csv = data.map(r => r.map(c => `"${c}"`).join(',')).join('\n');
-      const blob = new Blob([csv], { type: 'text/csv' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-    
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-    
-    function showToast(msg, type = 'success') {
-      const toast = document.createElement('div');
-      toast.className = `toast ${type}`;
-      toast.textContent = msg;
-      document.getElementById('toast-container').appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-    
-    document.querySelectorAll('.modal-overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) o.classList.remove('active'); }));
-    
-    init();
-  </script>
+        </div>
+        <div class="card" style="margin-top:20px"><h3 style="margin-bottom:16px">Jobs by Type</h3>
+          ${JOB_TYPES.map(t => { const c = state.jobs.filter(j => j.job_type === t).length; return c > 0 ? `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #e2e8f0"><span>${t}</span><span>${c} jobs</span></div>` : ''; }).join('')}
+        </div>
+      `;
+      break;
+  }
+  updateNav();
+}
+
+function openModal(title, content) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalContent').innerHTML = content; document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); state.editing = null; }
+
+function assignDriver(jobId, driverId) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (job) {
+    job.driver_id = driverId ? parseInt(driverId) : null;
+    job.status = driverId ? 'assigned' : 'unassigned';
+    saveData(); render(); toast('Driver assigned');
+  }
+}
+
+function updateStatus(jobId, status) {
+  const job = state.jobs.find(j => j.id === jobId);
+  if (job) {
+    job.status = status;
+    if (status === 'on_site') job.actual_start = new Date().toISOString();
+    if (status === 'completed') job.actual_end = new Date().toISOString();
+    saveData(); render(); toast(`Status: ${status.replace('_', ' ')}`);
+  }
+}
+
+function openJobModal(job) {
+  state.editing = job;
+  openModal(job ? `Job #${job.job_number}` : 'New Job', `
+    <form onsubmit="saveJob(event)">
+      <div class="row"><div class="field"><label>Job Type</label><select name="job_type">${JOB_TYPES.map(t => `<option value="${t}" ${job?.job_type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div class="field"><label>Priority</label><select name="priority">${PRIORITIES.map(p => `<option value="${p}" ${(job?.priority || 'normal') === p ? 'selected' : ''}>${p.charAt(0).toUpperCase() + p.slice(1)}</option>`).join('')}</select></div></div>
+      ${job ? `<div class="field"><label>Status</label><select name="status">${STATUSES.map(s => `<option value="${s}" ${job?.status === s ? 'selected' : ''}>${s.replace('_', ' ')}</option>`).join('')}</select></div>` : ''}
+      <div class="field"><label>Title</label><input name="title" value="${job?.title || ''}" required placeholder="Brief description"></div>
+      <div class="row"><div class="field"><label>Customer</label><select name="customer_id"><option value="">Select...</option>${state.customers.map(c => `<option value="${c.id}" ${job?.customer_id === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}</select></div><div class="field"><label>Driver</label><select name="driver_id"><option value="">Unassigned</option>${state.drivers.map(d => `<option value="${d.id}" ${job?.driver_id === d.id ? 'selected' : ''}>${d.name}</option>`).join('')}</select></div></div>
+      <div class="field"><label>Address</label><input name="address" value="${job?.address || ''}"></div>
+      <div class="row"><div class="field"><label>City</label><input name="city" value="${job?.city || ''}"></div><div class="field"><label>State</label><input name="state" value="${job?.state || ''}"></div><div class="field"><label>ZIP</label><input name="zip" value="${job?.zip || ''}"></div></div>
+      <div class="row"><div class="field"><label>Date</label><input type="date" name="scheduled_date" value="${job?.scheduled_date || state.selectedDate}" required></div><div class="field"><label>Time</label><input type="time" name="scheduled_time" value="${job?.scheduled_time || ''}"></div><div class="field"><label>Duration (min)</label><input type="number" name="estimated_duration" value="${job?.estimated_duration || 60}"></div></div>
+      <div class="field"><label>Notes</label><textarea name="notes">${job?.notes || ''}</textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function editJob(id) { openJobModal(state.jobs.find(j => j.id === id)); }
+
+function saveJob(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { job_type: f.job_type.value, priority: f.priority.value, title: f.title.value, customer_id: f.customer_id.value ? parseInt(f.customer_id.value) : null, driver_id: f.driver_id.value ? parseInt(f.driver_id.value) : null, address: f.address.value, city: f.city.value, state: f.state.value, zip: f.zip.value, scheduled_date: f.scheduled_date.value, scheduled_time: f.scheduled_time.value, estimated_duration: parseInt(f.estimated_duration.value) || 60, notes: f.notes.value };
+  if (f.status) data.status = f.status.value;
+  if (state.editing) {
+    Object.assign(state.editing, data);
+  } else {
+    data.id = Date.now();
+    data.job_number = genJobNumber();
+    data.status = data.driver_id ? 'assigned' : 'unassigned';
+    state.jobs.unshift(data);
+  }
+  saveData(); closeModal(); render(); toast('Job saved');
+}
+
+function openDriverModal(driver) {
+  state.editing = driver;
+  openModal(driver ? 'Edit Driver' : 'Add Driver', `
+    <form onsubmit="saveDriver(event)">
+      <div class="field"><label>Name</label><input name="name" value="${driver?.name || ''}" required></div>
+      <div class="row"><div class="field"><label>Phone</label><input name="phone" value="${driver?.phone || ''}"></div><div class="field"><label>Email</label><input type="email" name="email" value="${driver?.email || ''}"></div></div>
+      <div class="row"><div class="field"><label>Vehicle</label><input name="vehicle" value="${driver?.vehicle || ''}" placeholder="e.g., Ford Transit"></div><div class="field"><label>License Plate</label><input name="license_plate" value="${driver?.license_plate || ''}"></div></div>
+      <div class="field"><label>Color</label><input type="color" name="color" value="${driver?.color || '#3b82f6'}"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function editDriver(id) { openDriverModal(state.drivers.find(d => d.id === id)); }
+
+function saveDriver(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, phone: f.phone.value, email: f.email.value, vehicle: f.vehicle.value, license_plate: f.license_plate.value, color: f.color.value, status: 'available' };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.drivers.push(data); }
+  saveData(); closeModal(); render(); toast('Driver saved');
+}
+
+function openCustomerModal(customer) {
+  state.editing = customer;
+  openModal(customer ? 'Edit Customer' : 'Add Customer', `
+    <form onsubmit="saveCustomer(event)">
+      <div class="row"><div class="field"><label>Name</label><input name="name" value="${customer?.name || ''}" required></div><div class="field"><label>Company</label><input name="company" value="${customer?.company || ''}"></div></div>
+      <div class="row"><div class="field"><label>Phone</label><input name="phone" value="${customer?.phone || ''}"></div><div class="field"><label>Email</label><input type="email" name="email" value="${customer?.email || ''}"></div></div>
+      <div class="field"><label>Address</label><input name="address" value="${customer?.address || ''}"></div>
+      <div class="row"><div class="field"><label>City</label><input name="city" value="${customer?.city || ''}"></div><div class="field"><label>State</label><input name="state" value="${customer?.state || ''}"></div><div class="field"><label>ZIP</label><input name="zip" value="${customer?.zip || ''}"></div></div>
+      <div class="field"><label>Notes</label><textarea name="notes">${customer?.notes || ''}</textarea></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+
+function editCustomer(id) { openCustomerModal(state.customers.find(c => c.id === id)); }
+
+function saveCustomer(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, company: f.company.value, phone: f.phone.value, email: f.email.value, address: f.address.value, city: f.city.value, state: f.state.value, zip: f.zip.value, notes: f.notes.value };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.customers.push(data); }
+  saveData(); closeModal(); render(); toast('Customer saved');
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
 </body>
 </html>
