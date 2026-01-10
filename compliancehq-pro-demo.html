@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ComplianceHQ Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 200px; background: #1e293b; padding: 16px; position: fixed; height: calc(100vh - 36px); top: 36px; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; }
+    .logo-icon { font-size: 18px; background: #22c55e; color: #fff; width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+    .logo-text { font-weight: 700; font-size: 15px; color: #fff; }
+    .org-info { padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; margin-bottom: 16px; }
+    .org-name { font-weight: 600; font-size: 13px; color: #fff; }
+    .user-name { font-size: 11px; color: #94a3b8; }
+    .nav-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #94a3b8; font-size: 13px; margin-bottom: 2px; }
+    .nav-item:hover { background: rgba(255,255,255,0.1); }
+    .nav-item.active { background: rgba(34,197,94,0.2); color: #fff; font-weight: 500; }
+    .nav-badge { background: #ef4444; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; margin-left: auto; }
+    .main { flex: 1; margin-left: 200px; padding: 24px; margin-top: 36px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; }
+    .btn-primary { background: #22c55e; color: #fff; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-block; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">✓ ComplianceHQ Pro Demo - Data stored in browser | <a href="https://buyappsonce.com/landing-compliancehq-pro.html">Get ComplianceHQ Pro - $99 →</a></div>
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo"><span class="logo-icon">✓</span><span class="logo-text">ComplianceHQ</span></div>
+      <div class="org-info"><div class="org-name">Demo Corp</div><div class="user-name">Admin</div></div>
+      <div class="nav-item active" onclick="showTab('dashboard')">📊 Dashboard</div>
+      <div class="nav-item" onclick="showTab('alerts')" id="navAlerts">🔔 Alerts</div>
+      <div class="nav-item" onclick="showTab('certs')">📜 Certifications</div>
+      <div class="nav-item" onclick="showTab('employees')">👥 Employees</div>
+      <div class="nav-item" onclick="showTab('requirements')">📋 Requirements</div>
+      <div class="nav-item" onclick="showTab('departments')">🏢 Departments</div>
+      <div class="nav-item" onclick="showTab('reports')">📈 Reports</div>
+    </nav>
+    <main class="main" id="mainContent"></main>
+  </div>
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head"><h2 id="modalTitle">Modal</h2><button class="close-btn" onclick="closeModal()">×</button></div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const CATEGORIES = ['Safety', 'Professional', 'Regulatory', 'Training', 'Health', 'Other'];
+const STATUS_COLORS = { valid: '#22c55e', expiring: '#f59e0b', expired: '#ef4444', pending: '#3b82f6', waived: '#94a3b8' };
+
+let state = { tab: 'dashboard', employees: [], departments: [], requirements: [], certifications: [], alerts: [], editing: null };
+
+function init() {
+  loadData();
+  if (state.departments.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.employees = JSON.parse(localStorage.getItem('chq_employees') || '[]');
+  state.departments = JSON.parse(localStorage.getItem('chq_departments') || '[]');
+  state.requirements = JSON.parse(localStorage.getItem('chq_requirements') || '[]');
+  state.certifications = JSON.parse(localStorage.getItem('chq_certifications') || '[]');
+  state.alerts = JSON.parse(localStorage.getItem('chq_alerts') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('chq_employees', JSON.stringify(state.employees));
+  localStorage.setItem('chq_departments', JSON.stringify(state.departments));
+  localStorage.setItem('chq_requirements', JSON.stringify(state.requirements));
+  localStorage.setItem('chq_certifications', JSON.stringify(state.certifications));
+  localStorage.setItem('chq_alerts', JSON.stringify(state.alerts));
+}
+
+function loadSampleData() {
+  const today = new Date();
+  const in30 = new Date(today.getTime() + 30*86400000).toISOString().split('T')[0];
+  const in90 = new Date(today.getTime() + 90*86400000).toISOString().split('T')[0];
+  const past = new Date(today.getTime() - 30*86400000).toISOString().split('T')[0];
+  
+  state.departments = [
+    { id: 1, name: 'Operations', manager_name: 'John Smith' },
+    { id: 2, name: 'Sales', manager_name: 'Jane Doe' },
+    { id: 3, name: 'Warehouse', manager_name: 'Bob Wilson' }
+  ];
+  
+  state.employees = [
+    { id: 1, name: 'Alice Johnson', department_id: 1, job_title: 'Operator', email: 'alice@demo.com' },
+    { id: 2, name: 'Bob Brown', department_id: 1, job_title: 'Senior Operator', email: 'bob@demo.com' },
+    { id: 3, name: 'Carol Davis', department_id: 2, job_title: 'Sales Rep', email: 'carol@demo.com' },
+    { id: 4, name: 'Dan Miller', department_id: 3, job_title: 'Forklift Operator', email: 'dan@demo.com' }
+  ];
+  
+  state.requirements = [
+    { id: 1, name: 'CPR/First Aid', category: 'Safety', frequency_months: 24, is_mandatory: true },
+    { id: 2, name: 'Forklift Certification', category: 'Safety', frequency_months: 36, is_mandatory: true },
+    { id: 3, name: 'OSHA 10-Hour', category: 'Regulatory', frequency_months: null, is_mandatory: true },
+    { id: 4, name: 'Sales Training', category: 'Training', frequency_months: 12, is_mandatory: false }
+  ];
+  
+  state.certifications = [
+    { id: 1, employee_id: 1, requirement_id: 1, issued_date: '2024-01-15', expiration_date: in90, status: 'valid', certificate_number: 'CPR-2024-001' },
+    { id: 2, employee_id: 1, requirement_id: 3, issued_date: '2023-06-01', expiration_date: null, status: 'valid', certificate_number: 'OSHA-123' },
+    { id: 3, employee_id: 2, requirement_id: 1, issued_date: '2024-06-01', expiration_date: in30, status: 'expiring', certificate_number: 'CPR-2024-002' },
+    { id: 4, employee_id: 4, requirement_id: 2, issued_date: '2022-01-01', expiration_date: past, status: 'expired', certificate_number: 'FL-2022-001' },
+    { id: 5, employee_id: 3, requirement_id: 4, issued_date: '2024-03-01', expiration_date: in90, status: 'valid', certificate_number: 'ST-2024-001' }
+  ];
+  
+  state.alerts = [
+    { id: 1, employee_id: 4, certification_id: 4, alert_type: 'expired', days_until: -30 }
+  ];
+  
+  saveData();
+}
+
+function showTab(tab) { state.tab = tab; updateNav(); render(); }
+
+function updateNav() {
+  document.querySelectorAll('.nav-item').forEach((n, i) => n.classList.toggle('active', i === ['dashboard', 'alerts', 'certs', 'employees', 'requirements', 'departments', 'reports'].indexOf(state.tab)));
+  document.getElementById('navAlerts').innerHTML = `🔔 Alerts ${state.alerts.length > 0 ? `<span class="nav-badge">${state.alerts.length}</span>` : ''}`;
+}
+
+function getEmployee(id) { return state.employees.find(e => e.id === id); }
+function getDepartment(id) { return state.departments.find(d => d.id === id); }
+function getRequirement(id) { return state.requirements.find(r => r.id === id); }
+function fmtDate(d) { return d ? new Date(d + 'T12:00:00').toLocaleDateString() : '-'; }
+function daysUntil(d) { return d ? Math.ceil((new Date(d) - new Date()) / 86400000) : null; }
+
+function updateCertStatus(cert) {
+  if (!cert.expiration_date) { cert.status = 'valid'; return; }
+  const days = daysUntil(cert.expiration_date);
+  if (days < 0) cert.status = 'expired';
+  else if (days <= 30) cert.status = 'expiring';
+  else cert.status = 'valid';
+}
+
+function render() {
+  state.certifications.forEach(updateCertStatus);
+  const main = document.getElementById('mainContent');
+  const validCerts = state.certifications.filter(c => c.status === 'valid').length;
+  const expiringCerts = state.certifications.filter(c => c.status === 'expiring').length;
+  const expiredCerts = state.certifications.filter(c => c.status === 'expired').length;
+  const complianceRate = state.certifications.length > 0 ? Math.round((validCerts / state.certifications.length) * 100) : 100;
+
+  switch (state.tab) {
+    case 'dashboard':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Compliance Dashboard</h1></div>
+        <div class="stats">
+          <div class="stat-card" style="border-left:4px solid #22c55e"><div class="stat-label">Compliance Rate</div><div class="stat-value" style="color:${complianceRate >= 90 ? '#22c55e' : complianceRate >= 70 ? '#f59e0b' : '#ef4444'}">${complianceRate}%</div></div>
+          <div class="stat-card"><div class="stat-label">Valid</div><div class="stat-value" style="color:#22c55e">${validCerts}</div></div>
+          <div class="stat-card"><div class="stat-label">Expiring Soon</div><div class="stat-value" style="color:#f59e0b">${expiringCerts}</div></div>
+          <div class="stat-card"><div class="stat-label">Expired</div><div class="stat-value" style="color:#ef4444">${expiredCerts}</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card"><h3 style="margin-bottom:16px">🔔 Recent Alerts</h3>
+            ${state.alerts.slice(0, 5).map(a => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:500">${getEmployee(a.employee_id)?.name}</div><div style="font-size:12px;color:#64748b">${getRequirement(state.certifications.find(c => c.id === a.certification_id)?.requirement_id)?.name} - ${a.alert_type}</div></div><button class="btn btn-sm btn-secondary" onclick="dismissAlert(${a.id})">Dismiss</button></div>`).join('') || '<p style="color:#64748b">No alerts</p>'}
+          </div>
+          <div class="card"><h3 style="margin-bottom:16px">⚠️ Expiring Soon</h3>
+            ${state.certifications.filter(c => c.status === 'expiring').slice(0, 5).map(c => `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:500">${getEmployee(c.employee_id)?.name}</div><div style="font-size:12px;color:#64748b">${getRequirement(c.requirement_id)?.name}</div></div><div style="text-align:right"><div style="font-size:12px;color:#f59e0b">${daysUntil(c.expiration_date)} days</div><div style="font-size:11px;color:#64748b">${fmtDate(c.expiration_date)}</div></div></div>`).join('') || '<p style="color:#64748b">No expiring certifications</p>'}
+          </div>
+        </div>
+      `;
+      break;
+
+    case 'alerts':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Alerts</h1></div>
+        <div class="card">
+          ${state.alerts.length > 0 ? state.alerts.map(a => `<div style="display:flex;justify-content:space-between;align-items:center;padding:16px;border-bottom:1px solid #e2e8f0"><div><div style="font-weight:600">${getEmployee(a.employee_id)?.name}</div><div style="color:#64748b">${getRequirement(state.certifications.find(c => c.id === a.certification_id)?.requirement_id)?.name}</div><div style="font-size:12px;color:${a.alert_type === 'expired' ? '#ef4444' : '#f59e0b'}">${a.alert_type.toUpperCase()}</div></div><button class="btn btn-sm btn-secondary" onclick="dismissAlert(${a.id})">Dismiss</button></div>`).join('') : '<p style="padding:20px;color:#64748b;text-align:center">No alerts</p>'}
+        </div>
+      `;
+      break;
+
+    case 'certs':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Certifications</h1><button class="btn btn-primary" onclick="openCertModal()">+ Add Certification</button></div>
+        <div class="card">
+          <table><thead><tr><th>Employee</th><th>Requirement</th><th>Category</th><th>Issued</th><th>Expires</th><th>Status</th><th></th></tr></thead>
+          <tbody>${state.certifications.map(c => `
+            <tr><td><strong>${getEmployee(c.employee_id)?.name}</strong></td><td>${getRequirement(c.requirement_id)?.name}</td><td>${getRequirement(c.requirement_id)?.category}</td><td>${fmtDate(c.issued_date)}</td><td>${fmtDate(c.expiration_date)}</td><td><span class="badge" style="background:${STATUS_COLORS[c.status]};color:#fff">${c.status}</span></td><td><button class="btn btn-sm btn-secondary" onclick="editCert(${c.id})">Edit</button></td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+
+    case 'employees':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Employees</h1><button class="btn btn-primary" onclick="openEmployeeModal()">+ Add Employee</button></div>
+        <div class="grid">${state.employees.map(emp => {
+          const empCerts = state.certifications.filter(c => c.employee_id === emp.id);
+          const valid = empCerts.filter(c => c.status === 'valid').length;
+          const problems = empCerts.filter(c => ['expiring','expired'].includes(c.status)).length;
+          return `<div class="card" style="border-left:4px solid ${problems > 0 ? '#ef4444' : '#22c55e'};cursor:pointer" onclick="editEmployee(${emp.id})"><h3>${emp.name}</h3><p style="color:#64748b;font-size:13px">${emp.job_title || ''}</p><p style="color:#64748b;font-size:12px">${getDepartment(emp.department_id)?.name || ''}</p><div style="margin-top:12px;display:flex;gap:16px"><div><div style="font-size:20px;font-weight:700;color:#22c55e">${valid}</div><div style="font-size:11px;color:#64748b">Valid</div></div><div><div style="font-size:20px;font-weight:700;color:${problems > 0 ? '#ef4444' : '#94a3b8'}">${problems}</div><div style="font-size:11px;color:#64748b">Issues</div></div></div></div>`;
+        }).join('')}</div>
+      `;
+      break;
+
+    case 'requirements':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Requirements</h1><button class="btn btn-primary" onclick="openRequirementModal()">+ Add Requirement</button></div>
+        <div class="card">
+          <table><thead><tr><th>Name</th><th>Category</th><th>Frequency</th><th>Mandatory</th><th></th></tr></thead>
+          <tbody>${state.requirements.map(r => `
+            <tr><td><strong>${r.name}</strong></td><td>${r.category}</td><td>${r.frequency_months ? r.frequency_months + ' months' : 'One-time'}</td><td>${r.is_mandatory ? '✓' : '-'}</td><td><button class="btn btn-sm btn-secondary" onclick="editRequirement(${r.id})">Edit</button></td></tr>
+          `).join('')}</tbody></table>
+        </div>
+      `;
+      break;
+
+    case 'departments':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Departments</h1><button class="btn btn-primary" onclick="openDepartmentModal()">+ Add Department</button></div>
+        <div class="grid">${state.departments.map(d => `
+          <div class="card" onclick="editDepartment(${d.id})" style="cursor:pointer"><h3>${d.name}</h3><p style="color:#64748b;font-size:13px">${d.manager_name || 'No manager'}</p><div style="margin-top:12px"><strong>${state.employees.filter(e => e.department_id === d.id).length}</strong> employees</div></div>
+        `).join('')}</div>
+      `;
+      break;
+
+    case 'reports':
+      main.innerHTML = `
+        <div class="header"><h1 class="title">Reports</h1></div>
+        <div class="grid-2">
+          <div class="card"><h3 style="margin-bottom:16px">Compliance by Department</h3>
+            ${state.departments.map(d => { const deptEmps = state.employees.filter(e => e.department_id === d.id); const deptCerts = state.certifications.filter(c => deptEmps.some(e => e.id === c.employee_id)); const valid = deptCerts.filter(c => c.status === 'valid').length; const rate = deptCerts.length > 0 ? Math.round((valid / deptCerts.length) * 100) : 100; return `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0"><span>${d.name}</span><span style="font-weight:600;color:${rate >= 90 ? '#22c55e' : rate >= 70 ? '#f59e0b' : '#ef4444'}">${rate}%</span></div>`; }).join('')}
+          </div>
+          <div class="card"><h3 style="margin-bottom:16px">Upcoming Expirations</h3>
+            ${[7, 30, 60, 90].map(days => { const count = state.certifications.filter(c => { const d = daysUntil(c.expiration_date); return d !== null && d > 0 && d <= days; }).length; return `<div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #e2e8f0"><span>Within ${days} days</span><strong>${count}</strong></div>`; }).join('')}
+          </div>
+        </div>
+      `;
+      break;
+  }
+  updateNav();
+}
+
+function openModal(title, content) { document.getElementById('modalTitle').textContent = title; document.getElementById('modalContent').innerHTML = content; document.getElementById('modal').classList.remove('hidden'); }
+function closeModal() { document.getElementById('modal').classList.add('hidden'); state.editing = null; }
+
+function dismissAlert(id) { state.alerts = state.alerts.filter(a => a.id !== id); saveData(); render(); }
+
+function openEmployeeModal(emp) {
+  state.editing = emp;
+  openModal(emp ? 'Edit Employee' : 'Add Employee', `
+    <form onsubmit="saveEmployee(event)">
+      <div class="row"><div class="field"><label>Name</label><input name="name" value="${emp?.name || ''}" required></div><div class="field"><label>Employee #</label><input name="employee_number" value="${emp?.employee_number || ''}"></div></div>
+      <div class="row"><div class="field"><label>Email</label><input type="email" name="email" value="${emp?.email || ''}"></div><div class="field"><label>Phone</label><input name="phone" value="${emp?.phone || ''}"></div></div>
+      <div class="row"><div class="field"><label>Job Title</label><input name="job_title" value="${emp?.job_title || ''}"></div><div class="field"><label>Department</label><select name="department_id"><option value="">None</option>${state.departments.map(d => `<option value="${d.id}" ${emp?.department_id === d.id ? 'selected' : ''}>${d.name}</option>`).join('')}</select></div></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+function editEmployee(id) { openEmployeeModal(state.employees.find(e => e.id === id)); }
+function saveEmployee(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, employee_number: f.employee_number.value, email: f.email.value, phone: f.phone.value, job_title: f.job_title.value, department_id: f.department_id.value ? parseInt(f.department_id.value) : null };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.employees.push(data); }
+  saveData(); closeModal(); render(); toast('Employee saved');
+}
+
+function openDepartmentModal(dept) {
+  state.editing = dept;
+  openModal(dept ? 'Edit Department' : 'Add Department', `
+    <form onsubmit="saveDepartment(event)">
+      <div class="field"><label>Name</label><input name="name" value="${dept?.name || ''}" required></div>
+      <div class="field"><label>Manager Name</label><input name="manager_name" value="${dept?.manager_name || ''}"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+function editDepartment(id) { openDepartmentModal(state.departments.find(d => d.id === id)); }
+function saveDepartment(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, manager_name: f.manager_name.value };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.departments.push(data); }
+  saveData(); closeModal(); render(); toast('Department saved');
+}
+
+function openRequirementModal(req) {
+  state.editing = req;
+  openModal(req ? 'Edit Requirement' : 'Add Requirement', `
+    <form onsubmit="saveRequirement(event)">
+      <div class="field"><label>Name</label><input name="name" value="${req?.name || ''}" required placeholder="e.g., CPR Certification"></div>
+      <div class="field"><label>Category</label><select name="category">${CATEGORIES.map(c => `<option value="${c}" ${req?.category === c ? 'selected' : ''}>${c}</option>`).join('')}</select></div>
+      <div class="field"><label>Renewal Frequency (months)</label><input type="number" name="frequency_months" value="${req?.frequency_months || ''}" placeholder="Leave blank for one-time"></div>
+      <div class="field"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" name="is_mandatory" ${req?.is_mandatory !== false ? 'checked' : ''}> Mandatory</label></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+function editRequirement(id) { openRequirementModal(state.requirements.find(r => r.id === id)); }
+function saveRequirement(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, category: f.category.value, frequency_months: f.frequency_months.value ? parseInt(f.frequency_months.value) : null, is_mandatory: f.is_mandatory.checked };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.requirements.push(data); }
+  saveData(); closeModal(); render(); toast('Requirement saved');
+}
+
+function openCertModal(cert) {
+  state.editing = cert;
+  openModal(cert ? 'Edit Certification' : 'Add Certification', `
+    <form onsubmit="saveCert(event)">
+      <div class="row"><div class="field"><label>Employee</label><select name="employee_id" required>${state.employees.map(e => `<option value="${e.id}" ${cert?.employee_id === e.id ? 'selected' : ''}>${e.name}</option>`).join('')}</select></div><div class="field"><label>Requirement</label><select name="requirement_id" required>${state.requirements.map(r => `<option value="${r.id}" ${cert?.requirement_id === r.id ? 'selected' : ''}>${r.name}</option>`).join('')}</select></div></div>
+      <div class="row"><div class="field"><label>Issued Date</label><input type="date" name="issued_date" value="${cert?.issued_date || ''}"></div><div class="field"><label>Expiration Date</label><input type="date" name="expiration_date" value="${cert?.expiration_date || ''}"></div></div>
+      <div class="field"><label>Certificate #</label><input name="certificate_number" value="${cert?.certificate_number || ''}"></div>
+      <div class="modal-actions"><button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button><button type="submit" class="btn btn-primary">Save</button></div>
+    </form>
+  `);
+}
+function editCert(id) { openCertModal(state.certifications.find(c => c.id === id)); }
+function saveCert(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { employee_id: parseInt(f.employee_id.value), requirement_id: parseInt(f.requirement_id.value), issued_date: f.issued_date.value || null, expiration_date: f.expiration_date.value || null, certificate_number: f.certificate_number.value, status: 'valid' };
+  if (state.editing) { Object.assign(state.editing, data); }
+  else { data.id = Date.now(); state.certifications.push(data); }
+  saveData(); closeModal(); render(); toast('Certification saved');
+}
+
+function toast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.remove('hidden'); setTimeout(() => t.classList.add('hidden'), 3000); }
+
+init();
+</script>
+</body>
+</html>
