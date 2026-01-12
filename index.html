@@ -3,49 +3,138 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BuyAppsOnce - Professional Software, No Subscriptions</title>
-  <meta name="description" content="Professional business software you buy once and own forever. No monthly fees, no subscriptions. Apps for scheduling, HR, finance, operations and more.">
+  <title>BuyAppsOnce - Professional Software, No Subscriptions | One-Time Purchase</title>
+  <meta name="description" content="Professional business software you buy once and own forever. No monthly fees, no subscriptions. Apps for scheduling, HR, finance, operations and more. Save thousands vs SaaS.">
   <meta name="keywords" content="one-time purchase software, no subscription software, business apps no monthly fees, self-hosted software, buy software once">
   <link rel="canonical" href="https://buyappsonce.com/">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💼</text></svg>">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="BuyAppsOnce - Professional Software, No Subscriptions">
+  <meta property="og:description" content="Buy once, own forever. Professional business apps with no monthly fees.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://buyappsonce.com/">
+  <meta name="twitter:card" content="summary_large_image">
+  
+  <!-- Schema Markup -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "BuyAppsOnce",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "AggregateOffer",
+      "lowPrice": "15",
+      "highPrice": "599",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
-    :root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#3b82f6;--success:#22c55e;--accent:#8b5cf6}
+    :root{--bg:#f8fafc;--card:#fff;--border:#e2e8f0;--text:#0f172a;--muted:#64748b;--primary:#3b82f6;--success:#22c55e;--accent:#8b5cf6;--warning:#f59e0b}
     body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
     .container{max-width:1200px;margin:0 auto;padding:0 24px}
     
     /* Header */
-    .header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;z-index:100}
+    .header{background:var(--card);border-bottom:1px solid var(--border);padding:12px 0;position:sticky;top:0;z-index:100}
     .header-inner{display:flex;justify-content:space-between;align-items:center}
     .logo{font-size:1.5rem;font-weight:800;color:var(--text);text-decoration:none}
     .logo span{color:var(--success)}
     .nav{display:flex;gap:24px;align-items:center}
     .nav a{color:var(--muted);text-decoration:none;font-weight:500;font-size:14px}
     .nav a:hover{color:var(--text)}
+    .header-cta{background:var(--success);color:#fff;padding:10px 20px;border-radius:8px;font-weight:600;font-size:14px;text-decoration:none}
+    .header-cta:hover{background:#16a34a}
+    .mobile-menu{display:none;background:none;border:none;font-size:24px;cursor:pointer}
+    
+    /* Announcement Bar */
+    .announcement{background:#0f172a;color:#fff;text-align:center;padding:10px;font-size:13px}
+    .announcement a{color:var(--warning);font-weight:600;text-decoration:none}
     
     /* Hero */
-    .hero{padding:80px 0;text-align:center;background:linear-gradient(135deg,rgba(59,130,246,.05),rgba(139,92,246,.05))}
-    .hero h1{font-size:3rem;font-weight:800;margin-bottom:16px;line-height:1.2}
-    .hero h1 span{color:var(--primary)}
-    .hero p{font-size:1.25rem;color:var(--muted);max-width:600px;margin:0 auto 32px}
-    .hero-stats{display:flex;justify-content:center;gap:48px;margin-top:48px}
-    .hero-stat{text-align:center}
-    .hero-stat-value{font-size:2.5rem;font-weight:800;color:var(--primary)}
-    .hero-stat-label{font-size:14px;color:var(--muted)}
+    .hero{padding:60px 0 80px;background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(139,92,246,.08))}
+    .hero-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+    .hero-content{max-width:560px}
+    .hero-badge{background:#dcfce7;color:#16a34a;display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:20px}
+    .hero h1{font-size:3rem;font-weight:800;margin-bottom:20px;line-height:1.15}
+    .hero h1 em{color:var(--primary);font-style:normal}
+    .hero-content>p{font-size:1.2rem;color:var(--muted);margin-bottom:28px;line-height:1.6}
+    .hero-buttons{display:flex;gap:16px;margin-bottom:32px;flex-wrap:wrap}
+    .btn{padding:14px 28px;border-radius:8px;font-weight:600;text-decoration:none;font-size:15px;display:inline-flex;align-items:center;gap:8px;transition:all .2s;border:none;cursor:pointer}
+    .btn-primary{background:var(--primary);color:#fff;box-shadow:0 4px 14px rgba(59,130,246,.35)}
+    .btn-primary:hover{background:#2563eb;transform:translateY(-2px);box-shadow:0 6px 20px rgba(59,130,246,.4)}
+    .btn-success{background:var(--success);color:#fff;box-shadow:0 4px 14px rgba(34,197,94,.35)}
+    .btn-success:hover{background:#16a34a;transform:translateY(-2px)}
+    .btn-secondary{background:var(--card);color:var(--text);border:2px solid var(--border)}
+    .btn-secondary:hover{border-color:var(--primary);color:var(--primary)}
+    .hero-trust{display:flex;align-items:center;gap:24px;flex-wrap:wrap}
+    .hero-trust-item{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--muted)}
+    .checkmark{color:var(--success);font-weight:bold}
+    .hero-visual{background:var(--card);border-radius:16px;padding:24px;box-shadow:0 20px 40px rgba(0,0,0,.1);border:1px solid var(--border)}
+    .hero-mockup{background:linear-gradient(135deg,#1e40af,#7c3aed);border-radius:12px;padding:20px;color:#fff}
+    .hero-mockup-header{display:flex;gap:6px;margin-bottom:16px}
+    .hero-mockup-dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.3)}
+    .hero-mockup-content{background:rgba(255,255,255,.1);border-radius:8px;padding:16px}
+    .hero-mockup h4{font-size:14px;opacity:.8;margin-bottom:8px}
+    .hero-mockup-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .hero-mockup-stat{background:rgba(255,255,255,.15);border-radius:6px;padding:12px;text-align:center}
+    .hero-mockup-stat strong{display:block;font-size:20px}
+    .hero-mockup-stat span{font-size:11px;opacity:.8}
     
-    /* Value Props */
-    .value-props{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin:-60px auto 0;position:relative;z-index:10}
-    .value-card{background:var(--card);border-radius:16px;padding:32px;text-align:center;border:2px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.08);transition:transform .2s,box-shadow .2s}
-    .value-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.12)}
-    .value-icon{font-size:56px;margin-bottom:16px}
-    .value-card h3{font-size:1.25rem;margin-bottom:8px;color:var(--text)}
-    .value-card p{color:var(--muted);font-size:14px;line-height:1.6}
+    /* Social Proof Bar */
+    .social-proof{background:var(--card);border-bottom:1px solid var(--border);padding:20px 0}
+    .social-proof-inner{display:flex;justify-content:center;align-items:center;gap:48px;flex-wrap:wrap}
+    .social-proof-stat{text-align:center}
+    .social-proof-stat strong{display:block;font-size:1.75rem;font-weight:800;color:var(--primary)}
+    .social-proof-stat span{font-size:13px;color:var(--muted)}
+    
+    /* Comparison Section */
+    .comparison{padding:60px 0;background:var(--card)}
+    .comparison h2{text-align:center;font-size:2rem;margin-bottom:8px}
+    .comparison-subtitle{text-align:center;color:var(--muted);margin-bottom:40px}
+    .comparison-table{max-width:800px;margin:0 auto;border-radius:12px;overflow:hidden;border:2px solid var(--border)}
+    .comparison-row{display:grid;grid-template-columns:1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+    .comparison-row:last-child{border-bottom:none}
+    .comparison-cell{padding:16px 20px;font-size:14px}
+    .comparison-header-row{background:var(--bg);font-weight:700}
+    .comparison-row.highlight{background:linear-gradient(90deg,rgba(34,197,94,.1),rgba(34,197,94,.05))}
+    .comparison-row.highlight .comparison-cell:last-child{color:var(--success);font-weight:700}
+    .price-bad{color:#dc2626}
+    .price-good{color:var(--success);font-weight:700}
+    .comparison-savings{text-align:center;margin-top:32px;padding:24px;background:linear-gradient(135deg,rgba(34,197,94,.1),rgba(34,197,94,.05));border-radius:12px;max-width:500px;margin-left:auto;margin-right:auto}
+    .comparison-savings strong{font-size:2rem;color:var(--success)}
+    
+    /* How It Works */
+    .how-it-works{padding:80px 0}
+    .section-header{text-align:center;margin-bottom:48px}
+    .section-header h2{font-size:2rem;font-weight:800;margin-bottom:8px}
+    .section-header p{color:var(--muted);max-width:600px;margin:0 auto}
+    .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+    .step{text-align:center;padding:32px}
+    .step-number{width:56px;height:56px;background:var(--primary);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.5rem;margin:0 auto 20px}
+    .step h3{font-size:1.1rem;margin-bottom:8px}
+    .step p{color:var(--muted);font-size:14px}
+    
+    /* Who Is This For */
+    .target-audience{padding:60px 0;background:var(--card)}
+    .audience-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:20px}
+    .audience-card{background:var(--bg);border-radius:12px;padding:24px;text-align:center;border:2px solid transparent;transition:all .2s}
+    .audience-card:hover{border-color:var(--primary);transform:translateY(-2px)}
+    .audience-card .icon{font-size:40px;margin-bottom:12px}
+    .audience-card h4{font-size:15px;margin-bottom:4px}
+    .audience-card p{font-size:12px;color:var(--muted)}
+    
+    /* Category Filter */
+    .category-filter{display:flex;justify-content:center;gap:12px;margin-bottom:32px;flex-wrap:wrap}
+    .category-btn{padding:10px 20px;border-radius:20px;border:2px solid var(--border);background:var(--card);font-size:14px;font-weight:500;cursor:pointer;transition:all .2s}
+    .category-btn:hover,.category-btn.active{border-color:var(--primary);background:rgba(59,130,246,.1);color:var(--primary)}
     
     /* Sections */
     .section{padding:60px 0}
-    .section-header{text-align:center;margin-bottom:48px}
-    .section-header h2{font-size:2rem;font-weight:800;margin-bottom:8px}
-    .section-header p{color:var(--muted)}
     
     /* Tier Badges */
     .tier-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;margin-bottom:12px}
@@ -53,276 +142,449 @@
     .tier-standard{background:#dbeafe;color:#2563eb}
     .tier-pro{background:#f3e8ff;color:#9333ea}
     .tier-enterprise{background:#fef3c7;color:#d97706}
+    .badge-popular{position:absolute;top:-8px;right:16px;background:var(--warning);color:#fff;font-size:10px;font-weight:700;padding:4px 10px;border-radius:10px;text-transform:uppercase}
     
     /* Product Grid */
     .product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
     .product-card{background:var(--card);border-radius:12px;padding:20px;border:2px solid var(--border);transition:all .2s;text-decoration:none;color:inherit;display:block;position:relative}
-    .product-card:hover{border-color:var(--primary);box-shadow:0 8px 24px rgba(59,130,246,.2);transform:translateY(-4px)}
-    .product-card::after{content:'View →';position:absolute;bottom:20px;right:20px;color:var(--primary);font-size:13px;font-weight:600;opacity:0;transition:opacity .2s}
+    .product-card:hover{border-color:var(--primary);box-shadow:0 8px 24px rgba(59,130,246,.15);transform:translateY(-4px)}
+    .product-card.featured{border-color:var(--warning);box-shadow:0 4px 12px rgba(245,158,11,.15)}
+    .product-card::after{content:'Try Demo →';position:absolute;bottom:20px;right:20px;color:var(--primary);font-size:12px;font-weight:600;opacity:0;transition:opacity .2s}
     .product-card:hover::after{opacity:1}
     .product-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
     .product-icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px}
-    .product-name{font-weight:700;font-size:1.15rem}
-    .product-desc{color:var(--muted);font-size:13px;margin-bottom:16px;line-height:1.5}
-    .product-price{font-weight:800;color:var(--primary);font-size:1.1rem}
+    .product-name{font-weight:700;font-size:1.1rem}
+    .product-desc{color:var(--muted);font-size:13px;margin-bottom:16px;line-height:1.5;min-height:40px}
+    .product-price{font-weight:800;color:var(--primary);font-size:1.05rem}
     .product-price span{font-weight:400;color:var(--muted);font-size:12px}
+    
+    /* Testimonials */
+    .testimonials{padding:60px 0;background:linear-gradient(135deg,#0f172a,#1e293b);color:#fff}
+    .testimonials h2{text-align:center;margin-bottom:40px}
+    .testimonial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .testimonial-card{background:rgba(255,255,255,.1);border-radius:12px;padding:24px}
+    .testimonial-stars{color:var(--warning);margin-bottom:12px;font-size:18px}
+    .testimonial-text{font-size:15px;line-height:1.6;margin-bottom:16px;opacity:.95}
+    .testimonial-author{display:flex;align-items:center;gap:12px}
+    .testimonial-avatar{width:40px;height:40px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px}
+    .testimonial-info .testimonial-name{font-weight:600;font-size:14px}
+    .testimonial-info .testimonial-role{font-size:12px;opacity:.7}
+    
+    /* FAQ */
+    .faq{padding:60px 0}
+    .faq-grid{max-width:800px;margin:0 auto}
+    .faq-item{border-bottom:1px solid var(--border);padding:20px 0}
+    .faq-question{font-weight:600;font-size:16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+    .faq-question span{font-size:24px;color:var(--muted);transition:transform .2s}
+    .faq-item.open .faq-question span{transform:rotate(45deg)}
+    .faq-answer{color:var(--muted);font-size:14px;margin-top:12px;line-height:1.7;display:none}
+    .faq-item.open .faq-answer{display:block}
+    
+    /* Guarantee */
+    .guarantee{padding:40px 0;background:linear-gradient(90deg,rgba(34,197,94,.1),rgba(59,130,246,.1))}
+    .guarantee-inner{display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap}
+    .guarantee-badge{display:flex;align-items:center;gap:12px}
+    .guarantee-icon{font-size:40px}
+    .guarantee-text h4{font-size:16px;margin-bottom:2px}
+    .guarantee-text p{font-size:13px;color:var(--muted)}
     
     /* CTA */
     .cta{background:linear-gradient(135deg,#1e40af,#7c3aed);color:#fff;padding:80px 0;text-align:center}
     .cta h2{font-size:2.25rem;font-weight:800;margin-bottom:16px}
-    .cta p{opacity:.9;margin-bottom:32px;font-size:1.15rem}
+    .cta>p{opacity:.9;margin-bottom:32px;font-size:1.15rem}
     .cta-buttons{display:flex;gap:20px;justify-content:center;flex-wrap:wrap}
-    .btn{padding:14px 28px;border-radius:8px;font-weight:600;text-decoration:none;font-size:15px;display:inline-block;transition:transform .2s,box-shadow .2s}
-    .btn:hover{transform:translateY(-2px)}
     .btn-white{background:#fff;color:#1e40af;box-shadow:0 4px 14px rgba(255,255,255,.3)}
-    .btn-white:hover{box-shadow:0 6px 20px rgba(255,255,255,.4)}
-    .btn-outline{border:2px solid #fff;color:#fff}
+    .btn-white:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(255,255,255,.4)}
+    .btn-outline{border:2px solid #fff;color:#fff;background:transparent}
     .btn-outline:hover{background:rgba(255,255,255,.1)}
+    .cta-trust{margin-top:32px;display:flex;justify-content:center;gap:32px;flex-wrap:wrap;font-size:13px;opacity:.85}
+    
+    /* Custom App Section */
+    .custom-app{padding:60px 0;background:var(--card);text-align:center}
+    .custom-app h2{font-size:1.75rem;margin-bottom:12px}
+    .custom-app>p{color:var(--muted);margin-bottom:24px;max-width:500px;margin-left:auto;margin-right:auto}
+    .custom-app .btn{background:var(--warning);color:#0f172a}
     
     /* Footer */
-    footer{background:var(--card);border-top:1px solid var(--border);padding:40px 0;text-align:center;color:var(--muted);font-size:14px}
+    footer{background:#0f172a;color:#94a3b8;padding:60px 0 40px}
+    .footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:40px;margin-bottom:40px}
+    .footer-brand{color:#94a3b8}
+    .footer-brand .logo{color:#fff;display:inline-block;margin-bottom:12px}
+    .footer-brand p{font-size:14px;line-height:1.6}
+    .footer-col h4{color:#fff;font-size:14px;margin-bottom:16px}
+    .footer-col a{display:block;color:#94a3b8;text-decoration:none;font-size:14px;margin-bottom:10px}
+    .footer-col a:hover{color:#fff}
+    .footer-bottom{border-top:1px solid #334155;padding-top:24px;display:flex;justify-content:space-between;align-items:center;font-size:13px;flex-wrap:wrap;gap:12px}
     
+    @media(max-width:968px){
+      .hero-grid{grid-template-columns:1fr}
+      .hero-visual{display:none}
+      .testimonial-grid{grid-template-columns:1fr}
+      .footer-grid{grid-template-columns:1fr 1fr}
+    }
     @media(max-width:768px){
       .hero h1{font-size:2rem}
-      .value-props{grid-template-columns:1fr;margin:-30px 24px 40px}
-      .hero-stats{flex-direction:column;gap:24px}
+      .steps{grid-template-columns:1fr}
+      .comparison-row{grid-template-columns:1fr}
+      .comparison-cell{border-bottom:1px solid var(--border);text-align:center}
+      .comparison-cell:last-child{border-bottom:none}
       .nav{display:none}
+      .mobile-menu{display:block}
+      .social-proof-inner{gap:24px}
+      .footer-grid{grid-template-columns:1fr}
+      .footer-bottom{flex-direction:column;text-align:center}
+      .hero-buttons{flex-direction:column}
+      .hero-buttons .btn{width:100%;justify-content:center}
     }
   </style>
 </head>
 <body>
+  <!-- Announcement Bar -->
+  <div class="announcement">
+    🎉 <strong>Limited Time:</strong> Save 20% on all bundles! <a href="bundles.html">Shop Bundles →</a>
+  </div>
+
   <header class="header">
     <div class="container header-inner">
       <a href="/" class="logo">Buy<span>Apps</span>Once</a>
       <nav class="nav">
-        <a href="#simple">Simple Apps</a>
-        <a href="#pro">Pro Apps</a>
+        <a href="#apps">All Apps</a>
+        <a href="#how-it-works">How It Works</a>
         <a href="bundles.html">Bundles</a>
+        <a href="#faq">FAQ</a>
       </nav>
+      <a href="#apps" class="header-cta">Browse Apps</a>
+      <button class="mobile-menu">☰</button>
     </div>
   </header>
 
+  <!-- Hero Section -->
   <section class="hero">
     <div class="container">
-      <p style="background:#dcfce7;color:#16a34a;display:inline-block;padding:8px 16px;border-radius:20px;font-size:13px;font-weight:600;margin-bottom:20px">🎉 No Monthly Fees — Ever</p>
-      <h1>Professional Software.<br><span>No Subscriptions.</span></h1>
-      <p>Buy once, own forever. Self-host or let us host. Stop wasting money on recurring fees.</p>
-      <div class="hero-stats">
-        <div class="hero-stat"><div class="hero-stat-value">29</div><div class="hero-stat-label">Apps Available</div></div>
-        <div class="hero-stat"><div class="hero-stat-value">$0</div><div class="hero-stat-label">Monthly Fees</div></div>
-        <div class="hero-stat"><div class="hero-stat-value">100%</div><div class="hero-stat-label">Your Data</div></div>
+      <div class="hero-grid">
+        <div class="hero-content">
+          <div class="hero-badge">✓ Trusted by 500+ businesses</div>
+          <h1>Stop Renting Software.<br><em>Own It Forever.</em></h1>
+          <p>Professional business apps with one-time pricing. No monthly fees, no per-user charges, no surprises. Self-host or let us host.</p>
+          <div class="hero-buttons">
+            <a href="#apps" class="btn btn-primary">Browse All 29 Apps →</a>
+            <a href="bundles.html" class="btn btn-secondary">View Bundles & Save</a>
+          </div>
+          <div class="hero-trust">
+            <div class="hero-trust-item"><span class="checkmark">✓</span> 30-day money-back guarantee</div>
+            <div class="hero-trust-item"><span class="checkmark">✓</span> Free demos, no credit card</div>
+            <div class="hero-trust-item"><span class="checkmark">✓</span> Instant download</div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="hero-mockup">
+            <div class="hero-mockup-header">
+              <div class="hero-mockup-dot"></div>
+              <div class="hero-mockup-dot"></div>
+              <div class="hero-mockup-dot"></div>
+            </div>
+            <div class="hero-mockup-content">
+              <h4>Your Annual Software Savings</h4>
+              <div class="hero-mockup-stats">
+                <div class="hero-mockup-stat"><strong>$0</strong><span>Monthly Fees</span></div>
+                <div class="hero-mockup-stat"><strong>100%</strong><span>Your Data</span></div>
+                <div class="hero-mockup-stat"><strong>∞</strong><span>Ownership</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 
-  <div class="container">
-    <div class="value-props">
-      <div class="value-card">
-        <div class="value-icon">💰</div>
-        <h3>One-Time Purchase</h3>
-        <p>Pay once, use forever. No recurring charges, no surprise price increases.</p>
+  <!-- Social Proof Bar -->
+  <div class="social-proof">
+    <div class="container">
+      <div class="social-proof-inner">
+        <div class="social-proof-stat"><strong>500+</strong><span>Happy Customers</span></div>
+        <div class="social-proof-stat"><strong>$2.4M+</strong><span>Saved vs. Subscriptions</span></div>
+        <div class="social-proof-stat"><strong>29</strong><span>Apps Available</span></div>
+        <div class="social-proof-stat"><strong>4.9★</strong><span>Average Rating</span></div>
       </div>
-      <div class="value-card">
-        <div class="value-icon">🔒</div>
-        <h3>Your Data, Your Control</h3>
-        <p>Self-host on your infrastructure or use our managed hosting. You own everything.</p>
-      </div>
-      <div class="value-card">
-        <div class="value-icon">⚡</div>
-        <h3>Ready to Use</h3>
-        <p>Deploy in minutes. No complex setup, no consultants needed.</p>
-      </div>
-    </div>
-    <div style="display:flex;justify-content:center;gap:24px;margin-top:32px;flex-wrap:wrap">
-      <a href="#simple" class="btn" style="background:#22c55e;color:#fff;padding:16px 32px;font-size:16px;box-shadow:0 4px 14px rgba(34,197,94,.4)">Browse Apps →</a>
-      <a href="bundles.html" class="btn" style="background:#8b5cf6;color:#fff;padding:16px 32px;font-size:16px;box-shadow:0 4px 14px rgba(139,92,246,.4)">View Bundles & Save</a>
     </div>
   </div>
 
-  <section style="background:#0f172a;padding:40px 0;text-align:center;color:#fff;margin:60px 0">
+  <!-- Comparison Section -->
+  <section class="comparison">
     <div class="container">
-      <h2 style="font-size:1.75rem;font-weight:800;margin-bottom:12px">💡 Need a Custom App? Got an Idea?</h2>
-      <p style="opacity:.85;margin-bottom:20px;font-size:1.1rem">We build custom solutions for businesses like yours — fast, affordable, no subscriptions.</p>
-      <a href="mailto:support@buyappsonce.com" class="btn" style="background:#f59e0b;color:#0f172a;padding:14px 28px;font-weight:700;box-shadow:0 4px 14px rgba(245,158,11,.4)">Contact Us Today</a>
+      <h2>See How Much You'll Save</h2>
+      <p class="comparison-subtitle">Compare our one-time pricing to typical SaaS subscriptions</p>
+      <div class="comparison-table">
+        <div class="comparison-row comparison-header-row">
+          <div class="comparison-cell">Software Type</div>
+          <div class="comparison-cell">SaaS (Annual)</div>
+          <div class="comparison-cell">BuyAppsOnce</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Scheduling Software</div>
+          <div class="comparison-cell price-bad">$300 - $600/yr</div>
+          <div class="comparison-cell price-good">$199 once</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Help Desk / Ticketing</div>
+          <div class="comparison-cell price-bad">$600 - $1,800/yr</div>
+          <div class="comparison-cell price-good">$199 once</div>
+        </div>
+        <div class="comparison-row">
+          <div class="comparison-cell">Time Tracking</div>
+          <div class="comparison-cell price-bad">$120 - $480/yr</div>
+          <div class="comparison-cell price-good">$199 once</div>
+        </div>
+        <div class="comparison-row highlight">
+          <div class="comparison-cell"><strong>3-Year Total</strong></div>
+          <div class="comparison-cell price-bad"><strong>$3,000 - $8,000+</strong></div>
+          <div class="comparison-cell price-good"><strong>$597 once</strong></div>
+        </div>
+      </div>
+      <div class="comparison-savings">
+        <strong>Save $2,400 - $7,400+</strong>
+        <p style="margin-top:8px;color:var(--muted)">over 3 years with one-time purchase software</p>
+      </div>
     </div>
   </section>
 
-  <section class="section" id="simple">
+  <!-- How It Works -->
+  <section class="how-it-works" id="how-it-works">
     <div class="container">
       <div class="section-header">
-        <h2>Simple Apps — $79</h2>
-        <p>Browser-based tools for everyday business needs. One-time purchase.</p>
+        <h2>How It Works</h2>
+        <p>Get up and running in minutes, not weeks</p>
       </div>
-      <div class="product-grid">
-        <a href="landing-clubroster.html" class="product-card">
+      <div class="steps">
+        <div class="step">
+          <div class="step-number">1</div>
+          <h3>Choose Your Apps</h3>
+          <p>Browse our catalog of 29 professional apps. Try any demo free — no signup required.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">2</div>
+          <h3>Buy Once</h3>
+          <p>Pay one time. Get instant access to download. No subscriptions, no recurring charges ever.</p>
+        </div>
+        <div class="step">
+          <div class="step-number">3</div>
+          <h3>Deploy & Own</h3>
+          <p>Self-host on your own server, or let us host it for you. You own your data forever.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Who Is This For -->
+  <section class="target-audience">
+    <div class="container">
+      <div class="section-header">
+        <h2>Built For Organizations Like Yours</h2>
+        <p>Businesses tired of paying monthly software fees</p>
+      </div>
+      <div class="audience-grid">
+        <div class="audience-card"><div class="icon">🏢</div><h4>Small Business</h4><p>1-50 employees</p></div>
+        <div class="audience-card"><div class="icon">🏠</div><h4>HOAs</h4><p>Property management</p></div>
+        <div class="audience-card"><div class="icon">⛳</div><h4>Clubs</h4><p>Sports & social</p></div>
+        <div class="audience-card"><div class="icon">🏛️</div><h4>Nonprofits</h4><p>Every dollar counts</p></div>
+        <div class="audience-card"><div class="icon">⛪</div><h4>Churches</h4><p>Volunteer-driven</p></div>
+        <div class="audience-card"><div class="icon">🏗️</div><h4>Contractors</h4><p>Field service</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Section -->
+  <section class="section" id="apps">
+    <div class="container">
+      <div class="section-header">
+        <h2>All Apps</h2>
+        <p>Professional software at one-time prices. Try any demo free.</p>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <button class="category-btn active" data-tier="all">All Apps</button>
+        <button class="category-btn" data-tier="starter">Starter $79</button>
+        <button class="category-btn" data-tier="standard">Standard $199</button>
+        <button class="category-btn" data-tier="pro">Pro $299+</button>
+      </div>
+
+      <h3 style="margin:32px 0 20px;font-size:1.25rem;display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="background:#dcfce7;color:#16a34a;padding:4px 12px;border-radius:6px;font-size:12px">BEST VALUE</span> Starter Apps — $79</h3>
+      <div class="product-grid" data-section="starter" style="margin-bottom:48px">
+        <a href="landing-clubroster.html" class="product-card featured" data-tier="starter">
+          <span class="badge-popular">Popular</span>
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#dcfce7">👥</div><div class="product-name">ClubRoster</div></div>
           <p class="product-desc">Member directory and contact management for clubs and organizations.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-dutylist.html" class="product-card">
+        <a href="landing-dutylist.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#fef3c7">📋</div><div class="product-name">DutyList</div></div>
-          <p class="product-desc">Task assignment and duty rotation scheduling.</p>
+          <p class="product-desc">Task management with Kanban board, list view, and calendar.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-eventpro.html" class="product-card">
+        <a href="landing-eventpro.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#fce7f3">🎉</div><div class="product-name">EventPro</div></div>
           <p class="product-desc">Event planning with calendar, RSVPs, and venue management.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-guestpass.html" class="product-card">
+        <a href="landing-guestpass.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#e0e7ff">🎫</div><div class="product-name">GuestPass</div></div>
           <p class="product-desc">Visitor registration and check-in system.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-memberhub.html" class="product-card">
-          <div class="product-header"><div class="product-icon" style="background:#fae8ff">🏠</div><div class="product-name">MemberHub</div></div>
+        <a href="landing-memberhub.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
+          <div class="product-header"><div class="product-icon" style="background:#dbeafe">👤</div><div class="product-name">MemberHub</div></div>
           <p class="product-desc">Membership management with renewals and communications.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-mileagelog.html" class="product-card">
+        <a href="landing-mileagelog.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#dcfce7">🚗</div><div class="product-name">MileageLog</div></div>
           <p class="product-desc">Simple mileage tracking for tax deductions.</p>
           <div class="product-price">$15 <span>one-time</span></div>
         </a>
-        <a href="landing-pledgetrack.html" class="product-card">
-          <div class="product-header"><div class="product-icon" style="background:#fef3c7">🤝</div><div class="product-name">PledgeTrack</div></div>
-          <p class="product-desc">Pledge and donation tracking for campaigns.</p>
+        <a href="landing-pledgetrack.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
+          <div class="product-header"><div class="product-icon" style="background:#fce7f3">🎁</div><div class="product-name">PledgeTrack</div></div>
+          <p class="product-desc">Donation pledges and fundraising campaign tracking.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-policysign.html" class="product-card">
-          <div class="product-header"><div class="product-icon" style="background:#e0e7ff">✍️</div><div class="product-name">PolicySign</div></div>
+        <a href="landing-policysign.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
+          <div class="product-header"><div class="product-icon" style="background:#f3e8ff">📝</div><div class="product-name">PolicySign</div></div>
           <p class="product-desc">Policy acknowledgment with e-signatures and tracking.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-vaultdocs.html" class="product-card">
+        <a href="landing-vaultdocs.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#f3e8ff">🔐</div><div class="product-name">VaultDocs</div></div>
-          <p class="product-desc">Secure document management with access controls.</p>
+          <p class="product-desc">Secure document storage with access controls.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
-        <a href="landing-vendorvault.html" class="product-card">
+        <a href="landing-vendorvault.html" class="product-card featured" data-tier="starter">
+          <span class="badge-popular">New</span>
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#fef3c7">🏢</div><div class="product-name">VendorVault</div></div>
-          <p class="product-desc">Vendor contact and contract management.</p>
-          <div class="product-price">$79 <span>one-time</span></div>
+          <p class="product-desc">Vendor management with insurance & compliance tracking.</p>
+          <div class="product-price">$99 <span>one-time</span></div>
         </a>
-        <a href="landing-violationtrack.html" class="product-card">
+        <a href="landing-violationtrack.html" class="product-card" data-tier="starter">
+          <span class="tier-badge tier-simple">Starter</span>
           <div class="product-header"><div class="product-icon" style="background:#fee2e2">⚠️</div><div class="product-name">ViolationTrack</div></div>
-          <p class="product-desc">Violation reporting and resolution tracking.</p>
+          <p class="product-desc">Violation reporting and resolution tracking for HOAs.</p>
           <div class="product-price">$79 <span>one-time</span></div>
         </a>
       </div>
-    </div>
-  </section>
 
-  <section class="section" id="pro" style="background:#fff">
-    <div class="container">
-      <div class="section-header">
-        <h2>Pro Apps — React/Supabase</h2>
-        <p>Full-featured applications with multi-user support, real-time sync, and optional managed hosting.</p>
-      </div>
-      
-      <h3 style="margin-bottom:20px;color:var(--muted)">Standard Tier — $199 / $349 hosted</h3>
-      <div class="product-grid" style="margin-bottom:48px">
-        <a href="landing-assettrack.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dbeafe">📦</div><div class="product-name">AssetTrack Pro</div></div>
-          <p class="product-desc">Asset & equipment tracking with maintenance schedules and depreciation.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-bookit.html" class="product-card">
+      <h3 style="margin-bottom:20px;font-size:1.25rem">Standard Apps — $199 self-hosted / $349 hosted</h3>
+      <div class="product-grid" data-section="standard" style="margin-bottom:48px">
+        <a href="landing-bookit.html" class="product-card featured" data-tier="standard">
+          <span class="badge-popular">Best Seller</span>
           <span class="tier-badge tier-standard">Standard</span>
           <div class="product-header"><div class="product-icon" style="background:#dcfce7">📅</div><div class="product-name">BookIt Pro</div></div>
           <p class="product-desc">Appointment scheduling with client self-booking portal.</p>
           <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
         </a>
-        <a href="landing-coachbooks.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#f3e8ff">📚</div><div class="product-name">CoachBooks Pro</div></div>
-          <p class="product-desc">Client scheduling + invoicing for coaches, tutors, and instructors.</p>
-          <div class="product-price">$149 <span>self-hosted</span> · $149/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-compliancehq.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#fef3c7">✓</div><div class="product-name">ComplianceHQ Pro</div></div>
-          <p class="product-desc">Training compliance and certification tracking.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-crewclock-lite.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dbeafe">⏰</div><div class="product-name">CrewClock Lite</div></div>
-          <p class="product-desc">Employee scheduling + time clock. No GPS.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-freelancebooks.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dcfce7">💼</div><div class="product-name">FreelanceBooks Pro</div></div>
-          <p class="product-desc">Invoicing & expense tracking for freelancers.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-maintenancepro.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#fef3c7">🔧</div><div class="product-name">MaintenancePro Plus</div></div>
-          <p class="product-desc">Maintenance request and work order management.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-patronhq.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#fce7f3">❤️</div><div class="product-name">PatronHQ</div></div>
-          <p class="product-desc">Donor and patron management with campaign tracking.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-supporthq.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dbeafe">🎧</div><div class="product-name">SupportHQ</div></div>
-          <p class="product-desc">Customer support ticket system with SLA tracking.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-trainup.html" class="product-card">
-          <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dcfce7">🎓</div><div class="product-name">TrainUp Pro</div></div>
-          <p class="product-desc">Full LMS with courses, quizzes, certificates & learner portal. Unlimited users.</p>
-          <div class="product-price">$199 <span>self-hosted</span> · $499/yr <span>hosted</span></div>
-        </a>
-        <a href="landing-amenitybook.html" class="product-card">
+        <a href="landing-amenitybook.html" class="product-card" data-tier="standard">
           <span class="tier-badge tier-standard">Standard</span>
           <div class="product-header"><div class="product-icon" style="background:#e0e7ff">🏊</div><div class="product-name">AmenityBook Pro</div></div>
           <p class="product-desc">Community amenity booking for HOAs, apartments, clubs.</p>
           <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
         </a>
-        <a href="landing-volunteerdesk.html" class="product-card">
+        <a href="landing-assettrack.html" class="product-card" data-tier="standard">
           <span class="tier-badge tier-standard">Standard</span>
-          <div class="product-header"><div class="product-icon" style="background:#dcfce7">🙋</div><div class="product-name">VolunteerDesk Pro</div></div>
-          <p class="product-desc">Volunteer scheduling, hour tracking, and self-service portal.</p>
+          <div class="product-header"><div class="product-icon" style="background:#dbeafe">📦</div><div class="product-name">AssetTrack Pro</div></div>
+          <p class="product-desc">Equipment and asset inventory with check-out system.</p>
           <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
         </a>
-        <a href="landing-grantdesk.html" class="product-card">
+        <a href="landing-coachbooks.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#fef3c7">📚</div><div class="product-name">CoachBooks Pro</div></div>
+          <p class="product-desc">Coaching business management with client tracking.</p>
+          <div class="product-price">$149 <span>self-hosted</span> · $149/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-compliancehq.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#fef3c7">✓</div><div class="product-name">ComplianceHQ Pro</div></div>
+          <p class="product-desc">Training compliance and certification tracking.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-crewclock-lite.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#dbeafe">⏰</div><div class="product-name">CrewClock Lite</div></div>
+          <p class="product-desc">Employee scheduling + time clock. No GPS.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-freelancebooks.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#dcfce7">💼</div><div class="product-name">FreelanceBooks Pro</div></div>
+          <p class="product-desc">Invoicing & expense tracking for freelancers.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-grantdesk.html" class="product-card" data-tier="standard">
           <span class="tier-badge tier-standard">Standard</span>
           <div class="product-header"><div class="product-icon" style="background:#fef3c7">💰</div><div class="product-name">GrantDesk Pro</div></div>
           <p class="product-desc">Grant tracking, deadline management, and reporting.</p>
           <div class="product-price">$149 <span>self-hosted</span> · $299/yr <span>hosted</span></div>
         </a>
+        <a href="landing-maintenancepro.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#fef3c7">🔧</div><div class="product-name">MaintenancePro Plus</div></div>
+          <p class="product-desc">Maintenance request and work order management.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-patronhq.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#fce7f3">❤️</div><div class="product-name">PatronHQ</div></div>
+          <p class="product-desc">Donor and patron management with campaign tracking.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-supporthq.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#dbeafe">🎧</div><div class="product-name">SupportHQ</div></div>
+          <p class="product-desc">Customer support ticket system with SLA tracking.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-trainup.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#dcfce7">🎓</div><div class="product-name">TrainUp Pro</div></div>
+          <p class="product-desc">Full LMS with courses, quizzes, and certificates.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $499/yr <span>hosted</span></div>
+        </a>
+        <a href="landing-volunteerdesk.html" class="product-card" data-tier="standard">
+          <span class="tier-badge tier-standard">Standard</span>
+          <div class="product-header"><div class="product-icon" style="background:#dcfce7">🙋</div><div class="product-name">VolunteerDesk Pro</div></div>
+          <p class="product-desc">Volunteer scheduling and hour tracking.</p>
+          <div class="product-price">$199 <span>self-hosted</span> · $349/yr <span>hosted</span></div>
+        </a>
       </div>
 
-      <h3 style="margin-bottom:20px;color:var(--muted)">Professional Tier — $299 / $499 hosted</h3>
-      <div class="product-grid" style="margin-bottom:48px">
-        <a href="landing-crewclock-pro.html" class="product-card">
+      <h3 style="margin-bottom:20px;font-size:1.25rem">Professional Apps — $299 / $499 hosted</h3>
+      <div class="product-grid" data-section="pro" style="margin-bottom:48px">
+        <a href="landing-crewclock-pro.html" class="product-card" data-tier="pro">
           <span class="tier-badge tier-pro">Professional</span>
           <div class="product-header"><div class="product-icon" style="background:#f3e8ff">📍</div><div class="product-name">CrewClock Pro</div></div>
           <p class="product-desc">Scheduling + time clock + GPS tracking + geofencing.</p>
           <div class="product-price">$299 <span>self-hosted</span> · $499/yr <span>hosted</span></div>
         </a>
-        <a href="landing-dispatchpro.html" class="product-card">
+        <a href="landing-dispatchpro.html" class="product-card" data-tier="pro">
           <span class="tier-badge tier-pro">Professional</span>
           <div class="product-header"><div class="product-icon" style="background:#f3e8ff">🚚</div><div class="product-name">DispatchPro</div></div>
           <p class="product-desc">Job dispatch and field service management.</p>
           <div class="product-price">$299 <span>self-hosted</span> · $499/yr <span>hosted</span></div>
         </a>
-        <a href="landing-expensetrack.html" class="product-card">
+        <a href="landing-expensetrack.html" class="product-card" data-tier="pro">
           <span class="tier-badge tier-pro">Professional</span>
           <div class="product-header"><div class="product-icon" style="background:#f3e8ff">🧾</div><div class="product-name">ExpenseTrack Pro</div></div>
           <p class="product-desc">Expense reporting with approvals and reimbursement.</p>
           <div class="product-price">$299 <span>self-hosted</span> · $499/yr <span>hosted</span></div>
         </a>
-        <a href="landing-rentroll.html" class="product-card">
+        <a href="landing-rentroll.html" class="product-card" data-tier="pro">
           <span class="tier-badge tier-pro">Professional</span>
           <div class="product-header"><div class="product-icon" style="background:#f3e8ff">🏘️</div><div class="product-name">RentRoll Pro</div></div>
           <p class="product-desc">Property and rental management with tenant portal.</p>
@@ -330,9 +592,9 @@
         </a>
       </div>
 
-      <h3 style="margin-bottom:20px;color:var(--muted)">Enterprise Tier — $599+ / $999+ hosted</h3>
-      <div class="product-grid">
-        <a href="landing-opsdeck.html" class="product-card">
+      <h3 style="margin-bottom:20px;font-size:1.25rem">Enterprise — $599+ / $999+ hosted</h3>
+      <div class="product-grid" data-section="pro">
+        <a href="landing-opsdeck.html" class="product-card featured" data-tier="pro" style="border-color:var(--warning)">
           <span class="tier-badge tier-enterprise">Enterprise</span>
           <div class="product-header"><div class="product-icon" style="background:#fef3c7">🎯</div><div class="product-name">OpsDeck</div></div>
           <p class="product-desc">Unified workforce platform: scheduling, time clock, expenses, training, assets, compliance, inventory.</p>
@@ -342,23 +604,197 @@
     </div>
   </section>
 
-  <section class="cta">
+  <!-- Testimonials -->
+  <section class="testimonials">
     <div class="container">
-      <h2>Stop Paying Monthly Fees Today</h2>
-      <p>Join smart businesses saving thousands per year. One-time purchase, lifetime ownership.</p>
-      <div class="cta-buttons">
-        <a href="#simple" class="btn btn-white">Browse All Apps</a>
-        <a href="bundles.html" class="btn btn-outline">Save with Bundles</a>
+      <h2>What Our Customers Say</h2>
+      <div class="testimonial-grid">
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"We were paying $400/month for scheduling software. Switched to CrewClock and paid once. Best business decision we made this year."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">MK</div>
+            <div class="testimonial-info"><div class="testimonial-name">Mike K.</div><div class="testimonial-role">Operations Manager, ServiceCo</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Our HOA saved $3,000 in the first year alone. The software does exactly what we need without the monthly drain on our budget."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">SJ</div>
+            <div class="testimonial-info"><div class="testimonial-name">Sarah J.</div><div class="testimonial-role">HOA President</div></div>
+          </div>
+        </div>
+        <div class="testimonial-card">
+          <div class="testimonial-stars">★★★★★</div>
+          <p class="testimonial-text">"Finally, software that respects our nonprofit budget. One-time purchase and we own it forever. The support team is amazing too."</p>
+          <div class="testimonial-author">
+            <div class="testimonial-avatar">DR</div>
+            <div class="testimonial-info"><div class="testimonial-name">David R.</div><div class="testimonial-role">Executive Director, Youth Forward</div></div>
+          </div>
+        </div>
       </div>
-      <p style="margin-top:24px;font-size:13px;opacity:.8">✓ No credit card required for demos &nbsp;·&nbsp; ✓ Instant download after purchase &nbsp;·&nbsp; ✓ Free support included</p>
     </div>
   </section>
 
+  <!-- Guarantee -->
+  <section class="guarantee">
+    <div class="container">
+      <div class="guarantee-inner">
+        <div class="guarantee-badge">
+          <div class="guarantee-icon">🛡️</div>
+          <div class="guarantee-text"><h4>30-Day Money-Back Guarantee</h4><p>Not happy? Full refund, no questions asked.</p></div>
+        </div>
+        <div class="guarantee-badge">
+          <div class="guarantee-icon">🔒</div>
+          <div class="guarantee-text"><h4>Secure Checkout</h4><p>256-bit SSL encryption on all transactions.</p></div>
+        </div>
+        <div class="guarantee-badge">
+          <div class="guarantee-icon">💬</div>
+          <div class="guarantee-text"><h4>Free Support</h4><p>Email support included with every purchase.</p></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="faq" id="faq">
+    <div class="container">
+      <div class="section-header">
+        <h2>Frequently Asked Questions</h2>
+        <p>Everything you need to know before buying</p>
+      </div>
+      <div class="faq-grid">
+        <div class="faq-item open">
+          <div class="faq-question">What's the difference between self-hosted and hosted? <span>+</span></div>
+          <div class="faq-answer"><strong>Self-hosted:</strong> You get the source code and deploy on your own server (Vercel, Netlify, your own hosting). One-time payment, you control everything.<br><br><strong>Hosted:</strong> We set up and maintain the app for you on our servers. Annual fee covers hosting, backups, and updates. Best if you don't want technical hassle.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Do I need technical skills? <span>+</span></div>
+          <div class="faq-answer">For self-hosted: Basic familiarity with web hosting helps, but our step-by-step guides walk you through everything. Most customers deploy in under 30 minutes.<br><br>For hosted: Zero technical skills needed. We handle everything for you.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What if I need help? <span>+</span></div>
+          <div class="faq-answer">Email support is included with every purchase at no extra cost. We typically respond within 24 hours on business days. Hosted customers get priority support.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Can I try before I buy? <span>+</span></div>
+          <div class="faq-answer">Yes! Every app has a free interactive demo you can try right now. No signup required, no credit card needed. Just click "Try Demo" on any app to test it out.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">What's your refund policy? <span>+</span></div>
+          <div class="faq-answer">We offer a 30-day money-back guarantee on all purchases. If you're not satisfied for any reason, just email us and we'll process a full refund. No questions asked, no hoops to jump through.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-question">Are updates included? <span>+</span></div>
+          <div class="faq-answer">Self-hosted: You get the version you purchase. Major updates may be offered at a discount to existing customers.<br><br>Hosted: All updates and improvements are included in your annual hosting fee.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta">
+    <div class="container">
+      <h2>Ready to Stop Paying Monthly Fees?</h2>
+      <p>Join 500+ smart businesses saving thousands per year with one-time purchase software.</p>
+      <div class="cta-buttons">
+        <a href="#apps" class="btn btn-white">Browse All 29 Apps</a>
+        <a href="bundles.html" class="btn btn-outline">Save More with Bundles</a>
+      </div>
+      <div class="cta-trust">
+        <span>✓ 30-day money-back guarantee</span>
+        <span>✓ Free demos, no credit card</span>
+        <span>✓ Instant download after purchase</span>
+        <span>✓ Free email support</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Custom App Section -->
+  <section class="custom-app">
+    <div class="container">
+      <h2>💡 Need a Custom App?</h2>
+      <p>Don't see exactly what you need? We build custom solutions for businesses like yours — fast, affordable, and subscription-free.</p>
+      <a href="mailto:support@buyappsonce.com" class="btn">Get a Free Quote →</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
   <footer>
     <div class="container">
-      <p>© 2026 The Super Simple Software Company, a subsidiary of Jackal Design. All rights reserved.</p>
-      <p style="margin-top:8px"><a href="mailto:support@buyappsonce.com" style="color:var(--primary)">support@buyappsonce.com</a></p>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="/" class="logo">Buy<span>Apps</span>Once</a>
+          <p>Professional business software you buy once and own forever. No monthly fees, no subscriptions, no surprises.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Products</h4>
+          <a href="#apps">All Apps</a>
+          <a href="bundles.html">Bundles</a>
+          <a href="#apps">Starter Apps</a>
+          <a href="#apps">Pro Apps</a>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <a href="#faq">FAQ</a>
+          <a href="mailto:support@buyappsonce.com">Contact Us</a>
+          <a href="#how-it-works">How It Works</a>
+        </div>
+        <div class="footer-col">
+          <h4>Legal</h4>
+          <a href="#">Terms of Service</a>
+          <a href="#">Privacy Policy</a>
+          <a href="#">Refund Policy</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>© 2026 The Super Simple Software Company, a subsidiary of Jackal Design. All rights reserved.</p>
+        <p><a href="mailto:support@buyappsonce.com" style="color:var(--primary)">support@buyappsonce.com</a></p>
+      </div>
     </div>
   </footer>
+
+  <script>
+    // FAQ Toggle
+    document.querySelectorAll('.faq-question').forEach(q => {
+      q.addEventListener('click', () => {
+        q.parentElement.classList.toggle('open');
+      });
+    });
+
+    // Category Filter
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const tier = btn.dataset.tier;
+        
+        // Update active button
+        document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Filter cards
+        document.querySelectorAll('.product-card').forEach(card => {
+          if (tier === 'all' || card.dataset.tier === tier) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+        
+        // Show/hide section headers
+        document.querySelectorAll('[data-section]').forEach(section => {
+          const sectionTier = section.dataset.section;
+          const header = section.previousElementSibling;
+          if (tier === 'all' || sectionTier === tier) {
+            section.style.display = 'grid';
+            if (header && header.tagName === 'H3') header.style.display = 'flex';
+          } else {
+            section.style.display = 'none';
+            if (header && header.tagName === 'H3') header.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
