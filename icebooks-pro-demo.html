@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceBooks Pro - Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f8fafc; min-height: 100vh; }
+    .app { display: flex; min-height: 100vh; }
+    .sidebar { width: 220px; background: #fff; border-right: 1px solid #e2e8f0; padding: 16px; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+    .logo { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+    .logo-icon { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+    .logo-text { font-weight: 700; font-size: 18px; }
+    .badge { background: #8b5cf6; color: #fff; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 600; }
+    .role-switch { background: #f1f5f9; border-radius: 8px; padding: 4px; display: flex; gap: 4px; margin-bottom: 16px; }
+    .role-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; background: transparent; color: #64748b; }
+    .role-btn.active { background: #fff; color: #3b82f6; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .user-info { padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 16px; }
+    .user-name { font-weight: 600; font-size: 14px; }
+    .user-role { font-size: 12px; color: #64748b; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; color: #64748b; font-size: 14px; margin-bottom: 4px; transition: all 0.2s; }
+    .nav-item:hover { background: #f1f5f9; }
+    .nav-item.active { background: rgba(59,130,246,0.1); color: #3b82f6; font-weight: 500; }
+    .main { flex: 1; margin-left: 220px; padding: 24px; }
+    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .title { font-size: 24px; font-weight: 700; }
+    .nav-ctrl { display: flex; align-items: center; gap: 12px; }
+    .nav-btn { background: #fff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 14px; cursor: pointer; font-size: 14px; }
+    .nav-btn:hover { background: #f8fafc; }
+    .month-label { font-weight: 600; min-width: 160px; text-align: center; }
+    .btn { padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; font-size: 14px; transition: all 0.2s; }
+    .btn-primary { background: #3b82f6; color: #fff; }
+    .btn-primary:hover { background: #2563eb; }
+    .btn-secondary { background: #fff; border: 1px solid #e2e8f0; }
+    .btn-secondary:hover { background: #f8fafc; }
+    .btn-sm { padding: 6px 12px; font-size: 12px; border-radius: 6px; }
+    .btn-danger { background: #fef2f2; border-color: #fecaca; color: #ef4444; }
+    .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
+    .stat-card { background: #fff; border-radius: 12px; padding: 20px; border: 1px solid #e2e8f0; }
+    .stat-label { font-size: 12px; color: #64748b; margin-bottom: 4px; }
+    .stat-value { font-size: 28px; font-weight: 700; }
+    .stat-meta { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border-radius: 12px; overflow: hidden; }
+    .cal-head { background: #3b82f6; color: #fff; padding: 12px; text-align: center; font-weight: 600; font-size: 12px; }
+    .cal-day { background: #fff; min-height: 90px; padding: 8px; cursor: pointer; transition: background 0.2s; }
+    .cal-day:hover { background: #f8fafc; }
+    .cal-day.other { background: #f8fafc; color: #94a3b8; }
+    .cal-day.today { background: #eff6ff; }
+    .cal-day.has-booking { background: #fef3c7; }
+    .cal-date { font-weight: 600; margin-bottom: 4px; font-size: 14px; }
+    .cal-event { padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-bottom: 2px; background: #f1f5f9; border-left: 3px solid #3b82f6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cal-event.private { border-left-color: #3b82f6; }
+    .cal-event.shared { border-left-color: #8b5cf6; }
+    .cal-event.group { border-left-color: #10b981; }
+    .cal-more { font-size: 10px; color: #64748b; }
+    .day-detail { margin-top: 24px; background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .lesson-card { padding: 16px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 12px; border-left: 4px solid #3b82f6; }
+    .lesson-head { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; flex-wrap: wrap; }
+    .lesson-time { font-weight: 600; }
+    .lesson-venue { font-size: 13px; color: #64748b; margin-bottom: 4px; }
+    .lesson-spots { font-size: 12px; color: #64748b; }
+    .lesson-actions { margin-top: 12px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .type-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+    .draft-badge { background: #fef3c7; color: #f59e0b; padding: 2px 8px; border-radius: 4px; font-size: 11px; }
+    .full-badge { background: #fee2e2; color: #ef4444; padding: 4px 12px; border-radius: 4px; font-size: 12px; }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+    .chip { background: #f1f5f9; padding: 4px 10px; border-radius: 20px; font-size: 12px; }
+    .select { padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0; font-size: 13px; }
+    .empty { text-align: center; color: #64748b; padding: 40px 20px; }
+    table { width: 100%; border-collapse: collapse; }
+    th { padding: 12px; text-align: left; border-bottom: 1px solid #e2e8f0; font-size: 11px; text-transform: uppercase; color: #64748b; font-weight: 600; }
+    td { padding: 12px; border-bottom: 1px solid #e2e8f0; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+    .student-card { background: #fff; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; }
+    .student-name { font-weight: 600; font-size: 16px; margin-bottom: 8px; }
+    .student-meta { font-size: 13px; color: #64748b; }
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    .modal { background: #fff; border-radius: 16px; padding: 24px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; }
+    .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .modal-title { font-size: 18px; font-weight: 700; }
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: #64748b; }
+    .modal-actions { display: flex; gap: 12px; margin-top: 20px; justify-content: flex-end; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
+    .field input, .field select, .field textarea { width: 100%; padding: 10px 12px; border-radius: 8px; border: 1px solid #e2e8f0; font-size: 14px; font-family: inherit; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .check { margin-top: 12px; font-size: 14px; display: flex; align-items: center; gap: 8px; }
+    .toast { position: fixed; bottom: 20px; right: 20px; background: #333; color: #fff; padding: 12px 20px; border-radius: 8px; z-index: 200; animation: slideIn 0.3s; }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    .hidden { display: none !important; }
+    .demo-banner { background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: #fff; padding: 8px 16px; text-align: center; font-size: 13px; position: fixed; top: 0; left: 0; right: 0; z-index: 300; }
+    .demo-banner a { color: #fff; font-weight: 600; }
+    .app { margin-top: 36px; }
+    .sidebar { top: 36px; height: calc(100vh - 36px); }
+  </style>
+</head>
+<body>
+  <div class="demo-banner">🎯 Demo Mode - Data stored in browser | <a href="https://buyappsonce.com/landing-icebooks.html">Get IceBooks Pro →</a></div>
+  
+  <div class="app">
+    <nav class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">⛸️</span>
+        <span class="logo-text">IceBooks</span>
+        <span class="badge">PRO</span>
+      </div>
+      
+      <div class="role-switch">
+        <button class="role-btn active" onclick="switchRole('coach')">👨‍🏫 Coach</button>
+        <button class="role-btn" onclick="switchRole('parent')">👤 Parent</button>
+      </div>
+      
+      <div class="user-info">
+        <div class="user-name" id="userName">Sarah Mitchell</div>
+        <div class="user-role" id="userRoleDisplay">👨‍🏫 Figure Skating Coach</div>
+      </div>
+      
+      <div id="coachNav">
+        <div class="nav-item active" onclick="showTab('calendar')">📅 Calendar</div>
+        <div class="nav-item" onclick="showTab('clients')">👥 Clients</div>
+        <div class="nav-item" onclick="showTab('students')">⛸️ Students</div>
+        <div class="nav-item" onclick="showTab('dashboard')">💰 Dashboard</div>
+        <div class="nav-item" onclick="showTab('expenses')">💳 Expenses</div>
+        <div class="nav-item" onclick="showTab('mileage')">🚗 Mileage</div>
+      </div>
+      
+      <div id="parentNav" class="hidden">
+        <div class="nav-item active" onclick="showTab('calendar')">📅 Book Lessons</div>
+        <div class="nav-item" onclick="showTab('mylessons')">📋 My Schedule</div>
+        <div class="nav-item" onclick="showTab('mystudents')">⛸️ My Skaters</div>
+      </div>
+    </nav>
+    
+    <main class="main" id="mainContent"></main>
+  </div>
+  
+  <div class="overlay hidden" id="modal" onclick="closeModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">Modal</h2>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+  
+  <div class="toast hidden" id="toast"></div>
+
+<script>
+const LESSON_TYPES = [
+  { id: 'private', name: 'Private', icon: '👤', color: '#3b82f6', max: 1 },
+  { id: 'shared', name: 'Shared', icon: '👥', color: '#8b5cf6', max: 2 },
+  { id: 'group', name: 'Group', icon: '👨‍👩‍👧‍👦', color: '#10b981', max: 8 }
+];
+
+const VENUES = [
+  { id: 1, name: 'Ice Palace', address: '123 Skating Blvd' },
+  { id: 2, name: 'Frosty Arena', address: '456 Winter Lane' },
+  { id: 3, name: 'Community Rink', address: '789 Main St' }
+];
+
+const EXPENSE_CATEGORIES = ['Ice Time', 'Equipment', 'Music', 'Costumes', 'Travel', 'Coaching Education', 'Other'];
+
+let state = {
+  role: 'coach',
+  tab: 'calendar',
+  currentMonth: new Date(),
+  selectedDate: null,
+  clients: [],
+  students: [],
+  lessons: [],
+  expenses: [],
+  mileage: [],
+  editingLesson: null,
+  editingClient: null,
+  editingStudent: null
+};
+
+function init() {
+  loadData();
+  if (state.clients.length === 0) loadSampleData();
+  render();
+}
+
+function loadData() {
+  state.clients = JSON.parse(localStorage.getItem('cb_clients') || '[]');
+  state.students = JSON.parse(localStorage.getItem('cb_students') || '[]');
+  state.lessons = JSON.parse(localStorage.getItem('cb_lessons') || '[]');
+  state.expenses = JSON.parse(localStorage.getItem('cb_expenses') || '[]');
+  state.mileage = JSON.parse(localStorage.getItem('cb_mileage') || '[]');
+}
+
+function saveData() {
+  localStorage.setItem('cb_clients', JSON.stringify(state.clients));
+  localStorage.setItem('cb_students', JSON.stringify(state.students));
+  localStorage.setItem('cb_lessons', JSON.stringify(state.lessons));
+  localStorage.setItem('cb_expenses', JSON.stringify(state.expenses));
+  localStorage.setItem('cb_mileage', JSON.stringify(state.mileage));
+}
+
+function loadSampleData() {
+  state.clients = [
+    { id: 1, name: 'Jennifer Adams', email: 'jennifer@email.com', phone: '555-0101', notes: '' },
+    { id: 2, name: 'Michael Chen', email: 'mchen@email.com', phone: '555-0102', notes: 'Prefers morning lessons' },
+    { id: 3, name: 'Lisa Rodriguez', email: 'lisa.r@email.com', phone: '555-0103', notes: '' }
+  ];
+  state.students = [
+    { id: 1, clientId: 1, name: 'Emma Adams', level: 'Pre-Preliminary', birthdate: '2015-03-15' },
+    { id: 2, clientId: 1, name: 'Jake Adams', level: 'Basic Skills', birthdate: '2017-08-22' },
+    { id: 3, clientId: 2, name: 'Sophie Chen', level: 'Intermediate', birthdate: '2013-01-10' },
+    { id: 4, clientId: 3, name: 'Olivia Rodriguez', level: 'Juvenile', birthdate: '2012-06-05' }
+  ];
+  
+  const today = new Date();
+  const lessons = [];
+  for (let i = -3; i < 14; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() + i);
+    if (d.getDay() === 0) continue;
+    
+    const dateStr = d.toISOString().split('T')[0];
+    if (Math.random() > 0.4) {
+      lessons.push({
+        id: lessons.length + 1,
+        date: dateStr,
+        startTime: '09:00',
+        endTime: '09:30',
+        type: 'private',
+        venueId: 1,
+        maxStudents: 1,
+        studentIds: i < 0 || Math.random() > 0.5 ? [1] : [],
+        isPublished: true,
+        notes: ''
+      });
+    }
+    if (Math.random() > 0.6) {
+      lessons.push({
+        id: lessons.length + 1,
+        date: dateStr,
+        startTime: '10:00',
+        endTime: '10:30',
+        type: 'shared',
+        venueId: 1,
+        maxStudents: 2,
+        studentIds: i < 0 ? [3, 4] : Math.random() > 0.5 ? [3] : [],
+        isPublished: true,
+        notes: ''
+      });
+    }
+    if (d.getDay() === 6 && Math.random() > 0.3) {
+      lessons.push({
+        id: lessons.length + 1,
+        date: dateStr,
+        startTime: '14:00',
+        endTime: '15:00',
+        type: 'group',
+        venueId: 2,
+        maxStudents: 6,
+        studentIds: i < 0 ? [1, 2, 3, 4] : [2],
+        isPublished: true,
+        notes: 'Group choreography session'
+      });
+    }
+  }
+  state.lessons = lessons;
+  
+  state.expenses = [
+    { id: 1, date: getDateOffset(-5), category: 'Ice Time', description: 'Monthly rink rental', amount: 450 },
+    { id: 2, date: getDateOffset(-3), category: 'Music', description: 'Competition music editing', amount: 75 },
+    { id: 3, date: getDateOffset(-1), category: 'Equipment', description: 'New blade guards', amount: 35 }
+  ];
+  
+  state.mileage = [
+    { id: 1, date: getDateOffset(-5), venueId: 1, miles: 24, notes: '' },
+    { id: 2, date: getDateOffset(-3), venueId: 2, miles: 18, notes: '' },
+    { id: 3, date: getDateOffset(-1), venueId: 1, miles: 24, notes: '' }
+  ];
+  
+  saveData();
+}
+
+function getDateOffset(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  return d.toISOString().split('T')[0];
+}
+
+function switchRole(role) {
+  state.role = role;
+  state.tab = 'calendar';
+  state.selectedDate = null;
+  document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.role-btn:${role === 'coach' ? 'first' : 'last'}-child`).classList.add('active');
+  document.getElementById('coachNav').classList.toggle('hidden', role !== 'coach');
+  document.getElementById('parentNav').classList.toggle('hidden', role !== 'parent');
+  document.getElementById('userName').textContent = role === 'coach' ? 'Sarah Mitchell' : 'Jennifer Adams';
+  document.getElementById('userRoleDisplay').textContent = role === 'coach' ? '👨‍🏫 Figure Skating Coach' : '👤 Parent';
+  updateNavActive();
+  render();
+}
+
+function showTab(tab) {
+  state.tab = tab;
+  state.selectedDate = null;
+  updateNavActive();
+  render();
+}
+
+function updateNavActive() {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const navId = state.role === 'coach' ? 'coachNav' : 'parentNav';
+  const items = document.querySelectorAll(`#${navId} .nav-item`);
+  const tabs = state.role === 'coach' 
+    ? ['calendar', 'clients', 'students', 'dashboard', 'expenses', 'mileage']
+    : ['calendar', 'mylessons', 'mystudents'];
+  const idx = tabs.indexOf(state.tab);
+  if (idx >= 0 && items[idx]) items[idx].classList.add('active');
+}
+
+function render() {
+  const main = document.getElementById('mainContent');
+  const isCoach = state.role === 'coach';
+  
+  if (state.tab === 'calendar') {
+    main.innerHTML = renderCalendar(isCoach);
+  } else if (state.tab === 'clients' && isCoach) {
+    main.innerHTML = renderClients();
+  } else if (state.tab === 'students' && isCoach) {
+    main.innerHTML = renderStudents();
+  } else if (state.tab === 'dashboard' && isCoach) {
+    main.innerHTML = renderDashboard();
+  } else if (state.tab === 'expenses' && isCoach) {
+    main.innerHTML = renderExpenses();
+  } else if (state.tab === 'mileage' && isCoach) {
+    main.innerHTML = renderMileage();
+  } else if (state.tab === 'mylessons' && !isCoach) {
+    main.innerHTML = renderMyLessons();
+  } else if (state.tab === 'mystudents' && !isCoach) {
+    main.innerHTML = renderMyStudents();
+  }
+}
+
+function renderCalendar(isCoach) {
+  const days = getDays(state.currentMonth);
+  const monthLabel = state.currentMonth.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  
+  let html = `
+    <div class="header">
+      <h1 class="title">${isCoach ? 'Calendar' : 'Book Lessons'}</h1>
+      <div class="nav-ctrl">
+        <button class="nav-btn" onclick="changeMonth(-1)">◀</button>
+        <span class="month-label">${monthLabel}</span>
+        <button class="nav-btn" onclick="changeMonth(1)">▶</button>
+      </div>
+      ${isCoach ? '<button class="btn btn-primary" onclick="openLessonModal()">+ Add Lesson</button>' : ''}
+    </div>
+    <div class="calendar">
+      ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => `<div class="cal-head">${d}</div>`).join('')}
+      ${days.map(day => {
+        const dateStr = day.d.toISOString().split('T')[0];
+        const lessons = getLessonsForDate(dateStr);
+        const today = new Date().toISOString().split('T')[0];
+        const myStudentIds = isCoach ? [] : state.students.filter(s => s.clientId === 1).map(s => s.id);
+        const hasMyBooking = lessons.some(l => l.studentIds.some(id => myStudentIds.includes(id)));
+        let classes = 'cal-day';
+        if (day.other) classes += ' other';
+        if (dateStr === today) classes += ' today';
+        if (hasMyBooking) classes += ' has-booking';
+        
+        const visibleLessons = lessons.filter(l => isCoach || l.isPublished || l.studentIds.some(id => myStudentIds.includes(id)));
+        
+        return `
+          <div class="${classes}" onclick="selectDate('${dateStr}')">
+            <div class="cal-date">${day.d.getDate()}</div>
+            ${visibleLessons.slice(0, 3).map(l => {
+              const t = LESSON_TYPES.find(x => x.id === l.type);
+              return `<div class="cal-event ${l.type}">${formatTime(l.startTime)} ${t.icon}</div>`;
+            }).join('')}
+            ${visibleLessons.length > 3 ? `<div class="cal-more">+${visibleLessons.length - 3} more</div>` : ''}
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+  
+  if (state.selectedDate) {
+    html += renderDayDetail(isCoach);
+  }
+  
+  return html;
+}
+
+function renderDayDetail(isCoach) {
+  const lessons = getLessonsForDate(state.selectedDate);
+  const dateObj = new Date(state.selectedDate + 'T00:00');
+  const dateLabel = dateObj.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+  const myStudentIds = isCoach ? [] : state.students.filter(s => s.clientId === 1).map(s => s.id);
+  
+  const visibleLessons = lessons.filter(l => isCoach || l.isPublished || l.studentIds.some(id => myStudentIds.includes(id)));
+  
+  return `
+    <div class="day-detail">
+      <div class="day-header">
+        <h3>${dateLabel}</h3>
+        <button class="close-btn" onclick="state.selectedDate=null;render()">×</button>
+      </div>
+      ${visibleLessons.length === 0 ? '<p class="empty">No lessons scheduled</p>' : visibleLessons.map(l => {
+        const t = LESSON_TYPES.find(x => x.id === l.type);
+        const v = VENUES.find(x => x.id === l.venueId);
+        const booked = l.studentIds.map(id => state.students.find(s => s.id === id)).filter(Boolean);
+        const isFull = booked.length >= l.maxStudents;
+        const isMine = booked.some(s => myStudentIds.includes(s.id));
+        const canBook = !isCoach && l.isPublished && !isFull && !isMine && myStudentIds.length > 0;
+        
+        return `
+          <div class="lesson-card" style="border-left-color: ${t.color}">
+            <div class="lesson-head">
+              <span class="lesson-time">${formatTime(l.startTime)} - ${formatTime(l.endTime)}</span>
+              <span class="type-badge" style="background: ${t.color}22; color: ${t.color}">${t.icon} ${t.name}</span>
+              ${!l.isPublished ? '<span class="draft-badge">Draft</span>' : ''}
+            </div>
+            ${v ? `<div class="lesson-venue">📍 ${v.name}</div>` : ''}
+            <div class="lesson-spots">${booked.length}/${l.maxStudents} spots filled</div>
+            ${isCoach && booked.length > 0 ? `<div class="chips">${booked.map(s => `<span class="chip">${s.name}</span>`).join('')}</div>` : ''}
+            <div class="lesson-actions">
+              ${isCoach ? `
+                <button class="btn btn-sm btn-secondary" onclick="togglePublish(${l.id})">${l.isPublished ? '👁️ Unpublish' : '📢 Publish'}</button>
+                <button class="btn btn-sm btn-secondary" onclick="editLesson(${l.id})">✏️ Edit</button>
+                <button class="btn btn-sm btn-danger" onclick="deleteLesson(${l.id})">🗑️</button>
+              ` : isMine ? `
+                <button class="btn btn-sm btn-danger" onclick="cancelBooking(${l.id})">Cancel Booking</button>
+              ` : canBook ? `
+                <select class="select" onchange="bookLesson(${l.id}, this.value)">
+                  <option value="">Book for...</option>
+                  ${myStudentIds.filter(id => !l.studentIds.includes(id)).map(id => {
+                    const s = state.students.find(x => x.id === id);
+                    return `<option value="${id}">${s.name}</option>`;
+                  }).join('')}
+                </select>
+              ` : isFull ? '<span class="full-badge">Full</span>' : ''}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  `;
+}
+
+function renderClients() {
+  return `
+    <div class="header">
+      <h1 class="title">Clients</h1>
+      <button class="btn btn-primary" onclick="openClientModal()">+ Add Client</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Students</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${state.clients.map(c => {
+            const studentNames = state.students.filter(s => s.clientId === c.id).map(s => s.name).join(', ');
+            return `<tr>
+              <td><strong>${c.name}</strong></td>
+              <td>${c.email || '-'}</td>
+              <td>${c.phone || '-'}</td>
+              <td>${studentNames || '-'}</td>
+              <td><button class="btn btn-sm btn-secondary" onclick="editClient(${c.id})">Edit</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderStudents() {
+  return `
+    <div class="header">
+      <h1 class="title">Students</h1>
+      <button class="btn btn-primary" onclick="openStudentModal()">+ Add Student</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Name</th><th>Parent</th><th>Level</th><th>Actions</th></tr></thead>
+        <tbody>
+          ${state.students.map(s => {
+            const client = state.clients.find(c => c.id === s.clientId);
+            return `<tr>
+              <td><strong>${s.name}</strong></td>
+              <td>${client?.name || '-'}</td>
+              <td>${s.level || '-'}</td>
+              <td><button class="btn btn-sm btn-secondary" onclick="editStudent(${s.id})">Edit</button></td>
+            </tr>`;
+          }).join('')}
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderDashboard() {
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const monthLessons = state.lessons.filter(l => l.date.startsWith(thisMonth) && l.studentIds.length > 0);
+  const income = monthLessons.reduce((sum, l) => {
+    const rate = l.type === 'private' ? 75 : l.type === 'shared' ? 50 : 35;
+    return sum + (rate * l.studentIds.length);
+  }, 0);
+  const expenses = state.expenses.filter(e => e.date.startsWith(thisMonth)).reduce((s, e) => s + e.amount, 0);
+  const miles = state.mileage.filter(m => m.date.startsWith(thisMonth)).reduce((s, m) => s + m.miles, 0);
+  
+  return `
+    <div class="header"><h1 class="title">Dashboard</h1></div>
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">This Month Income</div>
+        <div class="stat-value" style="color: #22c55e">$${income.toFixed(2)}</div>
+        <div class="stat-meta">${monthLessons.length} lessons taught</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Expenses</div>
+        <div class="stat-value" style="color: #ef4444">$${expenses.toFixed(2)}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Mileage Deduction</div>
+        <div class="stat-value" style="color: #8b5cf6">$${(miles * 0.70).toFixed(2)}</div>
+        <div class="stat-meta">${miles} miles @ $0.70/mi</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Net Income</div>
+        <div class="stat-value">$${(income - expenses).toFixed(2)}</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3 style="margin-bottom: 16px">Active Students: ${state.students.length}</h3>
+      <p style="color: #64748b">Rates: Private $75 | Shared $50 | Group $35</p>
+    </div>
+  `;
+}
+
+function renderExpenses() {
+  const total = state.expenses.reduce((s, e) => s + e.amount, 0);
+  return `
+    <div class="header">
+      <h1 class="title">Expenses</h1>
+      <button class="btn btn-primary" onclick="openExpenseModal()">+ Add Expense</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr></thead>
+        <tbody>
+          ${state.expenses.map(e => `<tr>
+            <td>${e.date}</td>
+            <td>${e.category}</td>
+            <td>${e.description}</td>
+            <td style="color: #ef4444">$${e.amount.toFixed(2)}</td>
+          </tr>`).join('')}
+          <tr style="font-weight: 600; background: #f8fafc">
+            <td colspan="3">Total</td>
+            <td style="color: #ef4444">$${total.toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderMileage() {
+  const total = state.mileage.reduce((s, m) => s + m.miles, 0);
+  return `
+    <div class="header">
+      <h1 class="title">Mileage</h1>
+      <button class="btn btn-primary" onclick="openMileageModal()">+ Log Mileage</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr><th>Date</th><th>Destination</th><th>Miles</th><th>Deduction</th></tr></thead>
+        <tbody>
+          ${state.mileage.map(m => {
+            const v = VENUES.find(x => x.id === m.venueId);
+            return `<tr>
+              <td>${m.date}</td>
+              <td>${v?.name || m.notes || '-'}</td>
+              <td>${m.miles}</td>
+              <td style="color: #22c55e">$${(m.miles * 0.70).toFixed(2)}</td>
+            </tr>`;
+          }).join('')}
+          <tr style="font-weight: 600; background: #f8fafc">
+            <td colspan="2">Total</td>
+            <td>${total} mi</td>
+            <td style="color: #22c55e">$${(total * 0.70).toFixed(2)}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+}
+
+function renderMyLessons() {
+  const myStudentIds = state.students.filter(s => s.clientId === 1).map(s => s.id);
+  const myLessons = state.lessons.filter(l => l.studentIds.some(id => myStudentIds.includes(id))).sort((a, b) => a.date.localeCompare(b.date));
+  
+  return `
+    <div class="header">
+      <h1 class="title">My Schedule</h1>
+      <button class="btn btn-secondary" onclick="exportCalendar()">📅 Export to Calendar</button>
+    </div>
+    <div class="card">
+      ${myLessons.length === 0 ? '<p class="empty">No lessons booked yet</p>' : `
+        <table>
+          <thead><tr><th>Date</th><th>Time</th><th>Type</th><th>Location</th><th>Student</th><th>Actions</th></tr></thead>
+          <tbody>
+            ${myLessons.map(l => {
+              const t = LESSON_TYPES.find(x => x.id === l.type);
+              const v = VENUES.find(x => x.id === l.venueId);
+              const student = state.students.find(s => l.studentIds.includes(s.id) && myStudentIds.includes(s.id));
+              return `<tr>
+                <td>${l.date}</td>
+                <td>${formatTime(l.startTime)}</td>
+                <td><span class="type-badge" style="background: ${t.color}22; color: ${t.color}">${t.name}</span></td>
+                <td>${v?.name || '-'}</td>
+                <td>${student?.name || '-'}</td>
+                <td><button class="btn btn-sm btn-danger" onclick="cancelBooking(${l.id})">Cancel</button></td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      `}
+    </div>
+  `;
+}
+
+function renderMyStudents() {
+  const myStudents = state.students.filter(s => s.clientId === 1);
+  return `
+    <div class="header">
+      <h1 class="title">My Skaters</h1>
+      <button class="btn btn-primary" onclick="openStudentModal()">+ Add Skater</button>
+    </div>
+    <div class="grid">
+      ${myStudents.map(s => `
+        <div class="student-card">
+          <div class="student-name">⛸️ ${s.name}</div>
+          <div class="student-meta">Level: ${s.level || 'Not set'}</div>
+          <div class="student-meta">Birthdate: ${s.birthdate || 'Not set'}</div>
+          <button class="btn btn-sm btn-secondary" style="margin-top: 12px" onclick="editStudent(${s.id})">Edit</button>
+        </div>
+      `).join('')}
+    </div>
+  `;
+}
+
+function getDays(date) {
+  const y = date.getFullYear(), m = date.getMonth();
+  const first = new Date(y, m, 1), last = new Date(y, m + 1, 0);
+  const days = [];
+  for (let i = first.getDay() - 1; i >= 0; i--) days.push({ d: new Date(y, m, -i), other: true });
+  for (let i = 1; i <= last.getDate(); i++) days.push({ d: new Date(y, m, i), other: false });
+  while (days.length < 42) days.push({ d: new Date(y, m + 1, days.length - last.getDate() - first.getDay() + 1), other: true });
+  return days;
+}
+
+function getLessonsForDate(dateStr) {
+  return state.lessons.filter(l => l.date === dateStr);
+}
+
+function formatTime(t) {
+  const [h, m] = t.split(':');
+  const hr = parseInt(h);
+  return `${hr > 12 ? hr - 12 : hr}:${m} ${hr >= 12 ? 'PM' : 'AM'}`;
+}
+
+function changeMonth(delta) {
+  state.currentMonth = new Date(state.currentMonth.getFullYear(), state.currentMonth.getMonth() + delta);
+  state.selectedDate = null;
+  render();
+}
+
+function selectDate(dateStr) {
+  state.selectedDate = dateStr;
+  render();
+}
+
+// Modal functions
+function openModal(title, content) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalContent').innerHTML = content;
+  document.getElementById('modal').classList.remove('hidden');
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.add('hidden');
+  state.editingLesson = null;
+  state.editingClient = null;
+  state.editingStudent = null;
+}
+
+function openLessonModal() {
+  state.editingLesson = { date: state.selectedDate || new Date().toISOString().split('T')[0] };
+  const l = state.editingLesson;
+  openModal('Add Lesson', `
+    <form onsubmit="saveLesson(event)">
+      <div class="row">
+        <div class="field"><label>Date</label><input type="date" name="date" value="${l.date}" required></div>
+        <div class="field"><label>Type</label><select name="type">
+          ${LESSON_TYPES.map(t => `<option value="${t.id}">${t.name}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Start Time</label><input type="time" name="startTime" value="09:00" required></div>
+        <div class="field"><label>End Time</label><input type="time" name="endTime" value="09:30" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Venue</label><select name="venueId">
+          <option value="">Select...</option>
+          ${VENUES.map(v => `<option value="${v.id}">${v.name}</option>`).join('')}
+        </select></div>
+        <div class="field"><label>Max Students</label><input type="number" name="maxStudents" value="1" min="1" max="8"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea name="notes"></textarea></div>
+      <label class="check"><input type="checkbox" name="isPublished"> Publish for booking</label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save Lesson</button>
+      </div>
+    </form>
+  `);
+}
+
+function editLesson(id) {
+  const l = state.lessons.find(x => x.id === id);
+  state.editingLesson = l;
+  openModal('Edit Lesson', `
+    <form onsubmit="saveLesson(event)">
+      <div class="row">
+        <div class="field"><label>Date</label><input type="date" name="date" value="${l.date}" required></div>
+        <div class="field"><label>Type</label><select name="type">
+          ${LESSON_TYPES.map(t => `<option value="${t.id}" ${l.type === t.id ? 'selected' : ''}>${t.name}</option>`).join('')}
+        </select></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Start Time</label><input type="time" name="startTime" value="${l.startTime}" required></div>
+        <div class="field"><label>End Time</label><input type="time" name="endTime" value="${l.endTime}" required></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Venue</label><select name="venueId">
+          <option value="">Select...</option>
+          ${VENUES.map(v => `<option value="${v.id}" ${l.venueId == v.id ? 'selected' : ''}>${v.name}</option>`).join('')}
+        </select></div>
+        <div class="field"><label>Max Students</label><input type="number" name="maxStudents" value="${l.maxStudents}" min="1" max="8"></div>
+      </div>
+      <div class="field"><label>Notes</label><textarea name="notes">${l.notes || ''}</textarea></div>
+      <label class="check"><input type="checkbox" name="isPublished" ${l.isPublished ? 'checked' : ''}> Publish for booking</label>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function saveLesson(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = {
+    date: f.date.value,
+    startTime: f.startTime.value,
+    endTime: f.endTime.value,
+    type: f.type.value,
+    venueId: f.venueId.value ? parseInt(f.venueId.value) : null,
+    maxStudents: parseInt(f.maxStudents.value) || 1,
+    isPublished: f.isPublished.checked,
+    notes: f.notes.value,
+    studentIds: state.editingLesson?.studentIds || []
+  };
+  
+  if (state.editingLesson?.id) {
+    const idx = state.lessons.findIndex(l => l.id === state.editingLesson.id);
+    state.lessons[idx] = { ...state.lessons[idx], ...data };
+  } else {
+    data.id = Math.max(0, ...state.lessons.map(l => l.id)) + 1;
+    state.lessons.push(data);
+  }
+  
+  saveData();
+  closeModal();
+  toast('Lesson saved!');
+  render();
+}
+
+function deleteLesson(id) {
+  if (!confirm('Delete this lesson?')) return;
+  state.lessons = state.lessons.filter(l => l.id !== id);
+  saveData();
+  toast('Lesson deleted');
+  render();
+}
+
+function togglePublish(id) {
+  const l = state.lessons.find(x => x.id === id);
+  l.isPublished = !l.isPublished;
+  saveData();
+  toast(l.isPublished ? 'Lesson published!' : 'Lesson unpublished');
+  render();
+}
+
+function bookLesson(lessonId, studentId) {
+  if (!studentId) return;
+  const l = state.lessons.find(x => x.id === lessonId);
+  l.studentIds.push(parseInt(studentId));
+  saveData();
+  toast('Lesson booked!');
+  render();
+}
+
+function cancelBooking(lessonId) {
+  const l = state.lessons.find(x => x.id === lessonId);
+  const myStudentIds = state.students.filter(s => s.clientId === 1).map(s => s.id);
+  const studentId = l.studentIds.find(id => myStudentIds.includes(id));
+  if (studentId && confirm('Cancel this booking?')) {
+    l.studentIds = l.studentIds.filter(id => id !== studentId);
+    saveData();
+    toast('Booking cancelled');
+    render();
+  }
+}
+
+function openClientModal() {
+  state.editingClient = null;
+  openModal('Add Client', `
+    <form onsubmit="saveClient(event)">
+      <div class="field"><label>Name</label><input type="text" name="name" required></div>
+      <div class="field"><label>Email</label><input type="email" name="email"></div>
+      <div class="field"><label>Phone</label><input type="tel" name="phone"></div>
+      <div class="field"><label>Notes</label><textarea name="notes"></textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function editClient(id) {
+  const c = state.clients.find(x => x.id === id);
+  state.editingClient = c;
+  openModal('Edit Client', `
+    <form onsubmit="saveClient(event)">
+      <div class="field"><label>Name</label><input type="text" name="name" value="${c.name}" required></div>
+      <div class="field"><label>Email</label><input type="email" name="email" value="${c.email || ''}"></div>
+      <div class="field"><label>Phone</label><input type="tel" name="phone" value="${c.phone || ''}"></div>
+      <div class="field"><label>Notes</label><textarea name="notes">${c.notes || ''}</textarea></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function saveClient(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { name: f.name.value, email: f.email.value, phone: f.phone.value, notes: f.notes.value };
+  
+  if (state.editingClient?.id) {
+    const idx = state.clients.findIndex(c => c.id === state.editingClient.id);
+    state.clients[idx] = { ...state.clients[idx], ...data };
+  } else {
+    data.id = Math.max(0, ...state.clients.map(c => c.id)) + 1;
+    state.clients.push(data);
+  }
+  
+  saveData();
+  closeModal();
+  toast('Client saved!');
+  render();
+}
+
+function openStudentModal() {
+  state.editingStudent = null;
+  const isCoach = state.role === 'coach';
+  openModal('Add Student', `
+    <form onsubmit="saveStudent(event)">
+      <div class="field"><label>Name</label><input type="text" name="name" required></div>
+      ${isCoach ? `<div class="field"><label>Parent</label><select name="clientId" required>
+        <option value="">Select...</option>
+        ${state.clients.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
+      </select></div>` : '<input type="hidden" name="clientId" value="1">'}
+      <div class="field"><label>Level</label><input type="text" name="level" placeholder="e.g., Pre-Preliminary"></div>
+      <div class="field"><label>Birthdate</label><input type="date" name="birthdate"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function editStudent(id) {
+  const s = state.students.find(x => x.id === id);
+  state.editingStudent = s;
+  const isCoach = state.role === 'coach';
+  openModal('Edit Student', `
+    <form onsubmit="saveStudent(event)">
+      <div class="field"><label>Name</label><input type="text" name="name" value="${s.name}" required></div>
+      ${isCoach ? `<div class="field"><label>Parent</label><select name="clientId" required>
+        ${state.clients.map(c => `<option value="${c.id}" ${s.clientId === c.id ? 'selected' : ''}>${c.name}</option>`).join('')}
+      </select></div>` : `<input type="hidden" name="clientId" value="${s.clientId}">`}
+      <div class="field"><label>Level</label><input type="text" name="level" value="${s.level || ''}"></div>
+      <div class="field"><label>Birthdate</label><input type="date" name="birthdate" value="${s.birthdate || ''}"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function saveStudent(e) {
+  e.preventDefault();
+  const f = e.target;
+  const data = { clientId: parseInt(f.clientId.value), name: f.name.value, level: f.level.value, birthdate: f.birthdate.value };
+  
+  if (state.editingStudent?.id) {
+    const idx = state.students.findIndex(s => s.id === state.editingStudent.id);
+    state.students[idx] = { ...state.students[idx], ...data };
+  } else {
+    data.id = Math.max(0, ...state.students.map(s => s.id)) + 1;
+    state.students.push(data);
+  }
+  
+  saveData();
+  closeModal();
+  toast('Student saved!');
+  render();
+}
+
+function openExpenseModal() {
+  openModal('Add Expense', `
+    <form onsubmit="saveExpense(event)">
+      <div class="field"><label>Date</label><input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      <div class="field"><label>Category</label><select name="category">
+        ${EXPENSE_CATEGORIES.map(c => `<option value="${c}">${c}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Description</label><input type="text" name="description" required></div>
+      <div class="field"><label>Amount</label><input type="number" name="amount" step="0.01" required></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function saveExpense(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.expenses.unshift({
+    id: Math.max(0, ...state.expenses.map(x => x.id)) + 1,
+    date: f.date.value,
+    category: f.category.value,
+    description: f.description.value,
+    amount: parseFloat(f.amount.value)
+  });
+  saveData();
+  closeModal();
+  toast('Expense added!');
+  render();
+}
+
+function openMileageModal() {
+  openModal('Log Mileage', `
+    <form onsubmit="saveMileage(event)">
+      <div class="field"><label>Date</label><input type="date" name="date" value="${new Date().toISOString().split('T')[0]}" required></div>
+      <div class="field"><label>Destination</label><select name="venueId">
+        <option value="">Select or enter notes...</option>
+        ${VENUES.map(v => `<option value="${v.id}">${v.name}</option>`).join('')}
+      </select></div>
+      <div class="field"><label>Miles (round trip)</label><input type="number" name="miles" step="0.1" required></div>
+      <div class="field"><label>Notes</label><input type="text" name="notes"></div>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+        <button type="submit" class="btn btn-primary">Save</button>
+      </div>
+    </form>
+  `);
+}
+
+function saveMileage(e) {
+  e.preventDefault();
+  const f = e.target;
+  state.mileage.unshift({
+    id: Math.max(0, ...state.mileage.map(x => x.id)) + 1,
+    date: f.date.value,
+    venueId: f.venueId.value ? parseInt(f.venueId.value) : null,
+    miles: parseFloat(f.miles.value),
+    notes: f.notes.value
+  });
+  saveData();
+  closeModal();
+  toast('Mileage logged!');
+  render();
+}
+
+function exportCalendar() {
+  const myStudentIds = state.students.filter(s => s.clientId === 1).map(s => s.id);
+  const myLessons = state.lessons.filter(l => l.studentIds.some(id => myStudentIds.includes(id)));
+  
+  let ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//IceBooks Pro//EN'];
+  myLessons.forEach(l => {
+    const v = VENUES.find(x => x.id === l.venueId);
+    const t = LESSON_TYPES.find(x => x.id === l.type);
+    ics.push('BEGIN:VEVENT');
+    ics.push(`UID:${l.id}@icebooks`);
+    ics.push(`DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+    ics.push(`DTSTART:${l.date.replace(/-/g, '')}T${l.startTime.replace(':', '')}00`);
+    ics.push(`DTEND:${l.date.replace(/-/g, '')}T${l.endTime.replace(':', '')}00`);
+    ics.push(`SUMMARY:${t?.name || ''} Skating Lesson`);
+    if (v) ics.push(`LOCATION:${v.name}`);
+    ics.push('END:VEVENT');
+  });
+  ics.push('END:VCALENDAR');
+  
+  const blob = new Blob([ics.join('\r\n')], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'skating-lessons.ics';
+  a.click();
+  toast('Calendar exported!');
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.remove('hidden');
+  setTimeout(() => t.classList.add('hidden'), 3000);
+}
+
+init();
+</script>
+</body>
+</html>

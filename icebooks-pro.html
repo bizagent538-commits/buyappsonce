@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IceBooks Pro - Scheduling & Financials</title>
+  <meta name="theme-color" content="#8b5cf6">
+  <script src="https://unpkg.com/react@18/umd/react.development.js">
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='icebooks_pro_data';
+  const vars=['ics'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='icebooks_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js">
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='icebooks_pro_data';
+  const vars=['ics'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='icebooks_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js">
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='icebooks_pro_data';
+  const vars=['ics'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='icebooks_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #f8fafc; }
+    #root { min-height: 100vh; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+
+// IceBooks - Complete Business Management for Skating Coaches
+// Features: Calendar, Client/Student Management, Invoicing, Expense Tracking, Mileage Logging, Financial Dashboard
+
+// Constants
+const DEFAULT_MILEAGE_RATE = 0.70; // 2025 IRS standard mileage rate
+const EXPENSE_CATEGORIES = [
+  { id: 'ice_time', name: 'Ice Time Rental', icon: '🏒' },
+  { id: 'music', name: 'Music/Choreography', icon: '🎵' },
+  { id: 'costumes', name: 'Costumes/Apparel', icon: '👗' },
+  { id: 'equipment', name: 'Equipment/Blades', icon: '⛸️' },
+  { id: 'training', name: 'Training/Certification', icon: '⛸️' },
+  { id: 'travel', name: 'Travel/Lodging', icon: '✈️' },
+  { id: 'competition', name: 'Competition Fees', icon: '🏆' },
+  { id: 'marketing', name: 'Marketing/Website', icon: '📣' },
+  { id: 'insurance', name: 'Insurance', icon: '🛡️' },
+  { id: 'software', name: 'Software/Apps', icon: '💻' },
+  { id: 'other', name: 'Other', icon: '📦' },
+];
+
+const getDateStr = (d) => { const x = new Date(); x.setDate(x.getDate() + d); return x.toISOString().split('T')[0]; };
+
+// Sample Data
+const sampleClients = [
+  { id: 1, name: 'Sarah Johnson', email: 'sarah.johnson@email.com', phone: '(555) 123-4567', address: '123 Oak St, Hartford, CT' },
+  { id: 2, name: 'Michael Chen', email: 'mchen@email.com', phone: '(555) 234-5678', address: '456 Maple Ave, New London, CT' },
+  { id: 3, name: 'Lisa Rodriguez', email: 'lisa.r@email.com', phone: '(555) 345-6789', address: '789 Pine Rd, Groton, CT' },
+];
+
+const sampleStudents = [
+  { id: 1, clientId: 1, name: 'Emma Johnson', birthdate: '2013-05-15', level: 'Freestyle 4', usfsa: '123456', isi: '', notes: 'Working on axel', color: '#3b82f6' },
+  { id: 2, clientId: 1, name: 'Lily Johnson', birthdate: '2016-08-22', level: 'Basic 5', usfsa: '123457', isi: '', notes: '', color: '#8b5cf6' },
+  { id: 3, clientId: 2, name: 'Sophie Chen', birthdate: '2012-03-10', level: 'Freestyle 6', usfsa: '234567', isi: '', notes: 'Preparing for regionals', color: '#10b981' },
+  { id: 4, clientId: 3, name: 'Oliver Rodriguez', birthdate: '2014-11-30', level: 'Pre-Preliminary', usfsa: '345678', isi: 'CT-9876', notes: '', color: '#f59e0b' },
+];
+
+const sampleVenues = [
+  { id: 1, name: 'Champions Skating Center', address: '123 Ice Way, Hartford, CT', color: '#0ea5e9', distance: 12 },
+  { id: 2, name: 'Community Ice Rink', address: '456 Frost Lane, New London, CT', color: '#14b8a6', distance: 25 },
+];
+
+const sampleExpenses = [
+  { id: 1, date: getDateStr(-5), category: 'ice_time', description: 'Weekly ice rental - Champions', amount: 150 },
+  { id: 2, date: getDateStr(-10), category: 'music', description: 'Program music editing', amount: 75 },
+  { id: 3, date: getDateStr(-15), category: 'equipment', description: 'Blade sharpening x4 students', amount: 60 },
+  { id: 4, date: getDateStr(-3), category: 'ice_time', description: 'Extra practice session', amount: 45 },
+];
+
+const sampleMileage = [
+  { id: 1, date: getDateStr(-1), fromLocation: 'Home', toLocation: 'Champions Skating Center', miles: 12, purpose: 'Lessons', roundTrip: true },
+  { id: 2, date: getDateStr(-3), fromLocation: 'Home', toLocation: 'Community Ice Rink', miles: 25, purpose: 'Group class', roundTrip: true },
+  { id: 3, date: getDateStr(-7), fromLocation: 'Champions Skating Center', toLocation: 'Hartford Ice Arena', miles: 8, purpose: 'Competition scouting', roundTrip: false },
+];
+
+const sampleCompetitions = [
+  { id: 1, name: 'Winter Classic', startDate: '2025-02-15', endDate: '2025-02-16', location: 'Hartford Ice Arena', type: 'USFSA', levels: ['Preliminary', 'Pre-Juvenile'], registrationDeadline: '2025-01-31' },
+  { id: 2, name: 'Spring Showcase', startDate: '2025-03-22', endDate: '2025-03-22', location: 'Community Ice Center', type: 'Exhibition', levels: ['All Levels'], registrationDeadline: '2025-03-08' },
+];
+
+
+const sampleEvents = [
+  { id: 1, type: 'lesson', lessonType: 'private', title: 'Private Lesson', date: getDateStr(1), startTime: '15:30', endTime: '16:00', venueId: 1, studentIds: [1], maxStudents: 1, isPublished: true },
+  { id: 2, type: 'lesson', lessonType: 'private', title: 'Private Lesson', date: getDateStr(1), startTime: '16:00', endTime: '16:30', venueId: 1, studentIds: [3], maxStudents: 1, isPublished: true },
+  { id: 3, type: 'lesson', lessonType: 'shared', title: 'Shared Lesson', date: getDateStr(2), startTime: '15:00', endTime: '15:30', venueId: 1, studentIds: [1, 3], maxStudents: 2, isPublished: true },
+  { id: 4, type: 'lesson', lessonType: 'class', title: 'Beginner Group', date: getDateStr(3), startTime: '17:00', endTime: '17:45', venueId: 2, studentIds: [2, 4], maxStudents: 8, isPublished: true },
+  { id: 5, type: 'personal', title: 'Dentist Appointment', date: getDateStr(2), startTime: '10:00', endTime: '11:00', color: '#6366f1' },
+  { id: 6, type: 'blocked', title: 'Ice Show Rehearsal', date: getDateStr(5), startTime: '14:00', endTime: '18:00', venueId: 1, color: '#64748b' },
+];
+
+const defaultRates = { private: 55, shared: 35, class: 25 };
+const LEVELS = ['Snowplow Sam', 'Basic 1', 'Basic 2', 'Basic 3', 'Basic 4', 'Basic 5', 'Basic 6', 'Pre-Preliminary', 'Preliminary', 'Pre-Juvenile', 'Juvenile', 'Intermediate', 'Novice', 'Junior', 'Senior', 'Freestyle 1', 'Freestyle 2', 'Freestyle 3', 'Freestyle 4', 'Freestyle 5', 'Freestyle 6'];
+const COLORS = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
+
+// Utilities
+const formatDate = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+const formatDateLong = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+const formatDateShort = (d) => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const formatTime = (t) => { if (!t) return ''; const [h, m] = t.split(':'); const hr = parseInt(h); return `${hr % 12 || 12}:${m} ${hr >= 12 ? 'PM' : 'AM'}`; };
+const formatCurrency = (n) => `$${(n || 0).toFixed(2)}`;
+const getToday = () => new Date().toISOString().split('T')[0];
+const getMonthStart = (d) => { const x = new Date(d); x.setDate(1); return x.toISOString().split('T')[0]; };
+const getMonthEnd = (d) => { const x = new Date(d); x.setMonth(x.getMonth() + 1); x.setDate(0); return x.toISOString().split('T')[0]; };
+const getYearStart = () => `${new Date().getFullYear()}-01-01`;
+const genId = () => Date.now() + Math.random();
+const calcAge = (bd) => { if (!bd) return null; const t = new Date(), b = new Date(bd); let a = t.getFullYear() - b.getFullYear(); if (t.getMonth() < b.getMonth() || (t.getMonth() === b.getMonth() && t.getDate() < b.getDate())) a--; return a; };
+const getHoursUntil = (d, t) => (new Date(`${d}T${t}`) - new Date()) / 3600000;
+const isWithin24h = (d, t) => { const h = getHoursUntil(d, t); return h < 24 && h > -24; };
+
+// ICS Utilities
+const parseICS = (content) => {
+  const events = []; let curr = null;
+  content.split(/\r?\n/).forEach(line => {
+    if (line.startsWith('BEGIN:VEVENT')) curr = { type: 'external', studentIds: [], color: '#f59e0b' };
+    else if (line.startsWith('END:VEVENT') && curr?.date && curr?.title) { curr.id = genId(); events.push(curr); curr = null; }
+    else if (curr) {
+      if (line.startsWith('SUMMARY:')) curr.title = line.slice(8).replace(/\\,/g, ',');
+      else if (line.startsWith('DTSTART')) {
+        const v = line.split(':').pop().replace(/[^0-9T]/g, '');
+        if (v.length >= 8) { curr.date = `${v.slice(0,4)}-${v.slice(4,6)}-${v.slice(6,8)}`; if (v.includes('T')) curr.startTime = `${v.split('T')[1].slice(0,2)}:${v.split('T')[1].slice(2,4)}`; }
+      } else if (line.startsWith('DTEND')) {
+        const v = line.split(':').pop().replace(/[^0-9T]/g, '');
+        if (v.includes('T')) curr.endTime = `${v.split('T')[1].slice(0,2)}:${v.split('T')[1].slice(2,4)}`;
+      } else if (line.startsWith('LOCATION:')) curr.location = line.slice(9);
+    }
+  });
+  return events;
+};
+
+const generateICS = (events, getVenue) => {
+  let ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//IceBooks//EN', 'X-WR-CALNAME:IceBooks', 'METHOD:PUBLISH'];
+  events.forEach(e => {
+    const sd = e.date.replace(/-/g, ''), st = e.startTime?.replace(':', '') + '00', et = e.endTime?.replace(':', '') + '00';
+    ics.push('BEGIN:VEVENT', `UID:${e.id}@icebooks`, `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, '').split('.')[0]}Z`);
+    if (st) { ics.push(`DTSTART:${sd}T${st}`, `DTEND:${sd}T${et}`); } else { ics.push(`DTSTART;VALUE=DATE:${sd}`); }
+    ics.push(`SUMMARY:${e.title.replace(/,/g, '\\,')}`);
+    const loc = e.venueId ? getVenue(e.venueId)?.name : e.location;
+    if (loc) ics.push(`LOCATION:${loc}`);
+    ics.push('END:VEVENT');
+  });
+  ics.push('END:VCALENDAR');
+  return ics.join('\r\n');
+};
+
+const downloadICS = (events, getVenue) => {
+  const blob = new Blob([generateICS(events, getVenue)], { type: 'text/calendar' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'icebooks.ics'; a.click();
+};
+
+// Icons
+const Icon = ({ name }) => {
+  const icons = {
+    calendar: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>,
+    users: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
+    user: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>,
+    mapPin: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>,
+    clock: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>,
+    plus: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>,
+    x: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>,
+    chevronLeft: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>,
+    chevronRight: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>,
+    trash: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>,
+    edit: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>,
+    trophy: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6M18 9h1.5a2.5 2.5 0 0 0 0-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>,
+    dollar: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+    bell: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>,
+    download: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>,
+    upload: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>,
+    eye: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>,
+    snowflake: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="2" x2="12" y2="22"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/><line x1="19.07" y1="4.93" x2="4.93" y2="19.07"/><line x1="2" y1="12" x2="22" y2="12"/></svg>,
+    settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>,
+  };
+  return <span className="icon">{icons[name]}</span>;
+};
+
+// Modal Component
+const Modal = ({ isOpen, onClose, title, children, size }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className={`modal-content ${size || ''}`} onClick={e => e.stopPropagation()}>
+        <div className="modal-header">
+          <h2>{title}</h2>
+          <button className="modal-close" onClick={onClose}><Icon name="x" /></button>
+        </div>
+        <div className="modal-body">{children}</div>
+      </div>
+    </div>
+  );
+};
+
+// Main App
+function IceBooks() {
+  // State
+  const [clients, setClients] = useState(sampleClients);
+  const [students, setStudents] = useState(sampleStudents);
+  const [venues, setVenues] = useState(sampleVenues);
+  const [events, setEvents] = useState(sampleEvents);
+  const [competitions, setCompetitions] = useState(sampleCompetitions);
+  const [invoices, setInvoices] = useState([]);
+  const [expenses, setExpenses] = useState(sampleExpenses);
+  const [mileage, setMileage] = useState(sampleMileage);
+  const [rates, setRates] = useState(defaultRates);
+  const [mileageRate, setMileageRate] = useState(DEFAULT_MILEAGE_RATE);
+  const [notifications, setNotifications] = useState([]);
+  
+  const [isCoach, setIsCoach] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loggedInStudentId, setLoggedInStudentId] = useState(null);
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [calendarView, setCalendarView] = useState('month');
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(getToday());
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [dashboardPeriod, setDashboardPeriod] = useState('month');
+  
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [showStudentModal, setShowStudentModal] = useState(false);
+  const [showVenueModal, setShowVenueModal] = useState(false);
+  const [showRatesModal, setShowRatesModal] = useState(false);
+  const [showInvoiceDetail, setShowInvoiceDetail] = useState(false);
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [showExpenseModal, setShowExpenseModal] = useState(false);
+  const [showMileageModal, setShowMileageModal] = useState(false);
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  
+  const [editingEvent, setEditingEvent] = useState(null);
+  const [editingExpense, setEditingExpense] = useState(null);
+  const [editingMileage, setEditingMileage] = useState(null);
+  const [selectedClient, setSelectedClient] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
+  
+  const fileInputRef = useRef(null);
+
+  // Helpers
+  const getClient = (id) => clients.find(c => c.id === id);
+  const getStudent = (id) => students.find(s => s.id === id);
+  const getVenue = (id) => venues.find(v => v.id === id);
+  const getStudentsByClient = (cid) => students.filter(s => s.clientId === cid);
+  const getRate = (type) => rates[type] || 0;
+  
+  const getEventsForDate = (d) => events.filter(e => e.date === d).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+  const hasMyBooking = (d) => loggedInStudentId && getEventsForDate(d).some(e => e.type === 'lesson' && (e.studentIds || []).includes(loggedInStudentId));
+  
+  const unreadCount = notifications.filter(n => !n.read).length;
+  const billingCount = notifications.filter(n => n.billingRequired && !n.billed).length;
+  
+  const addNotification = (n) => setNotifications(prev => [{ id: genId(), timestamp: new Date().toISOString(), read: false, ...n }, ...prev]);
+
+  // Financial calculations
+  const getFinancialStats = (period = 'month') => {
+    const today = getToday();
+    let startDate = period === 'month' ? getMonthStart(today) : period === 'year' ? getYearStart() : '2000-01-01';
+    let endDate = period === 'month' ? getMonthEnd(today) : today;
+    
+    const periodInvoices = invoices.filter(i => i.paidAt && i.paidAt >= startDate && i.paidAt <= endDate);
+    const revenue = periodInvoices.reduce((sum, i) => sum + (i.amountPaid || i.total), 0);
+    
+    const periodExpenses = expenses.filter(e => e.date >= startDate && e.date <= endDate);
+    const totalExpenses = periodExpenses.reduce((sum, e) => sum + e.amount, 0);
+    
+    const periodMileage = mileage.filter(m => m.date >= startDate && m.date <= endDate);
+    const totalMiles = periodMileage.reduce((sum, m) => sum + (m.roundTrip ? m.miles * 2 : m.miles), 0);
+    const mileageDeduction = totalMiles * mileageRate;
+    
+    const outstanding = invoices.filter(i => i.status !== 'paid' && i.status !== 'draft').reduce((sum, i) => sum + i.total - (i.amountPaid || 0), 0);
+    
+    const expensesByCategory = {};
+    periodExpenses.forEach(e => { expensesByCategory[e.category] = (expensesByCategory[e.category] || 0) + e.amount; });
+    
+    return { revenue, expenses: totalExpenses, mileageDeduction, totalDeductions: totalExpenses + mileageDeduction, netIncome: revenue - totalExpenses - mileageDeduction, outstanding, totalMiles, expensesByCategory };
+  };
+
+  // Expense CRUD
+  const saveExpense = (data) => {
+    if (data.id) setExpenses(prev => prev.map(e => e.id === data.id ? data : e));
+    else setExpenses(prev => [...prev, { ...data, id: genId() }]);
+    setShowExpenseModal(false); setEditingExpense(null);
+  };
+  const deleteExpense = (id) => { if (confirm('Delete expense?')) setExpenses(prev => prev.filter(e => e.id !== id)); };
+
+  // Mileage CRUD
+  const saveMileage = (data) => {
+    if (data.id) setMileage(prev => prev.map(m => m.id === data.id ? data : m));
+    else setMileage(prev => [...prev, { ...data, id: genId() }]);
+    setShowMileageModal(false); setEditingMileage(null);
+  };
+  const deleteMileage = (id) => { if (confirm('Delete mileage entry?')) setMileage(prev => prev.filter(m => m.id !== id)); };
+
+  // Payment tracking
+  const recordPayment = (invoiceId, amount) => {
+    setInvoices(prev => prev.map(inv => {
+      if (inv.id !== invoiceId) return inv;
+      const payment = { id: genId(), date: getToday(), amount };
+      const payments = [...(inv.payments || []), payment];
+      const amountPaid = payments.reduce((s, p) => s + p.amount, 0);
+      const status = amountPaid >= inv.total ? 'paid' : amountPaid > 0 ? 'partial' : inv.status;
+      return { ...inv, payments, amountPaid, status, paidAt: status === 'paid' ? getToday() : inv.paidAt };
+    }));
+  };
+
+  // Event CRUD
+  const saveEvent = (data) => {
+    if (data.id && events.find(e => e.id === data.id)) {
+      setEvents(prev => prev.map(e => e.id === data.id ? { ...e, ...data } : e));
+    } else {
+      setEvents(prev => [...prev, { ...data, id: genId() }]);
+    }
+    setShowEventModal(false);
+    setEditingEvent(null);
+  };
+  
+  const deleteEvent = (id) => { if (confirm('Delete this event?')) setEvents(prev => prev.filter(e => e.id !== id)); };
+  
+  const bookLesson = (event, studentId) => {
+    const student = getStudent(studentId);
+    const client = student ? getClient(student.clientId) : null;
+    setEvents(prev => prev.map(e => e.id === event.id ? { ...e, studentIds: [...(e.studentIds || []), studentId] } : e));
+    addNotification({ type: 'booking', message: `${student?.name} booked ${event.lessonType} lesson`, studentId, studentName: student?.name, clientId: client?.id, date: event.date, time: event.startTime });
+  };
+  
+  const cancelBooking = (event, studentId) => {
+    const student = getStudent(studentId);
+    const client = student ? getClient(student.clientId) : null;
+    const isLate = isWithin24h(event.date, event.startTime);
+    setEvents(prev => prev.map(e => e.id === event.id ? { ...e, studentIds: (e.studentIds || []).filter(id => id !== studentId) } : e));
+    addNotification({ type: 'cancellation', message: `${student?.name} cancelled ${event.lessonType} lesson`, studentId, studentName: student?.name, clientId: client?.id, date: event.date, time: event.startTime, isLateCancellation: isLate, billingRequired: isLate, rate: getRate(event.lessonType), hoursNotice: Math.max(0, Math.floor(getHoursUntil(event.date, event.startTime))) });
+  };
+
+  // Client/Student CRUD
+  const saveClient = (data) => {
+    if (data.id) setClients(prev => prev.map(c => c.id === data.id ? data : c));
+    else setClients(prev => [...prev, { ...data, id: genId() }]);
+    setShowClientModal(false); setSelectedClient(null);
+  };
+  
+  const deleteClient = (id) => {
+    if (getStudentsByClient(id).length > 0) { alert('Remove students first.'); return; }
+    if (confirm('Delete client?')) setClients(prev => prev.filter(c => c.id !== id));
+  };
+  
+  const saveStudent = (data) => {
+    if (data.id) setStudents(prev => prev.map(s => s.id === data.id ? data : s));
+    else setStudents(prev => [...prev, { ...data, id: genId(), color: COLORS[students.length % COLORS.length] }]);
+    setShowStudentModal(false); setSelectedStudent(null);
+  };
+  
+  const deleteStudent = (id) => {
+    if (confirm('Delete student?')) {
+      setStudents(prev => prev.filter(s => s.id !== id));
+      setEvents(prev => prev.map(e => ({ ...e, studentIds: (e.studentIds || []).filter(sid => sid !== id) })));
+    }
+  };
+  
+  const saveVenue = (data) => {
+    if (data.id) setVenues(prev => prev.map(v => v.id === data.id ? data : v));
+    else setVenues(prev => [...prev, { ...data, id: genId() }]);
+    setShowVenueModal(false);
+  };
+  
+  const deleteVenue = (id) => {
+    if (events.some(e => e.venueId === id)) { alert('Events at this venue exist.'); return; }
+    if (confirm('Delete venue?')) setVenues(prev => prev.filter(v => v.id !== id));
+  };
+
+  // Invoice Generation
+  const generateInvoice = (clientId) => {
+    const client = getClient(clientId);
+    const studentIds = getStudentsByClient(clientId).map(s => s.id);
+    const items = [];
+    const today = getToday();
+    
+    events.filter(e => e.type === 'lesson' && e.date <= today && (e.studentIds || []).some(sid => studentIds.includes(sid)))
+      .forEach(e => {
+        (e.studentIds || []).filter(sid => studentIds.includes(sid)).forEach(sid => {
+          const student = getStudent(sid);
+          items.push({ id: genId(), type: 'lesson', date: e.date, studentName: student?.name, description: `${e.lessonType} Lesson - ${student?.name}`, amount: getRate(e.lessonType) });
+        });
+      });
+    
+    notifications.filter(n => n.billingRequired && n.clientId === clientId).forEach(n => {
+      items.push({ id: genId(), type: 'late_cancel', date: n.date, studentName: n.studentName, description: `Late Cancellation - ${n.studentName}`, amount: n.rate });
+    });
+    
+    if (items.length === 0) { alert('No billable items.'); return; }
+    
+    const invoice = { id: genId(), number: `INV-${String(invoices.length + 1).padStart(4, '0')}`, clientId, clientName: client?.name, clientEmail: client?.email, clientAddress: client?.address, items, total: items.reduce((s, i) => s + i.amount, 0), status: 'draft', createdAt: new Date().toISOString(), dueDate: new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0] };
+    setInvoices(prev => [...prev, invoice]);
+    setSelectedInvoice(invoice);
+    setShowInvoiceDetail(true);
+  };
+  
+  const updateInvoiceStatus = (id, status) => setInvoices(prev => prev.map(i => i.id === id ? { ...i, status } : i));
+
+  // Calendar Import/Export
+  const handleImport = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const imported = parseICS(ev.target?.result || '');
+      if (imported.length === 0) { alert('No events found.'); return; }
+      setEvents(prev => [...prev, ...imported]);
+      alert(`Imported ${imported.length} event(s).`);
+    };
+    reader.readAsText(file);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+    setShowImportModal(false);
+  };
+
+  // Calendar Navigation
+  const navMonth = (d) => { const n = new Date(currentDate); n.setMonth(n.getMonth() + d); setCurrentDate(n); };
+  const navWeek = (d) => { const n = new Date(currentDate); n.setDate(n.getDate() + d * 7); setCurrentDate(n); };
+  const goToday = () => { setCurrentDate(new Date()); setSelectedDate(getToday()); };
+
+  useEffect(() => {
+    const handler = (e) => { if (showNotifications && !e.target.closest('.notification-wrapper')) setShowNotifications(false); };
+    document.addEventListener('click', handler);
+    return () => document.removeEventListener('click', handler);
+  }, [showNotifications]);
+
+  // Render Month Calendar
+  const renderMonthCalendar = () => {
+    const year = currentDate.getFullYear(), month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    const today = getToday();
+    const days = [];
+    
+    for (let i = 0; i < firstDay; i++) days.push(<div key={`e${i}`} className="cal-day empty" />);
+    
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      const isToday = dateStr === today, isSel = dateStr === selectedDate;
+      const dayEvents = getEventsForDate(dateStr);
+      const myBooking = hasMyBooking(dateStr);
+      
+      days.push(
+        <div key={d} className={`cal-day ${isToday ? 'today' : ''} ${isSel ? 'selected' : ''}`} onClick={() => setSelectedDate(dateStr)}>
+          <span className="day-num">{d}</span>
+          <div className="day-dots">
+            {dayEvents.slice(0, 3).map((e, i) => <span key={i} className="dot" style={{ background: e.type === 'lesson' ? '#0ea5e9' : e.color || '#64748b' }} />)}
+            {dayEvents.length > 3 && <span className="more">+{dayEvents.length - 3}</span>}
+          </div>
+          {myBooking && !isCoach && <span className="my-dot" />}
+        </div>
+      );
+    }
+    
+    return (
+      <div className="month-cal">
+        <div className="weekdays">{['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d}>{d}</div>)}</div>
+        <div className="days-grid">{days}</div>
+      </div>
+    );
+  };
+
+  // Render Day Detail
+  const renderDayDetail = () => {
+    const dayEvents = getEventsForDate(selectedDate);
+    
+    return (
+      <div className="day-detail">
+        <div className="day-header">
+          <h3>{formatDateLong(selectedDate)}</h3>
+          {isCoach && (
+            <button className="btn btn-primary btn-sm" onClick={() => { setEditingEvent({ date: selectedDate, type: 'lesson', lessonType: 'private', startTime: '09:00', endTime: '09:30', studentIds: [], isPublished: false }); setShowEventModal(true); }}>
+              <Icon name="plus" /> Add Event
+            </button>
+          )}
+        </div>
+        
+        {dayEvents.length === 0 ? <p className="no-events">No events scheduled.</p> : (
+          <div className="events-list">
+            {dayEvents.map(event => {
+              const venue = event.venueId ? getVenue(event.venueId) : null;
+              const studentIds = event.studentIds || [];
+              const isLesson = event.type === 'lesson';
+              const maxStudents = event.maxStudents || 1;
+              const spotsLeft = maxStudents - studentIds.length;
+              const isFull = spotsLeft <= 0;
+              const isMyBooking = !isCoach && studentIds.includes(loggedInStudentId);
+              const canBook = !isCoach && isLesson && event.isPublished && !isFull && !isMyBooking && loggedInStudentId;
+              
+              if (!isCoach && isLesson && !event.isPublished && !isMyBooking) return null;
+              
+              const color = isLesson ? (event.lessonType === 'private' ? '#0ea5e9' : event.lessonType === 'shared' ? '#14b8a6' : '#8b5cf6') : (event.color || '#64748b');
+              
+              return (
+                <div key={event.id} className={`event-card ${isMyBooking ? 'my-booking' : ''} ${!event.isPublished && isLesson ? 'draft' : ''}`} style={{ borderLeftColor: color }}>
+                  <div className="event-main">
+                    <div className="event-top">
+                      <span className="event-title">{event.title}</span>
+                      {isLesson && <span className={`lesson-badge ${event.lessonType}`}>{event.lessonType} ${getRate(event.lessonType)}</span>}
+                      {!event.isPublished && isLesson && <span className="draft-badge">Draft</span>}
+                    </div>
+                    <div className="event-meta">
+                      <span><Icon name="clock" /> {formatTime(event.startTime)} - {formatTime(event.endTime)}</span>
+                      {venue && <span><Icon name="mapPin" /> {venue.name}</span>}
+                    </div>
+                    
+                    {isCoach && isLesson && (
+                      <div className="event-students">
+                        {studentIds.length === 0 ? <span className="no-students">No students yet</span> : studentIds.map(sid => {
+                          const student = getStudent(sid);
+                          const client = student ? getClient(student.clientId) : null;
+                          return student ? (
+                            <span key={sid} className="student-chip" style={{ background: student.color + '20', borderColor: student.color }}>
+                              {student.name} <small>({client?.name})</small>
+                              <button onClick={() => cancelBooking(event, sid)}>×</button>
+                            </span>
+                          ) : null;
+                        })}
+                        {(event.lessonType === 'shared' || event.lessonType === 'class') && spotsLeft > 0 && <span className="spots">{spotsLeft} spot{spotsLeft !== 1 ? 's' : ''} left</span>}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="event-actions">
+                    {isCoach && (
+                      <>
+                        {isLesson && <button className="btn-icon" onClick={() => setEvents(prev => prev.map(e => e.id === event.id ? { ...e, isPublished: !e.isPublished } : e))}><Icon name="eye" /></button>}
+                        <button className="btn-icon" onClick={() => { setEditingEvent(event); setShowEventModal(true); }}><Icon name="edit" /></button>
+                        <button className="btn-icon danger" onClick={() => deleteEvent(event.id)}><Icon name="trash" /></button>
+                      </>
+                    )}
+                    {!isCoach && isLesson && (
+                      isMyBooking ? (
+                        <div className="my-booking-actions">
+                          <span className="my-badge">My Lesson</span>
+                          <button className={`btn btn-sm ${isWithin24h(event.date, event.startTime) ? 'btn-danger' : 'btn-secondary'}`} onClick={() => {
+                            const isLate = isWithin24h(event.date, event.startTime);
+                            if (confirm(isLate ? `⚠️ LATE CANCEL: You'll be billed $${getRate(event.lessonType)}. Proceed?` : 'Cancel lesson?')) cancelBooking(event, loggedInStudentId);
+                          }}>{isWithin24h(event.date, event.startTime) ? 'Cancel (Bill)' : 'Cancel'}</button>
+                        </div>
+                      ) : canBook ? (
+                        <button className="btn btn-primary btn-sm" onClick={() => bookLesson(event, loggedInStudentId)}>Book</button>
+                      ) : isFull ? <span className="full-badge">Full</span> : null
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render Clients
+  const renderClients = () => (
+    <div className="section">
+      <div className="section-header">
+        <h2>Clients (Parents/Guardians)</h2>
+        <button className="btn btn-primary" onClick={() => { setSelectedClient(null); setShowClientModal(true); }}><Icon name="plus" /> Add Client</button>
+      </div>
+      <div className="cards-list">
+        {clients.map(client => {
+          const clientStudents = getStudentsByClient(client.id);
+          return (
+            <div key={client.id} className="card">
+              <div className="card-main">
+                <h3>{client.name}</h3>
+                <p>{client.email}</p>
+                <p>{client.phone}</p>
+              </div>
+              <div className="card-students">
+                <h4>Students:</h4>
+                {clientStudents.length === 0 ? <p className="empty">No students</p> : (
+                  <div className="chips">
+                    {clientStudents.map(s => <span key={s.id} className="chip" style={{ background: s.color + '20', borderColor: s.color }} onClick={() => { setSelectedStudent(s); setShowStudentModal(true); }}>{s.name}</span>)}
+                  </div>
+                )}
+              </div>
+              <div className="card-actions">
+                <button className="btn btn-secondary btn-sm" onClick={() => { setSelectedClient(client); setShowClientModal(true); }}>Edit</button>
+                <button className="btn btn-secondary btn-sm" onClick={() => generateInvoice(client.id)}><Icon name="dollar" /> Invoice</button>
+                <button className="btn-icon danger" onClick={() => deleteClient(client.id)}><Icon name="trash" /></button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Render Students
+  const renderStudents = () => (
+    <div className="section">
+      <div className="section-header">
+        <h2>Students</h2>
+        <button className="btn btn-primary" onClick={() => { setSelectedStudent(null); setShowStudentModal(true); }}><Icon name="plus" /> Add Student</button>
+      </div>
+      <div className="students-grid">
+        {students.map(student => {
+          const client = getClient(student.clientId);
+          const age = calcAge(student.birthdate);
+          return (
+            <div key={student.id} className="student-card" style={{ borderLeftColor: student.color }}>
+              <h3>{student.name}</h3>
+              <p className="level">{student.level}</p>
+              {age && <p className="age">Age {age}</p>}
+              <p className="parent">Parent: {client?.name}</p>
+              <div className="ids">
+                {student.usfsa && <span>USFSA: {student.usfsa}</span>}
+                {student.isi && <span>ISI: {student.isi}</span>}
+              </div>
+              <div className="actions">
+                <button className="btn btn-secondary btn-sm" onClick={() => { setSelectedStudent(student); setShowStudentModal(true); }}>Edit</button>
+                <button className="btn-icon danger" onClick={() => deleteStudent(student.id)}><Icon name="trash" /></button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Render Invoices
+  const renderInvoices = () => {
+    const sorted = [...invoices].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    return (
+      <div className="section">
+        <div className="section-header">
+          <h2>Invoices</h2>
+          <div className="header-actions">
+            <button className="btn btn-secondary" onClick={() => setShowRatesModal(true)}><Icon name="settings" /> Rates</button>
+          </div>
+        </div>
+        <div className="stats-row">
+          <div className="stat"><span className="val">{invoices.filter(i => i.status === 'draft').length}</span><span className="label">Drafts</span></div>
+          <div className="stat"><span className="val">{invoices.filter(i => i.status === 'sent').length}</span><span className="label">Sent</span></div>
+          <div className="stat"><span className="val">{invoices.filter(i => i.status === 'paid').length}</span><span className="label">Paid</span></div>
+        </div>
+        {sorted.length === 0 ? <p className="empty-state">No invoices yet. Generate from a client's profile.</p> : (
+          <div className="invoices-list">
+            {sorted.map(inv => (
+              <div key={inv.id} className="invoice-row" onClick={() => { setSelectedInvoice(inv); setShowInvoiceDetail(true); }}>
+                <span className="inv-num">{inv.number}</span>
+                <span className="inv-client">{inv.clientName}</span>
+                <span className="inv-date">{new Date(inv.createdAt).toLocaleDateString()}</span>
+                <span className="inv-amount">${inv.total.toFixed(2)}</span>
+                <span className={`inv-status ${inv.status}`}>{inv.status}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render Venues
+  const renderVenues = () => (
+    <div className="section">
+      <div className="section-header">
+        <h2>Venues</h2>
+        <button className="btn btn-primary" onClick={() => setShowVenueModal(true)}><Icon name="plus" /> Add Venue</button>
+      </div>
+      <div className="venues-list">
+        {venues.map(v => (
+          <div key={v.id} className="venue-card" style={{ borderLeftColor: v.color }}>
+            <div><h3>{v.name}</h3><p>{v.address}</p></div>
+            <button className="btn-icon danger" onClick={() => deleteVenue(v.id)}><Icon name="trash" /></button>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Render Competitions
+  // Dashboard
+  const renderDashboard = () => {
+    const stats = getFinancialStats(dashboardPeriod);
+    const pendingInvoices = invoices.filter(i => i.status === 'sent' || i.status === 'partial' || i.status === 'overdue');
+    const recentExpenses = [...expenses].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+    const upcomingLessons = events.filter(e => e.type === 'lesson' && e.date >= getToday()).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 5);
+    
+    return (
+      <div className="dashboard">
+        <div className="dashboard-header">
+          <h2>Dashboard</h2>
+          <div className="period-toggle">
+            {['month', 'year', 'all'].map(p => (
+              <button key={p} className={dashboardPeriod === p ? 'active' : ''} onClick={() => setDashboardPeriod(p)}>
+                {p === 'month' ? 'This Month' : p === 'year' ? 'This Year' : 'All Time'}
+              </button>
+            ))}
+          </div>
+        </div>
+        
+        <div className="stats-grid">
+          <div className="stat-card"><span className="stat-label">Revenue</span><span className="stat-value">{formatCurrency(stats.revenue)}</span></div>
+          <div className="stat-card"><span className="stat-label">Expenses</span><span className="stat-value expense">{formatCurrency(stats.expenses)}</span></div>
+          <div className="stat-card"><span className="stat-label">Mileage ({stats.totalMiles} mi)</span><span className="stat-value">{formatCurrency(stats.mileageDeduction)}</span></div>
+          <div className="stat-card"><span className="stat-label">Net Income</span><span className="stat-value net">{formatCurrency(stats.netIncome)}</span></div>
+        </div>
+        
+        <div className="dashboard-grid">
+          <div className="dash-card">
+            <h3>Outstanding Invoices ({formatCurrency(stats.outstanding)})</h3>
+            {pendingInvoices.length === 0 ? <p className="empty">All caught up!</p> : (
+              <div className="mini-list">{pendingInvoices.slice(0, 5).map(inv => (
+                <div key={inv.id} className="mini-item" onClick={() => { setSelectedInvoice(inv); setShowInvoiceDetail(true); }}>
+                  <span className="mini-primary">{inv.clientName}</span><span className="mini-amount">{formatCurrency(inv.total - (inv.amountPaid || 0))}</span>
+                </div>
+              ))}</div>
+            )}
+          </div>
+          
+          <div className="dash-card">
+            <h3>Recent Expenses</h3>
+            {recentExpenses.length === 0 ? <p className="empty">No expenses.</p> : (
+              <div className="mini-list">{recentExpenses.map(exp => {
+                const cat = EXPENSE_CATEGORIES.find(c => c.id === exp.category);
+                return <div key={exp.id} className="mini-item"><span className="mini-icon">{cat?.icon}</span><span className="mini-primary">{exp.description}</span><span className="mini-amount">{formatCurrency(exp.amount)}</span></div>;
+              })}</div>
+            )}
+          </div>
+          
+          <div className="dash-card">
+            <h3>Upcoming Lessons</h3>
+            {upcomingLessons.length === 0 ? <p className="empty">No lessons scheduled.</p> : (
+              <div className="mini-list">{upcomingLessons.map(e => {
+                const names = (e.studentIds || []).map(id => getStudent(id)?.name).filter(Boolean).join(', ');
+                return <div key={e.id} className="mini-item"><span className="mini-date">{formatDateShort(e.date)}</span><span className="mini-primary">{names || 'Open'}</span></div>;
+              })}</div>
+            )}
+          </div>
+          
+          <div className="dash-card">
+            <h3>Expense Breakdown</h3>
+            {Object.keys(stats.expensesByCategory).length === 0 ? <p className="empty">No expenses.</p> : (
+              <div className="breakdown">{Object.entries(stats.expensesByCategory).sort((a, b) => b[1] - a[1]).map(([catId, amount]) => {
+                const cat = EXPENSE_CATEGORIES.find(c => c.id === catId);
+                return <div key={catId} className="breakdown-row"><span>{cat?.icon} {cat?.name}</span><span>{formatCurrency(amount)}</span></div>;
+              })}</div>
+            )}
+          </div>
+        </div>
+        
+        <div className="quick-actions">
+          <button className="btn btn-primary" onClick={() => setShowExpenseModal(true)}>+ Add Expense</button>
+          <button className="btn btn-primary" onClick={() => setShowMileageModal(true)}>+ Log Mileage</button>
+          <button className="btn btn-secondary" onClick={() => setShowInvoiceModal(true)}>+ Create Invoice</button>
+        </div>
+      </div>
+    );
+  };
+
+  // Expenses
+  const renderExpenses = () => {
+    const sorted = [...expenses].sort((a, b) => b.date.localeCompare(a.date));
+    const total = expenses.reduce((s, e) => s + e.amount, 0);
+    
+    return (
+      <div className="section">
+        <div className="section-header">
+          <h2>Expenses</h2>
+          <button className="btn btn-primary" onClick={() => { setEditingExpense(null); setShowExpenseModal(true); }}>+ Add Expense</button>
+        </div>
+        <div className="summary-bar"><span>Total: <strong>{formatCurrency(total)}</strong></span><span>{expenses.length} expense{expenses.length !== 1 ? 's' : ''}</span></div>
+        {sorted.length === 0 ? <p className="empty">No expenses recorded.</p> : (
+          <div className="expense-list">{sorted.map(exp => {
+            const cat = EXPENSE_CATEGORIES.find(c => c.id === exp.category);
+            return (
+              <div key={exp.id} className="expense-row">
+                <span className="exp-icon">{cat?.icon || '📦'}</span>
+                <div className="exp-info"><span className="exp-desc">{exp.description}</span><span className="exp-cat">{cat?.name || 'Other'}</span></div>
+                <span className="exp-date">{formatDateShort(exp.date)}</span>
+                <span className="exp-amount">{formatCurrency(exp.amount)}</span>
+                <div className="exp-actions">
+                  <button className="btn-icon" onClick={() => { setEditingExpense(exp); setShowExpenseModal(true); }}>✏️</button>
+                  <button className="btn-icon danger" onClick={() => deleteExpense(exp.id)}>🗑️</button>
+                </div>
+              </div>
+            );
+          })}</div>
+        )}
+      </div>
+    );
+  };
+
+  // Mileage
+  const renderMileage = () => {
+    const sorted = [...mileage].sort((a, b) => b.date.localeCompare(a.date));
+    const totalMiles = mileage.reduce((s, m) => s + (m.roundTrip ? m.miles * 2 : m.miles), 0);
+    const totalDeduction = totalMiles * mileageRate;
+    
+    return (
+      <div className="section">
+        <div className="section-header">
+          <h2>Mileage Log</h2>
+          <button className="btn btn-primary" onClick={() => { setEditingMileage(null); setShowMileageModal(true); }}>+ Log Trip</button>
+        </div>
+        <div className="mileage-summary">
+          <div className="mileage-stat"><span className="stat-value">{totalMiles}</span><span className="stat-label">Total Miles</span></div>
+          <div className="mileage-stat highlight"><span className="stat-value">{formatCurrency(totalDeduction)}</span><span className="stat-label">Tax Deduction</span></div>
+          <div className="mileage-rate">@ ${mileageRate}/mile (2025 IRS rate)</div>
+        </div>
+        {sorted.length === 0 ? <p className="empty">No mileage logged.</p> : (
+          <div className="mileage-list">{sorted.map(trip => {
+            const actualMiles = trip.roundTrip ? trip.miles * 2 : trip.miles;
+            return (
+              <div key={trip.id} className="mileage-row">
+                <span className="trip-date">{formatDateShort(trip.date)}</span>
+                <div className="trip-route">
+                  <span>{trip.fromLocation}</span><span className="arrow">→</span><span>{trip.toLocation}</span>
+                  {trip.roundTrip && <span className="rt-badge">Round trip</span>}
+                </div>
+                <span className="trip-purpose">{trip.purpose}</span>
+                <span className="trip-miles">{actualMiles} mi</span>
+                <span className="trip-deduction">{formatCurrency(actualMiles * mileageRate)}</span>
+                <div className="trip-actions">
+                  <button className="btn-icon" onClick={() => { setEditingMileage(trip); setShowMileageModal(true); }}>✏️</button>
+                  <button className="btn-icon danger" onClick={() => deleteMileage(trip.id)}>🗑️</button>
+                </div>
+              </div>
+            );
+          })}</div>
+        )}
+      </div>
+    );
+  };
+
+  const renderCompetitions = () => (
+    <div className="section">
+      <div className="section-header">
+        <h2>Competitions</h2>
+      </div>
+      <div className="comps-list">
+        {competitions.map(c => {
+          const d = new Date(c.startDate + 'T00:00:00');
+          const regOpen = c.registrationDeadline ? new Date() < new Date(c.registrationDeadline) : true;
+          return (
+            <div key={c.id} className="comp-card">
+              <div className="comp-date"><span className="month">{d.toLocaleDateString('en-US', { month: 'short' })}</span><span className="day">{d.getDate()}</span></div>
+              <div className="comp-info">
+                <h3>{c.name}</h3>
+                <p><Icon name="mapPin" /> {c.location}</p>
+                <div className="comp-badges">
+                  <span className={`type-badge ${c.type?.toLowerCase()}`}>{c.type}</span>
+                  {c.registrationDeadline && <span className={`reg-badge ${regOpen ? 'open' : 'closed'}`}>{regOpen ? 'Reg Open' : 'Closed'}</span>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // Render My Lessons (Student View)
+  const renderMyLessons = () => {
+    const today = getToday();
+    const myEvents = events.filter(e => e.type === 'lesson' && (e.studentIds || []).includes(loggedInStudentId));
+    const upcoming = myEvents.filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date));
+    const past = myEvents.filter(e => e.date < today).sort((a, b) => b.date.localeCompare(a.date));
+    
+    return (
+      <div className="section">
+        <h2>My Lessons</h2>
+        <div className="stats-row">
+          <div className="stat"><span className="val">{upcoming.length}</span><span className="label">Upcoming</span></div>
+          <div className="stat"><span className="val">{past.length}</span><span className="label">Completed</span></div>
+        </div>
+        
+        <h3 className="subheader">Upcoming</h3>
+        {upcoming.length === 0 ? <p className="empty">No upcoming lessons.</p> : (
+          <div className="my-lessons">
+            {upcoming.map(e => {
+              const venue = getVenue(e.venueId);
+              const daysUntil = Math.ceil((new Date(e.date) - new Date(today)) / 86400000);
+              const isLate = isWithin24h(e.date, e.startTime);
+              return (
+                <div key={e.id} className={`lesson-row ${e.lessonType}`}>
+                  <div className="lesson-date"><span className="month">{new Date(e.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short' })}</span><span className="day">{new Date(e.date + 'T00:00:00').getDate()}</span></div>
+                  <div className="lesson-info">
+                    <span className={`lesson-badge ${e.lessonType}`}>{e.lessonType}</span>
+                    <span>{formatTime(e.startTime)} - {formatTime(e.endTime)}</span>
+                    {venue && <span>{venue.name}</span>}
+                  </div>
+                  <div className="lesson-countdown">
+                    <span className={`countdown ${daysUntil === 0 ? 'today' : daysUntil === 1 ? 'tomorrow' : ''}`}>{daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil} days`}</span>
+                    {isLate && <span className="late-warn">24hr policy</span>}
+                  </div>
+                  <button className={`btn btn-sm ${isLate ? 'btn-danger' : 'btn-secondary'}`} onClick={() => {
+                    if (confirm(isLate ? `⚠️ LATE CANCEL: You'll be billed $${getRate(e.lessonType)}. Proceed?` : 'Cancel?')) cancelBooking(e, loggedInStudentId);
+                  }}>{isLate ? 'Cancel (Bill)' : 'Cancel'}</button>
+                </div>
+              );
+            })}
+          </div>
+        )}
+        
+        <h3 className="subheader">Past</h3>
+        {past.length === 0 ? <p className="empty">No past lessons.</p> : (
+          <div className="past-lessons">
+            {past.slice(0, 10).map(e => <div key={e.id} className="past-row"><span>{formatDate(e.date)}</span><span className={e.lessonType}>{e.lessonType}</span><span>{formatTime(e.startTime)}</span></div>)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render My Profile (Student View)
+  const renderMyProfile = () => {
+    const student = getStudent(loggedInStudentId);
+    const client = student ? getClient(student.clientId) : null;
+    if (!student) return null;
+    const age = calcAge(student.birthdate);
+    
+    return (
+      <div className="section profile-section">
+        <h2>My Profile</h2>
+        <div className="profile-card" style={{ borderLeftColor: student.color }}>
+          <div className="avatar" style={{ background: student.color }}>{student.name.split(' ').map(n => n[0]).join('')}</div>
+          <div>
+            <h3>{student.name}</h3>
+            <p className="level">{student.level}</p>
+          </div>
+        </div>
+        <div className="profile-details">
+          {age && <div className="row"><span>Age</span><span>{age} years old</span></div>}
+          {student.usfsa && <div className="row"><span>USFSA #</span><span>{student.usfsa}</span></div>}
+          {student.isi && <div className="row"><span>ISI #</span><span>{student.isi}</span></div>}
+        </div>
+        {client && (
+          <div className="billing-card">
+            <h4>Billing Contact</h4>
+            <p className="name">{client.name}</p>
+            <p>{client.email}</p>
+            <p>{client.phone}</p>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Event Modal
+  const EventModal = () => {
+    const [form, setForm] = useState(editingEvent || { date: selectedDate, type: 'lesson', lessonType: 'private', title: '', startTime: '09:00', endTime: '09:30', venueId: venues[0]?.id || '', studentIds: [], maxStudents: 6, isPublished: false, color: '#6366f1' });
+    
+    useEffect(() => { setForm(editingEvent || { date: selectedDate, type: 'lesson', lessonType: 'private', title: '', startTime: '09:00', endTime: '09:30', venueId: venues[0]?.id || '', studentIds: [], maxStudents: 6, isPublished: false, color: '#6366f1' }); }, [editingEvent, selectedDate]);
+    
+    const handleSave = () => {
+      let title = form.title;
+      if (form.type === 'lesson' && !title) title = form.lessonType === 'private' ? 'Private Lesson' : form.lessonType === 'shared' ? 'Shared Lesson' : 'Group Class';
+      let maxStudents = form.type === 'lesson' ? (form.lessonType === 'private' ? 1 : form.lessonType === 'shared' ? 2 : parseInt(form.maxStudents) || 6) : 1;
+      saveEvent({ ...form, title, maxStudents, venueId: form.venueId ? parseInt(form.venueId) : null });
+    };
+    
+    return (
+      <Modal isOpen={showEventModal} onClose={() => { setShowEventModal(false); setEditingEvent(null); }} title={editingEvent?.id ? 'Edit Event' : 'New Event'} size="large">
+        <div className="form-group">
+          <label>Type</label>
+          <div className="type-toggle">
+            {['lesson', 'personal', 'blocked'].map(t => <button key={t} className={form.type === t ? 'active' : ''} onClick={() => setForm({ ...form, type: t })}>{t}</button>)}
+          </div>
+        </div>
+        
+        {form.type === 'lesson' && (
+          <div className="form-group">
+            <label>Lesson Type</label>
+            <div className="lesson-toggle">
+              {[{ v: 'private', l: 'Private', p: rates.private }, { v: 'shared', l: 'Shared', p: rates.shared }, { v: 'class', l: 'Class', p: rates.class }].map(t => (
+                <button key={t.v} className={form.lessonType === t.v ? 'active' : ''} onClick={() => setForm({ ...form, lessonType: t.v })}>
+                  <span>{t.l}</span><small>${t.p}</small>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {form.type === 'lesson' && form.lessonType === 'class' && (
+          <div className="form-row">
+            <div className="form-group"><label>Class Title</label><input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="e.g., Beginner Group" /></div>
+            <div className="form-group"><label>Max Students</label><input type="number" min="3" max="30" value={form.maxStudents} onChange={e => setForm({ ...form, maxStudents: e.target.value })} /></div>
+          </div>
+        )}
+        
+        {form.type !== 'lesson' && <div className="form-group"><label>Title</label><input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>}
+        
+        <div className="form-group"><label>Date</label><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+        
+        <div className="form-row">
+          <div className="form-group"><label>Start</label><input type="time" value={form.startTime} onChange={e => setForm({ ...form, startTime: e.target.value })} /></div>
+          <div className="form-group"><label>End</label><input type="time" value={form.endTime} onChange={e => setForm({ ...form, endTime: e.target.value })} /></div>
+        </div>
+        
+        {(form.type === 'lesson' || form.type === 'blocked') && (
+          <div className="form-group">
+            <label>Venue</label>
+            <select value={form.venueId || ''} onChange={e => setForm({ ...form, venueId: e.target.value })}>
+              <option value="">Select...</option>
+              {venues.map(v => <option key={v.id} value={v.id}>{v.name}</option>)}
+            </select>
+          </div>
+        )}
+        
+        {form.type === 'lesson' && (
+          <div className="form-group checkbox"><label><input type="checkbox" checked={form.isPublished} onChange={e => setForm({ ...form, isPublished: e.target.checked })} /> Publish (visible for booking)</label></div>
+        )}
+        
+        <div className="form-actions">
+          <button className="btn btn-secondary" onClick={() => { setShowEventModal(false); setEditingEvent(null); }}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave}>{editingEvent?.id ? 'Save' : 'Create'}</button>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Client Modal
+  const ClientModal = () => {
+    const [form, setForm] = useState(selectedClient || { name: '', email: '', phone: '', address: '' });
+    useEffect(() => { setForm(selectedClient || { name: '', email: '', phone: '', address: '' }); }, [selectedClient]);
+    
+    return (
+      <Modal isOpen={showClientModal} onClose={() => { setShowClientModal(false); setSelectedClient(null); }} title={selectedClient ? 'Edit Client' : 'Add Client'}>
+        <div className="form-group"><label>Name *</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+        <div className="form-group"><label>Email *</label><input type="email" value={form.email} onChange={e => setForm({ ...form, email: e.target.value })} /></div>
+        <div className="form-group"><label>Phone</label><input value={form.phone} onChange={e => setForm({ ...form, phone: e.target.value })} /></div>
+        <div className="form-group"><label>Address</label><textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
+        <div className="form-actions">
+          <button className="btn btn-secondary" onClick={() => { setShowClientModal(false); setSelectedClient(null); }}>Cancel</button>
+          <button className="btn btn-primary" disabled={!form.name || !form.email} onClick={() => saveClient(form)}>{selectedClient ? 'Save' : 'Add'}</button>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Student Modal
+  const StudentModal = () => {
+    const [form, setForm] = useState(selectedStudent || { clientId: clients[0]?.id || '', name: '', birthdate: '', level: 'Basic 1', usfsa: '', isi: '', notes: '' });
+    useEffect(() => { setForm(selectedStudent || { clientId: clients[0]?.id || '', name: '', birthdate: '', level: 'Basic 1', usfsa: '', isi: '', notes: '' }); }, [selectedStudent]);
+    
+    return (
+      <Modal isOpen={showStudentModal} onClose={() => { setShowStudentModal(false); setSelectedStudent(null); }} title={selectedStudent ? 'Edit Student' : 'Add Student'}>
+        <div className="form-group"><label>Parent/Guardian *</label><select value={form.clientId} onChange={e => setForm({ ...form, clientId: parseInt(e.target.value) })}><option value="">Select...</option>{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+        <div className="form-group"><label>Name *</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+        <div className="form-row">
+          <div className="form-group"><label>Birthdate</label><input type="date" value={form.birthdate} onChange={e => setForm({ ...form, birthdate: e.target.value })} /></div>
+          <div className="form-group"><label>Level</label><select value={form.level} onChange={e => setForm({ ...form, level: e.target.value })}>{LEVELS.map(l => <option key={l} value={l}>{l}</option>)}</select></div>
+        </div>
+        <div className="form-row">
+          <div className="form-group"><label>USFSA #</label><input value={form.usfsa} onChange={e => setForm({ ...form, usfsa: e.target.value })} /></div>
+          <div className="form-group"><label>ISI #</label><input value={form.isi} onChange={e => setForm({ ...form, isi: e.target.value })} /></div>
+        </div>
+        <div className="form-actions">
+          <button className="btn btn-secondary" onClick={() => { setShowStudentModal(false); setSelectedStudent(null); }}>Cancel</button>
+          <button className="btn btn-primary" disabled={!form.name || !form.clientId} onClick={() => saveStudent(form)}>{selectedStudent ? 'Save' : 'Add'}</button>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Venue Modal
+  const VenueModal = () => {
+    const [form, setForm] = useState({ name: '', address: '', color: '#0ea5e9' });
+    return (
+      <Modal isOpen={showVenueModal} onClose={() => setShowVenueModal(false)} title="Add Venue">
+        <div className="form-group"><label>Name *</label><input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} /></div>
+        <div className="form-group"><label>Address</label><textarea value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} /></div>
+        <div className="form-group"><label>Color</label><div className="color-picker">{COLORS.map(c => <button key={c} className={`color-btn ${form.color === c ? 'active' : ''}`} style={{ background: c }} onClick={() => setForm({ ...form, color: c })} />)}</div></div>
+        <div className="form-actions">
+          <button className="btn btn-secondary" onClick={() => setShowVenueModal(false)}>Cancel</button>
+          <button className="btn btn-primary" disabled={!form.name} onClick={() => saveVenue(form)}>Add</button>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Rates Modal
+  const RatesModal = () => {
+    const [form, setForm] = useState(rates);
+    const [mileageForm, setMileageForm] = useState(mileageRate);
+    useEffect(() => { setForm(rates); setMileageForm(mileageRate); }, [rates, mileageRate]);
+    return (
+      <Modal isOpen={showRatesModal} onClose={() => setShowRatesModal(false)} title="Rates & Settings">
+        <h4 style={{ fontSize: '0.85rem', color: '#64748b', marginBottom: '0.75rem' }}>Lesson Rates</h4>
+        {['private', 'shared', 'class'].map(t => (
+          <div key={t} className="rate-row">
+            <span className="rate-label">{t.charAt(0).toUpperCase() + t.slice(1)}</span>
+            <div className="rate-input"><span>$</span><input type="number" min="0" value={form[t]} onChange={e => setForm({ ...form, [t]: parseInt(e.target.value) || 0 })} /></div>
+          </div>
+        ))}
+        <h4 style={{ fontSize: '0.85rem', color: '#64748b', margin: '1.25rem 0 0.75rem' }}>Mileage Rate</h4>
+        <div className="rate-row">
+          <span className="rate-label">Per Mile (IRS 2025: $0.70)</span>
+          <div className="rate-input"><span>$</span><input type="number" min="0" step="0.01" value={mileageForm} onChange={e => setMileageForm(parseFloat(e.target.value) || 0)} /></div>
+        </div>
+        <div className="form-actions">
+          <button className="btn btn-secondary" onClick={() => setShowRatesModal(false)}>Cancel</button>
+          <button className="btn btn-primary" onClick={() => { setRates(form); setMileageRate(mileageForm); setShowRatesModal(false); }}>Save</button>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Invoice Detail Modal
+  const InvoiceDetailModal = () => {
+    const [paymentAmount, setPaymentAmount] = useState('');
+    if (!selectedInvoice) return null;
+    const remaining = selectedInvoice.total - (selectedInvoice.amountPaid || 0);
+    return (
+      <Modal isOpen={showInvoiceDetail} onClose={() => { setShowInvoiceDetail(false); setSelectedInvoice(null); }} title={`Invoice ${selectedInvoice.number}`} size="large">
+        <div className="invoice-detail">
+          <div className="inv-header"><span className="inv-num">{selectedInvoice.number}</span><span className={`inv-status ${selectedInvoice.status}`}>{selectedInvoice.status}</span><span className="inv-total">${selectedInvoice.total.toFixed(2)}</span></div>
+          <div className="inv-parties">
+            <div><h4>Bill To</h4><p>{selectedInvoice.clientName}</p><p>{selectedInvoice.clientEmail}</p><p>{selectedInvoice.clientAddress}</p></div>
+            <div><h4>Details</h4><p>Created: {new Date(selectedInvoice.createdAt).toLocaleDateString()}</p><p>Due: {new Date(selectedInvoice.dueDate).toLocaleDateString()}</p></div>
+          </div>
+          <table className="inv-items">
+            <thead><tr><th>Date</th><th>Description</th><th>Amount</th></tr></thead>
+            <tbody>{selectedInvoice.items.map(i => <tr key={i.id} className={i.type === 'late_cancel' ? 'late' : ''}><td>{formatDate(i.date)}</td><td>{i.description}</td><td>${i.amount.toFixed(2)}</td></tr>)}</tbody>
+            <tfoot>
+              <tr><td colSpan={2}>Subtotal</td><td>${selectedInvoice.total.toFixed(2)}</td></tr>
+              {(selectedInvoice.amountPaid || 0) > 0 && <tr className="paid-row"><td colSpan={2}>Paid</td><td>-${selectedInvoice.amountPaid.toFixed(2)}</td></tr>}
+              <tr className="total-row"><td colSpan={2}><strong>Balance Due</strong></td><td><strong>${remaining.toFixed(2)}</strong></td></tr>
+            </tfoot>
+          </table>
+          {(selectedInvoice.payments?.length > 0) && <div className="payments-section"><h4>Payment History</h4>{selectedInvoice.payments.map(p => <div key={p.id} className="payment-row"><span>{formatDateShort(p.date)}</span><span>{formatCurrency(p.amount)}</span></div>)}</div>}
+          <div className="inv-actions">
+            {selectedInvoice.status === 'draft' && <button className="btn btn-primary" onClick={() => updateInvoiceStatus(selectedInvoice.id, 'sent')}>Mark Sent</button>}
+            {remaining > 0 && selectedInvoice.status !== 'draft' && (
+              <div className="record-payment">
+                <input type="number" min="0" step="0.01" max={remaining} value={paymentAmount} onChange={e => setPaymentAmount(e.target.value)} placeholder={`$${remaining.toFixed(2)}`} />
+                <button className="btn btn-primary" disabled={!paymentAmount || parseFloat(paymentAmount) <= 0} onClick={() => { recordPayment(selectedInvoice.id, parseFloat(paymentAmount)); setPaymentAmount(''); setSelectedInvoice(invoices.find(i => i.id === selectedInvoice.id)); }}>Record Payment</button>
+              </div>
+            )}
+          </div>
+        </div>
+      </Modal>
+    );
+  };
+
+  // Import Modal
+  const ImportModal = () => (
+    <Modal isOpen={showImportModal} onClose={() => setShowImportModal(false)} title="Import Calendar">
+      <p>Import events from Google, Outlook, or Apple Calendar by uploading an ICS file.</p>
+      <div className="import-action"><button className="btn btn-primary" onClick={() => fileInputRef.current?.click()}><Icon name="upload" /> Choose File</button></div>
+    </Modal>
+  );
+
+  // Expense Modal
+  const ExpenseModal = () => {
+    const [form, setForm] = useState(editingExpense || { date: getToday(), category: 'ice_time', description: '', amount: '' });
+    useEffect(() => { setForm(editingExpense || { date: getToday(), category: 'ice_time', description: '', amount: '' }); }, [editingExpense]);
+    return (
+      <Modal isOpen={showExpenseModal} onClose={() => { setShowExpenseModal(false); setEditingExpense(null); }} title={editingExpense ? 'Edit Expense' : 'Add Expense'}>
+        <div className="form-group"><label>Date</label><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+        <div className="form-group"><label>Category</label><select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })}>{EXPENSE_CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.icon} {c.name}</option>)}</select></div>
+        <div className="form-group"><label>Description</label><input value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="What was this expense for?" /></div>
+        <div className="form-group"><label>Amount</label><div className="input-prefix"><span>$</span><input type="number" min="0" step="0.01" value={form.amount} onChange={e => setForm({ ...form, amount: parseFloat(e.target.value) || '' })} /></div></div>
+        <div className="form-actions"><button className="btn btn-secondary" onClick={() => { setShowExpenseModal(false); setEditingExpense(null); }}>Cancel</button><button className="btn btn-primary" disabled={!form.description || !form.amount} onClick={() => saveExpense(form)}>{editingExpense ? 'Save' : 'Add'}</button></div>
+      </Modal>
+    );
+  };
+
+  // Mileage Modal
+  const MileageModal = () => {
+    const [form, setForm] = useState(editingMileage || { date: getToday(), fromLocation: 'Home', toLocation: '', miles: '', purpose: '', roundTrip: true });
+    useEffect(() => { setForm(editingMileage || { date: getToday(), fromLocation: 'Home', toLocation: '', miles: '', purpose: '', roundTrip: true }); }, [editingMileage]);
+    const handleToChange = (val) => { const venue = venues.find(v => v.name === val); setForm(f => ({ ...f, toLocation: val, miles: venue?.distance || f.miles })); };
+    const actualMiles = form.roundTrip ? (form.miles || 0) * 2 : (form.miles || 0);
+    return (
+      <Modal isOpen={showMileageModal} onClose={() => { setShowMileageModal(false); setEditingMileage(null); }} title={editingMileage ? 'Edit Mileage' : 'Log Mileage'}>
+        <div className="form-group"><label>Date</label><input type="date" value={form.date} onChange={e => setForm({ ...form, date: e.target.value })} /></div>
+        <div className="form-row"><div className="form-group"><label>From</label><input value={form.fromLocation} onChange={e => setForm({ ...form, fromLocation: e.target.value })} /></div><div className="form-group"><label>To</label><select value={form.toLocation} onChange={e => handleToChange(e.target.value)}><option value="">Select venue...</option>{venues.map(v => <option key={v.id} value={v.name}>{v.name} {v.distance ? `(${v.distance} mi)` : ''}</option>)}</select></div></div>
+        {!venues.find(v => v.name === form.toLocation) && <div className="form-group"><label>Or enter destination</label><input value={form.toLocation} onChange={e => setForm({ ...form, toLocation: e.target.value })} /></div>}
+        <div className="form-row"><div className="form-group"><label>One-way Miles</label><input type="number" min="0" step="0.1" value={form.miles} onChange={e => setForm({ ...form, miles: parseFloat(e.target.value) || '' })} /></div><div className="form-group checkbox"><label><input type="checkbox" checked={form.roundTrip} onChange={e => setForm({ ...form, roundTrip: e.target.checked })} /> Round trip</label></div></div>
+        <div className="form-group"><label>Purpose</label><input value={form.purpose} onChange={e => setForm({ ...form, purpose: e.target.value })} placeholder="e.g., Lessons, Competition" /></div>
+        {form.miles > 0 && <div className="mileage-preview"><span>Total: <strong>{actualMiles} miles</strong></span><span>Deduction: <strong>{formatCurrency(actualMiles * mileageRate)}</strong></span></div>}
+        <div className="form-actions"><button className="btn btn-secondary" onClick={() => { setShowMileageModal(false); setEditingMileage(null); }}>Cancel</button><button className="btn btn-primary" disabled={!form.toLocation || !form.miles} onClick={() => saveMileage(form)}>{editingMileage ? 'Save' : 'Log'}</button></div>
+      </Modal>
+    );
+  };
+
+  // Invoice Generate Modal
+  const InvoiceGenerateModal = () => {
+    const [clientId, setClientId] = useState(clients[0]?.id || '');
+    const [startDate, setStartDate] = useState(getMonthStart(getToday()));
+    const [endDate, setEndDate] = useState(getToday());
+    return (
+      <Modal isOpen={showInvoiceModal} onClose={() => setShowInvoiceModal(false)} title="Generate Invoice">
+        <div className="form-group"><label>Client</label><select value={clientId} onChange={e => setClientId(parseInt(e.target.value))}><option value="">Select client...</option>{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></div>
+        <div className="form-row"><div className="form-group"><label>From</label><input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} /></div><div className="form-group"><label>To</label><input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} /></div></div>
+        <div className="form-actions"><button className="btn btn-secondary" onClick={() => setShowInvoiceModal(false)}>Cancel</button><button className="btn btn-primary" disabled={!clientId} onClick={() => { const inv = generateInvoice(clientId, startDate, endDate); if (inv) { setShowInvoiceModal(false); setSelectedInvoice(inv); setShowInvoiceDetail(true); } }}>Generate</button></div>
+      </Modal>
+    );
+  };
+
+  return (
+    <div className="icebooks">
+      <style>{`
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root { --ice: #0ea5e9; --ice-light: #e0f2fe; --slate: #64748b; --slate-dark: #1e293b; --emerald: #10b981; --rose: #f43f5e; --gold: #f59e0b; --purple: #8b5cf6; --teal: #14b8a6; }
+        .icebooks { font-family: 'Source Sans 3', -apple-system, sans-serif; background: linear-gradient(135deg, #f1f5f9, #e0f2fe); min-height: 100vh; color: #1e293b; }
+        .icon { display: inline-flex; width: 16px; height: 16px; }
+        .icon svg { width: 100%; height: 100%; }
+        
+        /* Header */
+        .header { background: linear-gradient(135deg, #1e293b, #0f172a); color: white; padding: 1rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .logo { display: flex; align-items: center; gap: 0.75rem; }
+        .logo .icon { width: 24px; height: 24px; color: var(--ice); }
+        .logo h1 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+        .header-controls { display: flex; align-items: center; gap: 1rem; }
+        .login-opts { display: flex; align-items: center; gap: 1rem; }
+        .login-div { color: #64748b; font-size: 0.85rem; }
+        .btn-login { padding: 0.5rem 1rem; border: none; border-radius: 8px; background: var(--ice); color: white; font-weight: 500; cursor: pointer; }
+        .student-select select { padding: 0.5rem; border-radius: 8px; border: 1px solid #475569; background: #334155; color: white; }
+        .logged-in { display: flex; align-items: center; gap: 0.75rem; }
+        .greeting { color: #7dd3fc; }
+        .role-badge { padding: 0.25rem 0.75rem; border-radius: 100px; font-size: 0.8rem; font-weight: 600; background: var(--ice); }
+        .btn-logout { padding: 0.25rem 0.75rem; border: 1px solid #475569; border-radius: 8px; background: transparent; color: #94a3b8; cursor: pointer; }
+        
+        /* Notifications */
+        .notif-wrap { position: relative; }
+        .notif-bell { width: 40px; height: 40px; border: none; background: rgba(255,255,255,0.1); border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #94a3b8; position: relative; }
+        .notif-bell:hover { background: rgba(255,255,255,0.2); color: white; }
+        .notif-badge { position: absolute; top: -4px; right: -4px; background: var(--rose); color: white; font-size: 0.65rem; font-weight: 700; min-width: 18px; height: 18px; border-radius: 100px; display: flex; align-items: center; justify-content: center; }
+        .notif-dropdown { position: absolute; top: calc(100% + 8px); right: 0; width: 320px; max-height: 400px; background: white; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); z-index: 1000; overflow: hidden; }
+        .notif-header { display: flex; justify-content: space-between; padding: 1rem; border-bottom: 1px solid #e2e8f0; background: #f8fafc; }
+        .notif-header h4 { font-size: 0.9rem; }
+        .notif-header button { background: none; border: none; color: var(--ice); font-size: 0.8rem; cursor: pointer; }
+        .notif-list { max-height: 340px; overflow-y: auto; }
+        .notif-empty { padding: 2rem; text-align: center; color: #94a3b8; }
+        .notif-item { display: flex; gap: 0.75rem; padding: 0.75rem 1rem; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+        .notif-item:hover { background: #f8fafc; }
+        .notif-item.unread { background: #e0f2fe; }
+        .notif-item.billing { background: #fef2f2; border-left: 3px solid var(--rose); }
+        .notif-icon { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; }
+        .notif-item.booking .notif-icon { background: #d1fae5; color: var(--emerald); }
+        .notif-item.cancellation .notif-icon { background: #ffe4e6; color: var(--rose); }
+        .notif-content { flex: 1; }
+        .notif-msg { font-size: 0.85rem; font-weight: 500; }
+        .notif-details { font-size: 0.75rem; color: #64748b; }
+        .billing-warn { font-size: 0.7rem; font-weight: 600; color: var(--rose); background: #ffe4e6; padding: 0.125rem 0.375rem; border-radius: 4px; margin-top: 0.25rem; display: inline-block; }
+        
+        /* Nav */
+        .nav { display: flex; gap: 0.25rem; padding: 0.75rem 1.5rem; background: white; border-bottom: 1px solid #e2e8f0; overflow-x: auto; }
+        .nav-tab { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border: none; background: transparent; color: #64748b; font-size: 0.9rem; font-weight: 500; cursor: pointer; border-radius: 8px; white-space: nowrap; }
+        .nav-tab:hover { background: #f1f5f9; color: #334155; }
+        .nav-tab.active { background: var(--ice-light); color: #0369a1; }
+        
+        /* Main */
+        .main { padding: 1.5rem; max-width: 1400px; margin: 0 auto; }
+        
+        /* Welcome */
+        .welcome { display: flex; justify-content: center; align-items: center; min-height: 60vh; }
+        .welcome-card { background: white; border-radius: 16px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); padding: 3rem; text-align: center; max-width: 500px; }
+        .welcome-icon { width: 80px; height: 80px; background: linear-gradient(135deg, #38bdf8, var(--ice)); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; }
+        .welcome-icon .icon { width: 40px; height: 40px; color: white; }
+        .welcome-card h2 { font-family: 'Playfair Display', serif; font-size: 1.75rem; margin-bottom: 0.5rem; }
+        .welcome-card p { color: #64748b; }
+        
+        /* Dashboard */
+        .dashboard-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+        .dashboard-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+        .period-toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .period-toggle button { padding: 0.5rem 1rem; border: none; background: white; font-size: 0.85rem; cursor: pointer; }
+        .period-toggle button:hover { background: #f8fafc; }
+        .period-toggle button.active { background: var(--ice-light); color: #0369a1; font-weight: 600; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-card { background: white; border-radius: 12px; padding: 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .stat-card .stat-label { display: block; font-size: 0.8rem; color: #64748b; margin-bottom: 0.25rem; }
+        .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--emerald); }
+        .stat-card .stat-value.expense { color: var(--rose); }
+        .stat-card .stat-value.net { color: var(--ice); }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+        .dash-card { background: white; border-radius: 12px; padding: 1rem 1.25rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        .dash-card h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 0.75rem; color: #334155; }
+        .mini-list { display: flex; flex-direction: column; gap: 0.4rem; }
+        .mini-item { display: flex; align-items: center; gap: 0.5rem; padding: 0.4rem 0; cursor: pointer; font-size: 0.85rem; border-bottom: 1px solid #f8fafc; }
+        .mini-item:last-child { border-bottom: none; }
+        .mini-icon { font-size: 1rem; }
+        .mini-primary { flex: 1; }
+        .mini-amount { font-weight: 600; }
+        .mini-date { font-size: 0.75rem; color: #94a3b8; min-width: 60px; }
+        .breakdown { display: flex; flex-direction: column; gap: 0.4rem; }
+        .breakdown-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.35rem 0; border-bottom: 1px solid #f8fafc; }
+        .breakdown-row:last-child { border-bottom: none; }
+        .quick-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+        
+        /* Expenses */
+        .summary-bar { display: flex; justify-content: space-between; padding: 1rem; background: white; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; }
+        .expense-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .expense-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: white; border-radius: 10px; box-shadow: 0 1px 2px rgba(0,0,0,0.03); }
+        .exp-icon { font-size: 1.5rem; }
+        .exp-info { flex: 1; min-width: 120px; }
+        .exp-desc { display: block; font-weight: 500; }
+        .exp-cat { font-size: 0.75rem; color: #64748b; }
+        .exp-date { font-size: 0.85rem; color: #94a3b8; min-width: 70px; }
+        .exp-amount { font-weight: 600; font-size: 1rem; min-width: 80px; text-align: right; }
+        .exp-actions { display: flex; gap: 0.25rem; }
+        
+        /* Mileage */
+        .mileage-summary { display: flex; gap: 2rem; padding: 1.25rem; background: white; border-radius: 12px; margin-bottom: 1rem; align-items: center; flex-wrap: wrap; }
+        .mileage-stat { text-align: center; }
+        .mileage-stat.highlight { padding: 0.5rem 1rem; background: var(--ice-light); border-radius: 8px; }
+        .mileage-stat .stat-value { display: block; font-size: 1.5rem; font-weight: 700; color: var(--ice); }
+        .mileage-stat .stat-label { font-size: 0.8rem; color: #64748b; }
+        .mileage-rate { font-size: 0.8rem; color: #94a3b8; }
+        .mileage-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .mileage-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: white; border-radius: 10px; font-size: 0.9rem; flex-wrap: wrap; }
+        .trip-date { font-size: 0.85rem; color: #64748b; min-width: 70px; }
+        .trip-route { flex: 1; display: flex; align-items: center; gap: 0.5rem; min-width: 200px; }
+        .arrow { color: #94a3b8; }
+        .rt-badge { padding: 0.15rem 0.4rem; background: var(--purple); background: #f3e8ff; color: var(--purple); border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
+        .trip-purpose { color: #64748b; min-width: 100px; }
+        .trip-miles { font-weight: 600; min-width: 60px; }
+        .trip-deduction { color: var(--emerald); font-weight: 500; min-width: 70px; }
+        .trip-actions { display: flex; gap: 0.25rem; }
+        .mileage-preview { display: flex; justify-content: space-between; padding: 0.75rem; background: var(--ice-light); border-radius: 8px; margin-top: 0.5rem; font-size: 0.9rem; }
+        
+        /* Payment Section */
+        .payments-section { margin: 1rem 0; padding: 0.75rem; background: #f8fafc; border-radius: 8px; }
+        .payments-section h4 { font-size: 0.8rem; color: #64748b; margin-bottom: 0.5rem; }
+        .payment-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 0.25rem 0; }
+        .paid-row td { color: var(--emerald); }
+        .total-row td { font-size: 1.1rem; padding-top: 0.5rem; }
+        .record-payment { display: flex; gap: 0.5rem; flex: 1; }
+        .record-payment input { flex: 1; padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 6px; }
+        
+        /* Calendar Section */
+        .cal-section { display: grid; grid-template-columns: 1fr 380px; gap: 1.5rem; }
+        @media (max-width: 1000px) { .cal-section { grid-template-columns: 1fr; } }
+        .cal-panel { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+        .cal-toolbar { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+        .cal-nav { display: flex; align-items: center; gap: 0.5rem; }
+        .cal-nav button { width: 36px; height: 36px; border: 1px solid #e2e8f0; background: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; }
+        .cal-nav button:hover { background: #f8fafc; }
+        .cal-nav h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin: 0 1rem; min-width: 160px; text-align: center; }
+        .cal-actions { display: flex; gap: 0.5rem; }
+        .view-toggle { display: flex; border: 1px solid #e2e8f0; border-radius: 8px; overflow: hidden; }
+        .view-toggle button { padding: 0.4rem 0.75rem; border: none; background: white; font-size: 0.8rem; cursor: pointer; }
+        .view-toggle button:hover { background: #f8fafc; }
+        .view-toggle button.active { background: var(--ice-light); color: #0369a1; }
+        
+        /* Month Calendar */
+        .month-cal { padding: 1rem; }
+        .weekdays { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 0.5rem; }
+        .weekdays div { text-align: center; font-size: 0.75rem; font-weight: 600; color: #64748b; padding: 0.5rem; }
+        .days-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+        .cal-day { aspect-ratio: 1; padding: 0.4rem; border-radius: 8px; cursor: pointer; display: flex; flex-direction: column; align-items: center; position: relative; }
+        .cal-day:hover:not(.empty) { background: #f1f5f9; }
+        .cal-day.selected { background: var(--ice); color: white; }
+        .cal-day.today .day-num { background: #1e293b; color: white; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+        .cal-day.selected.today .day-num { background: white; color: var(--ice); }
+        .day-num { font-size: 0.85rem; font-weight: 500; }
+        .day-dots { display: flex; gap: 2px; margin-top: 3px; flex-wrap: wrap; justify-content: center; }
+        .dot { width: 5px; height: 5px; border-radius: 50%; }
+        .more { font-size: 0.55rem; color: #64748b; }
+        .my-dot { position: absolute; bottom: 2px; width: 5px; height: 5px; background: var(--emerald); border-radius: 50%; }
+        
+        /* Day Detail */
+        .day-detail { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; }
+        .day-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .day-header h3 { font-family: 'Playfair Display', serif; font-size: 1rem; }
+        .no-events { text-align: center; padding: 2rem; color: #94a3b8; }
+        .events-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .event-card { background: #f8fafc; border: 1px solid #e2e8f0; border-left: 3px solid var(--ice); border-radius: 8px; padding: 0.75rem; }
+        .event-card:hover { background: white; }
+        .event-card.my-booking { background: #d1fae5; border-left-color: var(--emerald); }
+        .event-card.draft { opacity: 0.7; border-style: dashed; }
+        .event-main { margin-bottom: 0.5rem; }
+        .event-top { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.25rem; }
+        .event-title { font-weight: 600; font-size: 0.9rem; }
+        .lesson-badge { padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; }
+        .lesson-badge.private { background: var(--ice-light); color: #0369a1; }
+        .lesson-badge.shared { background: #ccfbf1; color: #0f766e; }
+        .lesson-badge.class { background: #f3e8ff; color: #7c3aed; }
+        .draft-badge { padding: 0.1rem 0.3rem; background: #e2e8f0; color: #64748b; border-radius: 4px; font-size: 0.6rem; font-weight: 600; }
+        .event-meta { display: flex; flex-wrap: wrap; gap: 0.75rem; font-size: 0.8rem; color: #64748b; }
+        .event-meta span { display: flex; align-items: center; gap: 0.25rem; }
+        .event-meta .icon { width: 12px; height: 12px; color: #94a3b8; }
+        .event-students { display: flex; flex-wrap: wrap; gap: 0.375rem; margin-top: 0.5rem; }
+        .no-students { font-size: 0.75rem; color: #94a3b8; font-style: italic; }
+        .student-chip { display: inline-flex; align-items: center; gap: 0.25rem; padding: 0.2rem 0.5rem; border-radius: 100px; font-size: 0.75rem; border: 1px solid; }
+        .student-chip small { color: #64748b; }
+        .student-chip button { width: 14px; height: 14px; border: none; background: rgba(0,0,0,0.1); border-radius: 50%; cursor: pointer; font-size: 0.6rem; line-height: 1; }
+        .spots { font-size: 0.7rem; color: #64748b; font-style: italic; }
+        .event-actions { display: flex; gap: 0.25rem; }
+        .my-booking-actions { display: flex; align-items: center; gap: 0.5rem; }
+        .my-badge { padding: 0.2rem 0.5rem; background: var(--emerald); color: white; border-radius: 100px; font-size: 0.7rem; font-weight: 600; }
+        .full-badge { padding: 0.2rem 0.5rem; background: #e2e8f0; color: #64748b; border-radius: 100px; font-size: 0.7rem; }
+        
+        /* Buttons */
+        .btn { display: inline-flex; align-items: center; gap: 0.375rem; padding: 0.5rem 1rem; border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 500; cursor: pointer; }
+        .btn-primary { background: var(--ice); color: white; }
+        .btn-primary:hover { background: #0284c7; }
+        .btn-secondary { background: #e2e8f0; color: #334155; }
+        .btn-secondary:hover { background: #cbd5e1; }
+        .btn-danger { background: var(--rose); color: white; }
+        .btn-sm { padding: 0.3rem 0.6rem; font-size: 0.75rem; }
+        .btn-icon { width: 28px; height: 28px; border: none; background: #f1f5f9; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; }
+        .btn-icon:hover { background: #e2e8f0; color: #334155; }
+        .btn-icon.danger:hover { background: #ffe4e6; color: var(--rose); }
+        
+        /* Sections */
+        .section { }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .section-header h2 { font-family: 'Playfair Display', serif; font-size: 1.5rem; }
+        .header-actions { display: flex; gap: 0.5rem; }
+        .subheader { font-size: 1rem; font-weight: 600; color: #334155; margin: 1.5rem 0 1rem; }
+        .empty { text-align: center; padding: 1.5rem; color: #94a3b8; background: white; border-radius: 8px; }
+        .empty-state { text-align: center; padding: 2rem; color: #94a3b8; }
+        
+        /* Cards */
+        .cards-list { display: flex; flex-direction: column; gap: 1rem; }
+        .card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.25rem; display: grid; grid-template-columns: 1fr 1fr auto; gap: 1rem; align-items: center; }
+        @media (max-width: 768px) { .card { grid-template-columns: 1fr; } }
+        .card-main h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.25rem; }
+        .card-main p { font-size: 0.85rem; color: #64748b; }
+        .card-students h4 { font-size: 0.75rem; color: #64748b; margin-bottom: 0.5rem; }
+        .chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+        .chip { padding: 0.2rem 0.5rem; border-radius: 100px; font-size: 0.75rem; font-weight: 500; border: 1px solid; cursor: pointer; }
+        .card-actions { display: flex; gap: 0.5rem; align-items: center; }
+        
+        /* Students Grid */
+        .students-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; }
+        .student-card { background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.25rem; border-left: 3px solid; }
+        .student-card h3 { font-size: 1rem; font-weight: 600; }
+        .student-card .level { color: var(--ice); font-weight: 500; font-size: 0.9rem; }
+        .student-card .age { font-size: 0.8rem; color: #64748b; }
+        .student-card .parent { font-size: 0.8rem; color: #64748b; margin-top: 0.25rem; }
+        .student-card .ids { display: flex; gap: 0.5rem; margin: 0.75rem 0; flex-wrap: wrap; }
+        .student-card .ids span { padding: 0.15rem 0.4rem; background: #f1f5f9; border-radius: 4px; font-size: 0.7rem; color: #64748b; }
+        .student-card .actions { display: flex; gap: 0.5rem; }
+        
+        /* Stats */
+        .stats-row { display: flex; gap: 2rem; margin-bottom: 1.5rem; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .stat { text-align: center; }
+        .stat .val { display: block; font-size: 1.5rem; font-weight: 700; color: var(--ice); }
+        .stat .label { font-size: 0.8rem; color: #64748b; }
+        
+        /* Invoices */
+        .invoices-list { display: flex; flex-direction: column; gap: 0.5rem; }
+        .invoice-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); cursor: pointer; }
+        .invoice-row:hover { box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .inv-num { font-weight: 600; }
+        .inv-client { flex: 1; color: #64748b; }
+        .inv-date { font-size: 0.8rem; color: #94a3b8; }
+        .inv-amount { font-weight: 700; }
+        .inv-status { padding: 0.2rem 0.6rem; border-radius: 100px; font-size: 0.7rem; font-weight: 600; text-transform: capitalize; }
+        .inv-status.draft { background: #e2e8f0; color: #64748b; }
+        .inv-status.sent { background: var(--ice-light); color: #0369a1; }
+        .inv-status.paid { background: #d1fae5; color: var(--emerald); }
+        
+        /* Venues */
+        .venues-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .venue-card { display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 3px solid; }
+        .venue-card h3 { font-weight: 600; }
+        .venue-card p { font-size: 0.85rem; color: #64748b; }
+        
+        /* Competitions */
+        .comps-list { display: flex; flex-direction: column; gap: 0.75rem; }
+        .comp-card { display: flex; align-items: center; gap: 1rem; padding: 1rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .comp-date { width: 50px; text-align: center; background: linear-gradient(135deg, #fbbf24, var(--gold)); padding: 0.5rem; border-radius: 8px; color: white; }
+        .comp-date .month { display: block; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; }
+        .comp-date .day { display: block; font-size: 1.25rem; font-weight: 700; line-height: 1; }
+        .comp-info { flex: 1; }
+        .comp-info h3 { font-weight: 600; }
+        .comp-info p { display: flex; align-items: center; gap: 0.25rem; font-size: 0.8rem; color: #64748b; margin: 0.25rem 0; }
+        .comp-info p .icon { width: 12px; height: 12px; }
+        .comp-badges { display: flex; gap: 0.5rem; }
+        .type-badge { padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; background: var(--ice-light); color: #0369a1; }
+        .type-badge.isi { background: #d1fae5; color: var(--emerald); }
+        .type-badge.exhibition { background: #f3e8ff; color: var(--purple); }
+        .reg-badge { padding: 0.15rem 0.4rem; border-radius: 4px; font-size: 0.65rem; font-weight: 600; }
+        .reg-badge.open { background: #d1fae5; color: var(--emerald); }
+        .reg-badge.closed { background: #e2e8f0; color: #64748b; }
+        
+        /* My Lessons */
+        .my-lessons { display: flex; flex-direction: column; gap: 0.75rem; }
+        .lesson-row { display: flex; align-items: center; gap: 1rem; padding: 0.75rem 1rem; background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-left: 3px solid var(--ice); }
+        .lesson-row.shared { border-left-color: var(--teal); }
+        .lesson-row.class { border-left-color: var(--purple); }
+        .lesson-date { width: 45px; text-align: center; }
+        .lesson-date .month { display: block; font-size: 0.6rem; font-weight: 600; text-transform: uppercase; color: #64748b; }
+        .lesson-date .day { display: block; font-size: 1.1rem; font-weight: 700; line-height: 1; }
+        .lesson-info { flex: 1; display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; font-size: 0.8rem; color: #64748b; }
+        .lesson-countdown { text-align: center; }
+        .countdown { display: inline-block; padding: 0.3rem 0.6rem; background: #e2e8f0; color: #64748b; border-radius: 100px; font-size: 0.75rem; font-weight: 600; }
+        .countdown.today { background: var(--emerald); color: white; }
+        .countdown.tomorrow { background: var(--gold); color: white; }
+        .late-warn { display: block; margin-top: 0.25rem; font-size: 0.6rem; font-weight: 600; color: var(--rose); background: #ffe4e6; padding: 0.1rem 0.3rem; border-radius: 4px; text-transform: uppercase; }
+        .past-lessons { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; }
+        .past-row { display: flex; align-items: center; gap: 1rem; padding: 0.6rem 1rem; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }
+        .past-row:last-child { border-bottom: none; }
+        .past-row .private { color: var(--ice); }
+        .past-row .shared { color: var(--teal); }
+        .past-row .class { color: var(--purple); }
+        
+        /* Profile */
+        .profile-section { max-width: 400px; }
+        .profile-card { display: flex; align-items: center; gap: 1rem; padding: 1.5rem; background: white; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; border-left: 3px solid; }
+        .avatar { width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.1rem; font-weight: 700; }
+        .profile-card h3 { font-size: 1.1rem; font-weight: 600; }
+        .profile-card .level { color: var(--ice); font-weight: 500; }
+        .profile-details { background: white; border-radius: 12px; padding: 1rem; margin-bottom: 1rem; }
+        .profile-details .row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f1f5f9; }
+        .profile-details .row:last-child { border-bottom: none; }
+        .profile-details .row span:first-child { color: #64748b; }
+        .billing-card { background: #f8fafc; border-radius: 12px; padding: 1rem; }
+        .billing-card h4 { font-size: 0.8rem; font-weight: 600; color: #64748b; margin-bottom: 0.5rem; }
+        .billing-card .name { font-weight: 600; }
+        .billing-card p { font-size: 0.85rem; color: #64748b; }
+        
+        /* Modal */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
+        .modal-content { background: white; border-radius: 12px; width: 100%; max-width: 440px; max-height: 90vh; overflow-y: auto; }
+        .modal-content.large { max-width: 580px; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+        .modal-header h2 { font-family: 'Playfair Display', serif; font-size: 1.15rem; }
+        .modal-close { width: 28px; height: 28px; border: none; background: #f1f5f9; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: #64748b; }
+        .modal-body { padding: 1.5rem; }
+        
+        /* Forms */
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.8rem; font-weight: 600; color: #334155; margin-bottom: 0.3rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 0.85rem; }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus { outline: none; border-color: var(--ice); box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1); }
+        .form-group textarea { resize: vertical; min-height: 60px; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        .form-actions { display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
+        .form-group.checkbox label { display: flex; align-items: center; gap: 0.5rem; cursor: pointer; }
+        .form-group.checkbox input { width: auto; }
+        
+        .type-toggle, .lesson-toggle { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+        .type-toggle button, .lesson-toggle button { display: flex; flex-direction: column; align-items: center; padding: 0.6rem; border: 2px solid #e2e8f0; border-radius: 8px; background: white; cursor: pointer; font-size: 0.8rem; font-weight: 500; }
+        .type-toggle button:hover, .lesson-toggle button:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .type-toggle button.active, .lesson-toggle button.active { border-color: var(--ice); background: var(--ice-light); }
+        .lesson-toggle button small { font-size: 0.7rem; color: #64748b; }
+        
+        .color-picker { display: flex; gap: 0.5rem; }
+        .color-btn { width: 28px; height: 28px; border: 2px solid transparent; border-radius: 50%; cursor: pointer; }
+        .color-btn.active { border-color: #1e293b; }
+        
+        /* Rates */
+        .rate-row { display: flex; align-items: center; gap: 1rem; margin-bottom: 1rem; }
+        .rate-label { flex: 1; font-weight: 500; text-transform: capitalize; }
+        .rate-input { display: flex; align-items: center; }
+        .rate-input span { padding: 0.5rem; background: #f1f5f9; border: 1px solid #cbd5e1; border-right: none; border-radius: 6px 0 0 6px; color: #64748b; }
+        .rate-input input { width: 70px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 0 6px 6px 0; }
+        
+        /* Invoice Detail */
+        .invoice-detail { }
+        .inv-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #e2e8f0; }
+        .inv-header .inv-num { font-size: 1.1rem; font-weight: 700; }
+        .inv-header .inv-status { margin-left: 0.5rem; }
+        .inv-header .inv-total { font-size: 1.25rem; font-weight: 700; }
+        .inv-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .inv-parties h4 { font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; margin-bottom: 0.5rem; }
+        .inv-parties p { font-size: 0.85rem; color: #64748b; }
+        .inv-items { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+        .inv-items th { text-align: left; padding: 0.4rem; background: #f8fafc; font-size: 0.7rem; font-weight: 600; color: #64748b; text-transform: uppercase; }
+        .inv-items td { padding: 0.4rem; border-bottom: 1px solid #f1f5f9; font-size: 0.85rem; }
+        .inv-items td:last-child { text-align: right; }
+        .inv-items tr.late td { color: var(--rose); }
+        .inv-items tfoot td { padding-top: 0.75rem; border-top: 2px solid #cbd5e1; border-bottom: none; }
+        .inv-actions { display: flex; gap: 0.5rem; margin-top: 1rem; }
+        
+        .import-action { text-align: center; margin-top: 1.5rem; }
+      `}</style>
+
+      {/* Header */}
+      <header className="header">
+        <div className="logo"><Icon name="snowflake" /><h1>IceBooks</h1></div>
+        <div className="header-controls">
+          {!isLoggedIn ? (
+            <div className="login-opts">
+              <button className="btn-login" onClick={() => { setIsCoach(true); setIsLoggedIn(true); }}>Coach Login</button>
+              <span className="login-div">or</span>
+              <div className="student-select">
+                <select value="" onChange={e => { if (e.target.value) { setLoggedInStudentId(parseInt(e.target.value)); setIsCoach(false); setIsLoggedIn(true); } }}>
+                  <option value="">Student Sign In...</option>
+                  {students.map(s => { const c = getClient(s.clientId); return <option key={s.id} value={s.id}>{s.name} ({c?.name})</option>; })}
+                </select>
+              </div>
+            </div>
+          ) : isCoach ? (
+            <div className="logged-in">
+              <div className="notif-wrap">
+                <button className="notif-bell" onClick={() => setShowNotifications(!showNotifications)}>
+                  <Icon name="bell" />
+                  {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
+                </button>
+                {showNotifications && (
+                  <div className="notif-dropdown">
+                    <div className="notif-header">
+                      <h4>Notifications {billingCount > 0 && <span style={{color:'var(--rose)'}}>({billingCount} billing)</span>}</h4>
+                      {unreadCount > 0 && <button onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}>Mark read</button>}
+                    </div>
+                    <div className="notif-list">
+                      {notifications.length === 0 ? <div className="notif-empty">No notifications</div> : notifications.slice(0, 8).map(n => (
+                        <div key={n.id} className={`notif-item ${n.type} ${n.read ? '' : 'unread'} ${n.billingRequired ? 'billing' : ''}`} onClick={() => setNotifications(prev => prev.map(x => x.id === n.id ? { ...x, read: true } : x))}>
+                          <div className="notif-icon">{n.type === 'booking' ? '✓' : n.billingRequired ? '$' : '✕'}</div>
+                          <div className="notif-content">
+                            <div className="notif-msg">{n.message}</div>
+                            {n.billingRequired && <div className="billing-warn">⚠️ Bill ${n.rate}</div>}
+                            <div className="notif-details">{formatDate(n.date)} at {formatTime(n.time)}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              <span className="role-badge">Coach</span>
+              <button className="btn-logout" onClick={() => { setIsLoggedIn(false); setIsCoach(false); }}>Sign Out</button>
+            </div>
+          ) : (
+            <div className="logged-in">
+              <span className="greeting">Welcome, {getStudent(loggedInStudentId)?.name.split(' ')[0]}</span>
+              <button className="btn-logout" onClick={() => { setIsLoggedIn(false); setLoggedInStudentId(null); }}>Sign Out</button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Nav */}
+      {isLoggedIn && (
+        <nav className="nav">
+          {isCoach ? (
+            <>
+              <button className={`nav-tab ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><Icon name="dollar" /> Dashboard</button>
+              <button className={`nav-tab ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}><Icon name="calendar" /> Calendar</button>
+              <button className={`nav-tab ${activeTab === 'clients' ? 'active' : ''}`} onClick={() => setActiveTab('clients')}><Icon name="user" /> Clients</button>
+              <button className={`nav-tab ${activeTab === 'students' ? 'active' : ''}`} onClick={() => setActiveTab('students')}><Icon name="users" /> Students</button>
+              <button className={`nav-tab ${activeTab === 'invoices' ? 'active' : ''}`} onClick={() => setActiveTab('invoices')}><Icon name="dollar" /> Invoices</button>
+              <button className={`nav-tab ${activeTab === 'expenses' ? 'active' : ''}`} onClick={() => setActiveTab('expenses')}><Icon name="dollar" /> Expenses</button>
+              <button className={`nav-tab ${activeTab === 'mileage' ? 'active' : ''}`} onClick={() => setActiveTab('mileage')}><Icon name="mapPin" /> Mileage</button>
+              <button className={`nav-tab ${activeTab === 'venues' ? 'active' : ''}`} onClick={() => setActiveTab('venues')}><Icon name="mapPin" /> Venues</button>
+              <button className={`nav-tab ${activeTab === 'competitions' ? 'active' : ''}`} onClick={() => setActiveTab('competitions')}><Icon name="trophy" /> Competitions</button>
+            </>
+          ) : (
+            <>
+              <button className={`nav-tab ${activeTab === 'calendar' ? 'active' : ''}`} onClick={() => setActiveTab('calendar')}><Icon name="calendar" /> Calendar</button>
+              <button className={`nav-tab ${activeTab === 'mylessons' ? 'active' : ''}`} onClick={() => setActiveTab('mylessons')}><Icon name="clock" /> My Lessons</button>
+              <button className={`nav-tab ${activeTab === 'myprofile' ? 'active' : ''}`} onClick={() => setActiveTab('myprofile')}><Icon name="user" /> My Profile</button>
+              <button className={`nav-tab ${activeTab === 'competitions' ? 'active' : ''}`} onClick={() => setActiveTab('competitions')}><Icon name="trophy" /> Competitions</button>
+            </>
+          )}
+        </nav>
+      )}
+
+      {/* Main */}
+      <main className="main">
+        {!isLoggedIn ? (
+          <div className="welcome">
+            <div className="welcome-card">
+              <div className="welcome-icon"><Icon name="snowflake" /></div>
+              <h2>Welcome to IceBooks</h2>
+              <p>Complete business management for skating coaches. Schedule lessons, track expenses, log mileage, and invoice clients.</p>
+            </div>
+          </div>
+        ) : (
+          <>
+            {activeTab === 'dashboard' && isCoach && renderDashboard()}
+            {activeTab === 'calendar' && (
+              <div className="cal-section">
+                <div className="cal-panel">
+                  <div className="cal-toolbar">
+                    <div className="cal-nav">
+                      <button onClick={() => calendarView === 'month' ? navMonth(-1) : navWeek(-1)}><Icon name="chevronLeft" /></button>
+                      <h3>{calendarView === 'month' ? currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) : `Week of ${formatDate(selectedDate)}`}</h3>
+                      <button onClick={() => calendarView === 'month' ? navMonth(1) : navWeek(1)}><Icon name="chevronRight" /></button>
+                      <button className="btn btn-sm btn-secondary" style={{marginLeft: '0.5rem'}} onClick={goToday}>Today</button>
+                    </div>
+                    <div className="cal-actions">
+                      <div className="view-toggle">
+                        <button className={calendarView === 'month' ? 'active' : ''} onClick={() => setCalendarView('month')}>Month</button>
+                        <button className={calendarView === 'week' ? 'active' : ''} onClick={() => setCalendarView('week')}>Week</button>
+                      </div>
+                      {isCoach && (
+                        <>
+                          <button className="btn btn-secondary btn-sm" onClick={() => setShowImportModal(true)}><Icon name="upload" /> Import</button>
+                          <button className="btn btn-secondary btn-sm" onClick={() => downloadICS(events, getVenue)}><Icon name="download" /> Export</button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {renderMonthCalendar()}
+                </div>
+                {renderDayDetail()}
+              </div>
+            )}
+            {activeTab === 'clients' && isCoach && renderClients()}
+            {activeTab === 'students' && isCoach && renderStudents()}
+            {activeTab === 'invoices' && isCoach && renderInvoices()}
+            {activeTab === 'expenses' && isCoach && renderExpenses()}
+            {activeTab === 'mileage' && isCoach && renderMileage()}
+            {activeTab === 'venues' && isCoach && renderVenues()}
+            {activeTab === 'mylessons' && !isCoach && renderMyLessons()}
+            {activeTab === 'myprofile' && !isCoach && renderMyProfile()}
+            {activeTab === 'competitions' && renderCompetitions()}
+          </>
+        )}
+      </main>
+
+      {/* Modals */}
+      {showEventModal && <EventModal />}
+      {showClientModal && <ClientModal />}
+      {showStudentModal && <StudentModal />}
+      {showVenueModal && <VenueModal />}
+      {showRatesModal && <RatesModal />}
+      {showInvoiceDetail && <InvoiceDetailModal />}
+      {showImportModal && <ImportModal />}
+      {showExpenseModal && <ExpenseModal />}
+      {showMileageModal && <MileageModal />}
+      {showInvoiceModal && <InvoiceGenerateModal />}
+      
+      <input ref={fileInputRef} type="file" accept=".ics,.ical" onChange={handleImport} style={{ display: 'none' }} />
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<IceBooks />);
+  
+// === LOCALSTORAGE PERSISTENCE (auto-injected) ===
+(function(){
+  const SK='icebooks_pro_data';
+  const vars=['ics'].join(',').split(',').map(s=>s.trim()).filter(Boolean);
+  
+  function save(){
+    try{
+      const d={};
+      vars.forEach(v=>{if(typeof window[v]!=='undefined')d[v]=window[v];});
+      localStorage.setItem(SK,JSON.stringify(d));
+    }catch(e){}
+  }
+  
+  function load(){
+    try{
+      const s=localStorage.getItem(SK);
+      if(s){
+        const d=JSON.parse(s);
+        vars.forEach(v=>{if(d[v])window[v]=d[v];});
+        return true;
+      }
+    }catch(e){}
+    return false;
+  }
+  
+  load();
+  setInterval(save,3000);
+  window.addEventListener('beforeunload',save);
+  document.addEventListener('click',function(){setTimeout(save,100);});
+  
+  // Export/Import
+  window._exportData=function(){
+    save();
+    const d=localStorage.getItem(SK);
+    const b=new Blob([d],{type:'application/json'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download='icebooks_pro-backup.json';
+    a.click();
+  };
+  window._importData=function(f){
+    const r=new FileReader();
+    r.onload=function(e){
+      try{localStorage.setItem(SK,e.target.result);location.reload();}catch(err){alert('Import failed');}
+    };
+    r.readAsText(f);
+  };
+})();
+// === END PERSISTENCE ===
+</script>
+<footer style="text-align:center;padding:2rem;color:#64748b;border-top:1px solid #e2e8f0"><p>© 2026 BuyAppsOnce. Professional software without subscriptions.</p></footer>
+</body>
+</html>
