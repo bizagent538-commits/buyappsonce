@@ -8,7 +8,6 @@
 | AmenityBook Pro | $199 | $349 | [Buy](https://payhip.com/b/hKUTt) | — |
 | AssetTrack Pro | $199 | $349 | [Buy](https://payhip.com/b/eaI89) | [Buy](https://payhip.com/b/2Kody) |
 | BookIt Pro | $199 | $349 | [Buy](https://payhip.com/b/IyjAu) | [Buy](https://payhip.com/b/1w6FG) |
-| CoachBooks Pro | $149 | $149 | [Buy](https://payhip.com/b/CKaYN) | [Buy](https://payhip.com/b/m3vBK) |
 | ComplianceHQ Pro | $199 | $349 | [Buy](https://payhip.com/b/quCPz) | [Buy](https://payhip.com/b/m68K7) |
 | CrewClock Lite | $199 | $349 | [Buy](https://payhip.com/b/tPHIK) | — |
 | FreelanceBooks Pro | $199 | $349 | [Buy](https://payhip.com/b/ljnTS) | [Buy](https://payhip.com/b/1k4bN) |
@@ -31,6 +30,13 @@
 | App | Self-Hosted | Hosted/yr | Self Link | Hosted Link |
 |-----|-------------|-----------|-----------|-------------|
 | OpsDeck | $599 | $999-1999 | Contact | Contact |
+| RinkOps | $599 | $999 | [Buy](https://payhip.com/b/w5un4) | [Buy](https://payhip.com/b/Svuz6) |
+
+### Standard Tier - Additional
+| App | Self-Hosted | Hosted/yr | Self Link | Hosted Link |
+|-----|-------------|-----------|-----------|-------------|
+| IceBooks Pro | $149 | $149 | [Buy](https://payhip.com/b/CKaYN) | [Buy](https://payhip.com/b/m3vBK) |
+| SessionSlate Pro | $99 | $199 | [Buy](https://payhip.com/b/XqMZz) | [Buy](https://payhip.com/b/v5nVM) |
 
 ---
 
@@ -54,12 +60,13 @@
 
 ## BUNDLES
 
-| Bundle | Price | Link |
-|--------|-------|------|
-| Property Manager Bundle | $499 | [Buy](https://payhip.com/b/eGVSO) |
-| Nonprofit Starter Bundle | $349 | [Buy](https://payhip.com/b/JsKgD) |
-| Contractor Bundle | $649 | [Buy](https://payhip.com/b/A3uzM) |
-| Freelancer Bundle | $399 | [Buy](https://payhip.com/b/MZzhR) |
+| Bundle | Price | Self Link | Hosted Link |
+|--------|-------|-----------|-------------|
+| Property Manager Bundle | $499 | [Buy](https://payhip.com/b/eGVSO) | — |
+| Nonprofit Complete Bundle | $349 | [Buy](https://payhip.com/b/Hon0z) | [Buy](https://payhip.com/b/S78fA) |
+| Contractor Bundle | $649 | [Buy](https://payhip.com/b/A3uzM) | — |
+| Freelancer Bundle | $399 | [Buy](https://payhip.com/b/MZzhR) | — |
+| HR & Workforce Bundle | $399 | [Buy](https://payhip.com/b/Nar7U) | [Buy](https://payhip.com/b/zvPH6) |
 
 ---
 
