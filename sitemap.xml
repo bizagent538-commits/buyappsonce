@@ -20,7 +20,8 @@
   <url><loc>https://buyappsonce.com/landing-amenitybook.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://buyappsonce.com/landing-assettrack.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://buyappsonce.com/landing-bookit.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://buyappsonce.com/landing-coachbooks.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://buyappsonce.com/landing-icebooks.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://buyappsonce.com/landing-sessionslate.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://buyappsonce.com/landing-compliancehq.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://buyappsonce.com/landing-crewclock-lite.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://buyappsonce.com/landing-freelancebooks.html</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -37,4 +38,5 @@
   
   <!-- Enterprise Tier -->
   <url><loc>https://buyappsonce.com/landing-opsdeck.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://buyappsonce.com/landing-rinkops.html</loc><changefreq>monthly</changefreq><priority>0.9</priority></url>
 </urlset>
